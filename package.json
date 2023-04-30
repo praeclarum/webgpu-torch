@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/praeclarum/jstorch/issues"
   },
-  "homepage": "https://github.com/praeclarum/jstorch#readme"
+  "homepage": "https://github.com/praeclarum/jstorch#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
 }
