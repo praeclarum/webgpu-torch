@@ -1,21 +1,22 @@
-import { Shape, Shapeish, shapeishToShape } from "./shape";
+import { Shapeish, getShape } from "./shape";
+import { Deviceish, getDevice } from "./devices";
+import { Dtypeish, getDtype } from "./dtype";
 import { Tensor } from "./tensor";
-import { UntypedStorage } from "./storage";
-import { getDevice, Deviceish } from "./devices";
-import { Dtype, dtypeishToDtype } from "./dtype";
 
 export function ones(
     shape: Shapeish,
-    dtype: Dtype | null = null,
+    dtype: Dtypeish | null = null,
     device: Deviceish | null = null
 ): Tensor {
-    return new Tensor(getDevice(device).ones(shapeishToShape(shape), dtypeishToDtype(dtype)));
+    return new Tensor(getDevice(device).ones(getShape(shape), getDtype(dtype)));
 }
 
 export function zeros(
     shape: Shapeish,
-    dtype: Dtype | null = null,
+    dtype: Dtypeish | null = null,
     device: Deviceish | null = null
 ): Tensor {
-    return new Tensor(getDevice(device).zeros(shapeishToShape(shape), dtypeishToDtype(dtype)));
+    return new Tensor(
+        getDevice(device).zeros(getShape(shape), getDtype(dtype))
+    );
 }
