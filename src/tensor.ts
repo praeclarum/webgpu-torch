@@ -33,7 +33,6 @@ export type GradientFunction = (
 
 export class Tensor implements ITensor {
     private _impl: TensorImpl;
-    private _dtype: Dtype;
     private _requiresGrad: boolean = false;
     private _gradFunc: GradientFunction | null;
     private _gradCtx: GradientFunctionContext | null;
@@ -59,23 +58,23 @@ export class Tensor implements ITensor {
         data: TensorArrayData | TensorImpl,
         dtype: Dtype = "float32",
         requiresGrad: boolean = false,
-        device: string | Device | DeviceType | null = null,
+        device: string | Device | DeviceType | null = null
     ) {
         if (data instanceof TensorImpl) {
             this._impl = data;
         } else {
-            const d = getDevice(device);
-            this._impl = d.tensor(data, dtype);
+            this._impl = getDevice(device).tensor(data, dtype);
         }
-        this._dtype = dtype;
         this._requiresGrad = requiresGrad;
         this._gradFunc = null;
         this._gradCtx = null;
         this._grad = null;
     }
+
     detach(): Tensor {
-        return new Tensor(this._impl, this._dtype, false);
+        return new Tensor(this._impl, this.dtype, false);
     }
+
     setGradientFunction(
         ctx: GradientFunctionContext,
         gradFunc: GradientFunction
