@@ -6,3 +6,8 @@ export function zeros(shape: Shapeish): Tensor {
     const shape_ = shapeishToShape(shape);
     return new Tensor(new UntypedStorage(), "float32");
 }
+
+export function ones(shape: Shapeish): Tensor {
+    const shape_ = shapeishToShape(shape);
+    return new Tensor(new UntypedStorage(), "float32");
+}

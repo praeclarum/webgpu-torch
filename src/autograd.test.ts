@@ -1,15 +1,15 @@
-import { Tensor } from "./tensor";
-import { AutoContext, AutoFunction, LinearFunction } from "./autograd";
+import { Tensor, GradientFunctionContext } from "./tensor";
+import { AutoFunction, LinearFunction } from "./autograd";
 import { zeros } from "./index";
 
 test("auto function forward fails", () => {
     expect(() => AutoFunction.forward()).toThrow();
 });
 test("auto function setupContext fails", () => {
-    expect(() => AutoFunction.setupContext(new AutoContext([]), [zeros(3)], zeros(3))).toThrow();
+    expect(() => AutoFunction.setupContext(new GradientFunctionContext([]), [zeros(3)], zeros(3))).toThrow();
 });
 test("auto function backward fails", () => {
-    expect(() => AutoFunction.backward(new AutoContext([]), zeros(3))).toThrow();
+    expect(() => AutoFunction.backward(new GradientFunctionContext([]), zeros(3))).toThrow();
 });
 
 test("linear function apply", () => {

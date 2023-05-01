@@ -1,34 +1,36 @@
-import { Tensor } from "./tensor";
-
-export type FunctionInput = Tensor | number | boolean | string;
-export type FunctionBackwardOutput = Tensor | null;
+import {
+    Tensor,
+    GradientFunctionContext,
+    FunctionInput,
+    GradientFunctionOutput,
+} from "./tensor";
 
 export class AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         throw new Error("Do not call forward on AutoFunction directly.");
     }
-    static setupContext(ctx: AutoContext, inputs: FunctionInput[], output: Tensor) {
+    static setupContext(
+        ctx: GradientFunctionContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ) {
         throw new Error("Do not call setupContext on AutoFunction directly.");
     }
-    static backward(ctx: AutoContext, gradOutput: Tensor): FunctionBackwardOutput[] {
+    static backward(
+        ctx: GradientFunctionContext,
+        gradOutput: Tensor
+    ): GradientFunctionOutput[] {
         throw new Error("Do not call backward on AutoFunction directly.");
     }
     static apply(...inputs: FunctionInput[]): Tensor {
-        const output = this.forward(...inputs);
-        const ctx = new AutoContext(inputs);
-        this.setupContext(ctx, inputs, output);
+        const ctx = new GradientFunctionContext(inputs);
+        const detachedInputs = inputs.map((input) =>
+            input instanceof Tensor ? input.detach() : input
+        );
+        const output = this.forward(...detachedInputs);
+        this.setupContext(ctx, detachedInputs, output);
+        output.setGradientFunction(ctx, this.backward);
         return output;
-    }
-}
-
-export class AutoContext {
-    savedTensors: Tensor[] = [];
-    needsInputGradient: boolean[];
-    constructor(inputs: FunctionInput[]) {
-        this.needsInputGradient = inputs.map(input => input instanceof Tensor && input.requiresGrad);
-    }
-    saveForBackward(...tensors: Tensor[]) {
-        this.savedTensors = tensors;
     }
 }
 
@@ -41,11 +43,18 @@ export class LinearFunction extends AutoFunction {
         }
         return output;
     }
-    static setupContext(ctx: AutoContext, inputs: FunctionInput[], output: Tensor) {
+    static setupContext(
+        ctx: GradientFunctionContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ) {
         const [input, weight, bias] = inputs as [Tensor, Tensor, Tensor];
         ctx.saveForBackward(input, weight, bias);
     }
-    static backward(ctx: AutoContext, gradOutput: Tensor): FunctionBackwardOutput[] {
+    static backward(
+        ctx: GradientFunctionContext,
+        gradOutput: Tensor
+    ): GradientFunctionOutput[] {
         const [input, weight, bias] = ctx.savedTensors;
         let gradInput: Tensor | null = null;
         let gradWeight: Tensor | null = null;
