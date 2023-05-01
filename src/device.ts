@@ -1,13 +1,14 @@
 import { Shape, Shapeish } from "./shape";
 import { Dtype } from "./dtype";
 import { TensorArrayData, TensorImpl } from "./tensor_if";
+import { IDevice } from "./device_if";
 
 export type DeviceType = "cpu" | "webgpu";
 export type DeviceId = string;
 
 export type Deviceish = DeviceType | Device | DeviceId;
 
-export abstract class Device {
+export abstract class Device implements IDevice {
     private _id: DeviceId;
     private _type: DeviceType;
     get id(): DeviceId {

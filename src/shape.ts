@@ -9,3 +9,17 @@ export function getShape(shapeish: Shapeish): Shape {
         return shapeish;
     }
 }
+
+export function shapeSize(shape: Shape): number {
+    return shape.reduce((a, b) => a * b);
+}
+
+export function defaultStrides(shape: Shape): Strides {
+    const strides = [];
+    let stride = 1;
+    for (let i = shape.length - 1; i >= 0; i--) {
+        strides[i] = stride;
+        stride *= shape[i];
+    }
+    return strides;
+}

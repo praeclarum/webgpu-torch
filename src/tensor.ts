@@ -1,10 +1,10 @@
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 import { Device, DeviceType } from "./device";
 import { getDevice } from "./devices";
-import { UntypedStorage } from "./storage";
 import { Shape, Strides } from "./shape";
 import { ones } from "./factories";
 import { Dtype } from "./dtype";
+import { IDevice } from "./device_if";
 
 export type FunctionInput = Tensor | number | boolean | string;
 export type GradientFunctionOutput = Tensor | null;
@@ -41,6 +41,17 @@ export class Tensor implements ITensor {
     get dtype(): Dtype {
         return this._impl.dtype;
     }
+    get shape(): Shape {
+        return this._impl.shape;
+    }
+    get device(): IDevice {
+        return this._impl.device;
+    }
+
+    get(...indices: number[]): number | ITensor {
+        return this._impl.get(...indices);
+    }
+
     get requiresGrad(): boolean {
         return this._requiresGrad;
     }
