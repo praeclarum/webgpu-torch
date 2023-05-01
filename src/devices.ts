@@ -7,7 +7,9 @@ const devices: { [id: string]: Device } = {
     cpu: cpuDevice,
 };
 
-export function getDevice(device: string | Device | null): Device {
+export type Deviceish = string | Device;
+
+export function getDevice(device: Deviceish | null): Device {
     if (device === null) {
         return cpuDevice;
     } else if (typeof device === "string") {

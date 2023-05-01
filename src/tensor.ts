@@ -1,11 +1,10 @@
-import { ITensor, TensorImpl } from "./tensor_if";
+import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 import { Device, DeviceType } from "./device";
 import { getDevice } from "./devices";
 import { UntypedStorage } from "./storage";
 import { Shape, Strides } from "./shape";
 import { ones } from "./factories";
-
-export type Dtype = "float32" | "int32" | "boolean" | "string";
+import { Dtype } from "./dtype";
 
 export type FunctionInput = Tensor | number | boolean | string;
 export type GradientFunctionOutput = Tensor | null;
@@ -33,19 +32,15 @@ export type GradientFunction = (
 ) => (Tensor | null)[];
 
 export class Tensor implements ITensor {
-    private _device: Device;
-    private _untypedStorage: UntypedStorage;
+    private _impl: TensorImpl;
     private _dtype: Dtype;
     private _requiresGrad: boolean = false;
     private _gradFunc: GradientFunction | null;
     private _gradCtx: GradientFunctionContext | null;
     private _grad: Tensor | null = null;
 
-    get untypedStorage(): UntypedStorage {
-        return this._untypedStorage;
-    }
     get dtype(): Dtype {
-        return this._dtype;
+        return this._impl.dtype;
     }
     get requiresGrad(): boolean {
         return this._requiresGrad;
@@ -61,13 +56,17 @@ export class Tensor implements ITensor {
     }
 
     constructor(
-        data: Array<any> | TensorImpl,
-        dtype: Dtype,
+        data: TensorArrayData | TensorImpl,
+        dtype: Dtype = "float32",
         requiresGrad: boolean = false,
-        device: string | Device | DeviceType | null = null
+        device: string | Device | DeviceType | null = null,
     ) {
-        this._device = getDevice(device);
-        this._untypedStorage = new UntypedStorage();
+        if (data instanceof TensorImpl) {
+            this._impl = data;
+        } else {
+            const d = getDevice(device);
+            this._impl = d.tensor(data, dtype);
+        }
         this._dtype = dtype;
         this._requiresGrad = requiresGrad;
         this._gradFunc = null;
@@ -75,7 +74,7 @@ export class Tensor implements ITensor {
         this._grad = null;
     }
     detach(): Tensor {
-        return new Tensor(this._untypedStorage, this._dtype);
+        return new Tensor(this._impl, this._dtype, false);
     }
     setGradientFunction(
         ctx: GradientFunctionContext,
@@ -119,15 +118,16 @@ export class Tensor implements ITensor {
     }
 
     add_(tensor: Tensor): Tensor {
+        this._impl.add_(tensor._impl);
         return this;
     }
     mm(tensor: Tensor): Tensor {
-        return new Tensor(this._untypedStorage, this._dtype);
+        return new Tensor(this._impl.mm(tensor._impl));
     }
     sum(arg0: number) {
-        return new Tensor(this._untypedStorage, this._dtype);
+        return new Tensor(this._impl.sum(arg0));
     }
     t(): Tensor {
-        return new Tensor(this._untypedStorage, this._dtype);
+        return new Tensor(this._impl.t());
     }
 }
