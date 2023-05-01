@@ -16,6 +16,6 @@ test("linear function apply", () => {
     const input = new Tensor([[1, 2, 3], [4, 5, 6]], "float32");
     const weight = new Tensor([[1, 2], [3, 4], [5, 6]], "float32");
     const bias = new Tensor([1, 2], "float32");
-    const output = LinearFunction.apply(input, weight, bias);
+    const output = LinearFunction.apply(input, weight.t(), bias);
     expect(output).toBeInstanceOf(Tensor);
 });

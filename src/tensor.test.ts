@@ -18,7 +18,7 @@ test("can toggle requiresGrad", () => {
 test("linear makes grad func and req gradient", () => {
     const input = new Tensor([10, 20, 30], "float32", true);
     const weight = new Tensor([10, 20, 30], "float32", true);
-    const bias = new Tensor([10, 20, 30], "float32", true);
+    const bias = new Tensor([1000], "float32", true);
     const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
     expect(output.gradFunc).not.toBeNull();
@@ -28,7 +28,7 @@ test("linear makes grad func and req gradient", () => {
 test("linear backwards", () => {
     const input = new Tensor([10, 20, 30], "float32", true);
     const weight = new Tensor([10, 20, 30], "float32", true);
-    const bias = new Tensor([10, 20, 30], "float32", true);
+    const bias = new Tensor([1000], "float32", true);
     const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
     expect(output.gradFunc).not.toBeNull();

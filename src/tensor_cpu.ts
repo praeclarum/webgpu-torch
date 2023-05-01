@@ -1,6 +1,6 @@
 import { Device } from "./device";
 import { Dtype } from "./dtype";
-import { Shape, Strides } from "./shape";
+import { Shape, Strides, defaultStrides } from "./shape";
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 
 type ArrayType = Float32Array | Int32Array | Uint8Array;
@@ -56,10 +56,55 @@ export class TensorCPU extends TensorImpl {
         this._device = device;
     }
     add_(other: ITensor): ITensor {
-        throw new Error("Method not implemented.");
+        if (!(other instanceof TensorCPU)) {
+            throw new Error("Only CPU tensors can be added to CPU tensors");
+        }
+        if (this._shape.length !== other.shape.length) {
+            throw new Error(`Shape dimensions must match. Got ${this._shape} and ${other.shape}`);
+        }
+        for (let i = 0; i < this._shape.length; i++) {
+            if (this._shape[i] !== other.shape[i]) {
+                throw new Error(`Shapes must match at index ${i}. Got ${this._shape} and ${other.shape}`);
+            }
+        }
+        const od = other.data as ArrayType;
+        for (let i = 0; i < this._data.length; i++) {
+            this._data[i] += od[i];
+        }
+        return this;
     }
     mm(other: ITensor): ITensor {
-        throw new Error("Method not implemented.");
+        // Vector dot product?
+        if (this._shape.length === 1 && other.shape.length === 1) {
+            if (this._shape[0] !== other.shape[0]) {
+                throw new Error("Vector dot product requires matching dimensions");
+            }
+            let sum = 0;
+            for (let i = 0; i < this._shape[0]; i++) {
+                sum += (this.get(i) as number) * (other.get(i) as number);
+            }
+            return new TensorCPU(new Float32Array([sum]), [1], [1], this._device);
+        }
+        // Matrix multiply
+        if (this._shape.length !== 2 || other.shape.length !== 2) {
+            throw new Error(`Matrix multiply requires 2D tensors. Got ${this._shape.length} and ${other.shape.length}`);
+        }
+        if (this._shape[1] !== other.shape[0]) {
+            throw new Error("Matrix multiply requires matching inner dimensions");
+        }
+        const newShape = [this._shape[0], other.shape[1]];
+        const newData = new Float32Array(newShape[0] * newShape[1]);
+        const newStrides = defaultStrides(newShape);
+        for (let i = 0; i < newShape[0]; i++) {
+            for (let j = 0; j < newShape[1]; j++) {
+                let sum = 0;
+                for (let k = 0; k < this._shape[1]; k++) {
+                    sum += (this.get(i, k) as number) * (other.get(k, j) as number);
+                }
+                newData[i * newStrides[0] + j] = sum;
+            }
+        }
+        return new TensorCPU(newData, newShape, newStrides, this._device);
     }
     sum(arg0: number): ITensor {
         throw new Error("Method not implemented.");
