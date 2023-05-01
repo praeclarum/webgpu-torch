@@ -1,14 +1,16 @@
 import { UntypedStorage } from './storage';
 
+export type Dtype = "float32" | "int32" | "boolean" | "string";
+
 export class Tensor {
     private _untypedStorage: UntypedStorage;
-    private _dtype: string;
+    private _dtype: Dtype;
     private _requiresGrad: boolean = false;
 
     get untypedStorage(): UntypedStorage { 
         return this._untypedStorage;
     }
-    get dtype(): string {
+    get dtype(): Dtype {
         return this._dtype;
     }
     get requiresGrad(): boolean {
@@ -18,9 +20,18 @@ export class Tensor {
         this._requiresGrad = value;
     }
 
-    constructor(untypedStorage: UntypedStorage, dtype: string) {
-        this._untypedStorage = untypedStorage;
+    constructor(data: UntypedStorage|Array<any>, dtype: Dtype) {
+        this._untypedStorage = new UntypedStorage();
         this._dtype = dtype;
     }
-}
 
+    add_(tensor: Tensor): Tensor {
+        return this;
+    }
+    mm(tensor: Tensor): Tensor {
+        return new Tensor(this._untypedStorage, this._dtype);
+    }
+    t(): Tensor {
+        return new Tensor(this._untypedStorage, this._dtype);
+    }
+}
