@@ -1,7 +1,7 @@
 export type Dtype = "float32" | "int32" | "uint8";
 export type Dtypeish = Dtype;
 
-export type ArrayType = Uint8Array | Int32Array | Float32Array;
+export type ATypedArray = Uint8Array | Int32Array | Float32Array;
 
 const dtypeArrayCtors = {
     "uint8": Uint8Array,
@@ -9,7 +9,7 @@ const dtypeArrayCtors = {
     "float32": Float32Array,
 };
 
-export function getDtype(dtype: Dtype | ArrayType | null): Dtype {
+export function getDtype(dtype: Dtype | ATypedArray | null): Dtype {
     if (dtype === null) {
         return "float32";
     } else if (dtype instanceof String && (dtype as Dtype) in dtypeArrayCtors) {
@@ -22,18 +22,5 @@ export function getDtype(dtype: Dtype | ArrayType | null): Dtype {
         return "float32";
     } else {
         throw new Error(`Invalid dtype ${dtype}`);
-    }
-}
-
-export function newArrayForDtype(length: number, dtype: Dtype) {
-    switch (dtype) {
-        case "uint8":
-            return new Uint8Array(length);
-        case "int32":
-            return new Int32Array(length);
-        case "float32":
-            return new Float32Array(length);
-        default:
-            throw new Error(`Unsupported dtype: ${dtype}`);
     }
 }

@@ -1,5 +1,5 @@
-import { Dtype } from "./dtype";
-import { Shape } from "./shape";
+import { ATypedArray, Dtype } from "./dtype";
+import { Shape, defaultStrides, shapeSize } from "./shape";
 import { IDevice } from "./device_if";
 import { Deviceish } from "./device";
 
@@ -35,3 +35,4 @@ export type TensorJsonData = {
     requiresGrad?: boolean;
     device?: Deviceish;
 };
+

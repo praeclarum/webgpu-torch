@@ -1,62 +1,25 @@
 import { Device  } from "./device";
-import { Dtype, newArrayForDtype } from "./dtype";
+import { Dtype } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
 import { TensorArrayData, TensorImpl } from "./tensor_if";
 import { TensorCPU } from "./tensor_cpu";
+import { newTypedArrayForDtype, newTypedArrayFromArray } from "./storage";
 
 export class DeviceCPU extends Device {
     constructor() {
         super("cpu", "cpu");
     }
     ones(shape: Shape, dtype: Dtype): TensorImpl {
-        const data = newArrayForDtype(shapeSize(shape), dtype);
+        const data = newTypedArrayForDtype(shapeSize(shape), dtype);
         data.fill(1);
         return new TensorCPU(data, shape, defaultStrides(shape), this);
     }
     tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
-        const shape: number[] = [];
-        function getShape(data: TensorArrayData | number) {
-            if (typeof data === "number") {
-                return;
-            }
-            shape.push(data.length);
-            getShape(data[0]);
-        }
-        if (data !== null) {
-            getShape(data);
-        }
-        const strides = defaultStrides(shape);
-        const size = shapeSize(shape);
-        if (dtype !== "float32") {
-            throw new Error("Only float32 is supported");
-        }
-        const flatData = new Float32Array(size);
-        let flatIndex = 0;
-        function flatten(data: TensorArrayData | number) {
-            if (typeof data === "number") {
-                flatData[flatIndex] = data;
-                flatIndex++;
-                return;
-            }
-            for (let i = 0; i < data.length; i++) {
-                let d = data[i];
-                if (typeof d === "number") {
-                    for (let j = 0; j < data.length; j++) {
-                        flatData[flatIndex] = data[j] as number;
-                        flatIndex++;
-                    }
-                    return;
-                }
-                flatten(data[i]);
-            }
-        }
-        if (data !== null) {
-            flatten(data);
-        }
-        return new TensorCPU(flatData, shape, strides, this);
+        const info = newTypedArrayFromArray(data, dtype);
+        return new TensorCPU(info.data, info.shape, info.strides, this);
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {
-        const data = newArrayForDtype(shapeSize(shape), dtype);
+        const data = newTypedArrayForDtype(shapeSize(shape), dtype);
         return new TensorCPU(data, shape, defaultStrides(shape), this);
     }
 }

@@ -1,16 +1,16 @@
 import { Device } from "./device";
-import { Dtype, ArrayType } from "./dtype";
+import { Dtype, ATypedArray } from "./dtype";
 import { Shape, Strides, defaultStrides, shapeGetAxis, shapeSize } from "./shape";
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 
 export class TensorCPU extends TensorImpl {
-    private _typedStorage: ArrayType;
+    private _typedStorage: ATypedArray;
     private _dtype: Dtype;
     private _shape: number[];
     private _strides: number[];
     private _device: Device;
 
-    get typedStorage(): ArrayType {
+    get typedStorage(): ATypedArray {
         return this._typedStorage;
     }
     get dtype(): Dtype {
@@ -40,7 +40,7 @@ export class TensorCPU extends TensorImpl {
         return new TensorCPU(data, shape, strides, this._device);
     }
 
-    constructor(data: ArrayType, shape: Shape, strides: Strides, device: Device) {
+    constructor(data: ATypedArray, shape: Shape, strides: Strides, device: Device) {
         super();
         this._typedStorage = data;
         this._dtype = "float32";
@@ -53,7 +53,7 @@ export class TensorCPU extends TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
         }
-        const od = other.typedStorage as ArrayType;
+        const od = other.typedStorage as ATypedArray;
         for (let i = 0; i < this._typedStorage.length; i++) {
             this._typedStorage[i] += od[i];
         }
