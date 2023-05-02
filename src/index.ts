@@ -17,3 +17,9 @@ export * from "./ops";
 export const foo = 42;
 
 export {LinearFunction} from "./autograd";
+
+import { discoverWebGPUDevicesAsync } from "./devices";
+
+export async function initWebGPUAsync() {
+    await discoverWebGPUDevicesAsync();
+}

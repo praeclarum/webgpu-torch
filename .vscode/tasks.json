@@ -10,7 +10,6 @@
 			},
 			"problemMatcher": [],
 			"label": "npm: test",
-			"detail": "jest"
 		},
 		{
 			"type": "npm",
@@ -21,7 +20,6 @@
 			},
 			"problemMatcher": [],
 			"label": "npm: build",
-			"detail": "tsc"
 		}
 	]
 }

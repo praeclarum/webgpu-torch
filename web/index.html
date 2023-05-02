@@ -8,13 +8,11 @@
 <body>
     <h1>jstorch</h1>
     <div id="tests"></div>
-    <!-- Load the Torch Web library as a module -->
-    <!-- <script>var exports = {};</script> -->
     <script src="../dist/jstorch.js"></script>
     <script src="tests.js"></script>
     <script>
-        
         async function run() {
+            await torch.initWebGPUAsync();
             await runTestsAsync(document.getElementById("tests"));
         }
         run();
