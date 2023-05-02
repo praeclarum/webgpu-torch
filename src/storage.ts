@@ -3,6 +3,7 @@ import { Shape, defaultStrides, shapeSize } from "./shape";
 import { TensorArrayData } from "./tensor_if";
 
 export abstract class UntypedStorage {
+    abstract get byteSize(): number;
     abstract get buffer(): ArrayBuffer | null;
     tryGetTypedArray(dtype: Dtype): ATypedArray | null {
         const buffer = this.buffer;
@@ -25,6 +26,9 @@ export abstract class UntypedStorage {
 
 export class ArrayBufferStorage extends UntypedStorage {
     private _buffer: ArrayBuffer;
+    get byteSize(): number {
+        return this._buffer.byteLength;
+    }
     constructor(byteSize: number | ArrayBuffer | ATypedArray) {
         super();
         if (typeof byteSize === "number") {
@@ -53,19 +57,35 @@ export class ArrayBufferStorage extends UntypedStorage {
 
 export class GPUBufferStorage extends UntypedStorage {
     private _buffer: GPUBuffer;
-    constructor(byteSize: number, usage: GPUBufferUsageFlags, device: GPUDevice) {
-        super();
-        this._buffer = device.createBuffer({
-            mappedAtCreation: true,
-            size: byteSize,
-            usage: usage,
-        });
+    get byteSize(): number {
+        return this._buffer.size;
+    }
+    get gpuBuffer(): GPUBuffer {
+        return this._buffer;
     }
     get buffer(): ArrayBuffer | null {
         if (this._buffer.mapState === "mapped") {
             return this._buffer.getMappedRange();
         }
         return null;
+    }
+    constructor(buffer: GPUBuffer)
+    constructor(byteSize: number, usage: GPUBufferUsageFlags, device: GPUDevice)
+    constructor(input: number|GPUBuffer, usage?: GPUBufferUsageFlags, device?: GPUDevice) {
+        super();
+        if (input instanceof GPUBuffer) {
+            this._buffer = input;
+        }
+        else if (typeof input === "number" && usage !== undefined && device !== undefined) {
+            this._buffer = device.createBuffer({
+                mappedAtCreation: true,
+                size: input,
+                usage: usage,
+            });
+        }
+        else {
+            throw new Error(`Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${(input as any).constructor.name})`);
+        }
     }
 }
 

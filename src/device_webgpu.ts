@@ -12,19 +12,19 @@ export class DeviceWebGPU extends Device {
         super(id, "webgpu");
         this.device = device;
     }
-    alloc(byteSize: number): UntypedStorage {
+    alloc(byteSize: number): GPUBufferStorage {
         return new GPUBufferStorage(byteSize, GPUBufferUsage.STORAGE, this.device);
     }
-    ones(shape: Shape, dtype: Dtype): TensorImpl {
+    ones(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
         const strides = defaultStrides(shape);
         return new TensorWebGPU(storage, dtype, shape, strides, this);
     }
-    tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
+    tensor(data: TensorArrayData | null, dtype: Dtype): TensorWebGPU {
         const info = newTypedArrayFromArray(data, dtype, shape => this.allocFor(shape, dtype));
         return new TensorWebGPU(info.storage as GPUBufferStorage, dtype, info.shape, info.strides, this);
     }
-    zeros(shape: Shape, dtype: Dtype): TensorImpl {
+    zeros(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
         const array = storage.getTypedArray(dtype);
         array.fill(0);
