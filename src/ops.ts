@@ -11,6 +11,14 @@ function shouldCreateGradient(...inputs: Tensor[]): boolean {
 }
 
 export function add_(a: Tensor, b: Tensor): Tensor {
+    if (a.shape.length !== b.shape.length) {
+        throw new Error(`Shape dimensions must match. Got ${a.shape} and ${b.shape}`);
+    }
+    for (let i = 0; i < a.shape.length; i++) {
+        if (a.shape[i] !== b.shape[i]) {
+            throw new Error(`Shapes must match at index ${i}. Got ${a.shape} and ${b.shape}`);
+        }
+    }
     return new Tensor(a.impl.add_(b.impl));
 }
 

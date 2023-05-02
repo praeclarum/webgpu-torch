@@ -10,6 +10,7 @@ export interface ITensor {
     get device(): IDevice;
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor): ITensor;
+    expand(shape: Shape): ITensor;
     mm(other: ITensor): ITensor;
     sum(axis: number | null): ITensor;
     t(): ITensor;
@@ -21,6 +22,7 @@ export abstract class TensorImpl implements ITensor {
     abstract get device(): IDevice;
     abstract get(...indices: number[]): number | ITensor;
     abstract add_(other: ITensor): ITensor;
+    abstract expand(shape: Shape): ITensor;
     abstract mm(other: ITensor): ITensor;
     abstract sum(axis: number | null): ITensor;
     abstract t(): ITensor;

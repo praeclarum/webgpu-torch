@@ -93,19 +93,26 @@ export class SumAxisFunction extends AutoFunction {
 
 export class SumFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
-        throw new Error("Method not implemented.");
+        const [input] = inputs as [Tensor];
+        return input.sum();
     }
     static setupContext(
         ctx: GradientFunctionContext,
         inputs: FunctionInput[],
         output: Tensor
     ) {
-        throw new Error("Method not implemented.");
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
     }
     static backward(
         ctx: GradientFunctionContext,
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
-        throw new Error("Method not implemented.");
+        const [input] = ctx.savedTensors;
+        let gradInput: Tensor | null = null;
+        if (ctx.needsInputGradient[0]) {
+            gradInput = gradOutput.expand(input.shape);
+        }
+        return [gradInput];
     }
 }

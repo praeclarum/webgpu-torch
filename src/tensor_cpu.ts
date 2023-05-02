@@ -59,39 +59,38 @@ export class TensorCPU extends TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
         }
-        if (this._shape.length !== other.shape.length) {
-            throw new Error(`Shape dimensions must match. Got ${this._shape} and ${other.shape}`);
-        }
-        for (let i = 0; i < this._shape.length; i++) {
-            if (this._shape[i] !== other.shape[i]) {
-                throw new Error(`Shapes must match at index ${i}. Got ${this._shape} and ${other.shape}`);
-            }
-        }
         const od = other.data as ArrayType;
         for (let i = 0; i < this._data.length; i++) {
             this._data[i] += od[i];
         }
         return this;
     }
+    /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
+    Passing -1 as the size for a dimension means not changing the size of that dimension.
+    Tensor can be also expanded to a larger number of dimensions, and the new ones will be appended at the front. For the new dimensions, the size cannot be set to -1.
+    Expanding a tensor does not allocate new memory, but only creates a new view on the existing tensor where a dimension of size one is expanded to a larger size by setting the stride to 0. Any dimension of size 1 can be expanded to an arbitrary value without allocating new memory. */
+    expand(shape: Shape): ITensor {
+        const newShape = shape.slice();
+        const newStrides = Array(newShape.length).fill(0);
+        // Update newStrides based on the current strides
+        // so that the expansion happens
+        // in the correct direction
+        let j = newShape.length - 1;
+        for (let i = this._shape.length - 1; i >= 0; i--) {
+            if (this._shape[i] === 1) {
+                newStrides[j] = 0;
+            } else {
+                newStrides[j] = this._strides[i];
+                j--;
+            }
+            if (newShape[j] === -1) {
+                newShape[j] = this._shape[i];
+            }
+        }
+        return new TensorCPU(this._data, newShape, newStrides, this._device);
+    }
     mm(other: ITensor): ITensor {
-        // Vector dot product?
-        if (this._shape.length === 1 && other.shape.length === 1) {
-            if (this._shape[0] !== other.shape[0]) {
-                throw new Error("Vector dot product requires matching dimensions");
-            }
-            let sum = 0;
-            for (let i = 0; i < this._shape[0]; i++) {
-                sum += (this.get(i) as number) * (other.get(i) as number);
-            }
-            return new TensorCPU(new Float32Array([sum]), [1], [1], this._device);
-        }
         // Matrix multiply
-        if (this._shape.length !== 2 || other.shape.length !== 2) {
-            throw new Error(`Matrix multiply requires 2D tensors. Got ${this._shape.length} and ${other.shape.length}`);
-        }
-        if (this._shape[1] !== other.shape[0]) {
-            throw new Error("Matrix multiply requires matching inner dimensions");
-        }
         const newShape = [this._shape[0], other.shape[1]];
         const newData = new Float32Array(newShape[0] * newShape[1]);
         const newStrides = defaultStrides(newShape);
@@ -136,7 +135,6 @@ export class TensorCPU extends TensorImpl {
         newShape.reverse();
         let newStrides = this._strides.slice();
         newStrides.reverse();
-        let newData = this._data.slice();
-        return new TensorCPU(newData, newShape, newStrides, this._device);
+        return new TensorCPU(this._data, newShape, newStrides, this._device);
     }
 }

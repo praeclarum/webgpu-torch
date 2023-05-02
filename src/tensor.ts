@@ -135,6 +135,13 @@ export class Tensor implements ITensor {
     add_(other: Tensor): Tensor {
         return add_(this, other);
     }
+    /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
+    Passing -1 as the size for a dimension means not changing the size of that dimension.
+    Tensor can be also expanded to a larger number of dimensions, and the new ones will be appended at the front. For the new dimensions, the size cannot be set to -1.
+    Expanding a tensor does not allocate new memory, but only creates a new view on the existing tensor where a dimension of size one is expanded to a larger size by setting the stride to 0. Any dimension of size 1 can be expanded to an arbitrary value without allocating new memory. */
+    expand(shape: Shape): Tensor {
+        return new Tensor(this.impl.expand(shape));
+    }
     mm(other: Tensor): Tensor {
         return mm(this, other);
     }
