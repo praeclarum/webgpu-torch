@@ -61,6 +61,9 @@ export class Tensor implements ITensor {
         return this._requiresGrad;
     }
     set requiresGrad(value: boolean) {
+        if (this._gradFunc) {
+            throw new Error("You can only change requiresGrad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use valueNoGrad = value.detach().");
+        }
         this._requiresGrad = value;
     }
     get gradFunc(): GradientFunction | null {

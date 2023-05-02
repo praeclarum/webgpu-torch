@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Torch Web</title>
+    <title>jstorch</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Torch Web</h1>
-    <p>It works! Woo!</p>
+    <h1>jstorch</h1>
+    <div id="tests"></div>
     <!-- Load the Torch Web library as a module -->
     <!-- <script>var exports = {};</script> -->
     <script src="../dist/jstorch.js"></script>
+    <script src="tests.js"></script>
     <script>
         
         const x = jstorch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
@@ -22,6 +24,10 @@
         console.log(`${b}`, b);
         const y = jstorch.LinearFunction.apply(x, w, b);
         console.log(`${y}`, y);
+        async function run() {
+            await runTestsAsync(document.getElementById("tests"));
+        }
+        run();
     </script>
 </body>
 </html>
