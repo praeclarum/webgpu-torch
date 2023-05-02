@@ -1,5 +1,5 @@
 import { Device } from "./device";
-import { Dtype, ATypedArray } from "./dtype";
+import { Dtype } from "./dtype";
 import {
     Shape,
     Strides,
@@ -8,7 +8,7 @@ import {
     shapeSize,
 } from "./shape";
 import { ArrayBufferStorage } from "./storage";
-import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
+import { TensorImpl } from "./tensor_if";
 
 export class TensorCPU extends TensorImpl {
     private _storage: ArrayBufferStorage;
@@ -52,7 +52,7 @@ export class TensorCPU extends TensorImpl {
         return new TensorCPU(this._storage, shape, strides, this._device);
     }
 
-    add_(other: ITensor): TensorImpl {
+    add_(other: TensorImpl): TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
         }
@@ -63,10 +63,13 @@ export class TensorCPU extends TensorImpl {
         }
         return this;
     }
-    mm(other: ITensor): TensorImpl {
+    mm(other: TensorImpl): TensorImpl {
         // Matrix multiply
         const newShape = [this._shape[0], other.shape[1]];
-        const [newStorage, newData] = this.device.allocTypedArray(newShape[0] * newShape[1], this.dtype);
+        const [newStorage, newData] = this.device.allocTypedArray(
+            newShape[0] * newShape[1],
+            this.dtype
+        );
         const newStrides = defaultStrides(newShape);
         for (let i = 0; i < newShape[0]; i++) {
             for (let j = 0; j < newShape[1]; j++) {
@@ -79,7 +82,12 @@ export class TensorCPU extends TensorImpl {
                 newData[i * newStrides[0] + j] = sum;
             }
         }
-        return new TensorCPU(newStorage as ArrayBufferStorage, newShape, newStrides, this._device);
+        return new TensorCPU(
+            newStorage as ArrayBufferStorage,
+            newShape,
+            newStrides,
+            this._device
+        );
     }
     sum(axis: number | null): TensorImpl {
         const d = this.getTypedArray();
@@ -88,13 +96,24 @@ export class TensorCPU extends TensorImpl {
             for (let i = 0; i < d.length; i++) {
                 sum += d[i];
             }
-            const [newStorage, newData] = this.device.allocTypedArray(1, this.dtype);
-            return new TensorCPU(newStorage as ArrayBufferStorage, [], [], this._device);
+            const [newStorage, newData] = this.device.allocTypedArray(
+                1,
+                this.dtype
+            );
+            return new TensorCPU(
+                newStorage as ArrayBufferStorage,
+                [],
+                [],
+                this._device
+            );
         } else {
             axis = shapeGetAxis(this._shape, axis);
             const newShape = this._shape.slice();
             newShape.splice(axis, 1);
-            const [newStorage, newData] = this.device.allocTypedArray(shapeSize(newShape), this.dtype);
+            const [newStorage, newData] = this.device.allocTypedArray(
+                shapeSize(newShape),
+                this.dtype
+            );
             const newStrides = defaultStrides(newShape);
             const axisStride = this._strides[axis];
             for (let i = 0; i < newData.length; i++) {
@@ -104,7 +123,12 @@ export class TensorCPU extends TensorImpl {
                 }
                 newData[i] = sum;
             }
-            return new TensorCPU(newStorage as ArrayBufferStorage, newShape, newStrides, this._device);
+            return new TensorCPU(
+                newStorage as ArrayBufferStorage,
+                newShape,
+                newStrides,
+                this._device
+            );
         }
     }
 }

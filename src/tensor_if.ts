@@ -28,8 +28,8 @@ export abstract class TensorImpl implements ITensor {
     abstract get device(): IDevice;
     abstract withShape(shape: Shape, strides: Strides): TensorImpl;
 
-    abstract add_(other: ITensor): TensorImpl;
-    abstract mm(other: ITensor): TensorImpl;
+    abstract add_(other: TensorImpl): TensorImpl;
+    abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;
 
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.

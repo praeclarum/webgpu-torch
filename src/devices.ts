@@ -11,16 +11,16 @@ const devices: { [id: string]: Device } = {
 
 export async function discoverWebGPUDevicesAsync() {
     if (!(navigator as any).gpu) {
+        console.warn("No WebGPU devices found");
         return;
     }
     const adapter = await (navigator as any).gpu.requestAdapter();
-    console.log("adapter", adapter);
     const device = await adapter.requestDevice();
-    console.log("device", device);
     const id = "webgpu";
     const dev = new DeviceWebGPU(id, adapter, device);
     devices[id] = dev;
     webgpuDevice = dev;
+    console.log("Found WebGPU device", device);
 }
 
 export function getDevice(device: Deviceish | null): Device {

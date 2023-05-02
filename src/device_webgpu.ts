@@ -25,6 +25,9 @@ export class DeviceWebGPU extends Device {
         return new TensorWebGPU(info.storage as GPUBufferStorage, dtype, info.shape, info.strides, this);
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {
-        throw new Error("Method not implemented.");
+        const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
+        const array = storage.getTypedArray(dtype);
+        array.fill(0);
+        return new TensorWebGPU(storage, dtype, shape, defaultStrides(shape), this);
     }
 }
