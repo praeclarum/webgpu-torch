@@ -131,11 +131,17 @@ export class Tensor implements ITensor {
         this._impl.add_(tensor._impl);
         return this;
     }
-    mm(tensor: Tensor): Tensor {
-        return new Tensor(this._impl.mm(tensor._impl));
+    mm(other: Tensor): Tensor {
+        if (this.shape.length !== 2 || other.shape.length !== 2) {
+            throw new Error(`Expected 2D tensors, got ${this.shape} and ${other.shape}`);
+        }
+        if (this.shape[1] !== other.shape[0]) {
+            throw new Error(`Expected tensors inner dimensions to be compatible, got ${this.shape} and ${other.shape}`);
+        }
+        return new Tensor(this._impl.mm(other._impl));
     }
-    sum(arg0: number) {
-        return new Tensor(this._impl.sum(arg0));
+    sum(axis: number | null = null): Tensor {
+        return new Tensor(this._impl.sum(axis));
     }
     t(): Tensor {
         return new Tensor(this._impl.t());

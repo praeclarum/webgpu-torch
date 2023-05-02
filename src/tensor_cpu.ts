@@ -1,6 +1,6 @@
 import { Device } from "./device";
 import { Dtype } from "./dtype";
-import { Shape, Strides, defaultStrides } from "./shape";
+import { Shape, Strides, defaultStrides, shapeGetAxis, shapeSize } from "./shape";
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 
 type ArrayType = Float32Array | Int32Array | Uint8Array;
@@ -106,8 +106,30 @@ export class TensorCPU extends TensorImpl {
         }
         return new TensorCPU(newData, newShape, newStrides, this._device);
     }
-    sum(arg0: number): ITensor {
-        throw new Error("Method not implemented.");
+    sum(axis: number | null): ITensor {
+        if (axis === null) {
+            let sum = 0;
+            for (let i = 0; i < this._data.length; i++) {
+                sum += this._data[i];
+            }
+            return new TensorCPU(new Float32Array([sum]), [], [], this._device);
+        }
+        else {
+            axis = shapeGetAxis(this._shape, axis);
+            const newShape = this._shape.slice();
+            newShape.splice(axis, 1);
+            const newData = new Float32Array(shapeSize(newShape));
+            const newStrides = defaultStrides(newShape);
+            const axisStride = this._strides[axis];
+            for (let i = 0; i < newData.length; i++) {
+                let sum = 0;
+                for (let j = 0; j < axisStride; j++) {
+                    sum += this._data[i * newStrides[0] + j];
+                }
+                newData[i] = sum;
+            }
+            return new TensorCPU(newData, newShape, newStrides, this._device);
+        }
     }
     t(): ITensor {
         let newShape = this._shape.slice();

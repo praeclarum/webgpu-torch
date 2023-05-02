@@ -11,7 +11,7 @@ export interface ITensor {
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor): ITensor;
     mm(other: ITensor): ITensor;
-    sum(arg0: number): ITensor;
+    sum(axis: number | null): ITensor;
     t(): ITensor;
 }
 
@@ -22,6 +22,6 @@ export abstract class TensorImpl implements ITensor {
     abstract get(...indices: number[]): number | ITensor;
     abstract add_(other: ITensor): ITensor;
     abstract mm(other: ITensor): ITensor;
-    abstract sum(arg0: number): ITensor;
+    abstract sum(axis: number | null): ITensor;
     abstract t(): ITensor;
 }

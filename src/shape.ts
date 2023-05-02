@@ -23,6 +23,17 @@ export function defaultStrides(shape: Shape): Strides {
     }
     return strides;
 }
+
+export function shapeGetAxis(shape: Shape, axis: number): number {
+    if (axis < 0) {
+        axis += shape.length;
+    }
+    if (axis < 0 || axis >= shape.length) {
+        throw new Error(`Axis ${axis} is out of bounds for shape ${shape}`);
+    }
+    return axis;
+}
+
 /*
 export function broadcastShape(leftShape: Shape, rightShape: Shape, rightStrides: Strides): {shape: Shape, strides: Strides} {
     const leftRank = leftShape.length;

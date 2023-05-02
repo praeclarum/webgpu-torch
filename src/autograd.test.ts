@@ -12,10 +12,19 @@ test("auto function backward fails", () => {
     expect(() => AutoFunction.backward(new GradientFunctionContext([]), zeros(3))).toThrow();
 });
 
-test("linear function apply", () => {
-    const input = new Tensor([[1, 2, 3], [4, 5, 6]], "float32");
-    const weight = new Tensor([[1, 2], [3, 4], [5, 6]], "float32");
-    const bias = new Tensor([1, 2], "float32");
-    const output = LinearFunction.apply(input, weight.t(), bias);
+test("linear backwards", () => {
+    const input = new Tensor([[3]], "float32", true);
+    const weight = new Tensor([[10], [11]], "float32", true);
+    const bias = new Tensor([[1000, 10000]], "float32", true);
+    const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
+    expect(output.shape).toEqual([1, 2]);
+    const loss = output.sum(0);
+    expect(loss.gradFunc).not.toBeNull();
+    expect(loss.requiresGrad).toBe(true);
+    loss.backward();
+    expect(input.grad).not.toBeNull();
+    expect(weight.grad).not.toBeNull();
+    expect(bias.grad).not.toBeNull();
+    expect(output.grad).not.toBeNull();
 });

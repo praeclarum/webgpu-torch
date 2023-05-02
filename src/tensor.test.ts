@@ -1,6 +1,7 @@
 import { UntypedStorage } from "./storage";
 import { Tensor } from "./index";
 import { LinearFunction } from "./autograd";
+import { TensorCPU } from "./tensor_cpu";
 
 test("create tensor with storage and dtype", () => {
     const tensor = new Tensor([10, 20, 30], "float32");
@@ -15,26 +16,18 @@ test("can toggle requiresGrad", () => {
     expect(tensor.requiresGrad).toBe(true);
 });
 
-test("linear makes grad func and req gradient", () => {
-    const input = new Tensor([10, 20, 30], "float32", true);
-    const weight = new Tensor([10, 20, 30], "float32", true);
-    const bias = new Tensor([1000], "float32", true);
+test("linear forward", () => {
+    const input = new Tensor([[3]], "float32");
+    const weight = new Tensor([[10], [11]], "float32");
+    const bias = new Tensor([[1000, 10000]], "float32");
     const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
-    expect(output.gradFunc).not.toBeNull();
-    expect(output.requiresGrad).toBe(true);
+    expect(output.shape).toEqual([1, 2]);
 });
 
-test("linear backwards", () => {
-    const input = new Tensor([10, 20, 30], "float32", true);
-    const weight = new Tensor([10, 20, 30], "float32", true);
-    const bias = new Tensor([1000], "float32", true);
-    const output = LinearFunction.apply(input, weight, bias);
-    expect(output).toBeInstanceOf(Tensor);
-    expect(output.gradFunc).not.toBeNull();
-    output.backward();
-    expect(input.grad).not.toBeNull();
-    expect(weight.grad).not.toBeNull();
-    expect(bias.grad).not.toBeNull();
-    expect(output.grad).not.toBeNull();
+test("complete sum over 2D tensor", () => {
+    const input = new Tensor([[1, 2, 3], [4, 5, 6]], "float32");
+    const sum = input.sum();
+    expect(sum).toBeInstanceOf(Tensor);
+    expect(sum.shape).toEqual([]);
 });
