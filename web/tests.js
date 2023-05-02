@@ -9,18 +9,19 @@ test("webgpu is supported", () => {
 });
 
 test("tensor is webgpu", () => {
-    const x = torch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
+    const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
+    expect(x.requiresGrad).toBe(false);
     expect(x.device.type).toBe("webgpu");
 });
 
 test("linear forward", () => {
-    const x = torch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
-    console.log(x);
-    expect(x.shape).toBe([2, 3]);
-    const w = torch.tensor([[100, 200, 300]], "float32", true);
-    const b = torch.tensor([[-1000], [1000]], "float32", true);
+    const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
+    expect(x.shape).toEqual([2, 3]);
+    const w = torch.tensor({data: [[100, 200, 300]], requiresGrad: true});
+    expect(w.requiresGrad).toBe(true);
+    const b = torch.tensor({data: [[-1000], [1000]], requiresGrad: true});
     const y = torch.LinearFunction.apply(x, w, b);
-    expect(y.shape).toBe([2, 1]);
+    expect(y.shape).toEqual([2, 1]);
 });
 
 
@@ -80,6 +81,10 @@ async function runTestsAsync($testDiv) {
         const $testErrorCell = document.createElement('td');
         if (error) {
             $testErrorCell.innerText = error.message;
+            const $stackDiv = document.createElement('div');
+            $stackDiv.className = 'stack';
+            $stackDiv.innerText = error.stack;
+            $testErrorCell.appendChild($stackDiv);
         }
         $testRow.appendChild($testErrorCell);
     }
