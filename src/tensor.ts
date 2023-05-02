@@ -87,8 +87,22 @@ export class Tensor implements ITensor {
         this._grad = null;
     }
 
+    get [Symbol.toStringTag]() {
+        return 'Tensor';
+    }
+    toString(options?: {}): string {
+        let rg = this.requiresGrad ? ", requiresGrad=true" : "";
+        if (this._gradFunc) {
+            rg = ", gradFunc";
+        }
+        return `tensor([${this.shape}], ${this.dtype}${rg})`;
+    }
+
     detach(): Tensor {
-        return new Tensor(this._impl, this.dtype, false);
+        if (this._requiresGrad || this._gradFunc) {
+            return new Tensor(this._impl, this.dtype, false);
+        }
+        return this;
     }
 
     setGradientFunction(

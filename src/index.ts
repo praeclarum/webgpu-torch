@@ -1,3 +1,4 @@
+
 export function testExport(input: any): any {
     return input;
 }
@@ -14,3 +15,5 @@ export * from "./factories";
 export * from "./ops";
 
 export const foo = 42;
+
+export {LinearFunction} from "./autograd";
