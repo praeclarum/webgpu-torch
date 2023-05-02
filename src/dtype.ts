@@ -9,6 +9,19 @@ const dtypeArrayCtors = {
     "float32": Float32Array,
 };
 
+export function dtypeByteSize(dtype: Dtype): number {
+    switch (dtype) {
+        case "float32":
+            return 4;
+        case "int32":
+            return 4;
+        case "uint8":
+            return 1;
+        default:
+            throw new Error(`Invalid dtype ${dtype}`);
+    }
+}
+
 export function getDtype(dtype: Dtype | ATypedArray | null): Dtype {
     if (dtype === null) {
         return "float32";

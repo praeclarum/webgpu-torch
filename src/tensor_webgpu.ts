@@ -1,10 +1,11 @@
 import { Device } from "./device";
 import { ATypedArray, Dtype, getDtype } from "./dtype";
 import { Shape, Strides, defaultStrides, shapeGetAxis, shapeSize } from "./shape";
+import { GPUBufferStorage } from "./storage";
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 
 export class TensorWebGPU extends TensorImpl {
-    private _data: ATypedArray;
+    private _storage: GPUBufferStorage;
     private _dtype: Dtype;
     private _shape: number[];
     private _strides: number[];
@@ -23,10 +24,10 @@ export class TensorWebGPU extends TensorImpl {
         return this._device;
     }
 
-    constructor(data: ATypedArray, shape: Shape, strides: Strides, device: Device) {
+    constructor(storage: GPUBufferStorage, dtype: Dtype, shape: Shape, strides: Strides, device: Device) {
         super();
-        this._data = data;
-        this._dtype = getDtype(data);
+        this._storage = storage;
+        this._dtype = dtype;
         this._shape = shape;
         this._strides = strides;
         this._device = device;

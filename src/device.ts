@@ -1,7 +1,8 @@
-import { Shape, Shapeish } from "./shape";
-import { Dtype } from "./dtype";
+import { Shape, Shapeish, shapeSize } from "./shape";
+import { Dtype, dtypeByteSize } from "./dtype";
 import { TensorArrayData, TensorImpl } from "./tensor_if";
 import { IDevice } from "./device_if";
+import { UntypedStorage } from "./storage";
 
 export type DeviceType = "cpu" | "webgpu";
 export type DeviceId = string;
@@ -20,6 +21,12 @@ export abstract class Device implements IDevice {
     constructor(id: DeviceId, type: DeviceType) {
         this._id = id;
         this._type = type;
+    }
+    abstract alloc(byteSize: number, alignment: number): UntypedStorage;
+    allocFor(shape: Shape, dtype: Dtype): UntypedStorage {
+        const elementByteSize = dtypeByteSize(dtype);
+        const byteSize = shapeSize(shape) * elementByteSize;
+        return this.alloc(byteSize, elementByteSize);
     }
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
     abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;

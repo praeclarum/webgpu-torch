@@ -1,12 +1,33 @@
 import { ATypedArray, Dtype } from "./dtype";
-import { defaultStrides, shapeSize } from "./shape";
+import { Shape, defaultStrides, shapeSize } from "./shape";
 import { TensorArrayData } from "./tensor_if";
 
 export class StorageBase {
 }
 
-export class UntypedStorage extends StorageBase {
+export abstract class UntypedStorage extends StorageBase {
+    abstract get buffer(): ArrayBuffer | null;
+}
 
+export class ArrayBufferStorage extends UntypedStorage {
+    private _buffer: ArrayBuffer;
+    constructor(byteSize: number) {
+        super();
+        this._buffer = new ArrayBuffer(byteSize);
+    }
+    get buffer(): ArrayBuffer | null {
+        return this._buffer;
+    }
+}
+
+export class GPUBufferStorage extends UntypedStorage {
+    private _buffer: ArrayBuffer | null = null;
+    constructor(byteSize: number, alignment: number) {
+        super();
+    }
+    get buffer(): ArrayBuffer | null {
+        return this._buffer;
+    }
 }
 
 export function newTypedArrayForDtype(length: number, dtype: Dtype) {
@@ -22,7 +43,7 @@ export function newTypedArrayForDtype(length: number, dtype: Dtype) {
     }
 }
 
-export function newTypedArrayFromArray(data: TensorArrayData | null, dtype: Dtype): {data: ATypedArray, shape: number[], strides: number[]} {
+export function newTypedArrayFromArray(data: TensorArrayData | null, dtype: Dtype, allocFor: (shape: Shape) => UntypedStorage): {data: UntypedStorage, shape: number[], strides: number[]} {
     const shape: number[] = [];
     function getShape(data: TensorArrayData | number) {
         if (typeof data === "number") {
