@@ -42,22 +42,17 @@ export class TensorWebGPU extends TensorImpl {
         this._device = device;
     }
 
-    get(...indices: number[]): number | TensorImpl {
-        throw new Error("Method not implemented.");
+    withShape(shape: Shape, strides: Strides): TensorImpl {
+        return new TensorWebGPU(this._storage, this._dtype, shape, strides, this._device);
     }
+
     add_(other: ITensor): TensorImpl {
-        throw new Error("Method not implemented.");
-    }
-    expand(shape: Shape): TensorImpl {
         throw new Error("Method not implemented.");
     }
     mm(other: ITensor): TensorImpl {
         throw new Error("Method not implemented.");
     }
     sum(axis: number | null): TensorImpl {
-        throw new Error("Method not implemented.");
-    }
-    t(): TensorImpl {
         throw new Error("Method not implemented.");
     }
 }

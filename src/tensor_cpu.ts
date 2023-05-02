@@ -33,27 +33,6 @@ export class TensorCPU extends TensorImpl {
         return this._device;
     }
 
-    get(...indices: number[]): number | TensorImpl {
-        let array = this.getTypedArray();
-        if (array === null) {
-            throw new Error("Cannot get value unmapped storage");
-        }
-        let offset = 0;
-        for (let i = 0; i < indices.length; i++) {
-            offset += indices[i] * this._strides[i];
-        }
-        if (this._strides.length === indices.length) {
-            return array[offset];
-        }
-        const data = array.subarray(
-            offset,
-            offset + this._strides[indices.length]
-        );
-        const shape = this._shape.slice(indices.length);
-        const strides = this._strides.slice(indices.length);
-        return new TensorCPU(new ArrayBufferStorage(data), shape, strides, this._device);
-    }
-
     constructor(
         data: ArrayBufferStorage,
         shape: Shape,
@@ -68,6 +47,11 @@ export class TensorCPU extends TensorImpl {
         this._strides = strides;
         this._device = device;
     }
+
+    withShape(shape: Shape, strides: Strides): TensorImpl {
+        return new TensorCPU(this._storage, shape, strides, this._device);
+    }
+
     add_(other: ITensor): TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
@@ -78,35 +62,6 @@ export class TensorCPU extends TensorImpl {
             d[i] += od[i];
         }
         return this;
-    }
-    /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
-    Passing -1 as the size for a dimension means not changing the size of that dimension.
-    Tensor can be also expanded to a larger number of dimensions, and the new ones will be appended at the front. For the new dimensions, the size cannot be set to -1.
-    Expanding a tensor does not allocate new memory, but only creates a new view on the existing tensor where a dimension of size one is expanded to a larger size by setting the stride to 0. Any dimension of size 1 can be expanded to an arbitrary value without allocating new memory. */
-    expand(shape: Shape): TensorImpl {
-        const newShape = shape.slice();
-        const newStrides = Array(newShape.length).fill(0);
-        // Update newStrides based on the current strides
-        // so that the expansion happens
-        // in the correct direction
-        let j = newShape.length - 1;
-        for (let i = this._shape.length - 1; i >= 0; i--) {
-            if (this._shape[i] === 1) {
-                newStrides[j] = 0;
-            } else {
-                newStrides[j] = this._strides[i];
-                j--;
-            }
-            if (newShape[j] === -1) {
-                newShape[j] = this._shape[i];
-            }
-        }
-        return new TensorCPU(
-            this._storage,
-            newShape,
-            newStrides,
-            this._device
-        );
     }
     mm(other: ITensor): TensorImpl {
         // Matrix multiply
@@ -151,17 +106,5 @@ export class TensorCPU extends TensorImpl {
             }
             return new TensorCPU(newStorage as ArrayBufferStorage, newShape, newStrides, this._device);
         }
-    }
-    t(): TensorImpl {
-        let newShape = this._shape.slice();
-        newShape.reverse();
-        let newStrides = this._strides.slice();
-        newStrides.reverse();
-        return new TensorCPU(
-            this._storage,
-            newShape,
-            newStrides,
-            this._device
-        );
     }
 }
