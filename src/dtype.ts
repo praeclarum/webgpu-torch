@@ -3,7 +3,7 @@ export type Dtypeish = Dtype;
 
 export type ATypedArray = Uint8Array | Int32Array | Float32Array;
 
-const dtypeArrayCtors = {
+export const dtypeArrayCtors = {
     "uint8": Uint8Array,
     "int32": Int32Array,
     "float32": Float32Array,

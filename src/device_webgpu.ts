@@ -20,7 +20,7 @@ export class DeviceWebGPU extends Device {
     }
     tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
         const info = newTypedArrayFromArray(data, dtype, shape => this.allocFor(shape, dtype));
-        return new TensorWebGPU(info.data as GPUBufferStorage, dtype, info.shape, info.strides, this);
+        return new TensorWebGPU(info.storage as GPUBufferStorage, dtype, info.shape, info.strides, this);
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {
         throw new Error("Method not implemented.");

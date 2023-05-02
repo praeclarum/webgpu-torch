@@ -1,8 +1,8 @@
 import { Device } from "./device";
-import { ATypedArray, Dtype, getDtype } from "./dtype";
-import { Shape, Strides, defaultStrides, shapeGetAxis, shapeSize } from "./shape";
+import { Dtype } from "./dtype";
+import { Shape, Strides } from "./shape";
 import { GPUBufferStorage } from "./storage";
-import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
+import { ITensor, TensorImpl } from "./tensor_if";
 
 export class TensorWebGPU extends TensorImpl {
     private _storage: GPUBufferStorage;
@@ -11,6 +11,9 @@ export class TensorWebGPU extends TensorImpl {
     private _strides: number[];
     private _device: Device;
 
+    get storage(): GPUBufferStorage {
+        return this._storage;
+    }
     get dtype(): Dtype {
         return this._dtype;
     }
@@ -24,7 +27,13 @@ export class TensorWebGPU extends TensorImpl {
         return this._device;
     }
 
-    constructor(storage: GPUBufferStorage, dtype: Dtype, shape: Shape, strides: Strides, device: Device) {
+    constructor(
+        storage: GPUBufferStorage,
+        dtype: Dtype,
+        shape: Shape,
+        strides: Strides,
+        device: Device
+    ) {
         super();
         this._storage = storage;
         this._dtype = dtype;
@@ -33,22 +42,22 @@ export class TensorWebGPU extends TensorImpl {
         this._device = device;
     }
 
-    get(...indices: number[]): number | ITensor {
+    get(...indices: number[]): number | TensorImpl {
         throw new Error("Method not implemented.");
     }
-    add_(other: ITensor): ITensor {
+    add_(other: ITensor): TensorImpl {
         throw new Error("Method not implemented.");
     }
-    expand(shape: Shape): ITensor {
+    expand(shape: Shape): TensorImpl {
         throw new Error("Method not implemented.");
     }
-    mm(other: ITensor): ITensor {
+    mm(other: ITensor): TensorImpl {
         throw new Error("Method not implemented.");
     }
-    sum(axis: number | null): ITensor {
+    sum(axis: number | null): TensorImpl {
         throw new Error("Method not implemented.");
     }
-    t(): ITensor {
+    t(): TensorImpl {
         throw new Error("Method not implemented.");
     }
 }

@@ -1,5 +1,5 @@
 import { Shape, Shapeish, shapeSize } from "./shape";
-import { Dtype, dtypeByteSize } from "./dtype";
+import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
 import { TensorArrayData, TensorImpl } from "./tensor_if";
 import { IDevice } from "./device_if";
 import { UntypedStorage } from "./storage";
@@ -27,6 +27,12 @@ export abstract class Device implements IDevice {
         const elementByteSize = dtypeByteSize(dtype);
         const byteSize = shapeSize(shape) * elementByteSize;
         return this.alloc(byteSize, elementByteSize);
+    }
+    allocTypedArray(size: number, dtype: Dtype): [UntypedStorage, ATypedArray] {
+        const elementByteSize = dtypeByteSize(dtype);
+        const byteSize = size * elementByteSize;
+        const storage = this.alloc(byteSize, elementByteSize);
+        return [storage, storage.getTypedArray(dtype)];
     }
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
     abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;

@@ -28,8 +28,8 @@ test("2D element data", () => {
         ],
         "float32"
     ) as TensorCPU;
-    expect(t.typedStorage).not.toBeNull();
-    expect(t.typedStorage).toEqual(new Float32Array([2, 3, 4, 5, 6, 7]));
+    expect(t.storage).not.toBeNull();
+    expect(t.getTypedArray()).toEqual(new Float32Array([2, 3, 4, 5, 6, 7]));
 });
 
 test("2D transpose", () => {

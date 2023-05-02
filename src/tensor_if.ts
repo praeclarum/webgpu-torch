@@ -2,6 +2,7 @@ import { ATypedArray, Dtype } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
 import { IDevice } from "./device_if";
 import { Deviceish } from "./device";
+import { UntypedStorage } from "./storage";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
 
@@ -18,15 +19,17 @@ export interface ITensor {
 }
 
 export abstract class TensorImpl implements ITensor {
+    abstract get storage(): UntypedStorage;
+    getTypedArray(): ATypedArray { return this.storage.getTypedArray(this.dtype); }
     abstract get dtype(): Dtype;
     abstract get shape(): Shape;
     abstract get device(): IDevice;
-    abstract get(...indices: number[]): number | ITensor;
-    abstract add_(other: ITensor): ITensor;
-    abstract expand(shape: Shape): ITensor;
-    abstract mm(other: ITensor): ITensor;
-    abstract sum(axis: number | null): ITensor;
-    abstract t(): ITensor;
+    abstract get(...indices: number[]): number | TensorImpl;
+    abstract add_(other: ITensor): TensorImpl;
+    abstract expand(shape: Shape): TensorImpl;
+    abstract mm(other: ITensor): TensorImpl;
+    abstract sum(axis: number | null): TensorImpl;
+    abstract t(): TensorImpl;
 }
 
 export type TensorJsonData = {
