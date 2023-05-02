@@ -11,6 +11,7 @@ import { ones } from "./factories";
 import { Dtype } from "./dtype";
 import { IDevice } from "./device_if";
 import { add_, mm, sum, t } from "./ops";
+import { UntypedStorage } from "./storage";
 
 export type FunctionInput = Tensor | number | boolean | string;
 export type GradientFunctionOutput = Tensor | null;
@@ -48,6 +49,9 @@ export class Tensor implements ITensor {
         return this._impl;
     }
 
+    get storage(): UntypedStorage {
+        return this._impl.storage;
+    }
     get dtype(): Dtype {
         return this._impl.dtype;
     }

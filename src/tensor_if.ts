@@ -7,6 +7,7 @@ import { UntypedStorage } from "./storage";
 export type TensorArrayData = Array<number | TensorArrayData>;
 
 export interface ITensor {
+    get storage(): UntypedStorage;
     get dtype(): Dtype;
     get shape(): Shape;
     get device(): IDevice;
