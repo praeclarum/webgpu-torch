@@ -52,12 +52,20 @@ export class ArrayBufferStorage extends UntypedStorage {
 }
 
 export class GPUBufferStorage extends UntypedStorage {
-    private _buffer: ArrayBuffer | null = null;
-    constructor(byteSize: number, alignment: number) {
+    private _buffer: GPUBuffer;
+    constructor(byteSize: number, usage: GPUBufferUsageFlags, device: GPUDevice) {
         super();
+        this._buffer = device.createBuffer({
+            mappedAtCreation: true,
+            size: byteSize,
+            usage: usage,
+        });
     }
     get buffer(): ArrayBuffer | null {
-        return this._buffer;
+        if (this._buffer.mapState === "mapped") {
+            return this._buffer.getMappedRange();
+        }
+        return null;
     }
 }
 

@@ -7,11 +7,13 @@ import { TensorWebGPU } from "./tensor_webgpu";
 import { GPUBufferStorage, UntypedStorage, newTypedArrayFromArray } from "./storage";
 
 export class DeviceWebGPU extends Device {
-    constructor(id: string, adapter: any, device: any) {
+    device: GPUDevice;
+    constructor(id: string, adapter: GPUAdapter, device: GPUDevice) {
         super(id, "webgpu");
+        this.device = device;
     }
-    alloc(byteSize: number, alignment: number): UntypedStorage {
-        return new GPUBufferStorage(byteSize, alignment);
+    alloc(byteSize: number): UntypedStorage {
+        return new GPUBufferStorage(byteSize, GPUBufferUsage.STORAGE, this.device);
     }
     ones(shape: Shape, dtype: Dtype): TensorImpl {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;

@@ -22,16 +22,16 @@ export abstract class Device implements IDevice {
         this._id = id;
         this._type = type;
     }
-    abstract alloc(byteSize: number, alignment: number): UntypedStorage;
+    abstract alloc(byteSize: number): UntypedStorage;
     allocFor(shape: Shape, dtype: Dtype): UntypedStorage {
         const elementByteSize = dtypeByteSize(dtype);
         const byteSize = shapeSize(shape) * elementByteSize;
-        return this.alloc(byteSize, elementByteSize);
+        return this.alloc(byteSize);
     }
     allocTypedArray(size: number, dtype: Dtype): [UntypedStorage, ATypedArray] {
         const elementByteSize = dtypeByteSize(dtype);
         const byteSize = size * elementByteSize;
-        const storage = this.alloc(byteSize, elementByteSize);
+        const storage = this.alloc(byteSize);
         return [storage, storage.getTypedArray(dtype)];
     }
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
