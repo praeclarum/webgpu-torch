@@ -1,4 +1,8 @@
 "use strict";
+/*
+These are tests that do not work in the normal node test environment
+because they require WebGPU.
+*/
 const tests = [];
 function test(description, callback) { tests.push({ description, callback }); }
 const torch = jstorch;
