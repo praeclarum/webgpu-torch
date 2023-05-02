@@ -26,17 +26,29 @@ test("linear forward", () => {
     const b = torch.tensor({data: [[-1000], [1000]], requiresGrad: true});
     const y = torch.LinearFunction.apply(x, w, b);
     expect(y.shape).toEqual([2, 1]);
+    expect(w.requiresGrad).toBe(true);
 });
 
 
 
 /*======== TEST FRAMEWORK ========*/
 
-function Expect(value) { this.value = value; }
-Expect.prototype.toBe = function(expected) { if (!Object.is(this.value, expected)) { throw new Error(`Expected ${this.value} to be ${expected}`); } };
-Expect.prototype.toBeInstanceOf = function(expected) { if (!(this.value instanceof expected)) { throw new Error(`Expected ${this.value} to be instance of ${expected}`); } };
-Expect.prototype.toEqual = function(expected) { if (!eq(this.value, expected)) { throw new Error(`Expected ${this.value} to equal ${expected}`); } };
-function expect(value) { return new Expect(value); }
+class Expect {
+    constructor(value, truth) { this.value = value; this.truth = truth; }
+    toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected ${this.value} to be ${expected}`); } }
+    toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected ${this.value} to be instance of ${expected}`); } }
+    toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected ${this.value} to equal ${expected}`); } }
+    toThrow(expected) {
+        try { this.value(); } catch (e) {
+            if (this.truth(true))
+                return;
+        } if (this.truth(true))
+            throw new Error(`Expected ${this.value} to throw`);
+    }
+    get not() { return new Expect(this.value, t => !this.truth(t)); };
+}
+
+function expect(value) { return new Expect(value, t => t); }
 
 function eq(a, b) {
     if (a === b) return true;
