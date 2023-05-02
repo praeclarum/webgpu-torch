@@ -1,19 +1,17 @@
 import { Device } from "./device";
-import { Dtype } from "./dtype";
+import { Dtype, ArrayType } from "./dtype";
 import { Shape, Strides, defaultStrides, shapeGetAxis, shapeSize } from "./shape";
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 
-type ArrayType = Float32Array | Int32Array | Uint8Array;
-
 export class TensorCPU extends TensorImpl {
-    private _data: ArrayType;
+    private _typedStorage: ArrayType;
     private _dtype: Dtype;
     private _shape: number[];
     private _strides: number[];
     private _device: Device;
 
-    get data(): ArrayType {
-        return this._data;
+    get typedStorage(): ArrayType {
+        return this._typedStorage;
     }
     get dtype(): Dtype {
         return this._dtype;
@@ -34,9 +32,9 @@ export class TensorCPU extends TensorImpl {
             offset += indices[i] * this._strides[i];
         }
         if (this._strides.length === indices.length) {
-            return this._data[offset];
+            return this._typedStorage[offset];
         }
-        const data = this._data.subarray(offset, offset + this._strides[indices.length]);
+        const data = this._typedStorage.subarray(offset, offset + this._strides[indices.length]);
         const shape = this._shape.slice(indices.length);
         const strides = this._strides.slice(indices.length);
         return new TensorCPU(data, shape, strides, this._device);
@@ -44,13 +42,9 @@ export class TensorCPU extends TensorImpl {
 
     constructor(data: ArrayType, shape: Shape, strides: Strides, device: Device) {
         super();
-        this._data = data;
+        this._typedStorage = data;
         this._dtype = "float32";
-        if (data instanceof Int32Array) {
-            this._dtype = "int32";
-        } else if (data instanceof Uint8Array) {
-            this._dtype = "boolean";
-        }
+        
         this._shape = shape;
         this._strides = strides;
         this._device = device;
@@ -59,9 +53,9 @@ export class TensorCPU extends TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
         }
-        const od = other.data as ArrayType;
-        for (let i = 0; i < this._data.length; i++) {
-            this._data[i] += od[i];
+        const od = other.typedStorage as ArrayType;
+        for (let i = 0; i < this._typedStorage.length; i++) {
+            this._typedStorage[i] += od[i];
         }
         return this;
     }
@@ -87,7 +81,7 @@ export class TensorCPU extends TensorImpl {
                 newShape[j] = this._shape[i];
             }
         }
-        return new TensorCPU(this._data, newShape, newStrides, this._device);
+        return new TensorCPU(this._typedStorage, newShape, newStrides, this._device);
     }
     mm(other: ITensor): ITensor {
         // Matrix multiply
@@ -108,8 +102,8 @@ export class TensorCPU extends TensorImpl {
     sum(axis: number | null): ITensor {
         if (axis === null) {
             let sum = 0;
-            for (let i = 0; i < this._data.length; i++) {
-                sum += this._data[i];
+            for (let i = 0; i < this._typedStorage.length; i++) {
+                sum += this._typedStorage[i];
             }
             return new TensorCPU(new Float32Array([sum]), [], [], this._device);
         }
@@ -123,7 +117,7 @@ export class TensorCPU extends TensorImpl {
             for (let i = 0; i < newData.length; i++) {
                 let sum = 0;
                 for (let j = 0; j < axisStride; j++) {
-                    sum += this._data[i * newStrides[0] + j];
+                    sum += this._typedStorage[i * newStrides[0] + j];
                 }
                 newData[i] = sum;
             }
@@ -135,6 +129,6 @@ export class TensorCPU extends TensorImpl {
         newShape.reverse();
         let newStrides = this._strides.slice();
         newStrides.reverse();
-        return new TensorCPU(this._data, newShape, newStrides, this._device);
+        return new TensorCPU(this._typedStorage, newShape, newStrides, this._device);
     }
 }

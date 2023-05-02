@@ -1,5 +1,5 @@
 import { Device  } from "./device";
-import { Dtype } from "./dtype";
+import { Dtype, newArrayForDtype } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
 import { TensorArrayData, TensorImpl } from "./tensor_if";
 import { TensorCPU } from "./tensor_cpu";
@@ -9,7 +9,7 @@ export class DeviceCPU extends Device {
         super("cpu", "cpu");
     }
     ones(shape: Shape, dtype: Dtype): TensorImpl {
-        const data = arrayForDtype(shapeSize(shape), dtype);
+        const data = newArrayForDtype(shapeSize(shape), dtype);
         data.fill(1);
         return new TensorCPU(data, shape, defaultStrides(shape), this);
     }
@@ -56,21 +56,8 @@ export class DeviceCPU extends Device {
         return new TensorCPU(flatData, shape, strides, this);
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {
-        const data = arrayForDtype(shapeSize(shape), dtype);
+        const data = newArrayForDtype(shapeSize(shape), dtype);
         return new TensorCPU(data, shape, defaultStrides(shape), this);
-    }
-}
-
-function arrayForDtype(length: number, dtype: Dtype) {
-    switch (dtype) {
-        case "float32":
-            return new Float32Array(length);
-        case "int32":
-            return new Int32Array(length);
-        case "boolean":
-            return new Uint8Array(length);
-        default:
-            throw new Error(`Unsupported dtype: ${dtype}`);
     }
 }
 
