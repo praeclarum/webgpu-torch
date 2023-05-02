@@ -1,7 +1,7 @@
 import { Device } from "./device";
 import { DeviceWebGPU } from "./device_webgpu";
-import { Dtype } from "./dtype";
-import { Shape, Strides } from "./shape";
+import { Dtype, dtypeByteSize } from "./dtype";
+import { Shape, Strides, defaultStrides } from "./shape";
 import { GPUBufferStorage } from "./storage";
 import { TensorImpl } from "./tensor_if";
 
@@ -65,9 +65,14 @@ export class TensorWebGPU extends TensorImpl {
     mm(other: TensorWebGPU): TensorWebGPU {
         const resultRows = this.shape[0];
         const resultCols = other.shape[1];
-        const result = this._device.zeros([resultRows, resultCols], this.dtype);
-        const resultMatrixBufferSize = result.storage.byteSize;
+        const elementByteSize = dtypeByteSize(this.dtype);
+        const resultBufferSize = resultRows * resultCols * elementByteSize;
         const device = this._device.device;
+        const resultBuffer = device.createBuffer({
+            mappedAtCreation: false,
+            size: resultBufferSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+        });
         const bindGroupLayout = device.createBindGroupLayout({
             entries: [
                 {
@@ -93,6 +98,8 @@ export class TensorWebGPU extends TensorImpl {
                 },
             ],
         });
+        this.gpuBuffer.unmap();
+        other.gpuBuffer.unmap();
         const bindGroup = device.createBindGroup({
             layout: bindGroupLayout,
             entries: [
@@ -111,7 +118,7 @@ export class TensorWebGPU extends TensorImpl {
                 {
                     binding: 2,
                     resource: {
-                        buffer: result.gpuBuffer,
+                        buffer: resultBuffer,
                     },
                 },
             ],
@@ -172,18 +179,19 @@ export class TensorWebGPU extends TensorImpl {
         passEncoder.end();
 
         // Get a GPU buffer for reading in an unmapped state.
-        const gpuReadBuffer = device.createBuffer({
-            size: resultMatrixBufferSize,
+        const readBuffer = device.createBuffer({
+            mappedAtCreation: false,
+            size: resultBufferSize,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
         });
         
         // Encode commands for copying buffer to buffer.
         commandEncoder.copyBufferToBuffer(
-            result.gpuBuffer /* source buffer */,
+            resultBuffer /* source buffer */,
             0 /* source offset */,
-            gpuReadBuffer /* destination buffer */,
+            readBuffer /* destination buffer */,
             0 /* destination offset */,
-            resultMatrixBufferSize /* size */
+            resultBufferSize /* size */
         );
         
         // Submit GPU commands.
@@ -191,12 +199,12 @@ export class TensorWebGPU extends TensorImpl {
         device.queue.submit([gpuCommands]);
 
         // Read buffer.
-        const readStorage = new GPUBufferStorage(gpuReadBuffer);
+        const readStorage = new GPUBufferStorage(readBuffer);
         const readTensor = new TensorWebGPU(
             readStorage,
             this.dtype,
-            result.shape,
-            result.strides,
+            [resultRows, resultCols],
+            defaultStrides([resultRows, resultCols]),
             this._device);
         return readTensor;
     }
