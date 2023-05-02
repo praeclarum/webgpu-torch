@@ -103,12 +103,7 @@ export function newTypedArrayFromArray(
     const storage = allocFor(shape);
     const flatData = storage.getTypedArray(dtype);
     let flatIndex = 0;
-    function flatten(data: TensorArrayData | number) {
-        if (typeof data === "number") {
-            flatData[flatIndex] = data;
-            flatIndex++;
-            return;
-        }
+    function flatten(data: TensorArrayData) {
         for (let i = 0; i < data.length; i++) {
             let d = data[i];
             if (typeof d === "number") {
@@ -118,7 +113,12 @@ export function newTypedArrayFromArray(
                 }
                 return;
             }
-            flatten(data[i]);
+            if (d instanceof Array) {
+                flatten(d);
+            }
+            else {
+                throw new Error(`Invalid data type: ${d} (${(d as any).constructor.name})`);
+            }
         }
     }
     if (data !== null) {

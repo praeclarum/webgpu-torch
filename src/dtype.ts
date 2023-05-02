@@ -11,12 +11,12 @@ export const dtypeArrayCtors = {
 
 export function dtypeByteSize(dtype: Dtype): number {
     switch (dtype) {
-        case "float32":
-            return 4;
-        case "int32":
-            return 4;
         case "uint8":
             return 1;
+        case "int32":
+            return 4;
+        case "float32":
+            return 4;
         default:
             throw new Error(`Invalid dtype ${dtype}`);
     }
