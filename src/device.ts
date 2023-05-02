@@ -22,6 +22,6 @@ export abstract class Device implements IDevice {
         this._type = type;
     }
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
-    abstract tensor(data: TensorArrayData, dtype: Dtype): TensorImpl;
+    abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;
     abstract zeros(shape: Shape, dtype: Dtype): TensorImpl;
 }

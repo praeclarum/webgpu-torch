@@ -13,7 +13,7 @@ export class DeviceCPU extends Device {
         data.fill(1);
         return new TensorCPU(data, shape, defaultStrides(shape), this);
     }
-    tensor(data: TensorArrayData, dtype: Dtype): TensorImpl {
+    tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
         const shape: number[] = [];
         function getShape(data: TensorArrayData | number) {
             if (typeof data === "number") {
@@ -22,9 +22,11 @@ export class DeviceCPU extends Device {
             shape.push(data.length);
             getShape(data[0]);
         }
-        getShape(data);
+        if (data !== null) {
+            getShape(data);
+        }
         const strides = defaultStrides(shape);
-        const size = shape.reduce((a, b) => a * b);
+        const size = shapeSize(shape);
         if (dtype !== "float32") {
             throw new Error("Only float32 is supported");
         }
@@ -48,7 +50,9 @@ export class DeviceCPU extends Device {
                 flatten(data[i]);
             }
         }
-        flatten(data);
+        if (data !== null) {
+            flatten(data);
+        }
         return new TensorCPU(flatData, shape, strides, this);
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {

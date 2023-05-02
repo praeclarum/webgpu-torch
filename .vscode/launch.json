@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome",
+            "url": "http://localhost:8080/web",
+            "webRoot": "${workspaceFolder}",
+            "port": 9223,
+            "runtimeExecutable": "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
+            "runtimeArgs": [
+                "--new-window",
+                "--remote-debugging-port=9223"
+            ],
+            "preLaunchTask": "npm: build"
+        }
+    ]
+}

@@ -1,5 +1,8 @@
-import { SumFunction, SumAxisFunction } from './autograd';
-import { Tensor } from './tensor';
+import { SumFunction, SumAxisFunction } from "./autograd";
+import { Device, DeviceType, Deviceish } from "./device";
+import { Dtype } from "./dtype";
+import { Tensor } from "./tensor";
+import { TensorArrayData, TensorImpl } from "./tensor_if";
 
 function shouldCreateGradient(...inputs: Tensor[]): boolean {
     for (const input of inputs) {
@@ -12,11 +15,15 @@ function shouldCreateGradient(...inputs: Tensor[]): boolean {
 
 export function add_(a: Tensor, b: Tensor): Tensor {
     if (a.shape.length !== b.shape.length) {
-        throw new Error(`Shape dimensions must match. Got ${a.shape} and ${b.shape}`);
+        throw new Error(
+            `Shape dimensions must match. Got ${a.shape} and ${b.shape}`
+        );
     }
     for (let i = 0; i < a.shape.length; i++) {
         if (a.shape[i] !== b.shape[i]) {
-            throw new Error(`Shapes must match at index ${i}. Got ${a.shape} and ${b.shape}`);
+            throw new Error(
+                `Shapes must match at index ${i}. Got ${a.shape} and ${b.shape}`
+            );
         }
     }
     return new Tensor(a.impl.add_(b.impl));
@@ -25,13 +32,16 @@ export function add_(a: Tensor, b: Tensor): Tensor {
 export function mm(a: Tensor, b: Tensor): Tensor {
     if (shouldCreateGradient(a, b)) {
         throw new Error("mm gradient not supported yet");
-    }
-    else {
+    } else {
         if (a.shape.length !== 2 || b.shape.length !== 2) {
-            throw new Error(`Expected 2D tensors, got ${a.shape} and ${b.shape}`);
+            throw new Error(
+                `Expected 2D tensors, got ${a.shape} and ${b.shape}`
+            );
         }
         if (a.shape[1] !== b.shape[0]) {
-            throw new Error(`Expected tensors inner dimensions to be compatible, got ${a.shape} and ${b.shape}`);
+            throw new Error(
+                `Expected tensors inner dimensions to be compatible, got ${a.shape} and ${b.shape}`
+            );
         }
         return new Tensor(a.impl.mm(b.impl));
     }
@@ -43,8 +53,7 @@ export function sum(input: Tensor, axis: number | null = 0): Tensor {
             return SumFunction.apply(input);
         }
         return SumAxisFunction.apply(input, axis);
-    }
-    else {
+    } else {
         return new Tensor(input.impl.sum(axis));
     }
 }
@@ -56,8 +65,16 @@ export function t(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
         throw new Error("t gradient not supported yet");
         // return TransposeFunction.apply(input, 0, 1);
-    }
-    else {
+    } else {
         return new Tensor(input.impl.t());
     }
+}
+
+export function tensor(
+    data: TensorArrayData | TensorImpl,
+    dtype: Dtype = "float32",
+    requiresGrad: boolean = false,
+    device: Deviceish | null = null
+) {
+    return new Tensor(data, dtype, requiresGrad, device);
 }

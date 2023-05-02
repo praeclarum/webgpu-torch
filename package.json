@@ -4,8 +4,9 @@
   "description": "Tensor computation with WebGPU acceleration",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "jest"
+    "build": "webpack --mode production",
+    "test": "jest",
+    "start": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,10 @@
     "jest-environment-jsdom": "^29.5.0",
     "prettier": "2.8.8",
     "ts-jest": "^29.1.0",
-    "typescript": "^5.0.4"
+    "ts-loader": "^9.4.2",
+    "typescript": "^5.0.4",
+    "webpack": "^5.81.0",
+    "webpack-cli": "^5.0.2",
+    "webpack-dev-server": "^4.13.3"
   }
 }

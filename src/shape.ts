@@ -11,7 +11,15 @@ export function getShape(shapeish: Shapeish): Shape {
 }
 
 export function shapeSize(shape: Shape): number {
-    return shape.reduce((a, b) => a * b);
+    if (shape.length === 0) {
+        return 1;
+    }
+    else if (shape.length === 1) {
+        return shape[0];
+    }
+    else {
+        return shape.reduce((a, b) => a * b);
+    }
 }
 
 export function defaultStrides(shape: Shape): Strides {

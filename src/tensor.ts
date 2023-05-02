@@ -1,5 +1,5 @@
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
-import { Device, DeviceType } from "./device";
+import { Device, DeviceType, Deviceish } from "./device";
 import { getDevice } from "./devices";
 import { Shape } from "./shape";
 import { ones } from "./factories";
@@ -71,10 +71,10 @@ export class Tensor implements ITensor {
     }
 
     constructor(
-        data: TensorArrayData | TensorImpl,
+        data: TensorArrayData | TensorImpl | null = null,
         dtype: Dtype = "float32",
         requiresGrad: boolean = false,
-        device: string | Device | DeviceType | null = null
+        device: Deviceish | null = null
     ) {
         if (data instanceof TensorImpl) {
             this._impl = data;
