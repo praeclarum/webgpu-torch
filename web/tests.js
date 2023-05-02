@@ -8,6 +8,11 @@ test("webgpu is supported", () => {
     expect(torch.hasWebGPU()).toBe(true);
 });
 
+test("tensor is webgpu", () => {
+    const x = torch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
+    expect(x.device.type).toBe("webgpu");
+});
+
 test("linear forward", () => {
     const x = torch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
     console.log(x);
@@ -23,7 +28,9 @@ test("linear forward", () => {
 /*======== TEST FRAMEWORK ========*/
 
 function Expect(value) { this.value = value; }
-Expect.prototype.toBe = function(expected) { if (!eq(this.value, expected)) { throw new Error(`Expected ${this.value} to be ${expected}`); } };
+Expect.prototype.toBe = function(expected) { if (!Object.is(this.value, expected)) { throw new Error(`Expected ${this.value} to be ${expected}`); } };
+Expect.prototype.toBeInstanceOf = function(expected) { if (!(this.value instanceof expected)) { throw new Error(`Expected ${this.value} to be instance of ${expected}`); } };
+Expect.prototype.toEqual = function(expected) { if (!eq(this.value, expected)) { throw new Error(`Expected ${this.value} to equal ${expected}`); } };
 function expect(value) { return new Expect(value); }
 
 function eq(a, b) {
@@ -72,7 +79,7 @@ async function runTestsAsync($testDiv) {
         $testRow.appendChild($testDescriptionCell);
         const $testErrorCell = document.createElement('td');
         if (error) {
-            $testErrorCell.innerText = error;
+            $testErrorCell.innerText = error.message;
         }
         $testRow.appendChild($testErrorCell);
     }

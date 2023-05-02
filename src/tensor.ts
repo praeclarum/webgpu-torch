@@ -1,4 +1,9 @@
-import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
+import {
+    ITensor,
+    TensorArrayData,
+    TensorImpl,
+    TensorJsonData,
+} from "./tensor_if";
 import { Device, DeviceType, Deviceish } from "./device";
 import { getDevice } from "./devices";
 import { Shape } from "./shape";
@@ -62,7 +67,9 @@ export class Tensor implements ITensor {
     }
     set requiresGrad(value: boolean) {
         if (this._gradFunc) {
-            throw new Error("You can only change requiresGrad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use valueNoGrad = value.detach().");
+            throw new Error(
+                "You can only change requiresGrad flags of leaf variables. If you want to use a computed variable in a subgraph that doesn't require differentiation use valueNoGrad = value.detach()."
+            );
         }
         this._requiresGrad = value;
     }
@@ -74,15 +81,30 @@ export class Tensor implements ITensor {
     }
 
     constructor(
-        data: TensorArrayData | TensorImpl | null = null,
+        data: TensorArrayData | TensorJsonData | TensorImpl | null = null,
         dtype: Dtype = "float32",
-        requiresGrad: boolean = false,
-        device: Deviceish | null = null
+        device: Deviceish | null = null,
+        requiresGrad: boolean = false
     ) {
         if (data instanceof TensorImpl) {
             this._impl = data;
-        } else {
+        } else if (data === null) {
             this._impl = getDevice(device).tensor(data, dtype);
+        } else if (data instanceof Array) {
+            this._impl = getDevice(device).tensor(data, dtype);
+        } else if (data.hasOwnProperty("data")) {
+            const jdata = data as TensorJsonData;
+            if (jdata.data instanceof TensorImpl) {
+                this._impl = jdata.data;
+            } else {
+                dtype = dtype || jdata.dtype;
+                device = device || jdata.device || null;
+                requiresGrad = requiresGrad || jdata.requiresGrad || false;
+                this._impl = getDevice(device).tensor(jdata.data, dtype);
+            }
+        }
+        else {
+            throw new Error("Invalid data type for Tensor constructor. Expected an array of values or a json object with a 'data' property.");
         }
         this._requiresGrad = requiresGrad;
         this._gradFunc = null;
@@ -91,7 +113,7 @@ export class Tensor implements ITensor {
     }
 
     get [Symbol.toStringTag]() {
-        return 'Tensor';
+        return "Tensor";
     }
     toString(options?: {}): string {
         let rg = this.requiresGrad ? ", requiresGrad=true" : "";
@@ -103,7 +125,7 @@ export class Tensor implements ITensor {
 
     detach(): Tensor {
         if (this._requiresGrad || this._gradFunc) {
-            return new Tensor(this._impl, this.dtype, false);
+            return new Tensor({data:this._impl, dtype:this.dtype, requiresGrad:false});
         }
         return this;
     }

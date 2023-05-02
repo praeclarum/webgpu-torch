@@ -1,4 +1,4 @@
-import { Device, DeviceType } from "./device";
+import { Device, DeviceType, Deviceish } from "./device";
 import { DeviceCPU } from "./device_cpu";
 
 const cpuDevice = new DeviceCPU();
@@ -6,8 +6,6 @@ const cpuDevice = new DeviceCPU();
 const devices: { [id: string]: Device } = {
     cpu: cpuDevice,
 };
-
-export type Deviceish = string | Device;
 
 export function getDevice(device: Deviceish | null): Device {
     if (device === null) {

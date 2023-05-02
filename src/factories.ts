@@ -1,5 +1,6 @@
 import { Shapeish, getShape } from "./shape";
-import { Deviceish, getDevice } from "./devices";
+import { Deviceish } from "./device";
+import { getDevice } from "./devices";
 import { Dtypeish, getDtype } from "./dtype";
 import { Tensor } from "./tensor";
 

@@ -1,6 +1,7 @@
 import { Dtype } from "./dtype";
 import { Shape } from "./shape";
 import { IDevice } from "./device_if";
+import { Deviceish } from "./device";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
 
@@ -27,3 +28,10 @@ export abstract class TensorImpl implements ITensor {
     abstract sum(axis: number | null): ITensor;
     abstract t(): ITensor;
 }
+
+export type TensorJsonData = {
+    data: TensorArrayData | TensorImpl;
+    dtype: Dtype;
+    requiresGrad?: boolean;
+    device?: Deviceish;
+};

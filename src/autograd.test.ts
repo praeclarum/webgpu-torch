@@ -13,9 +13,9 @@ test("auto function backward fails", () => {
 });
 
 test("linear backwards", () => {
-    const input = new Tensor([[3]], "float32", true);
-    const weight = new Tensor([[10], [11]], "float32", true);
-    const bias = new Tensor([[1000, 10000]], "float32", true);
+    const input = new Tensor([[3]], "float32", null, true);
+    const weight = new Tensor([[10], [11]], "float32", null, true);
+    const bias = new Tensor([[1000, 10000]], "float32", null, true);
     const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
     expect(output.shape).toEqual([1, 2]);

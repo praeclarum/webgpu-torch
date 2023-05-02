@@ -14,16 +14,6 @@
     <script src="tests.js"></script>
     <script>
         
-        const x = jstorch.tensor([[1, 2, 3], [4, 5, 6]], "float32");
-        console.log(x);
-        console.log(x.shape);
-        console.log(x.toString());
-        const w = jstorch.tensor([[100, 200, 300]], "float32", true);
-        const b = jstorch.tensor([[-1000], [1000]], "float32", true);
-        console.log(`${w}`, w);
-        console.log(`${b}`, b);
-        const y = jstorch.LinearFunction.apply(x, w, b);
-        console.log(`${y}`, y);
         async function run() {
             await runTestsAsync(document.getElementById("tests"));
         }

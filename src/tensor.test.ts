@@ -1,5 +1,5 @@
 import { UntypedStorage } from "./storage";
-import { Tensor } from "./index";
+import { Tensor, tensor } from "./index";
 import { LinearFunction } from "./autograd";
 import { TensorCPU } from "./tensor_cpu";
 
@@ -30,4 +30,10 @@ test("complete sum over 2D tensor", () => {
     const sum = input.sum();
     expect(sum).toBeInstanceOf(Tensor);
     expect(sum.shape).toEqual([]);
+});
+
+test("tensor from json", () => {
+    const x = tensor({data: [[1, 2, 3], [4, 5, 6]], dtype:"float32"});
+    expect(x.shape).toEqual([2, 3]);
+    expect(x.dtype).toEqual("float32");
 });
