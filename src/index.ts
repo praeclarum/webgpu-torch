@@ -11,3 +11,4 @@ export function hasWebGPU() {
 export * from "./shape";
 export * from "./tensor";
 export * from "./factories";
+export * from "./ops";

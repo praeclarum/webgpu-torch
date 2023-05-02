@@ -71,3 +71,41 @@ export class LinearFunction extends AutoFunction {
         return [gradInput, gradWeight, gradBias];
     }
 }
+
+export class SumAxisFunction extends AutoFunction {
+    static forward(...inputs: FunctionInput[]): Tensor {
+        throw new Error("Method not implemented.");
+    }
+    static setupContext(
+        ctx: GradientFunctionContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ) {
+        throw new Error("Method not implemented.");
+    }
+    static backward(
+        ctx: GradientFunctionContext,
+        gradOutput: Tensor
+    ): GradientFunctionOutput[] {
+        throw new Error("Method not implemented.");
+    }
+}
+
+export class SumFunction extends AutoFunction {
+    static forward(...inputs: FunctionInput[]): Tensor {
+        throw new Error("Method not implemented.");
+    }
+    static setupContext(
+        ctx: GradientFunctionContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ) {
+        throw new Error("Method not implemented.");
+    }
+    static backward(
+        ctx: GradientFunctionContext,
+        gradOutput: Tensor
+    ): GradientFunctionOutput[] {
+        throw new Error("Method not implemented.");
+    }
+}

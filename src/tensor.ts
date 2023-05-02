@@ -1,10 +1,11 @@
 import { ITensor, TensorArrayData, TensorImpl } from "./tensor_if";
 import { Device, DeviceType } from "./device";
 import { getDevice } from "./devices";
-import { Shape, Strides } from "./shape";
+import { Shape } from "./shape";
 import { ones } from "./factories";
 import { Dtype } from "./dtype";
 import { IDevice } from "./device_if";
+import { add_, mm, sum, t } from "./ops";
 
 export type FunctionInput = Tensor | number | boolean | string;
 export type GradientFunctionOutput = Tensor | null;
@@ -37,6 +38,10 @@ export class Tensor implements ITensor {
     private _gradFunc: GradientFunction | null;
     private _gradCtx: GradientFunctionContext | null;
     private _grad: Tensor | null = null;
+
+    get impl(): TensorImpl {
+        return this._impl;
+    }
 
     get dtype(): Dtype {
         return this._impl.dtype;
@@ -127,23 +132,16 @@ export class Tensor implements ITensor {
         }
     }
 
-    add_(tensor: Tensor): Tensor {
-        this._impl.add_(tensor._impl);
-        return this;
+    add_(other: Tensor): Tensor {
+        return add_(this, other);
     }
     mm(other: Tensor): Tensor {
-        if (this.shape.length !== 2 || other.shape.length !== 2) {
-            throw new Error(`Expected 2D tensors, got ${this.shape} and ${other.shape}`);
-        }
-        if (this.shape[1] !== other.shape[0]) {
-            throw new Error(`Expected tensors inner dimensions to be compatible, got ${this.shape} and ${other.shape}`);
-        }
-        return new Tensor(this._impl.mm(other._impl));
+        return mm(this, other);
     }
     sum(axis: number | null = null): Tensor {
-        return new Tensor(this._impl.sum(axis));
+        return sum(this, axis);
     }
     t(): Tensor {
-        return new Tensor(this._impl.t());
+        return t(this);
     }
 }
