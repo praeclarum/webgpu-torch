@@ -17,8 +17,9 @@ export class DeviceWebGPU extends Device {
     }
     ones(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
-        const strides = defaultStrides(shape);
-        return new TensorWebGPU(storage, dtype, shape, strides, this);
+        const array = storage.getTypedArray(dtype);
+        array.fill(1);
+        return new TensorWebGPU(storage, dtype, shape, defaultStrides(shape), this);
     }
     tensor(data: TensorArrayData | null, dtype: Dtype): TensorWebGPU {
         const info = newTypedArrayFromArray(data, dtype, shape => this.allocFor(shape, dtype));
@@ -26,8 +27,6 @@ export class DeviceWebGPU extends Device {
     }
     zeros(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
-        const array = storage.getTypedArray(dtype);
-        array.fill(0);
         return new TensorWebGPU(storage, dtype, shape, defaultStrides(shape), this);
     }
 }

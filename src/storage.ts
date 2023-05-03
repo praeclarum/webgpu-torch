@@ -6,7 +6,7 @@ export abstract class UntypedStorage {
     abstract get byteSize(): number;
     abstract get buffer(): ArrayBuffer | null;
     abstract get isMapped(): boolean;
-    abstract mapReadAsync(offset?: number, size?: number): Promise<boolean>;
+    abstract mapReadAsync(): Promise<boolean>;
     abstract unmap(): void;
     abstract destroy(): void;
     tryGetTypedArray(dtype: Dtype): ATypedArray | null {
@@ -60,7 +60,7 @@ export class ArrayBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return true;
     }
-    async mapReadAsync(offset?: number, size?: number): Promise<boolean> {
+    async mapReadAsync(): Promise<boolean> {
         return true;
     }
     unmap(): void {
@@ -73,6 +73,7 @@ export class ArrayBufferStorage extends UntypedStorage {
 
 export class GPUBufferStorage extends UntypedStorage {
     private _buffer: GPUBuffer;
+    private _mappedArrayBuffer: ArrayBuffer | null = null;
     get byteSize(): number {
         return this._buffer.size;
     }
@@ -80,8 +81,12 @@ export class GPUBufferStorage extends UntypedStorage {
         return this._buffer;
     }
     get buffer(): ArrayBuffer | null {
+        if (this._mappedArrayBuffer !== null) {
+            return this._mappedArrayBuffer;
+        }
         if (this._buffer.mapState === "mapped") {
-            return this._buffer.getMappedRange();
+            this._mappedArrayBuffer = this._buffer.getMappedRange();
+            return this._mappedArrayBuffer;
         }
         return null;
     }
@@ -106,17 +111,19 @@ export class GPUBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return this._buffer.mapState === "mapped";
     }
-    async mapReadAsync(offset?: number, size?: number): Promise<boolean> {
+    async mapReadAsync(): Promise<boolean> {
         if (this.isMapped) {
             return true;
         }
-        await this._buffer.mapAsync(GPUMapMode.READ, offset, size);
+        await this._buffer.mapAsync(GPUMapMode.READ);
         return this.isMapped;
     }
     unmap(): void {
+        this._mappedArrayBuffer = null;
         this._buffer.unmap();
     }
     destroy(): void {
+        this._mappedArrayBuffer = null;
         this._buffer.destroy();
     }
 }
