@@ -12,31 +12,7 @@ import { Dtype } from "./dtype";
 import { IDevice } from "./device_if";
 import { add_, mm, sum, t } from "./ops";
 import { UntypedStorage } from "./storage";
-
-export type FunctionInput = Tensor | number | boolean | string;
-export type GradientFunctionOutput = Tensor | null;
-
-export class GradientFunctionContext {
-    needsInputGradient: boolean[];
-    inputsWithGradient: (Tensor | null)[];
-    savedTensors: Tensor[] = [];
-    constructor(inputs: FunctionInput[]) {
-        this.needsInputGradient = inputs.map(
-            (input) => input instanceof Tensor && input.requiresGrad
-        );
-        this.inputsWithGradient = inputs.map((input) =>
-            input instanceof Tensor && input.requiresGrad ? input : null
-        );
-    }
-    saveForBackward(...tensors: Tensor[]) {
-        this.savedTensors = tensors;
-    }
-}
-
-export type GradientFunction = (
-    ctx: GradientFunctionContext,
-    output: Tensor
-) => (Tensor | null)[];
+import { GradientFunction, GradientFunctionContext } from "./autograd";
 
 export class Tensor implements ITensor {
     private _impl: TensorImpl;
@@ -207,8 +183,8 @@ export class Tensor implements ITensor {
         }
     }
 
-    add_(other: Tensor): Tensor {
-        return add_(this, other);
+    add_(other: Tensor, alpha?: number): Tensor {
+        return add_(this, other, alpha);
     }
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
     Passing -1 as the size for a dimension means not changing the size of that dimension.

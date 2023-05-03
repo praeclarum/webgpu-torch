@@ -13,20 +13,20 @@ function shouldCreateGradient(...inputs: Tensor[]): boolean {
     return false;
 }
 
-export function add_(a: Tensor, b: Tensor): Tensor {
-    if (a.shape.length !== b.shape.length) {
+export function add_(input: Tensor, other: Tensor, alpha?: number): Tensor {
+    if (input.shape.length !== other.shape.length) {
         throw new Error(
-            `Shape dimensions must match. Got ${a.shape} and ${b.shape}`
+            `Shape dimensions must match. Got ${input.shape} and ${other.shape}`
         );
     }
-    for (let i = 0; i < a.shape.length; i++) {
-        if (a.shape[i] !== b.shape[i]) {
+    for (let i = 0; i < input.shape.length; i++) {
+        if (input.shape[i] !== other.shape[i]) {
             throw new Error(
-                `Shapes must match at index ${i}. Got ${a.shape} and ${b.shape}`
+                `Shapes must match at index ${i}. Got ${input.shape} and ${other.shape}`
             );
         }
     }
-    return new Tensor(a.impl.add_(b.impl));
+    return new Tensor(input.impl.add_(other.impl, alpha));
 }
 
 export function mm(a: Tensor, b: Tensor): Tensor {

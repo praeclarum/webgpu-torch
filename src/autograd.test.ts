@@ -1,5 +1,5 @@
-import { Tensor, GradientFunctionContext } from "./tensor";
-import { AutoFunction, LinearFunction } from "./autograd";
+import { Tensor } from "./tensor";
+import { AutoFunction, LinearFunction, GradientFunctionContext } from "./autograd";
 import { zeros } from "./index";
 
 test("auto function forward fails", () => {

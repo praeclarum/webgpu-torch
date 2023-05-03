@@ -52,14 +52,21 @@ export class TensorCPU extends TensorImpl {
         return new TensorCPU(this._storage, shape, strides, this._device);
     }
 
-    add_(other: TensorImpl): TensorImpl {
+    add_(other: TensorImpl, alpha?: number): TensorImpl {
         if (!(other instanceof TensorCPU)) {
             throw new Error("Only CPU tensors can be added to CPU tensors");
         }
         const d = this.getTypedArray();
         const od = other.getTypedArray();
-        for (let i = 0; i < d.length; i++) {
-            d[i] += od[i];
+        if (alpha === undefined) {
+            for (let i = 0; i < d.length; i++) {
+                d[i] += od[i];
+            }
+        }
+        else {
+            for (let i = 0; i < d.length; i++) {
+                d[i] += alpha * od[i];
+            }
         }
         return this;
     }

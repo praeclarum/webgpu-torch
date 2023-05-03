@@ -33,6 +33,13 @@ test("tensor init", async () => {
     expect(await x.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
 });
 
+test("add_ vectors", async () => {
+    const a = tensor([1, 2, 3]);
+    const b = tensor([100, 200, 300]);
+    a.add_(b);
+    expect(await a.toArrayAsync()).toEqual([101, 202, 303]);
+});
+
 test("matrix multiply", async () => {
     const a = tensor([[1, 2, 3], [4, 5, 6]]);
     const b = tensor([[7, 8], [9, 10], [11, 12]]);
