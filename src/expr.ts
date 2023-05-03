@@ -1,4 +1,8 @@
-export type Expr = number | string;
+export type ExprCode = number | string;
+
+export type ExprNode = string | number | [string, ExprNode[]];
+
+export type ParsedExpr = ExprNode;
 
 export type EvalEnv = { [name: string]: any };
 
@@ -55,9 +59,7 @@ function lexn(code: string): (string | number)[] {
     return tokens;
 }
 
-type ExprNode = string | number | [string, ExprNode[]];
-
-function parsen(code: string): ExprNode {
+export function parseExpr(code: string): ExprNode {
     const tokens = lexn(code);
     const expr = parseExpr(0);
     if (expr === null) {
@@ -149,6 +151,48 @@ function parsen(code: string): ExprNode {
     }
 }
 
+export function substituteIdentifiers(ast: ExprNode, subs: { [name: string]: ExprNode }): ExprNode {
+    if (typeof ast === "number") {
+        return ast;
+    }
+    if (typeof ast === "string") {
+        if (ast in subs) {
+            return subs[ast];
+        }
+        return ast;
+    }
+    const newChildren: ExprNode[] = [];
+    for (const child of ast[1]) {
+        newChildren.push(substituteIdentifiers(child, subs));
+    }
+    return [ast[0], newChildren];
+}
+
+export function exprNodeToString(ast: ExprNode): string {
+    if (typeof ast === "number") {
+        return ast.toString();
+    }
+    if (typeof ast === "string") {
+        return ast;
+    }
+    if (ast[0] === "+") {
+        return `(${exprNodeToString(ast[1][0])} + ${exprNodeToString(ast[1][1])})`;
+    }
+    if (ast[0] === "-") {
+        return `(${exprNodeToString(ast[1][0])} - ${exprNodeToString(ast[1][1])})`;
+    }
+    if (ast[0] === "*") {
+        return `(${exprNodeToString(ast[1][0])} * ${exprNodeToString(ast[1][1])})`;
+    }
+    if (ast[0] === "/") {
+        return `(${exprNodeToString(ast[1][0])} / ${exprNodeToString(ast[1][1])})`;
+    }
+    throw new Error("Unknown AST node type");
+}
+
+
+/*== COMPILER ==*/
+
 const OP_CONSTANT = 0;
 const OP_READ = 1;
 const OP_ADD = 2;
@@ -158,11 +202,11 @@ const OP_DIVIDE = 5;
 
 export type CompiledExpr = (env: { [name: string]: any }) => number;
 
-export function compileExpr(code: Expr): CompiledExpr {
+export function compileCode(code: ExprCode): CompiledExpr {
     if (typeof code === "number") {
         return () => code;
     }
-    const expr = parsen(code);
+    const expr = parseExpr(code);
     // console.log("parsed", expr);
     const instructions: [number, (number|string|null)][] = [];
     function emit(node: ExprNode) {
@@ -236,10 +280,10 @@ export function compileExpr(code: Expr): CompiledExpr {
     };
 }
 
-export function evalExpr(input: Expr, env: { [name: string]: any }): number {
+export function evalCode(input: ExprCode, env: { [name: string]: any }): number {
     if (typeof input === "number") {
         return input;
     }
-    const c = compileExpr(input);
+    const c = compileCode(input);
     return c(env);
 }

@@ -58,4 +58,12 @@ export const registry: OpSpec[] = [
         webGPU: "atan2(input, other)",
         javaScript: "Math.atan2(input, other)",
     },
+    {
+        name: "sub",
+        aliases: ["subtract"],
+        type: "binary",
+        alpha: true,
+        webGPU: "input - other",
+        javaScript: "input - other",
+    },
 ];

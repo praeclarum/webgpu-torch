@@ -1,4 +1,4 @@
-import { Expr, evalExpr, compileExpr, CompiledExpr, EvalEnv } from "./expr";
+import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParam = number;
@@ -15,9 +15,9 @@ export type ShaderType =
 export interface KernelSpec {
     name: string;
     config: KernelConfigSpec[];
-    workgroupSize: [Expr, Expr, Expr];
+    workgroupSize: [ExprCode, ExprCode, ExprCode];
     parameters: KernelParamSpec[];
-    workgroupCount: [Expr, Expr, Expr];
+    workgroupCount: [ExprCode, ExprCode, ExprCode];
     inputs: KernelInputSpec[];
     outputs: KernelOutputSpec[];
     shader: string;
@@ -31,7 +31,7 @@ export interface KernelInputSpec {
 export interface KernelOutputSpec {
     name: string;
     shaderType: ShaderType;
-    size: Expr;
+    size: ExprCode;
 }
 
 export interface KernelParamSpec {
@@ -114,13 +114,13 @@ export class Kernel {
                 entryPoint: "main",
             },
         });
-        this._workgroupCountXFunc = compileExpr(spec.workgroupCount[0]);
-        this._workgroupCountYFunc = compileExpr(spec.workgroupCount[1]);
-        this._workgroupCountZFunc = compileExpr(spec.workgroupCount[2]);
+        this._workgroupCountXFunc = compileCode(spec.workgroupCount[0]);
+        this._workgroupCountYFunc = compileCode(spec.workgroupCount[1]);
+        this._workgroupCountZFunc = compileCode(spec.workgroupCount[2]);
         this._outputSizeFuncs = [];
         for (let i = 0; i < this._spec.outputs.length; i++, bindingIndex++) {
             const outputSpec = this._spec.outputs[i];
-            const outputElementCount = compileExpr(outputSpec.size);
+            const outputElementCount = compileCode(outputSpec.size);
             this._outputSizeFuncs.push(outputElementCount);
         }
     }
@@ -336,9 +336,9 @@ export function getKernelShaderCode(
         let configValue = config[i];
         env[configSpec.name] = configValue;
     }
-    const workgroupSizeX = Math.ceil(evalExpr(spec.workgroupSize[0], env));
-    const workgroupSizeY = Math.ceil(evalExpr(spec.workgroupSize[1], env));
-    const workgroupSizeZ = Math.ceil(evalExpr(spec.workgroupSize[2], env));
+    const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
+    const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
+    const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
     shaderCodeParts.push(
         `@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`
     );
