@@ -171,20 +171,16 @@ export class TensorWebGPU extends TensorImpl {
           
               @compute @workgroup_size(8, 8)
               fn main(@builtin(global_invocation_id) global_id : vec3u) {
-                // Guard against out-of-bounds work group sizes
                 if (global_id.x >= parameters.resultRows || global_id.y >= u32(parameters.resultCols)) {
                   return;
                 }
-          
-                let resultCell = vec2(global_id.x, global_id.y);
                 var result = 0.0;
                 for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
-                  let a = i + resultCell.x * parameters.innerDim;
-                  let b = resultCell.y + i * parameters.resultCols;
+                  let a = global_id.x * parameters.innerDim + i;
+                  let b = i * parameters.resultCols + global_id.y;
                   result = result + firstMatrix.numbers[a] * secondMatrix.numbers[b];
                 }
-          
-                let index = resultCell.y + resultCell.x * parameters.resultCols;
+                let index = global_id.y + global_id.x * parameters.resultCols;
                 resultMatrix.numbers[index] = result;
               }
             `,
