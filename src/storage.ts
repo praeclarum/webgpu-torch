@@ -5,6 +5,10 @@ import { TensorArrayData } from "./tensor_if";
 export abstract class UntypedStorage {
     abstract get byteSize(): number;
     abstract get buffer(): ArrayBuffer | null;
+    abstract get isMapped(): boolean;
+    abstract mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean>;
+    abstract unmap(): void;
+    abstract destroy(): void;
     tryGetTypedArray(dtype: Dtype): ATypedArray | null {
         const buffer = this.buffer;
         if (buffer === null) {
@@ -29,6 +33,9 @@ export class ArrayBufferStorage extends UntypedStorage {
     get byteSize(): number {
         return this._buffer.byteLength;
     }
+    get buffer(): ArrayBuffer | null {
+        return this._buffer;
+    }
     constructor(byteSize: number | ArrayBuffer | ATypedArray) {
         super();
         if (typeof byteSize === "number") {
@@ -50,8 +57,17 @@ export class ArrayBufferStorage extends UntypedStorage {
             throw new Error(`Invalid constructor argument for ArrayBufferStorage. Expected number of bytes, ArrayBuffer, or a TypedArray. Got ${byteSize} (${(byteSize as any).constructor.name})`);
         }
     }
-    get buffer(): ArrayBuffer | null {
-        return this._buffer;
+    get isMapped(): boolean {
+        return true;
+    }
+    async mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean> {
+        return true;
+    }
+    unmap(): void {
+        // Do nothing
+    }
+    destroy(): void {
+        // Do nothing
     }
 }
 
@@ -86,6 +102,22 @@ export class GPUBufferStorage extends UntypedStorage {
         else {
             throw new Error(`Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${(input as any).constructor.name})`);
         }
+    }
+    get isMapped(): boolean {
+        return this._buffer.mapState === "mapped";
+    }
+    async mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean> {
+        if (this.isMapped) {
+            return true;
+        }
+        await this._buffer.mapAsync(mode, offset, size);
+        return this.isMapped;
+    }
+    unmap(): void {
+        this._buffer.unmap();
+    }
+    destroy(): void {
+        this._buffer.destroy();
     }
 }
 

@@ -18,6 +18,13 @@ test("tensor is webgpu", () => {
     expect(x.device.type).toBe("webgpu");
 });
 
+test("ones are all ones", async () => {
+    const x = torch.ones([2, 3]);
+    expect(x.requiresGrad).toBe(false);
+    expect(x.device.type).toBe("webgpu");
+    expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
+});
+
 test("linear forward", () => {
     const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
     expect(x.shape).toEqual([2, 3]);
@@ -35,10 +42,10 @@ test("linear forward", () => {
 
 class Expect {
     constructor(value, truth) { this.value = value; this.truth = truth; }
-    toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected ${this.value} to be ${expected}`); } }
-    toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected ${this.value} to be instance of ${expected}`); } }
-    toBeNull() { if (this.truth(this.value !== null)) { throw new Error(`Expected ${this.value} to be null`); } }
-    toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected ${this.value} to equal ${expected}`); } }
+    toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected «${this.value}» to be «${expected}»`); } }
+    toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected «${this.value}» to be instance of «${expected}»`); } }
+    toBeNull() { if (this.truth(this.value !== null)) { throw new Error(`Expected «${this.value}» to be null`); } }
+    toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected «${this.value}» to equal «${expected}»`); } }
     toThrow(expected) {
         try { this.value(); } catch (e) {
             if (this.truth(true))

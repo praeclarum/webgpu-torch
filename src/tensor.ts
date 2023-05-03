@@ -126,6 +126,38 @@ export class Tensor implements ITensor {
         }
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
+    async toArrayAsync(): Promise<TensorArrayData> {
+        await this._impl.storage.mapAsync(GPUMapMode.READ);
+        const data = this._impl.getTypedArray();
+        const shape = this._impl.shape;
+        const strides = this._impl.strides;
+        const index: number[] = [];
+        return readArray(index);
+        function readArray(index: number[]): TensorArrayData {
+            const dim = index.length;
+            // console.log("Read array: ", index, "dim=", dim);
+            if (dim == shape.length - 1) {
+                const offset = index.reduce((acc, cur, i) => acc + cur * strides[i], 0);
+                // console.log("offset=", offset);
+                const length = shape[dim];
+                // console.log("length=", length);
+                const subarray = data.subarray(offset, offset + length);
+                // console.log("subarray=", subarray);
+                const ar = Array.from(subarray);
+                // console.log("ar=", ar);
+                return ar;
+            }
+            else {
+                const result: TensorArrayData = [];
+                for (let i = 0; i < shape[dim]; i++) {
+                    index.push(i);
+                    result.push(readArray(index));
+                    index.pop();
+                }
+                return result;
+            }
+        }
+    }
 
     detach(): Tensor {
         if (this._requiresGrad || this._gradFunc) {
