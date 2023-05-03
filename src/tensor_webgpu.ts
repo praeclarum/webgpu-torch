@@ -15,6 +15,9 @@ export class TensorWebGPU extends TensorImpl {
     get gpuBuffer(): GPUBuffer {
         return this._storage.gpuBuffer;
     }
+    get gpuDevice(): GPUDevice {
+        return this._device.gpuDevice;
+    }
 
     get storage(): GPUBufferStorage {
         return this._storage;
@@ -66,7 +69,7 @@ export class TensorWebGPU extends TensorImpl {
         other.gpuBuffer.unmap();
         const outputs = kernel.run([this.gpuBuffer, other.gpuBuffer], params);
         const readBuffer = outputs[0];
-        const readStorage = new GPUBufferStorage(readBuffer);
+        const readStorage = new GPUBufferStorage(readBuffer, this.gpuDevice);
         const resultShape = this.shape;
         const readTensor = new TensorWebGPU(
             readStorage,
@@ -89,7 +92,7 @@ export class TensorWebGPU extends TensorImpl {
         other.gpuBuffer.unmap();
         const outputs = kernel.run([this.gpuBuffer, other.gpuBuffer], params);
         const readBuffer = outputs[0];
-        const readStorage = new GPUBufferStorage(readBuffer);
+        const readStorage = new GPUBufferStorage(readBuffer, this.gpuDevice);
         const resultShape = [params.resultRows, params.resultCols];
         const readTensor = new TensorWebGPU(
             readStorage,
@@ -105,7 +108,7 @@ export class TensorWebGPU extends TensorImpl {
         const resultCols = other.shape[1];
         const elementByteSize = dtypeByteSize(this.dtype);
         const resultBufferSize = resultRows * resultCols * elementByteSize;
-        const device = this._device.device;
+        const device = this.gpuDevice;
         const paramsBufferSize = 16;
         const paramsBuffer = device.createBuffer({
             mappedAtCreation: true,
@@ -265,7 +268,7 @@ export class TensorWebGPU extends TensorImpl {
         device.queue.submit([gpuCommands]);
 
         // Read buffer.
-        const readStorage = new GPUBufferStorage(readBuffer);
+        const readStorage = new GPUBufferStorage(readBuffer, this.gpuDevice);
         const readTensor = new TensorWebGPU(
             readStorage,
             this.dtype,

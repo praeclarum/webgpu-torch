@@ -237,11 +237,6 @@ export class Kernel {
                 size: outputBufferSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
             });
-            // const readBuffer = this._device.createBuffer({
-            //     mappedAtCreation: false,
-            //     size: outputBufferSize,
-            //     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-            // });
             entries.push({
                 binding: bindingIndex,
                 resource: {
@@ -249,7 +244,6 @@ export class Kernel {
                 },
             });
             outputBuffers.push(outputBuffer);
-            // readBuffers.push(readBuffer);
         }
         entries.push({
             binding: bindingIndex,

@@ -67,11 +67,15 @@ export class ArrayBufferStorage extends UntypedStorage {
 export class GPUBufferStorage extends UntypedStorage {
     private _buffer: GPUBuffer;
     private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer|null] | null = null;
+    private _device: GPUDevice;
     get byteSize(): number {
         return this._buffer.size;
     }
     get gpuBuffer(): GPUBuffer {
         return this._buffer;
+    }
+    get gpuDevice(): GPUDevice {
+        return this._device;
     }
     get mappedArrayBuffer(): ArrayBuffer | null {
         if (this._mappedArrayBuffer !== null) {
@@ -84,10 +88,11 @@ export class GPUBufferStorage extends UntypedStorage {
         }
         return null;
     }
-    constructor(buffer: GPUBuffer)
-    constructor(byteSize: number, usage: GPUBufferUsageFlags, device: GPUDevice)
-    constructor(input: number|GPUBuffer, usage?: GPUBufferUsageFlags, device?: GPUDevice) {
+    constructor(buffer: GPUBuffer, device: GPUDevice)
+    constructor(byteSize: number, device: GPUDevice, usage: GPUBufferUsageFlags, )
+    constructor(input: number|GPUBuffer, device: GPUDevice, usage?: GPUBufferUsageFlags) {
         super();
+        this._device = device;
         if (input instanceof GPUBuffer) {
             this._buffer = input;
             switch (this._buffer.mapState) {
@@ -122,7 +127,7 @@ export class GPUBufferStorage extends UntypedStorage {
         }
         let mapBuffer: GPUBuffer = this._buffer;
         if ((this._buffer.usage & GPUBufferUsage.MAP_READ) === 0) {
-            throw new Error("GPUBuffer is not read mappable");
+            mapBuffer = this.copyBufferToReadableBuffer();
         }
         await mapBuffer.mapAsync(GPUMapMode.READ);
         if (mapBuffer.mapState === "mapped") {
@@ -139,6 +144,27 @@ export class GPUBufferStorage extends UntypedStorage {
     destroy(): void {
         this._mappedArrayBuffer = null;
         this._buffer.destroy();
+    }
+    private copyBufferToReadableBuffer(): GPUBuffer {
+        const size = this._buffer.size;
+        const readBuffer = this._device.createBuffer({
+            mappedAtCreation: false,
+            size: size,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+        // Encode commands for copying outputs to readable buffers
+        const commandEncoder = this._device.createCommandEncoder();
+        commandEncoder.copyBufferToBuffer(
+            this._buffer /* source buffer */,
+            0 /* source offset */,
+            readBuffer /* destination buffer */,
+            0 /* destination offset */,
+            size /* size */
+        );
+        // Submit GPU commands
+        const gpuCommands = commandEncoder.finish();
+        this._device.queue.submit([gpuCommands]);
+        return readBuffer;
     }
 }
 
