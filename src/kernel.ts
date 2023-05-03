@@ -126,8 +126,16 @@ export class Kernel {
     }
     run(
         inputs: GPUBuffer[],
-        parameters: { [name: string]: KernelParam }
-    ): GPUBuffer[] {
+        parameters: { [name: string]: KernelParam },
+        outputs?: GPUBuffer[]
+        ): GPUBuffer[] {
+        console.log("run", this._key);
+        // Start a new command encoder
+        const commandEncoder = this._device.createCommandEncoder();
+
+        // Get readable inputs
+        const readableInputs = inputs.map((input, i) => this.getReadableInputBuffer(input, i));
+
         // Build the parameter environment
         const env: { [name: string]: any } = {};
         let paramsBufferSize = 0;
@@ -163,7 +171,7 @@ export class Kernel {
         paramsBuffer.unmap();
 
         // Bind the buffers
-        const bindGroup = this.createBindGroup(inputs, paramsBuffer, env);
+        const bindGroup = this.createBindGroup(readableInputs, paramsBuffer, env);
 
         // Get the workgroup counts
         const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
@@ -172,7 +180,6 @@ export class Kernel {
         // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
 
         // Encode the kernel
-        const commandEncoder = this._device.createCommandEncoder();
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(this._computePipeline);
         passEncoder.setBindGroup(0, bindGroup.bindGroup);
@@ -202,6 +209,10 @@ export class Kernel {
 
         // Return the readable output buffers
         return bindGroup.outputBuffers;
+    }
+    private getReadableInputBuffer(input: GPUBuffer, index: number): GPUBuffer {
+        input.unmap();
+        return input;
     }
     private createBindGroup(
         inputBuffers: GPUBuffer[],

@@ -152,6 +152,7 @@ export class GPUBufferStorage extends UntypedStorage {
             size: size,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
+        console.log("copyBufferToReadableBuffer", this._buffer, readBuffer);
         // Encode commands for copying outputs to readable buffers
         const commandEncoder = this._device.createCommandEncoder();
         commandEncoder.copyBufferToBuffer(

@@ -66,20 +66,8 @@ export class TensorWebGPU extends TensorImpl {
             resultSize: this.shape.reduce((a, b) => a * b),
             alpha: alpha || 1.0,
         };
-        this.gpuBuffer.unmap();
-        other.gpuBuffer.unmap();
-        const outputs = kernel.run([this.gpuBuffer, other.gpuBuffer], params);
-        const outputBuffer = outputs[0];
-        const outputStorage = new GPUBufferStorage(outputBuffer, this.gpuDevice);
-        const outputShape = this.shape;
-        const outputTensorImpl = new TensorWebGPU(
-            outputStorage,
-            this.dtype,
-            outputShape,
-            defaultStrides(outputShape),
-            this._device
-        );
-        return outputTensorImpl;
+        kernel.run([this.gpuBuffer, other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
     }
     mm(other: TensorWebGPU): TensorWebGPU {
         const kernel = this._device.getKernel("MM", { resultDtype: "f32" });

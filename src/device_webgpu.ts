@@ -27,7 +27,7 @@ export class DeviceWebGPU extends Device {
         return new GPUBufferStorage(
             byteSize,
             this._device,
-            GPUBufferUsage.STORAGE
+            GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
         );
     }
     getKernel(name: string, config: KernelConfigInput): Kernel {
