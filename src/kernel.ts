@@ -1,4 +1,4 @@
-import { Expr, evalExpr, compileExpr, CompiledExpr } from "./expr";
+import { Expr, evalExpr, compileExpr, CompiledExpr, EvalEnv } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParam = number;
@@ -129,15 +129,10 @@ export class Kernel {
         parameters: { [name: string]: KernelParam },
         outputs?: GPUBuffer[]
         ): GPUBuffer[] {
-        console.log("run", this._key);
-        // Start a new command encoder
-        const commandEncoder = this._device.createCommandEncoder();
-
-        // Get readable inputs
-        const readableInputs = inputs.map((input, i) => this.getReadableInputBuffer(input, i));
+        console.log("run kernel", this._key);
 
         // Build the parameter environment
-        const env: { [name: string]: any } = {};
+        const env: EvalEnv = {};
         let paramsBufferSize = 0;
         for (let i = 0; i < this._spec.parameters.length; i++) {
             const param = this._spec.parameters[i];
@@ -150,11 +145,17 @@ export class Kernel {
         }
         // console.log("env", env);
 
+        // Get input buffers with storage usage
+        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i], i, env));
+
+        // Get output buffers with storage usage
+        const storageOutputs = this.spec.outputs.map((output, i) => this.getStorageOutputBuffer(output, outputs ? outputs[i] : null, i, env));
+
         // Build the params buffer
         const paramsBuffer = this._device.createBuffer({
             mappedAtCreation: true,
             size: paramsBufferSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            usage: GPUBufferUsage.STORAGE,
         });
         const paramsArrayBuffer = paramsBuffer.getMappedRange();
         for (let paramDtype of ["u32", "f32"]) {
@@ -171,7 +172,7 @@ export class Kernel {
         paramsBuffer.unmap();
 
         // Bind the buffers
-        const bindGroup = this.createBindGroup(readableInputs, paramsBuffer, env);
+        const bindGroup = this.createBindGroup(storageInputs, paramsBuffer, storageOutputs);
 
         // Get the workgroup counts
         const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
@@ -179,10 +180,13 @@ export class Kernel {
         const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
         // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
 
+        // Start a new command encoder
+        const commandEncoder = this._device.createCommandEncoder();
+
         // Encode the kernel
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(this._computePipeline);
-        passEncoder.setBindGroup(0, bindGroup.bindGroup);
+        passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(
             workgroupCountX,
             workgroupCountY,
@@ -190,39 +194,58 @@ export class Kernel {
         );
         passEncoder.end();
 
-        if (false) {
-            // Encode commands for copying outputs to readable buffers
-            for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
-                commandEncoder.copyBufferToBuffer(
-                    bindGroup.outputBuffers[i] /* source buffer */,
-                    0 /* source offset */,
-                    bindGroup.readBuffers[i] /* destination buffer */,
-                    0 /* destination offset */,
-                    bindGroup.readBuffers[i].size /* size */
-                );
-            }
-        }
+        // // Encode commands for copying outputs to readable buffers
+        // for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
+        //     commandEncoder.copyBufferToBuffer(
+        //         bindGroup.outputBuffers[i] /* source buffer */,
+        //         0 /* source offset */,
+        //         bindGroup.readBuffers[i] /* destination buffer */,
+        //         0 /* destination offset */,
+        //         bindGroup.readBuffers[i].size /* size */
+        //     );
+        // }
 
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
         this._device.queue.submit([gpuCommands]);
 
-        // Return the readable output buffers
-        return bindGroup.outputBuffers;
+        // Return the storage output buffers
+        return storageOutputs;
     }
-    private getReadableInputBuffer(input: GPUBuffer, index: number): GPUBuffer {
+    private getStorageInputBuffer(inputSpec: KernelInputSpec, input: GPUBuffer, inputIndex: number, env: EvalEnv): GPUBuffer {
         input.unmap();
         return input;
+    }
+    private getStorageOutputBuffer(outputSpec: KernelOutputSpec, providedOutput: GPUBuffer | null, outputIndex: number, env: EvalEnv): GPUBuffer {
+        if (providedOutput !== null) {
+            if (providedOutput.usage & GPUBufferUsage.STORAGE) {
+                providedOutput.unmap();
+                return providedOutput;
+            }
+            else {
+                throw new Error("Provided output buffer is not a storage buffer");
+            }
+        }
+        else {
+            const outputElementByteSize = getShaderTypeElementByteSize(
+                outputSpec.shaderType
+            );
+            const outputElementCount = Math.ceil(this._outputSizeFuncs[outputIndex](env));
+            // console.log("output size", outputElementCount, outputElementByteSize);
+            const outputBufferSize = outputElementByteSize * outputElementCount;
+            const outputBuffer = this._device.createBuffer({
+                mappedAtCreation: false,
+                size: outputBufferSize,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+            });
+            return outputBuffer;
+        }
     }
     private createBindGroup(
         inputBuffers: GPUBuffer[],
         paramsBuffer: GPUBuffer,
-        env: { [name: string]: any }
-    ): {
-        bindGroup: GPUBindGroup;
-        outputBuffers: GPUBuffer[];
-        readBuffers: GPUBuffer[];
-    } {
+        outputBuffers: GPUBuffer[]
+    ): GPUBindGroup {
         const entries: GPUBindGroupEntry[] = [];
         let bindingIndex = 0;
         for (let i = 0; i < inputBuffers.length; i++, bindingIndex++) {
@@ -233,21 +256,8 @@ export class Kernel {
                 },
             });
         }
-        const outputBuffers: GPUBuffer[] = [];
-        const readBuffers: GPUBuffer[] = [];
         for (let i = 0; i < this._spec.outputs.length; i++, bindingIndex++) {
-            const outputSpec = this._spec.outputs[i];
-            const outputElementByteSize = getShaderTypeElementByteSize(
-                outputSpec.shaderType
-            );
-            const outputElementCount = Math.ceil(this._outputSizeFuncs[i](env));
-            // console.log("output size", outputElementCount, outputElementByteSize);
-            const outputBufferSize = outputElementByteSize * outputElementCount;
-            const outputBuffer = this._device.createBuffer({
-                mappedAtCreation: false,
-                size: outputBufferSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-            });
+            const outputBuffer = outputBuffers[i];
             entries.push({
                 binding: bindingIndex,
                 resource: {
@@ -266,7 +276,7 @@ export class Kernel {
             layout: this._bindGroupLayout,
             entries: entries,
         });
-        return { bindGroup, outputBuffers, readBuffers };
+        return bindGroup;
     }
 }
 

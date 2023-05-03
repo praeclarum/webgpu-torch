@@ -1,5 +1,7 @@
 export type Expr = number | string;
 
+export type EvalEnv = { [name: string]: any };
+
 function lexn(code: string): (string | number)[] {
     const tokens: (string | number)[] = [];
     const n = code.length;

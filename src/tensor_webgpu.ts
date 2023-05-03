@@ -1,7 +1,7 @@
 import { Device } from "./device";
 import { DeviceWebGPU } from "./device_webgpu";
 import { Dtype, dtypeByteSize } from "./dtype";
-import { Shape, Strides, defaultStrides } from "./shape";
+import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { GPUBufferStorage } from "./storage";
 import { TensorImpl } from "./tensor_if";
 
@@ -61,12 +61,12 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
-        const kernel = this._device.getKernel("Add", { resultDtype: "f32" });
+        const kernel = this._device.getKernel("Add_", { resultDtype: "f32" });
         const params = {
-            resultSize: this.shape.reduce((a, b) => a * b),
+            resultSize: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        kernel.run([this.gpuBuffer, other.gpuBuffer], params, [this.gpuBuffer]);
+        kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
         return this;
     }
     mm(other: TensorWebGPU): TensorWebGPU {
