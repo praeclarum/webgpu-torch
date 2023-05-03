@@ -143,7 +143,6 @@ export class Kernel {
             env[param.name] = paramValue;
             paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
         }
-        // console.log("env", env);
 
         // Get input buffers with storage usage
         const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i], i, env));
@@ -178,12 +177,11 @@ export class Kernel {
         const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
         const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
         const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
-        // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
 
         // Start a new command encoder
         const commandEncoder = this._device.createCommandEncoder();
 
-        // Encode the kernel
+        // Encode the kernel using pass encoder
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(this._computePipeline);
         passEncoder.setBindGroup(0, bindGroup);
@@ -193,17 +191,6 @@ export class Kernel {
             workgroupCountZ
         );
         passEncoder.end();
-
-        // // Encode commands for copying outputs to readable buffers
-        // for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
-        //     commandEncoder.copyBufferToBuffer(
-        //         bindGroup.outputBuffers[i] /* source buffer */,
-        //         0 /* source offset */,
-        //         bindGroup.readBuffers[i] /* destination buffer */,
-        //         0 /* destination offset */,
-        //         bindGroup.readBuffers[i].size /* size */
-        //     );
-        // }
 
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
