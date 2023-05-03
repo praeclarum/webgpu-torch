@@ -40,8 +40,11 @@ export const registry: { [name: string]: KernelSpec } = {
             {
                 name: "resultMatrix",
                 shaderType: "array<f32>",
+                size: "=resultRows * resultCols",
             },
         ],
+        workgroupSize: [8, 8, 1],
+        workgroupCount: ["=resultRows/8", "=resultCols/8", 1],
         shader: `
     if (global_id.x >= parameters.resultRows || global_id.y >= u32(parameters.resultCols)) {
         return;

@@ -1,13 +1,23 @@
 import { FunctionInput } from "./tensor";
 
+export type KernelParamType = "u32" | "f32";
+export type KernelParam = number;
+
 export type ShaderType =
-    "u8" | "i32" | "u32" |
-    "f32" | "array<f32>";
+    KernelParamType |
+    "u8" | "array<u8>" |
+    "i32" | "array<i32>" |
+    "array<u32>" |
+    "array<f32>";
+
+export type Expr = number | string;
 
 export interface KernelSpec {
     name: string;
     config: KernelConfigSpec[];
+    workgroupSize: [Expr, Expr, Expr];
     parameters: KernelParamSpec[];
+    workgroupCount: [Expr, Expr, Expr];
     inputs: KernelInputSpec[];
     outputs: KernelOutputSpec[];
     shader: string;
@@ -21,11 +31,12 @@ export interface KernelInputSpec {
 export interface KernelOutputSpec {
     name: string;
     shaderType: ShaderType;
+    size: Expr;
 }
 
 export interface KernelParamSpec {
     name: string;
-    shaderType: ShaderType;
+    shaderType: KernelParamType;
 }
 
 export interface KernelConfigSpec {
@@ -60,7 +71,6 @@ export class Kernel {
         let bindGroupLayoutEntries: GPUBindGroupLayoutEntry[] = [];
         let bindingIndex = 0;
         for (let i = 0; i < spec.inputs.length; i++, bindingIndex++) {
-            let input = spec.inputs[i];
             bindGroupLayoutEntries.push({
                 binding: bindingIndex,
                 visibility: GPUShaderStage.COMPUTE,
@@ -70,7 +80,6 @@ export class Kernel {
             });
         }
         for (let i = 0; i < spec.outputs.length; i++, bindingIndex++) {
-            let output = spec.outputs[i];
             bindGroupLayoutEntries.push({
                 binding: bindingIndex,
                 visibility: GPUShaderStage.COMPUTE,
@@ -79,6 +88,13 @@ export class Kernel {
                 },
             });
         }
+        bindGroupLayoutEntries.push({
+            binding: bindingIndex,
+            visibility: GPUShaderStage.COMPUTE,
+            buffer: {
+                type: "read-only-storage" as GPUBufferBindingType,
+            },
+        });
         this._bindGroupLayout = device.createBindGroupLayout({
             entries: bindGroupLayoutEntries,
         });
@@ -96,19 +112,75 @@ export class Kernel {
             },
         });
     }
-    run(inputs: GPUBuffer[], parameters: ShaderValue[]) {
+    run(inputs: GPUBuffer[], parameters: {[name: string]: KernelParam}): GPUBuffer[] {
+        // Build the parameter environment
+        const env: { [name: string]: any } = {};
+        let paramsBufferSize = 0;
+        for (let i = 0; i < this._spec.parameters.length; i++) {
+            const param = this._spec.parameters[i];
+            const paramValue = parameters[param.name];
+            if (paramValue === undefined) {
+                throw new Error(`Missing parameter ${param.name}`);
+            }
+            env[param.name] = paramValue;
+            paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
+        }
+        console.log(env);
+        console.log(paramsBufferSize);
+        
+        // Build the params buffer
+        const paramsBuffer = this._device.createBuffer({
+            mappedAtCreation: true,
+            size: paramsBufferSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+        const paramsArrayBuffer = paramsBuffer.getMappedRange();
+        for (let paramDtype of ["u32", "f32"]) {
+            let paramsArray = new (paramDtype === "u32" ? Uint32Array : Float32Array)(paramsArrayBuffer);
+            for (let i = 0; i < this._spec.parameters.length; i++) {
+                const param = this._spec.parameters[i];
+                if (param.shaderType === paramDtype) {
+                    paramsArray[i] = env[param.name];
+                }
+            }
+        }
+        paramsBuffer.unmap();
+        
+        // Bind the buffers
+        const bindGroup = this.createBindGroup(inputs, paramsBuffer, env);
+        
+        // Get the workgroup counts
+        const workgroupCountX = Math.ceil(evaln(this._spec.workgroupCount[0], env));
+        const workgroupCountY = Math.ceil(evaln(this._spec.workgroupCount[1], env));
+        const workgroupCountZ = Math.ceil(evaln(this._spec.workgroupCount[2], env));
+        
+        // Encode the kernel
         const commandEncoder = this._device.createCommandEncoder();
         const passEncoder = commandEncoder.beginComputePass();
         passEncoder.setPipeline(this._computePipeline);
-        const bindGroup = this.createBindGroup(inputs);
         passEncoder.setBindGroup(0, bindGroup.bindGroup);
-        const workgroupCountX = 1;// TODO: Compute workgroup size Math.ceil(resultRows / 8);
-        const workgroupCountY = 1;// TODO: Math.ceil(resultCols / 8);
-        const workgroupCountZ = 1;
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
         passEncoder.end();
+
+        // Encode commands for copying outputs to readable buffers
+        for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
+            commandEncoder.copyBufferToBuffer(
+                bindGroup.outputBuffers[i] /* source buffer */,
+                0 /* source offset */,
+                bindGroup.readBuffers[i] /* destination buffer */,
+                0 /* destination offset */,
+                bindGroup.readBuffers[i].size /* size */
+            );
+        }
+
+        // Submit GPU commands
+        const gpuCommands = commandEncoder.finish();
+        this._device.queue.submit([gpuCommands]);
+
+        // Return the readable output buffers
+        return bindGroup.readBuffers;
     }
-    private createBindGroup(inputBuffers: GPUBuffer[]): {bindGroup:GPUBindGroup} {
+    private createBindGroup(inputBuffers: GPUBuffer[], paramsBuffer: GPUBuffer, env: { [name: string]: any }): { bindGroup: GPUBindGroup, outputBuffers: GPUBuffer[], readBuffers: GPUBuffer[] } {
         const entries: GPUBindGroupEntry[] = [];
         let bindingIndex = 0;
         for (let i = 0; i < inputBuffers.length; i++, bindingIndex++) {
@@ -123,7 +195,9 @@ export class Kernel {
         const readBuffers: GPUBuffer[] = [];
         for (let i = 0; i < this._spec.outputs.length; i++, bindingIndex++) {
             const outputSpec = this._spec.outputs[i];
-            const outputBufferSize = 4;// TODO: Compute output buffer size
+            const outputElementByteSize = getShaderTypeElementByteSize(outputSpec.shaderType);
+            const outputElementCount = Math.ceil(evaln(outputSpec.size, env));
+            const outputBufferSize = outputElementByteSize * outputElementCount;
             const outputBuffer = this._device.createBuffer({
                 mappedAtCreation: false,
                 size: outputBufferSize,
@@ -143,11 +217,17 @@ export class Kernel {
             outputBuffers.push(outputBuffer);
             readBuffers.push(readBuffer);
         }
+        entries.push({
+            binding: bindingIndex,
+            resource: {
+                buffer: paramsBuffer,
+            },
+        });
         const bindGroup = this._device.createBindGroup({
             layout: this._bindGroupLayout,
             entries: entries,
         });
-        return { bindGroup };
+        return { bindGroup, outputBuffers, readBuffers };
     }    
 }
 
@@ -174,6 +254,19 @@ export function getKernelKey(spec: KernelSpec, config: KernelConfig): KernelKey 
     return keyParts.join(",");
 }
 
+function evaln(input: Expr, env: {[name: string]: any}): number {
+    if (typeof input === "number") {
+        return input;
+    }
+    if (input.length === 0) {
+        throw new Error("Empty expression");
+    }
+    if (input[0] === "=") {
+        throw new Error("Evaluation not yet implemented");
+    }
+    return parseFloat(input);
+}
+
 export function getKernelShaderCode(spec: KernelSpec, config: KernelConfig): string {
     let shaderCodeParts: string[] = ["// " + spec.name + " kernel"];
     shaderCodeParts.push(`struct ${spec.name}Parameters {`);
@@ -192,9 +285,36 @@ export function getKernelShaderCode(spec: KernelSpec, config: KernelConfig): str
         shaderCodeParts.push(`@group(0) @binding(${bindingIndex}) var<storage, read_write> ${output.name}: ${output.shaderType};`);
     }
     shaderCodeParts.push(`@group(0) @binding(${bindingIndex}) var<storage, read> parameters: ${spec.name}Parameters;`);
-    shaderCodeParts.push(`@compute @workgroup_size(8, 8)`);
+    const env: { [name: string]: any } = {};
+    for (let i = 0; i < spec.config.length; i++) {
+        let configSpec = spec.config[i];
+        let configValue = config[i];
+        env[configSpec.name] = configValue;
+    }
+    const workgroupSizeX = Math.ceil(evaln(spec.workgroupSize[0], env));
+    const workgroupSizeY = Math.ceil(evaln(spec.workgroupSize[1], env));
+    const workgroupSizeZ = Math.ceil(evaln(spec.workgroupSize[2], env));
+    shaderCodeParts.push(`@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`);
     shaderCodeParts.push(`fn main(@builtin(global_invocation_id) global_id : vec3u) {`);
     shaderCodeParts.push("    " + spec.shader.trim());
     shaderCodeParts.push("}");
     return shaderCodeParts.join("\n");
 }
+
+function getShaderTypeElementByteSize(shaderType: ShaderType): number {
+    switch (shaderType) {
+        case "f32":
+        case "i32":
+        case "u32":
+        case "array<f32>":
+        case "array<i32>":
+        case "array<u32>":
+            return 4;
+        case "u8":
+        case "array<u8>":
+            return 1;
+        default:
+            throw new Error(`Unknown shader type ${shaderType}`);
+    }
+}
+
