@@ -127,7 +127,7 @@ export class Tensor implements ITensor {
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
     async toArrayAsync(): Promise<TensorArrayData> {
-        await this._impl.storage.mapAsync(GPUMapMode.READ);
+        await this._impl.storage.mapReadAsync();
         const data = this._impl.getTypedArray();
         const shape = this._impl.shape;
         const strides = this._impl.strides;

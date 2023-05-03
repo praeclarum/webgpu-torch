@@ -6,7 +6,7 @@ export abstract class UntypedStorage {
     abstract get byteSize(): number;
     abstract get buffer(): ArrayBuffer | null;
     abstract get isMapped(): boolean;
-    abstract mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean>;
+    abstract mapReadAsync(offset?: number, size?: number): Promise<boolean>;
     abstract unmap(): void;
     abstract destroy(): void;
     tryGetTypedArray(dtype: Dtype): ATypedArray | null {
@@ -60,7 +60,7 @@ export class ArrayBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return true;
     }
-    async mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean> {
+    async mapReadAsync(offset?: number, size?: number): Promise<boolean> {
         return true;
     }
     unmap(): void {
@@ -106,11 +106,11 @@ export class GPUBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return this._buffer.mapState === "mapped";
     }
-    async mapAsync(mode: GPUMapModeFlags, offset?: number, size?: number): Promise<boolean> {
+    async mapReadAsync(offset?: number, size?: number): Promise<boolean> {
         if (this.isMapped) {
             return true;
         }
-        await this._buffer.mapAsync(mode, offset, size);
+        await this._buffer.mapAsync(GPUMapMode.READ, offset, size);
         return this.isMapped;
     }
     unmap(): void {

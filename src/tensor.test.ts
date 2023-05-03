@@ -1,5 +1,5 @@
 import { UntypedStorage } from "./storage";
-import { Tensor, tensor } from "./index";
+import { Tensor, tensor, ones } from "./index";
 import { LinearFunction } from "./autograd";
 import { TensorCPU } from "./tensor_cpu";
 
@@ -36,4 +36,9 @@ test("tensor from json", () => {
     const x = tensor({data: [[1, 2, 3], [4, 5, 6]], dtype:"float32"});
     expect(x.shape).toEqual([2, 3]);
     expect(x.dtype).toEqual("float32");
+});
+
+test("ones are all ones", async () => {
+    const x = ones([2, 3]);
+    expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
 });
