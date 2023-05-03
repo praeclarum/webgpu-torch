@@ -1,6 +1,8 @@
 import { FunctionInput } from "./tensor";
 
-export type ShaderType = "u8" | "i32" | "u32" | "f32";
+export type ShaderType =
+    "u8" | "i32" | "u32" |
+    "f32" | "array<f32>";
 
 export interface KernelSpec {
     name: string;
@@ -80,9 +82,7 @@ export class Kernel {
         this._bindGroupLayout = device.createBindGroupLayout({
             entries: bindGroupLayoutEntries,
         });
-        const shaderCodeParts: string[] = [];
-        shaderCodeParts.push(spec.shader);
-        this._shaderCode = shaderCodeParts.join("\n");
+        this._shaderCode = getKernelShaderCode(spec, config);
         const shaderModule = device.createShaderModule({
             code: this._shaderCode,
         });
@@ -172,4 +172,29 @@ export function getKernelKey(spec: KernelSpec, config: KernelConfig): KernelKey 
         keyParts.push(`${configSpec.name}=${configValue}`);
     }
     return keyParts.join(",");
+}
+
+export function getKernelShaderCode(spec: KernelSpec, config: KernelConfig): string {
+    let shaderCodeParts: string[] = ["// " + spec.name + " kernel"];
+    shaderCodeParts.push(`struct ${spec.name}Parameters {`);
+    for (let i = 0; i < spec.parameters.length; i++) {
+        let parameter = spec.parameters[i];
+        shaderCodeParts.push(`    ${parameter.name}: ${parameter.shaderType},`);
+    }
+    shaderCodeParts.push(`}`);
+    let bindingIndex = 0;
+    for (let i = 0; i < spec.inputs.length; i++, bindingIndex++) {
+        let input = spec.inputs[i];
+        shaderCodeParts.push(`@group(0) @binding(${bindingIndex}) var<storage, read> ${input.name}: ${input.shaderType};`);
+    }
+    for (let i = 0; i < spec.outputs.length; i++, bindingIndex++) {
+        let output = spec.outputs[i];
+        shaderCodeParts.push(`@group(0) @binding(${bindingIndex}) var<storage, read_write> ${output.name}: ${output.shaderType};`);
+    }
+    shaderCodeParts.push(`@group(0) @binding(${bindingIndex}) var<storage, read> parameters: ${spec.name}Parameters;`);
+    shaderCodeParts.push(`@compute @workgroup_size(8, 8)`);
+    shaderCodeParts.push(`fn main(@builtin(global_invocation_id) global_id : vec3u) {`);
+    shaderCodeParts.push("    " + spec.shader.trim());
+    shaderCodeParts.push("}");
+    return shaderCodeParts.join("\n");
 }
