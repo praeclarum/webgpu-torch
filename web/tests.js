@@ -6,6 +6,7 @@ because they require WebGPU.
 const tests = [];
 function test(description, callback) { tests.push({ description, callback }); }
 const torch = jstorch;
+const tensor = torch.tensor;
 
 
 test("webgpu is supported", () => {
@@ -25,12 +26,19 @@ test("ones are all ones", async () => {
     expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
 });
 
+test("matrix multiply", async () => {
+    const a = tensor([[1, 2, 3], [4, 5, 6]]);
+    const b = tensor([[7, 8], [9, 10], [11, 12]]);
+    const c = a.mm(b);
+    expect(await c.toArrayAsync()).toEqual([[58, 64], [139, 154]]);
+});
+
 test("linear forward", () => {
-    const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
     expect(x.shape).toEqual([2, 3]);
-    const w = torch.tensor({data: [[100, 200, 300]], requiresGrad: true});
+    const w = tensor({data: [[100, 200, 300]], requiresGrad: true});
     expect(w.requiresGrad).toBe(true);
-    const b = torch.tensor({data: [[-1000], [1000]], requiresGrad: true});
+    const b = tensor({data: [[-1000], [1000]], requiresGrad: true});
     const y = torch.LinearFunction.apply(x, w, b);
     expect(y.shape).toEqual([2, 1]);
     expect(w.requiresGrad).toBe(true);

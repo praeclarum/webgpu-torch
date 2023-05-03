@@ -42,3 +42,10 @@ test("ones are all ones", async () => {
     const x = ones([2, 3]);
     expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
 });
+
+test("matrix multiply", async () => {
+    const a = tensor([[1, 2, 3], [4, 5, 6]]);
+    const b = tensor([[7, 8], [9, 10], [11, 12]]);
+    const c = a.mm(b);
+    expect(await c.toArrayAsync()).toEqual([[58, 64], [139, 154]]);
+});
