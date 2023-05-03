@@ -16,13 +16,14 @@ test("can toggle requiresGrad", () => {
     expect(tensor.requiresGrad).toBe(true);
 });
 
-test("linear forward", () => {
-    const input = new Tensor([[3]], "float32");
-    const weight = new Tensor([[10], [11]], "float32");
-    const bias = new Tensor([[1000, 10000]], "float32");
+test("linear forward", async () => {
+    const input = tensor([[3]]);
+    const weight = tensor([[10], [11]]);
+    const bias = tensor([[1000, 10000]]);
     const output = LinearFunction.apply(input, weight, bias);
-    expect(output).toBeInstanceOf(Tensor);
+    const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
     expect(output.shape).toEqual([1, 2]);
+    expect(await output.toArrayAsync()).toEqual(expected);
 });
 
 test("complete sum over 2D tensor", () => {

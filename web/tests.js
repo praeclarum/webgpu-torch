@@ -7,6 +7,7 @@ const tests = [];
 function test(description, callback) { tests.push({ description, callback }); }
 const torch = jstorch;
 const tensor = torch.tensor;
+const LinearFunction = torch.LinearFunction;
 
 
 test("webgpu is supported", () => {
@@ -39,16 +40,16 @@ test("matrix multiply", async () => {
     expect(await c.toArrayAsync()).toEqual([[58, 64], [139, 154]]);
 });
 
-test("linear forward", () => {
-    const x = tensor([[1, 2, 3], [4, 5, 6]]);
-    expect(x.shape).toEqual([2, 3]);
-    const w = tensor({data: [[100, 200, 300]], requiresGrad: true});
-    expect(w.requiresGrad).toBe(true);
-    const b = tensor({data: [[-1000], [1000]], requiresGrad: true});
-    const y = torch.LinearFunction.apply(x, w, b);
-    expect(y.shape).toEqual([2, 1]);
-    expect(w.requiresGrad).toBe(true);
+test("linear forward", async () => {
+    const input = tensor([[3]]);
+    const weight = tensor([[10], [11]]);
+    const bias = tensor([[1000, 10000]]);
+    const output = LinearFunction.apply(input, weight, bias);
+    const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
+    expect(output.shape).toEqual([1, 2]);
+    expect(await output.toArrayAsync()).toEqual(expected);
 });
+
 
 
 
