@@ -212,9 +212,14 @@ export class Kernel {
         // Return the storage output buffers
         return storageOutputs;
     }
-    private getStorageInputBuffer(inputSpec: KernelInputSpec, input: GPUBuffer, inputIndex: number, env: EvalEnv): GPUBuffer {
-        input.unmap();
-        return input;
+    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer, inputIndex: number, env: EvalEnv): GPUBuffer {
+        if (providedInput.usage & GPUBufferUsage.STORAGE) {
+            providedInput.unmap();
+            return providedInput;
+        }
+        else {
+            throw new Error("Provided input buffer is not a storage buffer");
+        }
     }
     private getStorageOutputBuffer(outputSpec: KernelOutputSpec, providedOutput: GPUBuffer | null, outputIndex: number, env: EvalEnv): GPUBuffer {
         if (providedOutput !== null) {
