@@ -183,15 +183,17 @@ export class Kernel {
         );
         passEncoder.end();
 
-        // Encode commands for copying outputs to readable buffers
-        for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
-            commandEncoder.copyBufferToBuffer(
-                bindGroup.outputBuffers[i] /* source buffer */,
-                0 /* source offset */,
-                bindGroup.readBuffers[i] /* destination buffer */,
-                0 /* destination offset */,
-                bindGroup.readBuffers[i].size /* size */
-            );
+        if (false) {
+            // Encode commands for copying outputs to readable buffers
+            for (var i = 0; i < bindGroup.outputBuffers.length; i++) {
+                commandEncoder.copyBufferToBuffer(
+                    bindGroup.outputBuffers[i] /* source buffer */,
+                    0 /* source offset */,
+                    bindGroup.readBuffers[i] /* destination buffer */,
+                    0 /* destination offset */,
+                    bindGroup.readBuffers[i].size /* size */
+                );
+            }
         }
 
         // Submit GPU commands
@@ -199,7 +201,7 @@ export class Kernel {
         this._device.queue.submit([gpuCommands]);
 
         // Return the readable output buffers
-        return bindGroup.readBuffers;
+        return bindGroup.outputBuffers;
     }
     private createBindGroup(
         inputBuffers: GPUBuffer[],
@@ -235,11 +237,11 @@ export class Kernel {
                 size: outputBufferSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
             });
-            const readBuffer = this._device.createBuffer({
-                mappedAtCreation: false,
-                size: outputBufferSize,
-                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-            });
+            // const readBuffer = this._device.createBuffer({
+            //     mappedAtCreation: false,
+            //     size: outputBufferSize,
+            //     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+            // });
             entries.push({
                 binding: bindingIndex,
                 resource: {
@@ -247,7 +249,7 @@ export class Kernel {
                 },
             });
             outputBuffers.push(outputBuffer);
-            readBuffers.push(readBuffer);
+            // readBuffers.push(readBuffer);
         }
         entries.push({
             binding: bindingIndex,

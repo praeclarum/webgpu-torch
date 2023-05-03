@@ -4,27 +4,20 @@ import { TensorArrayData } from "./tensor_if";
 
 export abstract class UntypedStorage {
     abstract get byteSize(): number;
-    abstract get buffer(): ArrayBuffer | null;
+    abstract get mappedArrayBuffer(): ArrayBuffer | null;
     abstract get isMapped(): boolean;
-    abstract mapReadAsync(): Promise<boolean>;
+    abstract mapReadAsync(): Promise<void>;
     abstract unmap(): void;
     abstract destroy(): void;
-    tryGetTypedArray(dtype: Dtype): ATypedArray | null {
-        const buffer = this.buffer;
+    getTypedArray(dtype: Dtype): ATypedArray {
+        const buffer = this.mappedArrayBuffer;
         if (buffer === null) {
-            return null;
+            throw new Error("Storage is not mapped");
         }
         if (dtype in dtypeArrayCtors) {
             return new dtypeArrayCtors[dtype](buffer);
         }
         throw new Error(`Unsupported dtype: ${dtype}`);
-    }
-    getTypedArray(dtype: Dtype): ATypedArray {
-        const result = this.tryGetTypedArray(dtype);
-        if (result !== null) {
-            return result;
-        }
-        throw new Error("Storage is not mapped");
     }
 }
 
@@ -33,7 +26,7 @@ export class ArrayBufferStorage extends UntypedStorage {
     get byteSize(): number {
         return this._buffer.byteLength;
     }
-    get buffer(): ArrayBuffer | null {
+    get mappedArrayBuffer(): ArrayBuffer | null {
         return this._buffer;
     }
     constructor(byteSize: number | ArrayBuffer | ATypedArray) {
@@ -60,8 +53,8 @@ export class ArrayBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return true;
     }
-    async mapReadAsync(): Promise<boolean> {
-        return true;
+    async mapReadAsync(): Promise<void> {
+        // Do nothing
     }
     unmap(): void {
         // Do nothing
@@ -73,20 +66,21 @@ export class ArrayBufferStorage extends UntypedStorage {
 
 export class GPUBufferStorage extends UntypedStorage {
     private _buffer: GPUBuffer;
-    private _mappedArrayBuffer: ArrayBuffer | null = null;
+    private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer|null] | null = null;
     get byteSize(): number {
         return this._buffer.size;
     }
     get gpuBuffer(): GPUBuffer {
         return this._buffer;
     }
-    get buffer(): ArrayBuffer | null {
+    get mappedArrayBuffer(): ArrayBuffer | null {
         if (this._mappedArrayBuffer !== null) {
-            return this._mappedArrayBuffer;
-        }
-        if (this._buffer.mapState === "mapped") {
-            this._mappedArrayBuffer = this._buffer.getMappedRange();
-            return this._mappedArrayBuffer;
+            let ar = this._mappedArrayBuffer[1];
+            if (ar === null) {
+                ar = this._mappedArrayBuffer[0].getMappedRange();
+                this._mappedArrayBuffer[1] = ar;
+            }
+            return ar;
         }
         return null;
     }
@@ -96,6 +90,16 @@ export class GPUBufferStorage extends UntypedStorage {
         super();
         if (input instanceof GPUBuffer) {
             this._buffer = input;
+            switch (this._buffer.mapState) {
+                case "mapped":
+                    this._mappedArrayBuffer = [this._buffer, null];
+                    break;
+                case "unmapped":
+                    this._mappedArrayBuffer = null;
+                    break;
+                case "pending":
+                    throw new Error("GPUBuffer is pending. Please wait for it to finish mapping before creating a GPUBufferStorage with it.");
+            }
         }
         else if (typeof input === "number" && usage !== undefined && device !== undefined) {
             this._buffer = device.createBuffer({
@@ -103,6 +107,7 @@ export class GPUBufferStorage extends UntypedStorage {
                 size: input,
                 usage: usage,
             });
+            this._mappedArrayBuffer = [this._buffer, null];
         }
         else {
             throw new Error(`Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${(input as any).constructor.name})`);
@@ -111,12 +116,21 @@ export class GPUBufferStorage extends UntypedStorage {
     get isMapped(): boolean {
         return this._buffer.mapState === "mapped";
     }
-    async mapReadAsync(): Promise<boolean> {
+    async mapReadAsync(): Promise<void> {
         if (this.isMapped) {
-            return true;
+            return;
         }
-        await this._buffer.mapAsync(GPUMapMode.READ);
-        return this.isMapped;
+        let mapBuffer: GPUBuffer = this._buffer;
+        if ((this._buffer.usage & GPUBufferUsage.MAP_READ) === 0) {
+            throw new Error("GPUBuffer is not read mappable");
+        }
+        await mapBuffer.mapAsync(GPUMapMode.READ);
+        if (mapBuffer.mapState === "mapped") {
+            this._mappedArrayBuffer = [mapBuffer, null];
+        }
+        else {
+            throw new Error("GPUBuffer failed to map");
+        }
     }
     unmap(): void {
         this._mappedArrayBuffer = null;
