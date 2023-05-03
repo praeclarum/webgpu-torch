@@ -77,7 +77,7 @@ export class TensorWebGPU extends TensorImpl {
         const paramsArrayBuffer = paramsBuffer.getMappedRange();
         const paramsInt32Array = new Int32Array(paramsArrayBuffer);
         paramsInt32Array[0] = this.shape[0];
-        paramsInt32Array[1] = other.shape[0];
+        paramsInt32Array[1] = other.shape[1];
         paramsInt32Array[2] = this.shape[1];
         const paramsFloat32Array = new Float32Array(paramsArrayBuffer);
         paramsFloat32Array[3] = 1.0;
