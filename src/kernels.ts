@@ -40,11 +40,11 @@ export const registry: { [name: string]: KernelSpec } = {
             {
                 name: "resultMatrix",
                 shaderType: "array<f32>",
-                size: "=resultRows * resultCols",
+                size: "resultRows * resultCols",
             },
         ],
         workgroupSize: [8, 8, 1],
-        workgroupCount: ["=resultRows/8", "=resultCols/8", 1],
+        workgroupCount: ["resultRows/8", "resultCols/8", 1],
         shader: `
     if (global_id.x >= parameters.resultRows || global_id.y >= u32(parameters.resultCols)) {
         return;
@@ -53,10 +53,10 @@ export const registry: { [name: string]: KernelSpec } = {
     for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
         let a = global_id.x * parameters.innerDim + i;
         let b = i * parameters.resultCols + global_id.y;
-        result = result + firstMatrix.numbers[a] * secondMatrix.numbers[b];
+        result = result + firstMatrix[a] * secondMatrix[b];
     }
     let index = global_id.y + global_id.x * parameters.resultCols;
-    resultMatrix.numbers[index] = result;
+    resultMatrix[index] = result;
 `
     },
 };

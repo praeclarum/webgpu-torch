@@ -1,4 +1,4 @@
-import { FunctionInput } from "./tensor";
+import { Expr, evalExpr, compileExpr, CompiledExpr } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParam = number;
@@ -11,8 +11,6 @@ export type ShaderType =
     | "array<i32>"
     | "array<u32>"
     | "array<f32>";
-
-export type Expr = number | string;
 
 export interface KernelSpec {
     name: string;
@@ -45,7 +43,6 @@ export interface KernelConfigSpec {
     name: string;
 }
 
-type ShaderValue = FunctionInput;
 export type KernelConfigValue = string | number;
 export type KernelConfigInput = { [key: KernelKey]: KernelConfigValue };
 export type KernelConfig = KernelConfigValue[];
@@ -59,6 +56,10 @@ export class Kernel {
     private _device: GPUDevice;
     private _bindGroupLayout: GPUBindGroupLayout;
     private _computePipeline: GPUComputePipeline;
+    private _workgroupCountXFunc: CompiledExpr;
+    private _workgroupCountYFunc: CompiledExpr;
+    private _workgroupCountZFunc: CompiledExpr;
+    private _outputSizeFuncs: CompiledExpr[];
     get key(): KernelKey {
         return this._key;
     }
@@ -113,6 +114,15 @@ export class Kernel {
                 entryPoint: "main",
             },
         });
+        this._workgroupCountXFunc = compileExpr(spec.workgroupCount[0]);
+        this._workgroupCountYFunc = compileExpr(spec.workgroupCount[1]);
+        this._workgroupCountZFunc = compileExpr(spec.workgroupCount[2]);
+        this._outputSizeFuncs = [];
+        for (let i = 0; i < this._spec.outputs.length; i++, bindingIndex++) {
+            const outputSpec = this._spec.outputs[i];
+            const outputElementCount = compileExpr(outputSpec.size);
+            this._outputSizeFuncs.push(outputElementCount);
+        }
     }
     run(
         inputs: GPUBuffer[],
@@ -130,8 +140,7 @@ export class Kernel {
             env[param.name] = paramValue;
             paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
         }
-        console.log(env);
-        console.log(paramsBufferSize);
+        console.log("env", env);
 
         // Build the params buffer
         const paramsBuffer = this._device.createBuffer({
@@ -157,15 +166,10 @@ export class Kernel {
         const bindGroup = this.createBindGroup(inputs, paramsBuffer, env);
 
         // Get the workgroup counts
-        const workgroupCountX = Math.ceil(
-            evaln(this._spec.workgroupCount[0], env)
-        );
-        const workgroupCountY = Math.ceil(
-            evaln(this._spec.workgroupCount[1], env)
-        );
-        const workgroupCountZ = Math.ceil(
-            evaln(this._spec.workgroupCount[2], env)
-        );
+        const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
+        const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
+        const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
+        console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
 
         // Encode the kernel
         const commandEncoder = this._device.createCommandEncoder();
@@ -223,7 +227,8 @@ export class Kernel {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
             );
-            const outputElementCount = Math.ceil(evaln(outputSpec.size, env));
+            const outputElementCount = Math.ceil(this._outputSizeFuncs[i](env));
+            // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
             const outputBuffer = this._device.createBuffer({
                 mappedAtCreation: false,
@@ -289,19 +294,6 @@ export function getKernelKey(
     return keyParts.join(",");
 }
 
-function evaln(input: Expr, env: { [name: string]: any }): number {
-    if (typeof input === "number") {
-        return input;
-    }
-    if (input.length === 0) {
-        throw new Error("Empty expression");
-    }
-    if (input[0] === "=") {
-        throw new Error("Evaluation not yet implemented");
-    }
-    return parseFloat(input);
-}
-
 export function getKernelShaderCode(
     spec: KernelSpec,
     config: KernelConfig
@@ -335,9 +327,9 @@ export function getKernelShaderCode(
         let configValue = config[i];
         env[configSpec.name] = configValue;
     }
-    const workgroupSizeX = Math.ceil(evaln(spec.workgroupSize[0], env));
-    const workgroupSizeY = Math.ceil(evaln(spec.workgroupSize[1], env));
-    const workgroupSizeZ = Math.ceil(evaln(spec.workgroupSize[2], env));
+    const workgroupSizeX = Math.ceil(evalExpr(spec.workgroupSize[0], env));
+    const workgroupSizeY = Math.ceil(evalExpr(spec.workgroupSize[1], env));
+    const workgroupSizeZ = Math.ceil(evalExpr(spec.workgroupSize[2], env));
     shaderCodeParts.push(
         `@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`
     );

@@ -25,9 +25,9 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
     for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
         let a = global_id.x * parameters.innerDim + i;
         let b = i * parameters.resultCols + global_id.y;
-        result = result + firstMatrix.numbers[a] * secondMatrix.numbers[b];
+        result = result + firstMatrix[a] * secondMatrix[b];
     }
     let index = global_id.y + global_id.x * parameters.resultCols;
-    resultMatrix.numbers[index] = result;
+    resultMatrix[index] = result;
 }`);
 });
