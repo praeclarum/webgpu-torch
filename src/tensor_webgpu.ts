@@ -68,11 +68,27 @@ export class TensorWebGPU extends TensorImpl {
         const elementByteSize = dtypeByteSize(this.dtype);
         const resultBufferSize = resultRows * resultCols * elementByteSize;
         const device = this._device.device;
+        const paramsBufferSize = 16;
+        const paramsBuffer = device.createBuffer({
+            mappedAtCreation: true,
+            size: paramsBufferSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+        const paramsArrayBuffer = paramsBuffer.getMappedRange();
+        const paramsInt32Array = new Int32Array(paramsArrayBuffer);
+        paramsInt32Array[0] = this.shape[0];
+        paramsInt32Array[1] = other.shape[0];
+        paramsInt32Array[2] = this.shape[1];
+        const paramsFloat32Array = new Float32Array(paramsArrayBuffer);
+        paramsFloat32Array[3] = 1.0;
         const resultBuffer = device.createBuffer({
             mappedAtCreation: false,
             size: resultBufferSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
+        paramsBuffer.unmap();
+        this.gpuBuffer.unmap();
+        other.gpuBuffer.unmap();
         const bindGroupLayout = device.createBindGroupLayout({
             entries: [
                 {
@@ -96,10 +112,15 @@ export class TensorWebGPU extends TensorImpl {
                         type: "storage" as GPUBufferBindingType,
                     },
                 },
+                {
+                    binding: 3,
+                    visibility: GPUShaderStage.COMPUTE,
+                    buffer: {
+                        type: "read-only-storage" as GPUBufferBindingType,
+                    },
+                },
             ],
         });
-        this.gpuBuffer.unmap();
-        other.gpuBuffer.unmap();
         const bindGroup = device.createBindGroup({
             layout: bindGroupLayout,
             entries: [
@@ -121,38 +142,49 @@ export class TensorWebGPU extends TensorImpl {
                         buffer: resultBuffer,
                     },
                 },
+                {
+                    binding: 3,
+                    resource: {
+                        buffer: paramsBuffer,
+                    },
+                },
             ],
         });
 
         const shaderModule = device.createShaderModule({
             code: `
               struct Matrix {
-                size : vec2f,
                 numbers: array<f32>,
+              }
+
+              struct MMParameters {
+                resultRows : u32,
+                resultCols : u32,
+                innerDim : u32,
+                alpha : f32,
               }
           
               @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
               @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
               @group(0) @binding(2) var<storage, read_write> resultMatrix : Matrix;
+              @group(0) @binding(3) var<storage, read> parameters : MMParameters;
           
               @compute @workgroup_size(8, 8)
               fn main(@builtin(global_invocation_id) global_id : vec3u) {
                 // Guard against out-of-bounds work group sizes
-                if (global_id.x >= u32(firstMatrix.size.x) || global_id.y >= u32(secondMatrix.size.y)) {
+                if (global_id.x >= parameters.resultRows || global_id.y >= u32(parameters.resultCols)) {
                   return;
                 }
           
-                resultMatrix.size = vec2(firstMatrix.size.x, secondMatrix.size.y);
-          
                 let resultCell = vec2(global_id.x, global_id.y);
                 var result = 0.0;
-                for (var i = 0u; i < u32(firstMatrix.size.y); i = i + 1u) {
-                  let a = i + resultCell.x * u32(firstMatrix.size.y);
-                  let b = resultCell.y + i * u32(secondMatrix.size.y);
+                for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
+                  let a = i + resultCell.x * parameters.innerDim;
+                  let b = resultCell.y + i * parameters.resultCols;
                   result = result + firstMatrix.numbers[a] * secondMatrix.numbers[b];
                 }
           
-                let index = resultCell.y + resultCell.x * u32(secondMatrix.size.y);
+                let index = resultCell.y + resultCell.x * parameters.resultCols;
                 resultMatrix.numbers[index] = result;
               }
             `,
@@ -182,9 +214,9 @@ export class TensorWebGPU extends TensorImpl {
         const readBuffer = device.createBuffer({
             mappedAtCreation: false,
             size: resultBufferSize,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
-        
+
         // Encode commands for copying buffer to buffer.
         commandEncoder.copyBufferToBuffer(
             resultBuffer /* source buffer */,
@@ -193,7 +225,7 @@ export class TensorWebGPU extends TensorImpl {
             0 /* destination offset */,
             resultBufferSize /* size */
         );
-        
+
         // Submit GPU commands.
         const gpuCommands = commandEncoder.finish();
         device.queue.submit([gpuCommands]);
@@ -205,7 +237,8 @@ export class TensorWebGPU extends TensorImpl {
             this.dtype,
             [resultRows, resultCols],
             defaultStrides([resultRows, resultCols]),
-            this._device);
+            this._device
+        );
         return readTensor;
     }
     sum(axis: number | null): TensorImpl {
