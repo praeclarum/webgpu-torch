@@ -26,3 +26,10 @@ test("binary sub op generate kernel spec", () => {
 
 });
 
+test("can generate all kernel specs", () => {
+    for (const spec of registry) {
+        const kernels = getKernelSpecs(spec);
+        expect(kernels.length).toBeGreaterThan(0);
+    }
+});
+

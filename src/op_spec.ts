@@ -93,7 +93,7 @@ export function getKernelSpecs(op: OpSpec): KernelSpec[] {
         return kernels;
     }
     else {
-        throw new Error("Not implemented");
+        throw new Error("Unary Op Specs Not implemented");
     }
 }
 
