@@ -1,9 +1,13 @@
 import { KernelSpec } from "./kernel";
 
-export const registry: KernelSpec[] = [
-    {
-        name: "mm",
-        config: [],
+export const registry: { [name: string]: KernelSpec } = {
+    MM: {
+        name: "MM",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
         parameters: [
             {
                 name: "resultRows",
@@ -40,4 +44,4 @@ export const registry: KernelSpec[] = [
         ],
         shader: "",
     },
-];
+};

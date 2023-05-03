@@ -63,6 +63,10 @@ export class TensorWebGPU extends TensorImpl {
         return result;
     }
     mm(other: TensorWebGPU): TensorWebGPU {
+        const kernel = this._device.getKernel("MM", { "resultDtype": "f32" });
+        throw new Error("Method not implemented. But got kernel: " + kernel.key);
+    }
+    mm_old(other: TensorWebGPU): TensorWebGPU {
         const resultRows = this.shape[0];
         const resultCols = other.shape[1];
         const elementByteSize = dtypeByteSize(this.dtype);
