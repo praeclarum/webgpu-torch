@@ -140,7 +140,7 @@ export class Kernel {
             env[param.name] = paramValue;
             paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
         }
-        console.log("env", env);
+        // console.log("env", env);
 
         // Build the params buffer
         const paramsBuffer = this._device.createBuffer({
@@ -169,7 +169,7 @@ export class Kernel {
         const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
         const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
         const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
-        console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
+        // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
 
         // Encode the kernel
         const commandEncoder = this._device.createCommandEncoder();

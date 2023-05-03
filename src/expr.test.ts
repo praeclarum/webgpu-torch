@@ -1,4 +1,4 @@
-import { evalExpr } from "./expr";
+import { compileExpr, evalExpr } from "./expr";
 
 test("just a number", () => {
     const expr = "3.14";
@@ -28,4 +28,15 @@ test("multiadd expression", () => {
 test("parens expression", () => {
     const expr = "(2+3)*4";
     expect(evalExpr(expr, {})).toEqual(20);
+});
+
+test("name lookup", () => {
+    const expr = "x";
+    expect(evalExpr(expr, { x: 3 })).toEqual(3);
+});
+
+test("compile number", () => {
+    const expr = 3;
+    const compiled = compileExpr(expr);
+    expect(compiled({})).toEqual(3);
 });
