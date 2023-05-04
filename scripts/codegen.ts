@@ -212,3 +212,67 @@ function writeTensorCode(): void {
     insertCodegenIntoFile(path, code);
 }
 writeTensorCode();
+
+// Write the ITensor interface
+function writeITensorCode(): void {
+    const w = new CodeWriter();
+    w.indent();
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(other: ITensor, alpha?: number): ITensor;`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(other: ITensor): ITensor;`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(alpha?: number): ITensor;`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(): ITensor;`);
+            }
+        }
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/tensor_if.ts";
+    insertCodegenIntoFile(path, code);
+}
+writeITensorCode();
+
+// Write the ITensor interface
+function writeTensorImplCode(): void {
+    const w = new CodeWriter();
+    w.indent();
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl, alpha?: number): TensorImpl;`);
+            }
+            else {
+                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl): ITensor;`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`abstract ${kernelSpec.name}(alpha?: number): TensorImpl;`);
+            }
+            else {
+                w.writeLine(`abstract ${kernelSpec.name}(): TensorImpl;`);
+            }
+        }
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/tensor_impl.ts";
+    insertCodegenIntoFile(path, code);
+}
+writeTensorImplCode();

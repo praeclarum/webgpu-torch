@@ -14,7 +14,6 @@ export abstract class TensorImpl implements ITensor {
     abstract get device(): IDevice;
     abstract withShape(shape: Shape, strides: Strides): TensorImpl;
 
-    abstract add_(other: TensorImpl, alpha?: number): TensorImpl;
     abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;
 
@@ -63,5 +62,23 @@ export abstract class TensorImpl implements ITensor {
     }
 
     // Codegen marker
+    abstract abs(): TensorImpl;
+    abstract abs_(): TensorImpl;
+    abstract acos(): TensorImpl;
+    abstract acos_(): TensorImpl;
+    abstract acosh(): TensorImpl;
+    abstract acosh_(): TensorImpl;
+    abstract add(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract add_(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract asin(): TensorImpl;
+    abstract asin_(): TensorImpl;
+    abstract asinh(): TensorImpl;
+    abstract asinh_(): TensorImpl;
+    abstract atan(): TensorImpl;
+    abstract atan_(): TensorImpl;
+    abstract atan2(other: TensorImpl): ITensor;
+    abstract atan2_(other: TensorImpl): ITensor;
+    abstract sub(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract sub_(other: TensorImpl, alpha?: number): TensorImpl;
     // End codegen marker
 }

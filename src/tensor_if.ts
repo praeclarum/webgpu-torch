@@ -25,5 +25,24 @@ export interface ITensor {
     mm(other: ITensor): ITensor;
     sum(axis: number | null): ITensor;
     t(): ITensor;
+    // Codegen marker
+    abs(): ITensor;
+    abs_(): ITensor;
+    acos(): ITensor;
+    acos_(): ITensor;
+    acosh(): ITensor;
+    acosh_(): ITensor;
+    add(other: ITensor, alpha?: number): ITensor;
+    add_(other: ITensor, alpha?: number): ITensor;
+    asin(): ITensor;
+    asin_(): ITensor;
+    asinh(): ITensor;
+    asinh_(): ITensor;
+    atan(): ITensor;
+    atan_(): ITensor;
+    atan2(other: ITensor): ITensor;
+    atan2_(other: ITensor): ITensor;
+    sub(other: ITensor, alpha?: number): ITensor;
+    sub_(other: ITensor, alpha?: number): ITensor;
+    // End codegen marker
 }
-
