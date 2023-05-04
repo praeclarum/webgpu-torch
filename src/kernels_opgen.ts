@@ -4,8 +4,8 @@ import { KernelSpec } from "./kernel";
 
 export const kernels: { [name: string]: KernelSpec } =
 {
-    "Abs": {
-        "name": "Abs",
+    "abs": {
+        "name": "abs",
         "config": [
             {
                 "name": "dtype"
@@ -42,8 +42,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = abs(input[global_id.x]);"
     },
-    "Acos": {
-        "name": "Acos",
+    "abs_": {
+        "name": "abs_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = abs(input[global_id.x]);"
+    },
+    "acos": {
+        "name": "acos",
         "config": [
             {
                 "name": "dtype"
@@ -80,8 +113,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = acos(input[global_id.x]);"
     },
-    "Acosh": {
-        "name": "Acosh",
+    "acos_": {
+        "name": "acos_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = acos(input[global_id.x]);"
+    },
+    "acosh": {
+        "name": "acosh",
         "config": [
             {
                 "name": "dtype"
@@ -118,8 +184,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = acosh(input[global_id.x]);"
     },
-    "Add": {
-        "name": "Add",
+    "acosh_": {
+        "name": "acosh_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = acosh(input[global_id.x]);"
+    },
+    "add": {
+        "name": "add",
         "config": [
             {
                 "name": "dtype"
@@ -160,8 +259,8 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] + other[global_id.x]);"
     },
-    "Add_": {
-        "name": "Add_",
+    "add_": {
+        "name": "add_",
         "config": [
             {
                 "name": "dtype"
@@ -198,8 +297,8 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + other[global_id.x]);"
     },
-    "Asin": {
-        "name": "Asin",
+    "asin": {
+        "name": "asin",
         "config": [
             {
                 "name": "dtype"
@@ -236,8 +335,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = asin(input[global_id.x]);"
     },
-    "Asinh": {
-        "name": "Asinh",
+    "asin_": {
+        "name": "asin_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = asin(input[global_id.x]);"
+    },
+    "asinh": {
+        "name": "asinh",
         "config": [
             {
                 "name": "dtype"
@@ -274,8 +406,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = asinh(input[global_id.x]);"
     },
-    "Atan": {
-        "name": "Atan",
+    "asinh_": {
+        "name": "asinh_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = asinh(input[global_id.x]);"
+    },
+    "atan": {
+        "name": "atan",
         "config": [
             {
                 "name": "dtype"
@@ -312,8 +477,41 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = atan(input[global_id.x]);"
     },
-    "Atan2": {
-        "name": "Atan2",
+    "atan_": {
+        "name": "atan_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = atan(input[global_id.x]);"
+    },
+    "atan2": {
+        "name": "atan2",
         "config": [
             {
                 "name": "dtype"
@@ -354,8 +552,8 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
     },
-    "Atan2_": {
-        "name": "Atan2_",
+    "atan2_": {
+        "name": "atan2_",
         "config": [
             {
                 "name": "dtype"
@@ -392,8 +590,8 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
     },
-    "Sub": {
-        "name": "Sub",
+    "sub": {
+        "name": "sub",
         "config": [
             {
                 "name": "dtype"
@@ -434,8 +632,8 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] - other[global_id.x]);"
     },
-    "Sub_": {
-        "name": "Sub_",
+    "sub_": {
+        "name": "sub_",
         "config": [
             {
                 "name": "dtype"

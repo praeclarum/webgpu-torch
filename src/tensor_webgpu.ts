@@ -61,7 +61,7 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
-        const kernel = this._device.getKernel("Add_", { dtype: "f32" });
+        const kernel = this._device.getKernel("add_", { dtype: "f32" });
         const params = {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
@@ -70,7 +70,7 @@ export class TensorWebGPU extends TensorImpl {
         return this;
     }
     mm(other: TensorWebGPU): TensorWebGPU {
-        const kernel = this._device.getKernel("MM", { resultDtype: "f32" });
+        const kernel = this._device.getKernel("mm", { resultDtype: "f32" });
         const params = {
             resultRows: this.shape[0],
             resultCols: other.shape[1],

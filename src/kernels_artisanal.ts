@@ -1,8 +1,8 @@
 import { KernelSpec } from "./kernel";
 
 export const kernels: { [name: string]: KernelSpec } = {
-    MM: {
-        name: "MM",
+    mm: {
+        name: "mm",
         config: [
             {
                 name: "resultDtype",
