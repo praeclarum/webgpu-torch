@@ -258,7 +258,7 @@ function writeTensorImplCode(): void {
                 w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl, alpha?: number): TensorImpl;`);
             }
             else {
-                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl): ITensor;`);
+                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl): TensorImpl;`);
             }
         }
         else {
@@ -276,3 +276,61 @@ function writeTensorImplCode(): void {
     insertCodegenIntoFile(path, code);
 }
 writeTensorImplCode();
+
+// Write ops global functions
+function writeOpsCode(): void {
+    const w = new CodeWriter();
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        if (isInplace) {
+            continue;
+        }
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
+            }
+            else {
+                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor): Tensor {`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, alpha?: number): Tensor {`);
+            }
+            else {
+                w.writeLine(`export function ${kernelSpec.name}(input: Tensor): Tensor {`);
+            }
+        }
+        w.indent();
+        w.writeLine(`if (shouldCreateGradient(input)) {`);
+        w.indent();
+        w.writeLine(`throw new Error("Gradient of ${kernelSpec.name} is not supported");`);
+        w.dedent();
+        w.writeLine(`}`);
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl, alpha));`);
+            }
+            else {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl));`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(alpha));`);
+            }
+            else {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}());`);
+            }
+        }
+        w.dedent();
+        w.writeLine(`}`);
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/ops.ts";
+    insertCodegenIntoFile(path, code);
+}
+writeOpsCode();

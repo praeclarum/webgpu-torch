@@ -76,8 +76,8 @@ export abstract class TensorImpl implements ITensor {
     abstract asinh_(): TensorImpl;
     abstract atan(): TensorImpl;
     abstract atan_(): TensorImpl;
-    abstract atan2(other: TensorImpl): ITensor;
-    abstract atan2_(other: TensorImpl): ITensor;
+    abstract atan2(other: TensorImpl): TensorImpl;
+    abstract atan2_(other: TensorImpl): TensorImpl;
     abstract sub(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub_(other: TensorImpl, alpha?: number): TensorImpl;
     // End codegen marker
