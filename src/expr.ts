@@ -1,6 +1,8 @@
 export type ExprCode = number | string;
 
-export type ExprNode = string | number | [string, ExprNode[]];
+export type ExprNodeType = "apply" | "assign" | "statements" | "+" | "-" | "*" | "/";
+
+export type ExprNode = string | number | [ExprNodeType, ExprNode[]];
 
 export type ParsedExpr = ExprNode;
 
@@ -16,7 +18,7 @@ function lexn(code: string): (string | number)[] {
             i++;
             continue;
         }
-        if (c === "+" || c === "-" || c === "*" || c === "/" || c == ",") {
+        if (c === "+" || c === "-" || c === "*" || c === "/" || c == "," || c == "=" || c == ";" || c == ":" || c == "?" || c == "^" || c == "%" || c == "!" || c == "~" || c == "[" || c == "]" || c == "{" || c == "}" || c == ".") {
             tokens.push(c);
             i++;
             continue;
@@ -59,9 +61,14 @@ function lexn(code: string): (string | number)[] {
     return tokens;
 }
 
-export function parseCode(code: string): ExprNode {
+type ParseState = [ExprNode, number];
+
+export function parseCode(code: ExprCode): ExprNode {
+    if (typeof code === "number") {
+        return code;
+    }
     const tokens = lexn(code);
-    const expr = parseExpr(0);
+    const expr = parseStatements(0);
     if (expr === null) {
         throw new Error("Missing expression");
     }
@@ -70,7 +77,7 @@ export function parseCode(code: string): ExprNode {
         throw new Error(`Unexpected token: '${tokens[expr[1]]}' after parsing: ${JSON.stringify(expr[0])}`);
     }
     return expr[0];
-    function parsePrimary(i: number): [ExprNode, number]|null {
+    function parsePrimary(i: number): ParseState|null {
         if (i >= tokens.length) {
             return null;
         }
@@ -94,7 +101,7 @@ export function parseCode(code: string): ExprNode {
                 }
                 return [expr[0], i + 1];
             }
-            let result: [ExprNode, number] = [t, i + 1];
+            let result: ParseState = [t, i + 1];
             if (i + 1 < tokens.length && tokens[i + 1] === "(") {
                 const args: ExprNode[] = [];
                 let j = i + 2;
@@ -128,10 +135,10 @@ export function parseCode(code: string): ExprNode {
         }
         return null;
     }
-    function parseExpr(i: number): [ExprNode, number]|null {
+    function parseExpr(i: number): ParseState|null {
         return parseAddOrSubtract(i);
     }
-    function parseAddOrSubtract(i: number): [ExprNode, number]|null {
+    function parseAddOrSubtract(i: number): ParseState|null {
         let expr = parseMultiplyOrDivide(i);
         if (expr === null) {
             return null;
@@ -155,7 +162,7 @@ export function parseCode(code: string): ExprNode {
         }
         return expr;
     }
-    function parseMultiplyOrDivide(i: number): [ExprNode, number]|null {
+    function parseMultiplyOrDivide(i: number): ParseState|null {
         let expr = parsePrimary(i);
         if (expr === null) {
             return null;
@@ -178,6 +185,53 @@ export function parseCode(code: string): ExprNode {
             break;
         }
         return expr;
+    }
+    function parseStatement(i: number): ParseState|null {
+        // Empty statement?
+        if (tokens[i] === ";") {
+            return [["statements", []], i + 1];
+        }
+        // Expression statement?
+        const expr = parseExpr(i);
+        if (expr === null) {
+            return null;
+        }
+        i = expr[1];
+        if (i < tokens.length && tokens[i] === "=") {
+            const expr2 = parseExpr(i + 1);
+            if (expr2 === null) {
+                throw new Error("Missing right hand side of assignment");
+            }
+            return [["assign", [expr[0], expr2[0]]], expr2[1]];
+        }
+        return expr;
+    }
+    function parseStatements(i: number): ParseState|null {
+        if (i >= tokens.length) {
+            return null;
+        }
+        const expr = parseStatement(i);
+        if (expr === null) {
+            return null;
+        }
+        i = expr[1];
+        if (i >= tokens.length) {
+            return expr;
+        }
+        let children: ExprNode[] = [expr[0]];
+        while (i < tokens.length) {
+            const t = tokens[i];
+            if (typeof t !== "string" || t !== ";") {
+                break;
+            }
+            const expr2 = parseStatement(i + 1);
+            if (expr2 === null) {
+                break;
+            }
+            children.push(expr2[0]);
+            i = expr2[1];
+        }
+        return [["statements", children], i];
     }
 }
 

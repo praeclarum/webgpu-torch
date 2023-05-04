@@ -46,3 +46,15 @@ test("parse apply", () => {
     const parsed = parseCode(expr);
     expect(parsed).toEqual(["apply", ["f", 3]]);
 });
+
+test("parse assign", () => {
+    const expr = "x = 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["assign", ["x", 3]]);
+});
+
+test("parse statements", () => {
+    const expr = "x = 3; y = 4; x+y";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["statements", [["assign", ["x", 3]], ["assign", ["y", 4]], ["+", ["x", "y"]]]]);
+});
