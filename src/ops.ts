@@ -2,7 +2,8 @@ import { SumFunction, SumAxisFunction } from "./autograd";
 import { Device, DeviceType, Deviceish } from "./device";
 import { Dtype } from "./dtype";
 import { Tensor } from "./tensor";
-import { TensorArrayData, TensorJsonData, TensorImpl } from "./tensor_if";
+import { TensorArrayData, TensorJsonData } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
 
 function shouldCreateGradient(...inputs: Tensor[]): boolean {
     for (const input of inputs) {
@@ -78,3 +79,6 @@ export function tensor(
 ) {
     return new Tensor(data, dtype, device, requiresGrad);
 }
+
+// Codegen marker
+// End codegen marker

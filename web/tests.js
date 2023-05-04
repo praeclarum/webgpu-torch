@@ -36,7 +36,7 @@ test("tensor init", async () => {
 test("add_ vectors", async () => {
     const a = tensor([1, 2, 3]);
     const b = tensor([100, 200, 300]);
-    a.add_(b);
+    const aa = a.add_(b);
     expect(await a.toArrayAsync()).toEqual([101, 202, 303]);
 });
 

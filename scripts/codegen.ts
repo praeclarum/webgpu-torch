@@ -140,3 +140,75 @@ function writeTensorWebGPUCode(): void {
     insertCodegenIntoFile(path, code);
 }
 writeTensorWebGPUCode();
+
+// Write the Tensor class
+function writeTensorCode(): void {
+    const w = new CodeWriter();
+    w.indent();
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(other: Tensor, alpha?: number): Tensor {`);
+                w.indent();
+                if (isInplace) {
+                    w.writeLine(`this._impl.${kernelSpec.name}(other._impl, alpha);`);
+                    w.writeLine(`return this;`);
+                }
+                else {
+                    w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
+                }
+                w.dedent();
+                w.writeLine(`}`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(other: Tensor): Tensor {`);
+                w.indent();
+                if (isInplace) {
+                    w.writeLine(`this._impl.${kernelSpec.name}(other._impl);`);
+                    w.writeLine(`return this;`);
+                }
+                else {
+                    w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
+                }
+                w.dedent();
+                w.writeLine(`}`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(alpha?: number): Tensor {`);
+                w.indent();
+                if (isInplace) {
+                    w.writeLine(`this._impl.${kernelSpec.name}(alpha);`);
+                    w.writeLine(`return this;`);
+                }
+                else {
+                    w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
+                }
+                w.dedent();
+                w.writeLine(`}`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(): Tensor {`);
+                w.indent();
+                if (isInplace) {
+                    w.writeLine(`this._impl.${kernelSpec.name}();`);
+                    w.writeLine(`return this;`);
+                }
+                else {
+                    w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                }
+                w.dedent();
+                w.writeLine(`}`);
+            }
+        }
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/tensor.ts";
+    insertCodegenIntoFile(path, code);
+}
+writeTensorCode();

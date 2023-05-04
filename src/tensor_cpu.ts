@@ -8,7 +8,7 @@ import {
     shapeSize,
 } from "./shape";
 import { ArrayBufferStorage } from "./storage";
-import { TensorImpl } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
 
 export class TensorCPU extends TensorImpl {
     private _storage: ArrayBufferStorage;

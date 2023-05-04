@@ -3,7 +3,7 @@ import { DeviceWebGPU } from "./device_webgpu";
 import { Dtype, dtypeByteSize } from "./dtype";
 import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { GPUBufferStorage } from "./storage";
-import { TensorImpl } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
 
 export class TensorWebGPU extends TensorImpl {
     private _storage: GPUBufferStorage;
