@@ -1,7 +1,7 @@
 {
   "name": "webgpu-torch",
   "version": "0.1.0",
-  "description": "Tensor computation with WebGPU acceleration",
+  "description": "Tensor computation and autograd with WebGPU acceleration",
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode production",
@@ -16,7 +16,14 @@
   "keywords": [
     "torch",
     "nn",
-    "webgpu"
+    "webgpu",
+    "ai",
+    "machine learning",
+    "deep learning",
+    "neural networks",
+    "autograd",
+    "gpu",
+    "acceleration"
   ],
   "author": "Frank A. Krueger",
   "license": "MIT",
