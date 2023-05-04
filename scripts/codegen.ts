@@ -1,5 +1,5 @@
 import { KernelSpec } from "../src/kernel";
-import { CodeWriter, getKernelSpecs } from "../src/op_codegen";
+import { CodeWriter, getKernelSpecs } from "../src/opgen";
 import { OpSpec } from "../src/op_spec";
 import { registry } from "../src/op_table";
 
@@ -321,6 +321,13 @@ writeTensorImplCode();
 // Write ops global functions
 function writeOpsCode(): void {
     const w = new CodeWriter();
+    w.writeLine(`import * as functions from "./functions";
+import { Deviceish } from "./device";
+import { Dtype } from "./dtype";
+import { Tensor } from "./tensor";
+import { TensorArrayData, TensorJsonData } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
+import { shouldCreateGradient } from "./autograd";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -369,9 +376,11 @@ function writeOpsCode(): void {
         w.dedent();
         w.writeLine(`}`);
     }
+    w.writeLine("");
     const code = w.toString();
     // console.log(code);
-    const path = absSrcDir + "/ops.ts";
-    insertCodegenIntoFile(path, code);
+    const path = absSrcDir + "/ops_opgen.ts";
+    console.log("Writing", path);
+    fs.writeFileSync(path, code);
 }
 writeOpsCode();

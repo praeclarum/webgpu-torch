@@ -1,4 +1,4 @@
-import { getKernelSpecs } from "./op_codegen";
+import { getKernelSpecs } from "./opgen";
 import { registry, opSpecs } from "./op_table";
 
 test("binary sub op generate kernel spec", () => {

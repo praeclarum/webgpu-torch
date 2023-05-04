@@ -53,3 +53,12 @@ export class AutoFunction {
         return output;
     }
 }
+
+export function shouldCreateGradient(...inputs: Tensor[]): boolean {
+    for (const input of inputs) {
+        if (input.requiresGrad) {
+            return true;
+        }
+    }
+    return false;
+}
