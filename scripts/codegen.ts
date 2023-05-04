@@ -1,5 +1,5 @@
 import { KernelSpec } from "../src/kernel";
-import { getKernelSpecs } from "../src/op_spec";
+import { getKernelSpecs } from "../src/op_codegen";
 import { registry } from "../src/op_table";
 
 // import fs

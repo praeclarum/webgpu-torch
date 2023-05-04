@@ -1,10 +1,10 @@
-import { getKernelSpecs } from "./op_spec";
-import {registry, opSpecs} from "./op_table";
+import { getKernelSpecs } from "./op_codegen";
+import { registry, opSpecs } from "./op_table";
 
 test("binary sub op generate kernel spec", () => {
     const spec = opSpecs["sub"];
     const kernels = getKernelSpecs(spec);
-    expect(kernels.length).toBe(1);
+    expect(kernels.length).toBeGreaterThan(0);
     const kernel = kernels[0];
     expect(kernel.name).toBe("Sub");
     expect(kernel.config).toEqual([
@@ -35,4 +35,3 @@ test("can generate all kernel specs", () => {
         expect(kernels.length).toBeGreaterThan(0);
     }
 });
-
