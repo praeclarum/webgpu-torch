@@ -328,6 +328,7 @@ function writeFunctionsCode(): void {
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";`);
+    w.writeLine(`import * as ops from "./ops";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -340,24 +341,30 @@ import { Tensor } from "./tensor";`);
         w.indent();
         w.writeLine(`static forward(...inputs: FunctionInput[]): Tensor {`);
         w.indent();
-        w.writeLine(`throw new Error("Not implemented");`);
         if (isBinary) {
             if (hasAlpha) {
+                w.writeLine(`const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];`);
+                w.writeLine(`return ops.${kernelSpec.name}(input, other, alpha);`);
             }
             else {
+                w.writeLine(`const [input, other] = inputs as [Tensor, Tensor];`);
+                w.writeLine(`return ops.${kernelSpec.name}(input, other);`);
             }
         }
         else {
             if (hasAlpha) {
+                w.writeLine(`const [input, alpha] = inputs as [Tensor, number|undefined];`);
+                w.writeLine(`return ops.${kernelSpec.name}(input, alpha);`);
             }
             else {
+                w.writeLine(`const [input] = inputs as [Tensor];`);
+                w.writeLine(`return ops.${kernelSpec.name}(input);`);
             }
         }
         w.dedent();
         w.writeLine(`}`);
         w.writeLine(`static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {`);
         w.indent();
-        w.writeLine(`throw new Error("Not implemented");`);
         if (isBinary) {
             if (hasAlpha) {
             }
@@ -370,6 +377,7 @@ import { Tensor } from "./tensor";`);
             else {
             }
         }
+        w.writeLine(`throw new Error("Not implemented");`);
         w.dedent();
         w.writeLine(`}`);
         w.dedent();
