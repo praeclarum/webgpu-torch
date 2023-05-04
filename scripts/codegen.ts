@@ -384,15 +384,11 @@ import { Tensor } from "./tensor";`);
 }
 writeFunctionsCode();
 
-// Write ops global functions
+// Write global ops
 function writeOpsCode(): void {
     const w = new CodeWriter();
     w.writeLine(`import * as functions from "./functions";
-import { Deviceish } from "./device";
-import { Dtype } from "./dtype";
 import { Tensor } from "./tensor";
-import { TensorArrayData, TensorJsonData } from "./tensor_if";
-import { TensorImpl } from "./tensor_impl";
 import { shouldCreateGradient } from "./autograd";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
@@ -401,12 +397,30 @@ import { shouldCreateGradient } from "./autograd";`);
         }
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
+        const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
         if (isBinary) {
             if (hasAlpha) {
                 w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
             }
             else {
                 w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor): Tensor {`);
+            }
+            w.indent();
+            w.writeLine(`if (input.shape.length !== other.shape.length) {`);
+            w.indent();
+            w.writeLine("throw new Error(`Shape dimensions of " + kernelSpec.name + " must match. Got ${input.shape} and ${other.shape}`);");
+            w.dedent();
+            w.writeLine(`}`);
+            w.writeLine(`if (shouldCreateGradient(input, other)) {`);
+            w.indent();
+            w.writeLine(`return functions.${funcName}.apply(input, other);`);
+            w.dedent();
+            w.writeLine(`}`);
+            if (hasAlpha) {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl, alpha));`);
+            }
+            else {
+                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl));`);
             }
         }
         else {
@@ -416,22 +430,12 @@ import { shouldCreateGradient } from "./autograd";`);
             else {
                 w.writeLine(`export function ${kernelSpec.name}(input: Tensor): Tensor {`);
             }
-        }
-        w.indent();
-        w.writeLine(`if (shouldCreateGradient(input)) {`);
-        w.indent();
-        w.writeLine(`throw new Error("Gradient of ${kernelSpec.name} is not supported");`);
-        w.dedent();
-        w.writeLine(`}`);
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl, alpha));`);
-            }
-            else {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl));`);
-            }
-        }
-        else {
+            w.indent();
+            w.writeLine(`if (shouldCreateGradient(input)) {`);
+            w.indent();
+            w.writeLine(`return functions.${funcName}.apply(input);`);
+            w.dedent();
+            w.writeLine(`}`);
             if (hasAlpha) {
                 w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(alpha));`);
             }
