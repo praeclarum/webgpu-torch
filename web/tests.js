@@ -5,7 +5,6 @@ because they require WebGPU.
 */
 const tests = [];
 function test(description, callback) { tests.push({ description, callback }); }
-const torch = jstorch;
 const tensor = torch.tensor;
 const LinearFunction = torch.functions.LinearFunction;
 

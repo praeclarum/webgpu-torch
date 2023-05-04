@@ -19,9 +19,9 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js"],
   },
   output: {
-    filename: "jstorch.js", // Set the output file name
+    filename: "torch.js", // Set the output file name
     path: path.resolve(__dirname, "dist"),
-    library: "jstorch",
+    library: "torch",
     libraryTarget: "umd",
   },
 };

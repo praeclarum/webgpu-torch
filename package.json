@@ -1,5 +1,5 @@
 {
-  "name": "jstorch",
+  "name": "webgpu-torch",
   "version": "0.1.0",
   "description": "Tensor computation with WebGPU acceleration",
   "main": "index.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/praeclarum/jstorch.git"
+    "url": "git+https://github.com/praeclarum/webgpu-torch.git"
   },
   "keywords": [
     "torch",
@@ -21,9 +21,9 @@
   "author": "Frank A. Krueger",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/praeclarum/jstorch/issues"
+    "url": "https://github.com/praeclarum/webgpu-torch/issues"
   },
-  "homepage": "https://github.com/praeclarum/jstorch#readme",
+  "homepage": "https://github.com/praeclarum/webgpu-torch#readme",
   "devDependencies": {
     "@types/jest": "^29.5.1",
     "jest": "^29.5.0",
