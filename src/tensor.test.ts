@@ -1,6 +1,6 @@
 import { UntypedStorage } from "./storage";
 import { Tensor, tensor, ones } from "./index";
-import { LinearFunction } from "./autograd";
+import { LinearFunction } from "./functions";
 import { TensorCPU } from "./tensor_cpu";
 
 test("create tensor with storage and dtype", () => {

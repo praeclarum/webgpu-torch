@@ -16,7 +16,7 @@ export * from "./ops";
 
 export const foo = 42;
 
-export {LinearFunction} from "./autograd";
+export * as functions from "./functions";
 
 import { discoverWebGPUDevicesAsync } from "./devices";
 

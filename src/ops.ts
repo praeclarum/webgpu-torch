@@ -1,4 +1,4 @@
-import { SumFunction, SumAxisFunction } from "./autograd";
+import * as functions from "./functions";
 import { Device, DeviceType, Deviceish } from "./device";
 import { Dtype } from "./dtype";
 import { Tensor } from "./tensor";
@@ -51,9 +51,9 @@ export function mm(a: Tensor, b: Tensor): Tensor {
 export function sum(input: Tensor, axis: number | null = 0): Tensor {
     if (shouldCreateGradient(input)) {
         if (axis === null) {
-            return SumFunction.apply(input);
+            return functions.SumFunction.apply(input);
         }
-        return SumAxisFunction.apply(input, axis);
+        return functions.SumAxisFunction.apply(input, axis);
     } else {
         return new Tensor(input.impl.sum(axis));
     }
