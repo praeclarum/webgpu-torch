@@ -61,9 +61,9 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
-        const kernel = this._device.getKernel("Add_", { resultDtype: "f32" });
+        const kernel = this._device.getKernel("Add_", { dtype: "f32" });
         const params = {
-            resultSize: shapeSize(this.shape),
+            size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
         kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);

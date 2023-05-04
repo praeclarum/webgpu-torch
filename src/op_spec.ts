@@ -42,6 +42,13 @@ function titleCase(str: string) {
 }
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
+    return [
+        getBinaryKernelSpec(op),
+        getBinaryInplaceKernelSpec(op),
+    ];
+}
+
+function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
@@ -60,7 +67,7 @@ function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
             return;
         }
         out[global_id.x] = ${shaderSnippet};`;
-    const kernels: KernelSpec[] = [{
+    return {
         name: titleCase(op.name),
         config: [
             {
@@ -88,8 +95,53 @@ function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
         workgroupSize: [64, 1, 1],
         workgroupCount: ["size/8", 1, 1],
         shader: shader,
-    }];
-    return kernels;
+    };
+}
+
+function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
+    const parameters: KernelParamSpec[] = [
+        {
+            name: "size",
+            shaderType: "u32",
+        },
+    ];
+    const ast = parseCode(op.webGPU);
+    const subs = {
+        input: "input[global_id.x]",
+        other: "other[global_id.x]",
+    };
+    const shaderAst = substituteIdentifiers(ast, subs);
+    const shaderSnippet = exprNodeToString(shaderAst);
+    const shader = `
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        input[global_id.x] = ${shaderSnippet};`;
+    return {
+        name: titleCase(op.name) + "_",
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: parameters,
+        inputs: [
+            {
+                name: "other",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [64, 1, 1],
+        workgroupCount: ["size/8", 1, 1],
+        shader: shader,
+    };
 }
 
 function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {

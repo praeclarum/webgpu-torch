@@ -1,43 +1,6 @@
 import { KernelSpec } from "./kernel";
 
 export const kernels: { [name: string]: KernelSpec } = {
-    Add_: {
-        name: "Add_",
-        config: [
-            {
-                name: "resultDtype",
-            },
-        ],
-        parameters: [
-            {
-                name: "resultSize",
-                shaderType: "u32",
-            },
-        ],
-        inputs: [
-            
-            {
-                name: "secondArray",
-                shaderType: "array<f32>",
-            },
-        ],
-        outputs: [
-            {
-                name: "firstArray",
-                shaderType: "array<f32>",
-                size: "resultSize",
-            },
-        ],
-        workgroupSize: [64, 1, 1],
-        workgroupCount: ["resultSize/8", 1, 1],
-        shader: `
-    if (global_id.x >= parameters.resultSize) {
-        return;
-    }
-    firstArray[global_id.x] += secondArray[global_id.x];
-`
-    },
-
     MM: {
         name: "MM",
         config: [
