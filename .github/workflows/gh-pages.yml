@@ -35,6 +35,8 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
+      - name: Copy the build to web
+        run: cp -a dist web/
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Build with Jekyll
