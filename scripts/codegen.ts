@@ -318,6 +318,72 @@ function writeTensorImplCode(): void {
 }
 writeTensorImplCode();
 
+// Write autograd functions
+function writeFunctionsCode(): void {
+    const w = new CodeWriter();
+    w.writeLine(`import {
+    AutoFunction,
+    FunctionInput,
+    GradientFunctionContext,
+    GradientFunctionOutput,
+} from "./autograd";
+import { Tensor } from "./tensor";`);
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        if (isInplace) {
+            continue;
+        }
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
+        w.writeLine(`export class ${className} extends AutoFunction {`);
+        w.indent();
+        w.writeLine(`static forward(...inputs: FunctionInput[]): Tensor {`);
+        w.indent();
+        w.writeLine(`throw new Error("Not implemented");`);
+        if (isBinary) {
+            if (hasAlpha) {
+            }
+            else {
+            }
+        }
+        else {
+            if (hasAlpha) {
+            }
+            else {
+            }
+        }
+        w.dedent();
+        w.writeLine(`}`);
+        w.writeLine(`static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {`);
+        w.indent();
+        w.writeLine(`throw new Error("Not implemented");`);
+        if (isBinary) {
+            if (hasAlpha) {
+            }
+            else {
+            }
+        }
+        else {
+            if (hasAlpha) {
+            }
+            else {
+            }
+        }
+        w.dedent();
+        w.writeLine(`}`);
+        w.dedent();
+        w.writeLine(`}`);
+    }
+    w.writeLine("");
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/functions_opgen.ts";
+    console.log("Writing", path);
+    fs.writeFileSync(path, code);
+}
+writeFunctionsCode();
+
 // Write ops global functions
 function writeOpsCode(): void {
     const w = new CodeWriter();
