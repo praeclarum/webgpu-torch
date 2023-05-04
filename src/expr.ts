@@ -16,7 +16,7 @@ function lexn(code: string): (string | number)[] {
             i++;
             continue;
         }
-        if (c === "+" || c === "-" || c === "*" || c === "/") {
+        if (c === "+" || c === "-" || c === "*" || c === "/" || c == ",") {
             tokens.push(c);
             i++;
             continue;
@@ -59,14 +59,14 @@ function lexn(code: string): (string | number)[] {
     return tokens;
 }
 
-export function parseExpr(code: string): ExprNode {
+export function parseCode(code: string): ExprNode {
     const tokens = lexn(code);
     const expr = parseExpr(0);
     if (expr === null) {
         throw new Error("Missing expression");
     }
     if (expr[1] < tokens.length) {
-        console.log("bad tree", expr[0], expr[1], tokens.length, tokens[expr[1]])
+        console.log("bad tree:", "e0:", expr[0], "e1:", expr[1], "numTokens:", tokens.length, "token:", tokens[expr[1]])
         throw new Error(`Unexpected token: '${tokens[expr[1]]}' after parsing: ${JSON.stringify(expr[0])}`);
     }
     return expr[0];
@@ -94,7 +94,37 @@ export function parseExpr(code: string): ExprNode {
                 }
                 return [expr[0], i + 1];
             }
-            return [t, i + 1];
+            let result: [ExprNode, number] = [t, i + 1];
+            if (i + 1 < tokens.length && tokens[i + 1] === "(") {
+                const args: ExprNode[] = [];
+                let j = i + 2;
+                while (j < tokens.length) {
+                    const arg = parseExpr(j);
+                    if (arg === null) {
+                        throw new Error("Missing argument");
+                    }
+                    args.push(arg[0]);
+                    j = arg[1];
+                    if (j >= tokens.length) {
+                        throw new Error("Unexpected end of expression");
+                    }
+                    const t2 = tokens[j];
+                    if (typeof t2 !== "string") {
+                        throw new Error("Expected , or )");
+                    }
+                    if (t2 === ")") {
+                        break;
+                    }
+                    if (t2 !== ",") {
+                        throw new Error("Expected ,");
+                    }
+                    j++;
+                }
+                const func = result[0];
+                args.splice(0, 0, func);
+                result = [["apply", args], j + 1];
+            }
+            return result;
         }
         return null;
     }
@@ -187,7 +217,14 @@ export function exprNodeToString(ast: ExprNode): string {
     if (ast[0] === "/") {
         return `(${exprNodeToString(ast[1][0])} / ${exprNodeToString(ast[1][1])})`;
     }
-    throw new Error("Unknown AST node type");
+    if (ast[0] === "apply") {
+        const f = ast[1][0];
+        const fstr = exprNodeToString(f);
+        const args = ast[1].slice(1);
+        const argstrs = args.map(exprNodeToString);
+        return `${fstr}(${argstrs.join(", ")})`;
+    }
+    throw new Error(`Unknown AST node type when printing: ${ast[0]}`);
 }
 
 
@@ -206,7 +243,7 @@ export function compileCode(code: ExprCode): CompiledExpr {
     if (typeof code === "number") {
         return () => code;
     }
-    const expr = parseExpr(code);
+    const expr = parseCode(code);
     // console.log("parsed", expr);
     const instructions: [number, (number|string|null)][] = [];
     function emit(node: ExprNode) {

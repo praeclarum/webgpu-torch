@@ -1,4 +1,4 @@
-import { compileCode, evalCode } from "./expr";
+import { compileCode, evalCode, parseCode } from "./expr";
 
 test("just a number", () => {
     const expr = "3.14";
@@ -39,4 +39,10 @@ test("compile number", () => {
     const expr = 3;
     const compiled = compileCode(expr);
     expect(compiled({})).toEqual(3);
+});
+
+test("parse apply", () => {
+    const expr = "f(3)";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["apply", ["f", 3]]);
 });

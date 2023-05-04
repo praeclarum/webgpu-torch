@@ -1,5 +1,5 @@
 import { KernelParamSpec, KernelSpec } from "./kernel";
-import { exprNodeToString, parseExpr, substituteIdentifiers } from "./expr";
+import { exprNodeToString, parseCode, substituteIdentifiers } from "./expr";
 
 export type OpType = "unary" | "binary";
 
@@ -41,59 +41,109 @@ function titleCase(str: string) {
     return str[0].toUpperCase() + str.slice(1);
 }
 
+function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
+    const parameters: KernelParamSpec[] = [
+        {
+            name: "size",
+            shaderType: "u32",
+        },
+    ];
+    const ast = parseCode(op.webGPU);
+    const subs = {
+        input: "input[global_id.x]",
+        other: "other[global_id.x]",
+    };
+    const shaderAst = substituteIdentifiers(ast, subs);
+    const shaderSnippet = exprNodeToString(shaderAst);
+    const shader = `
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        out[global_id.x] = ${shaderSnippet};`;
+    const kernels: KernelSpec[] = [{
+        name: titleCase(op.name),
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: parameters,
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "other",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "out",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [64, 1, 1],
+        workgroupCount: ["size/8", 1, 1],
+        shader: shader,
+    }];
+    return kernels;
+}
+
+function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
+    const parameters: KernelParamSpec[] = [
+        {
+            name: "size",
+            shaderType: "u32",
+        },
+    ];
+    const ast = parseCode(op.webGPU);
+    const subs = {
+        input: "input[global_id.x]",
+    };
+    const shaderAst = substituteIdentifiers(ast, subs);
+    const shaderSnippet = exprNodeToString(shaderAst);
+    const shader = `
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        out[global_id.x] = ${shaderSnippet};`;
+    const kernels: KernelSpec[] = [{
+        name: titleCase(op.name),
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: parameters,
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "out",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [64, 1, 1],
+        workgroupCount: ["size/8", 1, 1],
+        shader: shader,
+    }];
+    return kernels;
+}
+
 export function getKernelSpecs(op: OpSpec): KernelSpec[] {
     if (op.type == "binary") {
-        const parameters: KernelParamSpec[] = [
-            {
-                name: "size",
-                shaderType: "u32",
-            },
-        ];
-        const ast = parseExpr(op.webGPU);
-        const subs = {
-            input: "input[global_id.x]",
-            other: "other[global_id.x]",
-        };
-        const shaderAst = substituteIdentifiers(ast, subs);
-        const shaderSnippet = exprNodeToString(shaderAst);
-        const shader = `
-            if (global_id.x >= parameters.size) {
-                return;
-            }
-            out[global_id.x] = ${shaderSnippet};`;
-        const kernels: KernelSpec[] = [{
-            name: titleCase(op.name),
-            config: [
-                {
-                    name: "dtype",
-                },
-            ],
-            parameters: parameters,
-            inputs: [
-                {
-                    name: "input",
-                    shaderType: "array<f32>",
-                },
-                {
-                    name: "other",
-                    shaderType: "array<f32>",
-                },
-            ],
-            outputs: [
-                {
-                    name: "out",
-                    shaderType: "array<f32>",
-                    size: "size",
-                },
-            ],
-            workgroupSize: [64, 1, 1],
-            workgroupCount: ["size/8", 1, 1],
-            shader: shader,
-        }];
-        return kernels;
+        return getBinaryKernelSpecs(op as BinaryOpSpec);
     }
     else {
-        throw new Error("Unary Op Specs Not implemented");
+        return getUnaryKernelSpecs(op as UnaryOpSpec);
     }
 }
 

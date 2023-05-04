@@ -19,11 +19,20 @@ test("binary sub op generate kernel spec", () => {
         },
     ]);
     expect(kernel.shader).toBe(`
-            if (global_id.x >= parameters.size) {
-                return;
-            }
-            out[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        out[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
+});
 
+test("binary atan2 op kernel spec shader", () => {
+    const spec = opSpecs["atan2"];
+    const kernels = getKernelSpecs(spec);
+    expect(kernels[0].shader).toBe(`
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        out[global_id.x] = atan2(input[global_id.x], other[global_id.x]);`);
 });
 
 test("can generate all kernel specs", () => {
