@@ -60,15 +60,6 @@ export class TensorWebGPU extends TensorImpl {
         );
     }
 
-    add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
-        const kernel = this._device.getKernel("add_", { dtype: "f32" });
-        const params = {
-            size: shapeSize(this.shape),
-            alpha: alpha || 1.0,
-        };
-        kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
-        return this;
-    }
     mm(other: TensorWebGPU): TensorWebGPU {
         const kernel = this._device.getKernel("mm", { resultDtype: "f32" });
         const params = {
@@ -95,4 +86,33 @@ export class TensorWebGPU extends TensorImpl {
     sum(axis: number | null): TensorImpl {
         throw new Error("Sum not implemented.");
     }
+
+    // Codegen marker
+    add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const kernel = this._device.getKernel("add_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
+    }
+    atan2_(other: TensorWebGPU): TensorWebGPU {
+        const kernel = this._device.getKernel("atan2_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
+    }
+    sub_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const kernel = this._device.getKernel("sub_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
+    }
+    // End codegen marker
 }

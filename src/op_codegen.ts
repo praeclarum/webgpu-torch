@@ -2,7 +2,7 @@ import { KernelParamSpec, KernelSpec } from "./kernel";
 import { exprNodeToString, parseCode, substituteIdentifiers } from "./expr";
 import { BinaryOpSpec, OpSpec, UnaryOpSpec } from "./op_spec";
 
-class CodeWriter {
+export class CodeWriter {
     private indentLevel = 0;
     private lines: string[] = [];
     indent() {
