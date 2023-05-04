@@ -20,6 +20,12 @@
 			},
 			"problemMatcher": [],
 			"label": "npm: build",
+		},
+		{
+			"type": "npm",
+			"script": "codegen",
+			"problemMatcher": [],
+			"label": "npm: codegen",
 		}
 	]
 }

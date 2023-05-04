@@ -1,6 +1,5 @@
 import { OpSpec } from "./op_spec";
 
-
 export const registry: OpSpec[] = [
     {
         name: "abs",
@@ -67,3 +66,8 @@ export const registry: OpSpec[] = [
         javaScript: "input - other",
     },
 ];
+
+export const opSpecs = registry.reduce((map, spec) => {
+    map[spec.name] = spec;
+    return map;
+}, {} as {[name: string]: any});
