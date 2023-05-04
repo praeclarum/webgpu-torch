@@ -100,3 +100,15 @@ test("parse nest blocks", () => {
     const parsed = parseCode(expr);
     expect(parsed).toEqual(["statements", [["assign", ["x", 3]], ["statements", [["assign", ["y", 4]], ["assign", ["z", 5]]]]]]);
 });
+
+test("parse if", () => {
+    const expr = "if (x > 3) { y = 4; }";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["if", [[">", ["x", 3]], ["assign", ["y", 4]]]]);
+});
+
+test("parse if else", () => {
+    const expr = "if (x > 3) { y = 4; } else { y = 5; }";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["if", [[">", ["x", 3]], ["assign", ["y", 4]], ["assign", ["y", 5]]]]);
+});

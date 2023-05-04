@@ -1,6 +1,6 @@
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "assign" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
+export type ExprNodeType = "apply" | "assign" | "if" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
 
 export type ExprNode = string | number | [ExprNodeType, ExprNode[]];
 
@@ -70,7 +70,13 @@ function tokenIsIdent(token: string): boolean {
     if (token.length <= 0)
         return false;
     const c = token[0];
-    return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c === "_";
+    if (!((c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c === "_")) {
+        return false;
+    }
+    if (c === "if" || c === "else") {
+        return false;
+    }
+    return true;
 }
 
 type ParseState = [ExprNode, number];
@@ -255,6 +261,40 @@ export function parseCode(code: ExprCode): ExprNode {
             // console.log("block statement end:", j + 1, tokens[j + 1]);
             return [statements[0], j + 1];
         }
+        // If statement?
+        if (tokens[i] === "if") {
+            // console.log("parse If Statement:", i, tokens.slice(i));
+            let j = i + 1;
+            if (j >= tokens.length) {
+                throw new Error("Missing ( after if");
+            }
+            if (tokens[j] !== "(") {
+                throw new Error("Missing ( after if");
+            }
+            const condExpr = parseExpr(j + 1);
+            if (condExpr === null) {
+                throw new Error("Missing condition after if");
+            }
+            j = condExpr[1];
+            if (j >= tokens.length || tokens[j] !== ")") {
+                throw new Error("Missing ) after if condition");
+            }
+            const thenExpr = parseStatement(j + 1);
+            if (thenExpr === null) {
+                throw new Error("Missing then after if condition");
+            }
+            j = thenExpr[1];
+            if (j >= tokens.length || tokens[j] !== "else") {
+                return [["if", [condExpr[0], thenExpr[0]]], j];
+            }
+            const elseExpr = parseStatement(j + 1);
+            if (elseExpr === null) {
+                throw new Error("Missing else after if condition");
+            }
+            j = elseExpr[1];
+            return [["if", [condExpr[0], thenExpr[0], elseExpr[0]]], j];
+        }
+
         // Expression statement?
         const expr = parseExpr(i);
         if (expr === null) {
@@ -300,6 +340,9 @@ export function parseCode(code: ExprCode): ExprNode {
             }
             children.push(expr2[0]);
             i = expr2[1];
+        }
+        if (children.length === 1) {
+            return [children[0], i];
         }
         // console.log("parsed statements", i, tokens.slice(i));
         return [["statements", children], i];
