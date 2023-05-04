@@ -1,6 +1,6 @@
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "assign" | "statements" | "+" | "-" | "*" | "/";
+export type ExprNodeType = "apply" | "assign" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
 
 export type ExprNode = string | number | [ExprNodeType, ExprNode[]];
 
@@ -18,12 +18,17 @@ function lexn(code: string): (string | number)[] {
             i++;
             continue;
         }
-        if (c === "+" || c === "-" || c === "*" || c === "/" || c == "," || c == "=" || c == ";" || c == ":" || c == "?" || c == "^" || c == "%" || c == "!" || c == "~" || c == "[" || c == "]" || c == "{" || c == "}" || c == ".") {
+        if (c === "+" || c === "-" || c === "*" || c === "/" || c == "," || c == ";" || c == ":" || c == "?" || c == "^" || c == "%" || c == "~" || c == "(" || c == ")" || c == "[" || c == "]" || c == "{" || c == "}" || c == ".") {
             tokens.push(c);
             i++;
             continue;
         }
-        if (c === "(" || c === ")") {
+        if (c == "=" || c == "<" || c == ">" || c == "!") {
+            if (i + 1 < n && code[i + 1] == "=") {
+                tokens.push(c + "=");
+                i += 2;
+                continue;
+            }
             tokens.push(c);
             i++;
             continue;
@@ -136,7 +141,31 @@ export function parseCode(code: ExprCode): ExprNode {
         return null;
     }
     function parseExpr(i: number): ParseState|null {
-        return parseAddOrSubtract(i);
+        return parseComparison(i);
+    }
+    function parseComparison(i: number): ParseState|null {
+        let expr = parseAddOrSubtract(i);
+        if (expr === null) {
+            return null;
+        }
+        i = expr[1];
+        while (i < tokens.length) {
+            const t = tokens[i];
+            if (typeof t !== "string") {
+                break;
+            }
+            if (t === "==" || t === "!=" || t === "<" || t === ">" || t === "<=" || t === ">=") {
+                const expr2 = parseAddOrSubtract(i + 1);
+                if (expr2 === null) {
+                    throw new Error("Missing expression after " + t);
+                }
+                expr = [[t, [expr[0], expr2[0]]], expr2[1]];
+                i = expr2[1];
+                continue;
+            }
+            break;
+        }
+        return expr;
     }
     function parseAddOrSubtract(i: number): ParseState|null {
         let expr = parseMultiplyOrDivide(i);

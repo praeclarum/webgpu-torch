@@ -58,3 +58,33 @@ test("parse statements", () => {
     const parsed = parseCode(expr);
     expect(parsed).toEqual(["statements", [["assign", ["x", 3]], ["assign", ["y", 4]], ["+", ["x", "y"]]]]);
 });
+
+test("parse >", () => {
+    const expr = "x > 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual([">", ["x", 3]]);
+});
+
+test("parse >=", () => {
+    const expr = "x >= 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual([">=", ["x", 3]]);
+});
+
+test("parse <", () => {
+    const expr = "x < 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["<", ["x", 3]]);
+});
+
+test("parse <=", () => {
+    const expr = "x <= 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["<=", ["x", 3]]);
+});
+
+test("parse ==", () => {
+    const expr = "x == 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["==", ["x", 3]]);
+});
