@@ -6,7 +6,7 @@ test("binary sub op generate kernel spec", () => {
     const kernels = getKernelSpecs(spec);
     expect(kernels.length).toBeGreaterThan(0);
     const kernel = kernels[0];
-    expect(kernel.name).toBe("Sub");
+    expect(kernel.name).toBe("sub");
     expect(kernel.config).toEqual([
         {
             name: "dtype",

@@ -62,7 +62,6 @@ function writeTensorWebGPUCode(): void {
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
-            if (!isInplace) continue;
             if (hasAlpha) {
                 w.writeLine(`${kernelSpec.name}(other: TensorWebGPU, alpha?: number): TensorWebGPU {`);
             }
@@ -83,7 +82,17 @@ function writeTensorWebGPUCode(): void {
                 w.writeLine(`kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);`);
             }
             else {
-                w.writeLine(`//const result = new TensorWebGPU(this._device, this.shape);`);
+                w.writeLine(`const outputBuffer = kernel.run([this.gpuBuffer, other.gpuBuffer], params)[0];`);
+                w.writeLine(`return new TensorWebGPU(`);
+                w.indent();
+                w.writeLine(`new GPUBufferStorage(outputBuffer, this.gpuDevice),`);
+                w.writeLine(`this.dtype,`);
+                w.writeLine(`this.shape,`);
+                w.writeLine(`defaultStrides(this.shape),`);
+                w.writeLine(`this._device`);
+                w.dedent();
+                w.writeLine(`);`);
+
             }
             w.writeLine(`return this;`);
             w.dedent();

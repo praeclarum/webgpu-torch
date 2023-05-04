@@ -88,6 +88,22 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     // Codegen marker
+    add(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const kernel = this._device.getKernel("add", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer, other.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+        return this;
+    }
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const kernel = this._device.getKernel("add_", { dtype: "f32" });
         const params = {
@@ -97,12 +113,43 @@ export class TensorWebGPU extends TensorImpl {
         kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
         return this;
     }
+    atan2(other: TensorWebGPU): TensorWebGPU {
+        const kernel = this._device.getKernel("atan2", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer, other.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+        return this;
+    }
     atan2_(other: TensorWebGPU): TensorWebGPU {
         const kernel = this._device.getKernel("atan2_", { dtype: "f32" });
         const params = {
             size: shapeSize(this.shape),
         };
         kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
+    }
+    sub(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const kernel = this._device.getKernel("sub", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer, other.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
         return this;
     }
     sub_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
