@@ -6,7 +6,7 @@ import { ones } from "./factories";
 import { Dtype } from "./dtype";
 import { IDevice } from "./device_if";
 import { UntypedStorage } from "./storage";
-import { GradientFunction, GradientFunctionContext } from "./autograd";
+import { GradientFunction, GradientContext } from "./autograd";
 import { TensorImpl } from "./tensor_impl";
 import * as ops from "./ops";
 
@@ -14,7 +14,7 @@ export class Tensor implements ITensor {
     private _impl: TensorImpl;
     private _requiresGrad: boolean = false;
     private _gradFunc: GradientFunction | null;
-    private _gradCtx: GradientFunctionContext | null;
+    private _gradCtx: GradientContext | null;
     private _grad: Tensor | null = null;
 
     get impl(): TensorImpl {
@@ -146,7 +146,7 @@ export class Tensor implements ITensor {
     }
 
     setGradientFunction(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         gradFunc: GradientFunction
     ): void {
         this._gradFunc = gradFunc;

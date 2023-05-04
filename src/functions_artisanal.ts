@@ -1,7 +1,7 @@
 import {
     AutoFunction,
     FunctionInput,
-    GradientFunctionContext,
+    GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";
@@ -16,7 +16,7 @@ export class LinearFunction extends AutoFunction {
         return output;
     }
     static setupContext(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ) {
@@ -24,7 +24,7 @@ export class LinearFunction extends AutoFunction {
         ctx.saveForBackward(input, weight, bias);
     }
     static backward(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
         const [input, weight, bias] = ctx.savedTensors;
@@ -49,14 +49,14 @@ export class SumAxisFunction extends AutoFunction {
         throw new Error("Method not implemented.");
     }
     static setupContext(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ) {
         throw new Error("Method not implemented.");
     }
     static backward(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
         throw new Error("Method not implemented.");
@@ -69,7 +69,7 @@ export class SumFunction extends AutoFunction {
         return input.sum();
     }
     static setupContext(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ) {
@@ -77,7 +77,7 @@ export class SumFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
         const [input] = ctx.savedTensors;

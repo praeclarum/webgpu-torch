@@ -3,7 +3,8 @@ import { Tensor } from "./tensor";
 export type FunctionInput = Tensor | number | boolean | string;
 export type GradientFunctionOutput = Tensor | null;
 
-export class GradientFunctionContext {
+export class GradientContext {
+    [key: string]: any;
     needsInputGradient: boolean[];
     inputsWithGradient: (Tensor | null)[];
     savedTensors: Tensor[] = [];
@@ -21,7 +22,7 @@ export class GradientFunctionContext {
 }
 
 export type GradientFunction = (
-    ctx: GradientFunctionContext,
+    ctx: GradientContext,
     output: Tensor
 ) => (Tensor | null)[];
 
@@ -30,20 +31,20 @@ export class AutoFunction {
         throw new Error("Do not call forward on AutoFunction directly.");
     }
     static setupContext(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
-    ) {
+    ): void {
         throw new Error("Do not call setupContext on AutoFunction directly.");
     }
     static backward(
-        ctx: GradientFunctionContext,
+        ctx: GradientContext,
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
         throw new Error("Do not call backward on AutoFunction directly.");
     }
     static apply(...inputs: FunctionInput[]): Tensor {
-        const ctx = new GradientFunctionContext(inputs);
+        const ctx = new GradientContext(inputs);
         const detachedInputs = inputs.map((input) =>
             input instanceof Tensor ? input.detach() : input
         );

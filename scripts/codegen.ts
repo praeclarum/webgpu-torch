@@ -324,7 +324,7 @@ function writeFunctionsCode(): void {
     w.writeLine(`import {
     AutoFunction,
     FunctionInput,
-    GradientFunctionContext,
+    GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";`);
@@ -339,6 +339,8 @@ import { Tensor } from "./tensor";`);
         const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
         w.writeLine(`export class ${className} extends AutoFunction {`);
         w.indent();
+
+        // Forward
         w.writeLine(`static forward(...inputs: FunctionInput[]): Tensor {`);
         w.indent();
         if (isBinary) {
@@ -363,7 +365,40 @@ import { Tensor } from "./tensor";`);
         }
         w.dedent();
         w.writeLine(`}`);
-        w.writeLine(`static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {`);
+
+        w.writeLine(`static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {`);
+        w.indent();
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];`);
+                w.writeLine(`ctx.alpha = alpha;`);
+                w.writeLine(`ctx.saveForBackward(input, other);`);
+            }
+            else {
+                w.writeLine(`const [input, other] = inputs as [Tensor, Tensor];`);
+                w.writeLine(`ctx.saveForBackward(input, other);`);
+            }
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`const [input, alpha] = inputs as [Tensor, number|undefined];`);
+                w.writeLine(`ctx.alpha = alpha;`);
+                w.writeLine(`ctx.saveForBackward(input);`);
+            }
+            else {
+                w.writeLine(`const [input] = inputs as [Tensor];`);
+                w.writeLine(`ctx.saveForBackward(input);`);
+            }
+        }
+        w.dedent();
+        w.writeLine(`}`);
+
+        // Backward
+        w.writeLine(`static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {`);
         w.indent();
         if (isBinary) {
             if (hasAlpha) {

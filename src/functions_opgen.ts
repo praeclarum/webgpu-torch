@@ -1,7 +1,7 @@
 import {
     AutoFunction,
     FunctionInput,
-    GradientFunctionContext,
+    GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";
@@ -11,7 +11,15 @@ export class AbsFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.abs(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -20,7 +28,15 @@ export class AcosFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.acos(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -29,7 +45,15 @@ export class AcoshFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.acosh(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -38,7 +62,16 @@ export class AddFunction extends AutoFunction {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
         return ops.add(input, other, alpha);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -47,7 +80,15 @@ export class AsinFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.asin(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -56,7 +97,15 @@ export class AsinhFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.asinh(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -65,7 +114,15 @@ export class AtanFunction extends AutoFunction {
         const [input] = inputs as [Tensor];
         return ops.atan(input);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -74,7 +131,15 @@ export class Atan2Function extends AutoFunction {
         const [input, other] = inputs as [Tensor, Tensor];
         return ops.atan2(input, other);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other] = inputs as [Tensor, Tensor];
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
@@ -83,7 +148,16 @@ export class SubFunction extends AutoFunction {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
         return ops.sub(input, other, alpha);
     }
-    static backward(ctx: GradientFunctionContext, gradOutput: Tensor): GradientFunctionOutput[] {
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
         throw new Error("Not implemented");
     }
 }
