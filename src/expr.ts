@@ -66,6 +66,13 @@ function lexn(code: string): (string | number)[] {
     return tokens;
 }
 
+function tokenIsIdent(token: string): boolean {
+    if (token.length <= 0)
+        return false;
+    const c = token[0];
+    return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c === "_";
+}
+
 type ParseState = [ExprNode, number];
 
 export function parseCode(code: ExprCode): ExprNode {
@@ -90,55 +97,55 @@ export function parseCode(code: ExprCode): ExprNode {
         if (typeof t === "number") {
             return [t, i + 1];
         }
-        if (typeof t === "string") {
-            if (t === "(") {
-                const expr = parseExpr(i + 1);
-                if (expr === null) {
-                    throw new Error("Missing expression");
+        if (t === "(") {
+            const expr = parseExpr(i + 1);
+            if (expr === null) {
+                throw new Error("Missing expression");
+            }
+            i = expr[1];
+            if (i >= tokens.length) {
+                throw new Error("Unexpected end of expression");
+            }
+            const t2 = tokens[i];
+            if (typeof t2 !== "string" || t2 !== ")") {
+                throw new Error("Expected )");
+            }
+            return [expr[0], i + 1];
+        }
+        if (!tokenIsIdent(t)) {
+            return null;
+        }
+        let result: ParseState = [t, i + 1];
+        if (i + 1 < tokens.length && tokens[i + 1] === "(") {
+            const args: ExprNode[] = [];
+            let j = i + 2;
+            while (j < tokens.length) {
+                const arg = parseExpr(j);
+                if (arg === null) {
+                    throw new Error("Missing argument");
                 }
-                i = expr[1];
-                if (i >= tokens.length) {
+                args.push(arg[0]);
+                j = arg[1];
+                if (j >= tokens.length) {
                     throw new Error("Unexpected end of expression");
                 }
-                const t2 = tokens[i];
-                if (typeof t2 !== "string" || t2 !== ")") {
-                    throw new Error("Expected )");
+                const t2 = tokens[j];
+                if (typeof t2 !== "string") {
+                    throw new Error("Expected , or )");
                 }
-                return [expr[0], i + 1];
-            }
-            let result: ParseState = [t, i + 1];
-            if (i + 1 < tokens.length && tokens[i + 1] === "(") {
-                const args: ExprNode[] = [];
-                let j = i + 2;
-                while (j < tokens.length) {
-                    const arg = parseExpr(j);
-                    if (arg === null) {
-                        throw new Error("Missing argument");
-                    }
-                    args.push(arg[0]);
-                    j = arg[1];
-                    if (j >= tokens.length) {
-                        throw new Error("Unexpected end of expression");
-                    }
-                    const t2 = tokens[j];
-                    if (typeof t2 !== "string") {
-                        throw new Error("Expected , or )");
-                    }
-                    if (t2 === ")") {
-                        break;
-                    }
-                    if (t2 !== ",") {
-                        throw new Error("Expected ,");
-                    }
-                    j++;
+                if (t2 === ")") {
+                    break;
                 }
-                const func = result[0];
-                args.splice(0, 0, func);
-                result = [["apply", args], j + 1];
+                if (t2 !== ",") {
+                    throw new Error("Expected ,");
+                }
+                j++;
             }
-            return result;
+            const func = result[0];
+            args.splice(0, 0, func);
+            result = [["apply", args], j + 1];
         }
-        return null;
+        return result;
     }
     function parseExpr(i: number): ParseState|null {
         return parseComparison(i);
@@ -216,15 +223,45 @@ export function parseCode(code: ExprCode): ExprNode {
         return expr;
     }
     function parseStatement(i: number): ParseState|null {
+        if (i >= tokens.length) {
+            return null;
+        }
+        
         // Empty statement?
         if (tokens[i] === ";") {
+            // console.log("parse Empty Statement:", i, tokens.slice(i));
             return [["statements", []], i + 1];
+        }
+        // Block statement?
+        if (tokens[i] === "{") {
+            // console.log("parse Block Statement:", i, tokens.slice(i));
+            let j = i + 1;
+            if (j >= tokens.length) {
+                throw new Error("Missing } at end of input");
+            }
+            if (tokens[j] === "}") {
+                // console.log("block statement empty");
+                return [["statements", []], j + 1];
+            }
+            const statements = parseStatements(j);
+            if (statements === null) {
+                throw new Error("Missing statements after {");
+            }
+            j = statements[1];
+            // console.log("block statements end:", j, tokens[j]);
+            if (tokens[j] !== "}") {
+                throw new Error(`Missing } (${tokens})`);
+            }
+            // console.log("block statement end:", j + 1, tokens[j + 1]);
+            return [statements[0], j + 1];
         }
         // Expression statement?
         const expr = parseExpr(i);
         if (expr === null) {
+            // console.log("Failed to parse statement");
             return null;
         }
+        // console.log("parse Expression Statement:", i, tokens.slice(i), expr);
         i = expr[1];
         if (i < tokens.length && tokens[i] === "=") {
             const expr2 = parseExpr(i + 1);
@@ -239,6 +276,7 @@ export function parseCode(code: ExprCode): ExprNode {
         if (i >= tokens.length) {
             return null;
         }
+        // console.log("parseStatements:", i, tokens.slice(i));
         const expr = parseStatement(i);
         if (expr === null) {
             return null;
@@ -250,16 +288,20 @@ export function parseCode(code: ExprCode): ExprNode {
         let children: ExprNode[] = [expr[0]];
         while (i < tokens.length) {
             const t = tokens[i];
-            if (typeof t !== "string" || t !== ";") {
+            if (t !== ";") {
                 break;
             }
-            const expr2 = parseStatement(i + 1);
+            // console.log("got semi-colon at", i, tokens.slice(i));
+            i += 1;
+            const expr2 = parseStatement(i);
             if (expr2 === null) {
+                // console.log("no more statements");
                 break;
             }
             children.push(expr2[0]);
             i = expr2[1];
         }
+        // console.log("parsed statements", i, tokens.slice(i));
         return [["statements", children], i];
     }
 }

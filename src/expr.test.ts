@@ -88,3 +88,15 @@ test("parse ==", () => {
     const parsed = parseCode(expr);
     expect(parsed).toEqual(["==", ["x", 3]]);
 });
+
+test("parse !=", () => {
+    const expr = "x != 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["!=", ["x", 3]]);
+});
+
+test("parse nest blocks", () => {
+    const expr = "{ x = 3; { y = 4; z = 5; } }";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["statements", [["assign", ["x", 3]], ["statements", [["assign", ["y", 4]], ["assign", ["z", 5]]]]]]);
+});
