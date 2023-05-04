@@ -88,6 +88,72 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     // Codegen marker
+    abs(): TensorWebGPU {
+        const kernel = this._device.getKernel("abs", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    abs_(): TensorWebGPU {
+        const kernel = this._device.getKernel("abs_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
+        return this;
+    }
+    acos(): TensorWebGPU {
+        const kernel = this._device.getKernel("acos", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    acos_(): TensorWebGPU {
+        const kernel = this._device.getKernel("acos_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
+        return this;
+    }
+    acosh(): TensorWebGPU {
+        const kernel = this._device.getKernel("acosh", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    acosh_(): TensorWebGPU {
+        const kernel = this._device.getKernel("acosh_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
+        return this;
+    }
     add(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const kernel = this._device.getKernel("add", { dtype: "f32" });
         const params = {
@@ -102,7 +168,6 @@ export class TensorWebGPU extends TensorImpl {
             defaultStrides(this.shape),
             this._device
         );
-        return this;
     }
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const kernel = this._device.getKernel("add_", { dtype: "f32" });
@@ -111,6 +176,72 @@ export class TensorWebGPU extends TensorImpl {
             alpha: alpha || 1.0,
         };
         kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);
+        return this;
+    }
+    asin(): TensorWebGPU {
+        const kernel = this._device.getKernel("asin", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    asin_(): TensorWebGPU {
+        const kernel = this._device.getKernel("asin_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
+        return this;
+    }
+    asinh(): TensorWebGPU {
+        const kernel = this._device.getKernel("asinh", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    asinh_(): TensorWebGPU {
+        const kernel = this._device.getKernel("asinh_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
+        return this;
+    }
+    atan(): TensorWebGPU {
+        const kernel = this._device.getKernel("atan", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        const outputBuffer = kernel.run([this.gpuBuffer], params)[0];
+        return new TensorWebGPU(
+            new GPUBufferStorage(outputBuffer, this.gpuDevice),
+            this.dtype,
+            this.shape,
+            defaultStrides(this.shape),
+            this._device
+        );
+    }
+    atan_(): TensorWebGPU {
+        const kernel = this._device.getKernel("atan_", { dtype: "f32" });
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        kernel.run([], params, [this.gpuBuffer]);
         return this;
     }
     atan2(other: TensorWebGPU): TensorWebGPU {
@@ -126,7 +257,6 @@ export class TensorWebGPU extends TensorImpl {
             defaultStrides(this.shape),
             this._device
         );
-        return this;
     }
     atan2_(other: TensorWebGPU): TensorWebGPU {
         const kernel = this._device.getKernel("atan2_", { dtype: "f32" });
@@ -150,7 +280,6 @@ export class TensorWebGPU extends TensorImpl {
             defaultStrides(this.shape),
             this._device
         );
-        return this;
     }
     sub_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const kernel = this._device.getKernel("sub_", { dtype: "f32" });

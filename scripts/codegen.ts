@@ -80,6 +80,7 @@ function writeTensorWebGPUCode(): void {
             w.writeLine(`};`);
             if (isInplace) {
                 w.writeLine(`kernel.run([other.gpuBuffer], params, [this.gpuBuffer]);`);
+                w.writeLine(`return this;`);
             }
             else {
                 w.writeLine(`const outputBuffer = kernel.run([this.gpuBuffer, other.gpuBuffer], params)[0];`);
@@ -92,14 +93,45 @@ function writeTensorWebGPUCode(): void {
                 w.writeLine(`this._device`);
                 w.dedent();
                 w.writeLine(`);`);
-
             }
-            w.writeLine(`return this;`);
             w.dedent();
             w.writeLine(`}`);
         }
         else {
-
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorWebGPU {`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(): TensorWebGPU {`);
+            }
+            w.indent();
+            w.writeLine(`const kernel = this._device.getKernel("${kernelSpec.name}", { dtype: "f32" });`);
+            w.writeLine(`const params = {`);
+            w.indent();
+            w.writeLine(`size: shapeSize(this.shape),`);
+            if (hasAlpha) {
+                w.writeLine(`alpha: alpha || 1.0,`);
+            }
+            w.dedent();
+            w.writeLine(`};`);
+            if (isInplace) {
+                w.writeLine(`kernel.run([], params, [this.gpuBuffer]);`);
+                w.writeLine(`return this;`);
+            }
+            else {
+                w.writeLine(`const outputBuffer = kernel.run([this.gpuBuffer], params)[0];`);
+                w.writeLine(`return new TensorWebGPU(`);
+                w.indent();
+                w.writeLine(`new GPUBufferStorage(outputBuffer, this.gpuDevice),`);
+                w.writeLine(`this.dtype,`);
+                w.writeLine(`this.shape,`);
+                w.writeLine(`defaultStrides(this.shape),`);
+                w.writeLine(`this._device`);
+                w.dedent();
+                w.writeLine(`);`);
+            }
+            w.dedent();
+            w.writeLine(`}`);
         }
     }
     const code = w.toString();

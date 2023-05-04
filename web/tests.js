@@ -57,6 +57,12 @@ test("linear forward", async () => {
     expect(await output.toArrayAsync()).toEqual(expected);
 });
 
+test("abs value", async () => {
+    const x = tensor([[-1, 2, -3], [4, -5, 6]]);
+    const y = x.abs();
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 60]]);
+});
+
 
 
 
