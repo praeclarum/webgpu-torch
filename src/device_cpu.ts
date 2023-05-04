@@ -1,7 +1,8 @@
 import { Device } from "./device";
 import { Dtype } from "./dtype";
 import { Shape, defaultStrides } from "./shape";
-import { TensorArrayData, TensorImpl } from "./tensor_if";
+import { TensorArrayData } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
 import { TensorCPU } from "./tensor_cpu";
 import {
     ArrayBufferStorage,

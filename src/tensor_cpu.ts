@@ -138,4 +138,57 @@ export class TensorCPU extends TensorImpl {
             );
         }
     }
+    // Codegen marker
+    abs(): TensorCPU {
+        throw new Error("CPU abs not supported");
+    }
+    abs_(): TensorCPU {
+        throw new Error("CPU abs_ not supported");
+    }
+    acos(): TensorCPU {
+        throw new Error("CPU acos not supported");
+    }
+    acos_(): TensorCPU {
+        throw new Error("CPU acos_ not supported");
+    }
+    acosh(): TensorCPU {
+        throw new Error("CPU acosh not supported");
+    }
+    acosh_(): TensorCPU {
+        throw new Error("CPU acosh_ not supported");
+    }
+    add(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU add not supported");
+    }
+    asin(): TensorCPU {
+        throw new Error("CPU asin not supported");
+    }
+    asin_(): TensorCPU {
+        throw new Error("CPU asin_ not supported");
+    }
+    asinh(): TensorCPU {
+        throw new Error("CPU asinh not supported");
+    }
+    asinh_(): TensorCPU {
+        throw new Error("CPU asinh_ not supported");
+    }
+    atan(): TensorCPU {
+        throw new Error("CPU atan not supported");
+    }
+    atan_(): TensorCPU {
+        throw new Error("CPU atan_ not supported");
+    }
+    atan2(other: TensorCPU): TensorCPU {
+        throw new Error("CPU atan2 not supported");
+    }
+    atan2_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU atan2_ not supported");
+    }
+    sub(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU sub not supported");
+    }
+    sub_(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU sub_ not supported");
+    }
+    // End codegen marker
 }

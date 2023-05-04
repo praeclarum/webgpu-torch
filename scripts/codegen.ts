@@ -53,6 +53,47 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
     fs.writeFileSync(path, newCode);
 }
 
+// Write the TensorCPU class
+function writeTensorCPUCode(): void {
+    const w = new CodeWriter();
+    w.indent();
+    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        const isBinary = opSpec.type === "binary";
+        const hasAlpha = opSpec.alpha ?? false;
+        if (kernelSpec.name == "add_") continue;
+        if (isBinary) {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(other: TensorCPU, alpha?: number): TensorCPU {`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(other: TensorCPU): TensorCPU {`);
+            }
+            w.indent();
+            w.writeLine(`throw new Error("CPU ${kernelSpec.name} not supported");`);
+            w.dedent();
+            w.writeLine(`}`);
+        }
+        else {
+            if (hasAlpha) {
+                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorCPU {`);
+            }
+            else {
+                w.writeLine(`${kernelSpec.name}(): TensorCPU {`);
+            }
+            w.indent();
+            w.writeLine(`throw new Error("CPU ${kernelSpec.name} not supported");`);
+            w.dedent();
+            w.writeLine(`}`);
+        }
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/tensor_cpu.ts";
+    insertCodegenIntoFile(path, code);
+}
+writeTensorCPUCode();
+
 // Write the TensorWebGPU class
 function writeTensorWebGPUCode(): void {
     const w = new CodeWriter();

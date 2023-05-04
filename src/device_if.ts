@@ -1,6 +1,7 @@
 import { Dtype } from "./dtype";
 import { Shape } from "./shape";
-import { TensorArrayData, TensorImpl } from "./tensor_if";
+import { TensorArrayData } from "./tensor_if";
+import { TensorImpl } from "./tensor_impl";
 
 export interface IDevice {
     ones(shape: Shape, dtype: Dtype): TensorImpl;

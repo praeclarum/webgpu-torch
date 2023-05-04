@@ -1,8 +1,9 @@
 import { Shape, Shapeish, shapeSize } from "./shape";
 import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
-import { TensorArrayData, TensorImpl } from "./tensor_if";
+import { TensorArrayData } from "./tensor_if";
 import { IDevice } from "./device_if";
 import { UntypedStorage } from "./storage";
+import { TensorImpl } from "./tensor_impl";
 
 export type DeviceType = "cpu" | "webgpu";
 export type DeviceId = string;
