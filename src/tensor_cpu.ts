@@ -174,6 +174,9 @@ export class TensorCPU extends TensorImpl {
     add(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU add not supported");
     }
+    addGrad(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU addGrad not supported");
+    }
     asin(): TensorCPU {
         throw new Error("CPU asin not supported");
     }
@@ -207,17 +210,26 @@ export class TensorCPU extends TensorImpl {
     atan2_(other: TensorCPU): TensorCPU {
         throw new Error("CPU atan2_ not supported");
     }
+    atan2Grad(other: TensorCPU): TensorCPU {
+        throw new Error("CPU atan2Grad not supported");
+    }
     mul(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul not supported");
     }
     mul_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul_ not supported");
     }
+    mulGrad(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU mulGrad not supported");
+    }
     sub(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub not supported");
     }
     sub_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub_ not supported");
+    }
+    subGrad(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU subGrad not supported");
     }
     // End codegen marker
 }

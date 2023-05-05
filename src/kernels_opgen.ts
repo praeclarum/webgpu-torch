@@ -423,6 +423,57 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + other[global_id.x]);"
     },
+    "addGrad": {
+        "name": "addGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x]; otherGrad[global_id.x] = outputGrad[global_id.x];"
+    },
     "asin": {
         "name": "asin",
         "config": [
@@ -842,6 +893,57 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
     },
+    "atan2Grad": {
+        "name": "atan2Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * other[global_id.x]) / ((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x]))); otherGrad[global_id.x] = (((-outputGrad[global_id.x]) * input[global_id.x]) / ((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x])));"
+    },
     "mul": {
         "name": "mul",
         "config": [
@@ -922,6 +1024,57 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * other[global_id.x]);"
     },
+    "mulGrad": {
+        "name": "mulGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * other[global_id.x]); otherGrad[global_id.x] = (outputGrad[global_id.x] * input[global_id.x]);"
+    },
     "sub": {
         "name": "sub",
         "config": [
@@ -1001,5 +1154,56 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] - other[global_id.x]);"
+    },
+    "subGrad": {
+        "name": "subGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x]; otherGrad[global_id.x] = (-outputGrad[global_id.x]);"
     }
 };

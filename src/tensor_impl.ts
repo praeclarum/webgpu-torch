@@ -75,6 +75,7 @@ export abstract class TensorImpl implements ITensor {
     abstract acoshGrad(): TensorImpl;
     abstract add(other: TensorImpl, alpha?: number): TensorImpl;
     abstract add_(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract addGrad(other: TensorImpl, alpha?: number): TensorImpl;
     abstract asin(): TensorImpl;
     abstract asin_(): TensorImpl;
     abstract asinGrad(): TensorImpl;
@@ -86,9 +87,12 @@ export abstract class TensorImpl implements ITensor {
     abstract atanGrad(): TensorImpl;
     abstract atan2(other: TensorImpl): TensorImpl;
     abstract atan2_(other: TensorImpl): TensorImpl;
+    abstract atan2Grad(other: TensorImpl): TensorImpl;
     abstract mul(other: TensorImpl, alpha?: number): TensorImpl;
     abstract mul_(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract mulGrad(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub_(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract subGrad(other: TensorImpl, alpha?: number): TensorImpl;
     // End codegen marker
 }

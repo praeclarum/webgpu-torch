@@ -175,7 +175,34 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape], other, outputGrad);
+        return input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+    }
+}
+export class AddGradFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape], other)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: ctx.alpha || 1.0,
+        };
+        return input.runKernel("addGradGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class AsinFunction extends AutoFunction {
@@ -343,7 +370,31 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape], other, outputGrad);
+        return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+    }
+}
+export class Atan2GradFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, other] = inputs as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape], other)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other] = inputs as [Tensor, Tensor];
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("atan2GradGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class MulFunction extends AutoFunction {
@@ -370,7 +421,34 @@ export class MulFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape], other, outputGrad);
+        return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+    }
+}
+export class MulGradFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape], other)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: ctx.alpha || 1.0,
+        };
+        return input.runKernel("mulGradGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class SubFunction extends AutoFunction {
@@ -397,6 +475,33 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape], other, outputGrad);
+        return input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+    }
+}
+export class SubGradFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape], other)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: ctx.alpha || 1.0,
+        };
+        return input.runKernel("subGradGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }

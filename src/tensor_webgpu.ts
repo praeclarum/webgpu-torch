@@ -100,7 +100,7 @@ export class TensorWebGPU extends TensorImpl {
         const inputBuffers = [this.gpuBuffer, ...additionalInputs.map(t => t.gpuBuffer)];
         const outputBuffers = kernel.run(inputBuffers, params);
         if (outputBuffers.length !== outputShapes.length) {
-            throw new Error(`Expected ${outputShapes.length} output buffers, got ${outputBuffers.length} when running kernel ${name}.`);
+            throw new Error(`Expected ${outputShapes.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`);
         }
         return outputBuffers.map((outputBuffer, i) => new TensorWebGPU(
             new GPUBufferStorage(outputBuffer, this.gpuDevice),
@@ -180,6 +180,13 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
     }
+    addGrad(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        return this.runKernel("addGrad", { dtype: this.dtype }, params, [this.shape], other)[0];
+    }
     asin(): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -246,6 +253,12 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
+    atan2Grad(other: TensorWebGPU): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("atan2Grad", { dtype: this.dtype }, params, [this.shape], other)[0];
+    }
     mul(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -260,6 +273,13 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
+    mulGrad(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        return this.runKernel("mulGrad", { dtype: this.dtype }, params, [this.shape], other)[0];
+    }
     sub(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -273,6 +293,13 @@ export class TensorWebGPU extends TensorImpl {
             alpha: alpha || 1.0,
         };
         return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
+    }
+    subGrad(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        return this.runKernel("subGrad", { dtype: this.dtype }, params, [this.shape], other)[0];
     }
     // End codegen marker
 }

@@ -28,7 +28,14 @@ export function getKernelSpecs(op: OpSpec): KernelSpec[] {
 }
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
-    return [getBinaryKernelSpec(op), getBinaryInplaceKernelSpec(op)];
+    const specs = [
+        getBinaryKernelSpec(op),
+        getBinaryInplaceKernelSpec(op),
+    ];
+    if (op.backward) {
+        specs.push(getBinaryGradKernelSpec(op, op.backward));
+    }
+    return specs;
 }
 
 function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
@@ -130,6 +137,69 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
         outputs: [
             {
                 name: "input",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [64, 1, 1],
+        workgroupCount: ["size/8", 1, 1],
+        shader: shader,
+    };
+}
+
+function getBinaryGradKernelSpec(op: BinaryOpSpec, backward: ExprCode): KernelSpec {
+    const parameters: KernelParamSpec[] = [
+        {
+            name: "size",
+            shaderType: "u32",
+        },
+    ];
+    const ast = parseCode(backward);
+    const subs = {
+        input: "input[global_id.x]",
+        inputGrad: "inputGrad[global_id.x]",
+        output: "output[global_id.x]",
+        outputGrad: "outputGrad[global_id.x]",
+        other: "other[global_id.x]",
+        otherGrad: "otherGrad[global_id.x]",
+    };
+    const shaderAst = substituteIdentifiers(ast, subs);
+    const shaderSnippet = exprNodeToWebGLShader(shaderAst);
+    const shader = `
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        ${shaderSnippet};`;
+    return {
+        name: op.name + "Grad",
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: parameters,
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "other",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "outputGrad",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "inputGrad",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+            {
+                name: "otherGrad",
                 shaderType: "array<f32>",
                 size: "size",
             },

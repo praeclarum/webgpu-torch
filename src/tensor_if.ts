@@ -39,6 +39,7 @@ export interface ITensor {
     acoshGrad(): ITensor;
     add(other: ITensor, alpha?: number): ITensor;
     add_(other: ITensor, alpha?: number): ITensor;
+    addGrad(other: ITensor, alpha?: number): ITensor;
     asin(): ITensor;
     asin_(): ITensor;
     asinGrad(): ITensor;
@@ -50,9 +51,12 @@ export interface ITensor {
     atanGrad(): ITensor;
     atan2(other: ITensor): ITensor;
     atan2_(other: ITensor): ITensor;
+    atan2Grad(other: ITensor): ITensor;
     mul(other: ITensor, alpha?: number): ITensor;
     mul_(other: ITensor, alpha?: number): ITensor;
+    mulGrad(other: ITensor, alpha?: number): ITensor;
     sub(other: ITensor, alpha?: number): ITensor;
     sub_(other: ITensor, alpha?: number): ITensor;
+    subGrad(other: ITensor, alpha?: number): ITensor;
     // End codegen marker
 }

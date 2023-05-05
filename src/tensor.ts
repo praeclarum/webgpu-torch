@@ -177,15 +177,27 @@ export class Tensor implements ITensor {
                 input.backward(grad);
             } else {
                 throw new Error(
-                    "Gradient function did not return a gradient for input " + i
+                    `Gradient function did not return a gradient for input #${i} (out of ${inputs.length}). ${grads.length} gradients were returned.`
                 );
             }
         }
     }
 
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: Tensor[]): Tensor[] {
-        const impls = this.impl.runKernel(name, config, params, outputShapes, ...additionalInputs.map(t => t.impl));
-        return impls.map(impl => new Tensor(impl));
+    runKernel(
+        name: string,
+        config: KernelConfigInput,
+        params: KernelParamsInput,
+        outputShapes: Shape[],
+        ...additionalInputs: Tensor[]
+    ): Tensor[] {
+        const impls = this.impl.runKernel(
+            name,
+            config,
+            params,
+            outputShapes,
+            ...additionalInputs.map((t) => t.impl)
+        );
+        return impls.map((impl) => new Tensor(impl));
     }
 
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.
@@ -243,6 +255,9 @@ export class Tensor implements ITensor {
         this._impl.add_(other._impl, alpha);
         return this;
     }
+    addGrad(other: Tensor, alpha?: number): Tensor {
+        return ops.addGrad(this, other, alpha);
+    }
     asin(): Tensor {
         return ops.asin(this);
     }
@@ -280,6 +295,9 @@ export class Tensor implements ITensor {
         this._impl.atan2_(other._impl);
         return this;
     }
+    atan2Grad(other: Tensor): Tensor {
+        return ops.atan2Grad(this, other);
+    }
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
     }
@@ -287,12 +305,18 @@ export class Tensor implements ITensor {
         this._impl.mul_(other._impl, alpha);
         return this;
     }
+    mulGrad(other: Tensor, alpha?: number): Tensor {
+        return ops.mulGrad(this, other, alpha);
+    }
     sub(other: Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
     sub_(other: Tensor, alpha?: number): Tensor {
         this._impl.sub_(other._impl, alpha);
         return this;
+    }
+    subGrad(other: Tensor, alpha?: number): Tensor {
+        return ops.subGrad(this, other, alpha);
     }
     // End codegen marker
 }
