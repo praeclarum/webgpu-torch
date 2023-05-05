@@ -316,30 +316,30 @@ import * as ops from "./ops";`);
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
-        const writeUnpackInputs = (inputsPrefix: string) => {
+        const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
             if (isBinary) {
-                if (hasAlpha) {
-                    w.writeLine(`const [input, other, alpha] = ${inputsPrefix}inputs as [Tensor, Tensor, number|undefined];`);
+                if (hasAlpha && includeAlpha) {
+                    w.writeLine(`const [input, other, alpha] = ${inputsName} as [Tensor, Tensor, number|undefined];`);
                 }
                 else {
-                    w.writeLine(`const [input, other] = ${inputsPrefix}inputs as [Tensor, Tensor];`);
+                    w.writeLine(`const [input, other] = ${inputsName} as [Tensor, Tensor];`);
                 }
             }
             else {
-                if (hasAlpha) {
-                    w.writeLine(`const [input, alpha] = ${inputsPrefix}inputs as [Tensor, number|undefined];`);
+                if (hasAlpha && includeAlpha) {
+                    w.writeLine(`const [input, alpha] = ${inputsName} as [Tensor, number|undefined];`);
                 }
                 else {
-                    w.writeLine(`const [input] = ${inputsPrefix}inputs as [Tensor];`);
+                    w.writeLine(`const [input] = ${inputsName} as [Tensor];`);
                 }
             }
         }
-        const writeParams = () => {
+        const writeParams = (alphaName: string) => {
             w.writeLine(`const params = {`);
             w.indent();
             w.writeLine(`size: shapeSize(input.shape),`);
             if (hasAlpha) {
-                w.writeLine(`alpha: alpha || 1.0,`);
+                w.writeLine(`alpha: ${alphaName} || 1.0,`);
             }
             w.dedent();
             w.writeLine(`};`);
@@ -348,10 +348,10 @@ import * as ops from "./ops";`);
         w.indent();
 
         // Forward
-        w.writeLine(`static forward(...inputs: FunctionInput[]): Tensor {`);
+        w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
         w.indent();
-        writeUnpackInputs("");
-        writeParams();
+        writeUnpackInputs("inputs", true);
+        writeParams("alpha");
         if (isBinary) {
             w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape], other)[0];`);
         }
@@ -367,40 +367,33 @@ import * as ops from "./ops";`);
         output: Tensor
     ): void {`);
         w.indent();
-        writeUnpackInputs("");
+        writeUnpackInputs("inputs", true);
         if (isBinary) {
             if (hasAlpha) {
                 w.writeLine(`ctx.alpha = alpha;`);
-                w.writeLine(`ctx.saveForBackward(input, other);`);
             }
-            else {
-                w.writeLine(`ctx.saveForBackward(input, other);`);
-            }
+            w.writeLine(`ctx.saveForBackward(input, other);`);
         }
         else {
             if (hasAlpha) {
                 w.writeLine(`ctx.alpha = alpha;`);
-                w.writeLine(`ctx.saveForBackward(input);`);
             }
-            else {
-                w.writeLine(`ctx.saveForBackward(input);`);
-            }
+            w.writeLine(`ctx.saveForBackward(input);`);
         }
         w.dedent();
         w.writeLine(`}`);
 
         // Backward
-        w.writeLine(`static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {`);
+        w.writeLine(`static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {`);
         w.indent();
-        writeUnpackInputs("ctx.");
-        writeParams();
+        writeUnpackInputs("ctx.savedTensors", false);
+        writeParams("ctx.alpha");
         if (isBinary) {
-            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], other)[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], other);`);
         }
         else {
-            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape])[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape]);`);
         }
-        w.writeLine(`throw new Error("Not implemented");`);
         w.dedent();
         w.writeLine(`}`);
         w.dedent();

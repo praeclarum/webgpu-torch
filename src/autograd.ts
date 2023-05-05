@@ -27,7 +27,7 @@ export type GradientFunction = (
 ) => (Tensor | null)[];
 
 export class AutoFunction {
-    static forward(...inputs: FunctionInput[]): Tensor {
+    static forward(inputs: FunctionInput[]): Tensor {
         throw new Error("Do not call forward on AutoFunction directly.");
     }
     static setupContext(
@@ -48,7 +48,7 @@ export class AutoFunction {
         const detachedInputs = inputs.map((input) =>
             input instanceof Tensor ? input.detach() : input
         );
-        const output = this.forward(...detachedInputs);
+        const output = this.forward(detachedInputs);
         this.setupContext(ctx, detachedInputs, output);
         output.setGradientFunction(ctx, this.backward);
         return output;

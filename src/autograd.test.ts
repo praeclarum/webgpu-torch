@@ -3,7 +3,7 @@ import { AutoFunction, GradientContext } from "./autograd";
 import { zeros, functions } from "./index";
 
 test("auto function forward fails", () => {
-    expect(() => AutoFunction.forward()).toThrow();
+    expect(() => AutoFunction.forward([])).toThrow();
 });
 test("auto function setupContext fails", () => {
     expect(() => AutoFunction.setupContext(new GradientContext([]), [zeros(3)], zeros(3))).toThrow();

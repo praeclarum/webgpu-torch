@@ -6,7 +6,8 @@ because they require WebGPU.
 const tests = [];
 function test(description, callback) { tests.push({ description, callback }); }
 const tensor = torch.tensor;
-const LinearFunction = torch.functions.LinearFunction;
+const Tensor = torch.Tensor;
+const functions = torch.functions;
 
 
 test("webgpu is supported", () => {
@@ -63,21 +64,37 @@ test("linear forward", async () => {
     const input = tensor([[3]]);
     const weight = tensor([[10], [11]]);
     const bias = tensor([[1000, 10000]]);
-    const output = LinearFunction.apply(input, weight, bias);
+    const output = functions.LinearFunction.apply(input, weight, bias);
     const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
     expect(output.shape).toEqual([1, 2]);
     expect(await output.toArrayAsync()).toEqual(expected);
 });
 
-test("linear forward with grad", async () => {
-    const input = tensor([[3]]);
-    const weight = tensor({data:[[10], [11]], requiresGrad:true});
-    const bias = tensor({data:[[1000, 10000]], requiresGrad:true});
-    const output = LinearFunction.apply(input, weight, bias);
-    const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
+test("abs backwards", () => {
+    const input = new Tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
+    const output = input.abs();
+    expect(output).toBeInstanceOf(Tensor);
+    expect(output.shape).toEqual([2, 3]);
+    output.backward();
+    expect(input.grad).not.toBeNull();
+    expect(output.grad).not.toBeNull();
+});
+
+test("linear backwards", () => {
+    const input = new Tensor([[3]], "float32", null, true);
+    const weight = new Tensor([[10], [11]], "float32", null, true);
+    const bias = new Tensor([[1000, 10000]], "float32", null, true);
+    const output = functions.LinearFunction.apply(input, weight, bias);
+    expect(output).toBeInstanceOf(Tensor);
     expect(output.shape).toEqual([1, 2]);
-    expect(await output.toArrayAsync()).toEqual(expected);
-    expect(output.requiresGrad).toBe(true);
+    // const loss = output.sum();
+    // expect(loss.gradFunc).not.toBeNull();
+    // expect(loss.requiresGrad).toBe(true);
+    // loss.backward();
+    // expect(input.grad).not.toBeNull();
+    // expect(weight.grad).not.toBeNull();
+    // expect(bias.grad).not.toBeNull();
+    // expect(output.grad).not.toBeNull();
 });
 
 

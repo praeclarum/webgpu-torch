@@ -7,7 +7,7 @@ import {
 import { Tensor } from "./tensor";
 
 export class LinearFunction extends AutoFunction {
-    static forward(...inputs: FunctionInput[]): Tensor {
+    static forward(inputs: FunctionInput[]): Tensor {
         const [input, weight, bias] = inputs as [Tensor, Tensor, Tensor];
         const output = input.mm(weight.t());
         if (bias) {
@@ -45,7 +45,7 @@ export class LinearFunction extends AutoFunction {
 }
 
 export class SumAxisFunction extends AutoFunction {
-    static forward(...inputs: FunctionInput[]): Tensor {
+    static forward(inputs: FunctionInput[]): Tensor {
         throw new Error("Method not implemented.");
     }
     static setupContext(
@@ -64,7 +64,7 @@ export class SumAxisFunction extends AutoFunction {
 }
 
 export class SumFunction extends AutoFunction {
-    static forward(...inputs: FunctionInput[]): Tensor {
+    static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
         return input.sum();
     }
