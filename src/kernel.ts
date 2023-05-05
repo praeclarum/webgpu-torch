@@ -242,6 +242,13 @@ const javaScriptSubstitutions: [RegExp, string][] = [
     ["global_id\\.z", "global_id_z"],
 ].map(([regex, replacement]) => [new RegExp(regex, "g"), replacement]);
 
+// Add all the Math. functions to the substitution list
+for (const name of Object.getOwnPropertyNames(Math)) {
+    if (typeof (Math as any)[name] === "function") {
+        javaScriptSubstitutions.push([new RegExp(name, "g"), `Math.${name}`]);
+    }
+}
+
 export function getKernelJavaScriptCode(
     spec: KernelSpec,
     config: KernelConfig
@@ -258,7 +265,7 @@ export function getKernelJavaScriptCode(
     for (const [regex, replacement] of javaScriptSubstitutions) {
         jsCode = jsCode.replace(regex, replacement);
     }
-    
+
     // Write the whole function
     const w = new CodeWriter();
     const params: string[] = [];
@@ -280,7 +287,9 @@ export function getKernelJavaScriptCode(
     const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
     w.writeLine(`((${params.join(", ")}) => {`);
     w.indent();
-    w.writeLine(`function ${spec.name}Kernel(global_id_x, global_id_y, global_id_z) {`);
+    w.writeLine(
+        `function ${spec.name}Kernel(global_id_x, global_id_y, global_id_z) {`
+    );
     w.indent();
     w.writeLine(jsCode);
     w.dedent();
@@ -288,7 +297,9 @@ export function getKernelJavaScriptCode(
     w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
     w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
     w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
-    w.writeLine(`console.log("workgroupCount", workgroupCountX, workgroupCountY, workgroupCountZ);`);
+    // w.writeLine(
+    //     `console.log("workgroupCount", workgroupCountX, workgroupCountY, workgroupCountZ);`
+    // );
     w.writeLine(`for (let wgZ = 0; wgZ < workgroupCountZ; wgZ++) {`);
     w.indent();
     w.writeLine(`for (let wgY = 0; wgY < workgroupCountY; wgY++) {`);
@@ -301,11 +312,17 @@ export function getKernelJavaScriptCode(
     w.writeLine(`const globalEndY = globalStartY + workgroupSizeY;`);
     w.writeLine(`const globalStartZ = wgZ * workgroupSizeZ;`);
     w.writeLine(`const globalEndZ = globalStartZ + workgroupSizeZ;`);
-    w.writeLine(`for (let global_id_z = globalStartZ; global_id_z < globalEndZ; global_id_z++) {`);
+    w.writeLine(
+        `for (let global_id_z = globalStartZ; global_id_z < globalEndZ; global_id_z++) {`
+    );
     w.indent();
-    w.writeLine(`for (let global_id_y = globalStartY; global_id_y < globalEndY; global_id_y++) {`);
+    w.writeLine(
+        `for (let global_id_y = globalStartY; global_id_y < globalEndY; global_id_y++) {`
+    );
     w.indent();
-    w.writeLine(`for (let global_id_x = globalStartX; global_id_x < globalEndX; global_id_x++) {`);
+    w.writeLine(
+        `for (let global_id_x = globalStartX; global_id_x < globalEndX; global_id_x++) {`
+    );
     w.indent();
     w.writeLine(`${spec.name}Kernel(global_id_x, global_id_y, global_id_z);`);
     w.dedent();
