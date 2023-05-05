@@ -11,11 +11,9 @@ import {
     getKernelConfig,
     getKernelKey,
 } from "./kernel";
-import { registry as kernelRegistry } from "./kernels";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;
-    private _kernels: { [key: KernelKey]: Kernel } = {};
     get gpuDevice(): GPUDevice {
         return this._device;
     }
@@ -29,20 +27,6 @@ export class DeviceWebGPU extends Device {
             this._device,
             GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
         );
-    }
-    getKernel(name: string, config: KernelConfigInput): Kernel {
-        const spec = kernelRegistry[name];
-        if (spec === undefined) {
-            throw new Error(`Kernel ${name} not found`);
-        }
-        const kconfig = getKernelConfig(spec, config);
-        const key = getKernelKey(spec, kconfig);
-        let kernel = this._kernels[key];
-        if (kernel === undefined) {
-            kernel = new Kernel(spec, kconfig, this._device);
-            this._kernels[key] = kernel;
-        }
-        return kernel;
     }
     ones(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;

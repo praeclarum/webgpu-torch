@@ -1,5 +1,5 @@
 import { Device } from "./device";
-import { Dtype } from "./dtype";
+import { ATypedArray, Dtype } from "./dtype";
 import { KernelConfigInput, KernelParamsInput } from "./kernel";
 import {
     Shape,
@@ -36,25 +36,57 @@ export class TensorCPU extends TensorImpl {
 
     constructor(
         data: ArrayBufferStorage,
+        dtype: Dtype,
         shape: Shape,
         strides: Strides,
         device: Device
     ) {
         super();
         this._storage = data;
-        this._dtype = "float32";
-
+        this._dtype = dtype;
         this._shape = shape;
         this._strides = strides;
         this._device = device;
     }
 
     withShape(shape: Shape, strides: Strides): TensorImpl {
-        return new TensorCPU(this._storage, shape, strides, this._device);
+        return new TensorCPU(
+            this._storage,
+            this._dtype,
+            shape,
+            strides,
+            this._device
+        );
     }
 
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorCPU[]): TensorCPU[] {
-        throw new Error("Running kernels on the CPU is not implemented.");
+    runKernel(
+        name: string,
+        config: KernelConfigInput,
+        params: KernelParamsInput,
+        outputShapes: Shape[],
+        ...additionalInputs: TensorCPU[]
+    ): TensorCPU[] {
+        const kernel = this.device.getKernel(name, config);
+        const inputBuffers = [
+            this.getTypedArray(),
+            ...additionalInputs.map((t) => t.getTypedArray()),
+        ];
+        const outputBuffers = kernel.run(inputBuffers, params) as ATypedArray[];
+        if (outputBuffers.length !== outputShapes.length) {
+            throw new Error(
+                `Expected ${outputShapes.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`
+            );
+        }
+        return outputBuffers.map(
+            (outputBuffer, i) =>
+                new TensorCPU(
+                    new ArrayBufferStorage(outputBuffer.buffer),
+                    this.dtype,
+                    outputShapes[i],
+                    defaultStrides(outputShapes[i]),
+                    this._device
+                )
+        );
     }
 
     add_(other: TensorImpl, alpha?: number): TensorImpl {
@@ -67,8 +99,7 @@ export class TensorCPU extends TensorImpl {
             for (let i = 0; i < d.length; i++) {
                 d[i] += od[i];
             }
-        }
-        else {
+        } else {
             for (let i = 0; i < d.length; i++) {
                 d[i] += alpha * od[i];
             }
@@ -96,6 +127,7 @@ export class TensorCPU extends TensorImpl {
         }
         return new TensorCPU(
             newStorage as ArrayBufferStorage,
+            this._dtype,
             newShape,
             newStrides,
             this._device
@@ -114,6 +146,7 @@ export class TensorCPU extends TensorImpl {
             );
             return new TensorCPU(
                 newStorage as ArrayBufferStorage,
+                this._dtype,
                 [],
                 [],
                 this._device
@@ -137,6 +170,7 @@ export class TensorCPU extends TensorImpl {
             }
             return new TensorCPU(
                 newStorage as ArrayBufferStorage,
+                this._dtype,
                 newShape,
                 newStrides,
                 this._device

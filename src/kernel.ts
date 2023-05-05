@@ -1,3 +1,5 @@
+import { Device } from "./device";
+import { ATypedArray } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
@@ -54,7 +56,8 @@ export class Kernel {
     private _spec: KernelSpec;
     private _config: KernelConfig;
     private _shaderCode: string;
-    private _device: GPUDevice;
+    private _device: Device;
+    private _gpuDevice: GPUDevice;
     private _bindGroupLayout: GPUBindGroupLayout;
     private _computePipeline: GPUComputePipeline;
     private _workgroupCountXFunc: CompiledExpr;
@@ -67,9 +70,14 @@ export class Kernel {
     get spec(): KernelSpec {
         return this._spec;
     }
-    constructor(spec: KernelSpec, config: KernelConfig, device: GPUDevice) {
+    constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         this._key = getKernelKey(spec, config);
         this._device = device;
+        const gpuDevice = (device as any).gpuDevice;
+        if (!gpuDevice) {
+            throw new Error("Cannot create kernel without GPU device");
+        }
+        this._gpuDevice = gpuDevice;
         this._spec = spec;
         this._config = config;
         let bindGroupLayoutEntries: GPUBindGroupLayoutEntry[] = [];
@@ -99,15 +107,15 @@ export class Kernel {
                 type: "read-only-storage" as GPUBufferBindingType,
             },
         });
-        this._bindGroupLayout = device.createBindGroupLayout({
+        this._bindGroupLayout = gpuDevice.createBindGroupLayout({
             entries: bindGroupLayoutEntries,
         });
         this._shaderCode = getKernelShaderCode(spec, config);
-        const shaderModule = device.createShaderModule({
+        const shaderModule = gpuDevice.createShaderModule({
             code: this._shaderCode,
         });
-        this._computePipeline = device.createComputePipeline({
-            layout: device.createPipelineLayout({
+        this._computePipeline = gpuDevice.createComputePipeline({
+            layout: gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [this._bindGroupLayout],
             }),
             compute: {
@@ -126,11 +134,13 @@ export class Kernel {
         }
     }
     run(
-        inputs: GPUBuffer[],
+        inputs: (GPUBuffer | ATypedArray | undefined)[],
         parameters: KernelParamsInput,
         outputs?: GPUBuffer[]
-        ): GPUBuffer[] {
+        ): GPUBuffer[] | ATypedArray[] {
         console.log("run kernel", this._key);
+
+        const inputBuffers = inputs as GPUBuffer[];
 
         // Build the parameter environment
         const env: EvalEnv = {};
@@ -146,13 +156,13 @@ export class Kernel {
         }
 
         // Get input buffers with storage usage
-        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i] ? inputs[i] : null, i, env));
+        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputBuffers[i] ? inputBuffers[i] : null, i, env));
 
         // Get output buffers with storage usage
         const storageOutputs = this.spec.outputs.map((output, i) => this.getStorageOutputBuffer(output, outputs ? outputs[i] : null, i, env));
 
         // Build the params buffer
-        const paramsBuffer = this._device.createBuffer({
+        const paramsBuffer = this._gpuDevice.createBuffer({
             mappedAtCreation: true,
             size: paramsBufferSize,
             usage: GPUBufferUsage.STORAGE,
@@ -180,7 +190,7 @@ export class Kernel {
         const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
 
         // Start a new command encoder
-        const commandEncoder = this._device.createCommandEncoder();
+        const commandEncoder = this._gpuDevice.createCommandEncoder();
 
         // Encode the kernel using pass encoder
         const passEncoder = commandEncoder.beginComputePass();
@@ -195,7 +205,7 @@ export class Kernel {
 
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
-        this._device.queue.submit([gpuCommands]);
+        this._gpuDevice.queue.submit([gpuCommands]);
 
         // Return the storage output buffers
         return storageOutputs;
@@ -229,7 +239,7 @@ export class Kernel {
             const outputElementCount = Math.ceil(this._outputSizeFuncs[outputIndex](env));
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
-            const outputBuffer = this._device.createBuffer({
+            const outputBuffer = this._gpuDevice.createBuffer({
                 mappedAtCreation: false,
                 size: outputBufferSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
@@ -267,7 +277,7 @@ export class Kernel {
                 buffer: paramsBuffer,
             },
         });
-        const bindGroup = this._device.createBindGroup({
+        const bindGroup = this._gpuDevice.createBindGroup({
             layout: this._bindGroupLayout,
             entries: entries,
         });

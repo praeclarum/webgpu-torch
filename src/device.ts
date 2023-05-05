@@ -4,6 +4,8 @@ import { TensorArrayData } from "./tensor_if";
 import { IDevice } from "./device_if";
 import { UntypedStorage } from "./storage";
 import { TensorImpl } from "./tensor_impl";
+import { Kernel, KernelConfigInput, KernelKey, getKernelConfig, getKernelKey } from "./kernel";
+import { registry as kernelRegistry } from "./kernels";
 
 export type DeviceType = "cpu" | "webgpu";
 export type DeviceId = string;
@@ -13,6 +15,7 @@ export type Deviceish = DeviceType | Device | DeviceId;
 export abstract class Device implements IDevice {
     private _id: DeviceId;
     private _type: DeviceType;
+    private _kernels: { [key: KernelKey]: Kernel } = {};
     get id(): DeviceId {
         return this._id;
     }
@@ -34,6 +37,20 @@ export abstract class Device implements IDevice {
         const byteSize = size * elementByteSize;
         const storage = this.alloc(byteSize);
         return [storage, storage.getTypedArray(dtype)];
+    }
+    getKernel(name: string, config: KernelConfigInput): Kernel {
+        const spec = kernelRegistry[name];
+        if (spec === undefined) {
+            throw new Error(`Kernel ${name} not found`);
+        }
+        const kconfig = getKernelConfig(spec, config);
+        const key = getKernelKey(spec, kconfig);
+        let kernel = this._kernels[key];
+        if (kernel === undefined) {
+            kernel = new Kernel(spec, kconfig, this);
+            this._kernels[key] = kernel;
+        }
+        return kernel;
     }
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
     abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;

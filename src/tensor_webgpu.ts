@@ -71,7 +71,7 @@ export class TensorWebGPU extends TensorImpl {
         };
         this.gpuBuffer.unmap();
         other.gpuBuffer.unmap();
-        const outputs = kernel.run([this.gpuBuffer, other.gpuBuffer], params);
+        const outputs = kernel.run([this.gpuBuffer, other.gpuBuffer], params) as GPUBuffer[];
         const readBuffer = outputs[0];
         const readStorage = new GPUBufferStorage(readBuffer, this.gpuDevice);
         const resultShape = [params.resultRows, params.resultCols];
@@ -98,7 +98,7 @@ export class TensorWebGPU extends TensorImpl {
     runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorWebGPU[]): TensorWebGPU[] {
         const kernel = this._device.getKernel(name, config);
         const inputBuffers = [this.gpuBuffer, ...additionalInputs.map(t => t.gpuBuffer)];
-        const outputBuffers = kernel.run(inputBuffers, params);
+        const outputBuffers = kernel.run(inputBuffers, params) as GPUBuffer[];
         if (outputBuffers.length !== outputShapes.length) {
             throw new Error(`Expected ${outputShapes.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`);
         }

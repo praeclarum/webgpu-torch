@@ -21,7 +21,13 @@ export class DeviceCPU extends Device {
         const storage = this.allocFor(shape, dtype) as ArrayBufferStorage;
         const array = storage.getTypedArray(dtype);
         array.fill(1);
-        return new TensorCPU(storage, shape, defaultStrides(shape), this);
+        return new TensorCPU(
+            storage,
+            dtype,
+            shape,
+            defaultStrides(shape),
+            this
+        );
     }
     tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
         const info = newTypedArrayFromArray(data, dtype, (shape) =>
@@ -29,6 +35,7 @@ export class DeviceCPU extends Device {
         );
         return new TensorCPU(
             info.storage as ArrayBufferStorage,
+            dtype,
             info.shape,
             info.strides,
             this
@@ -36,6 +43,12 @@ export class DeviceCPU extends Device {
     }
     zeros(shape: Shape, dtype: Dtype): TensorImpl {
         const storage = this.allocFor(shape, dtype) as ArrayBufferStorage;
-        return new TensorCPU(storage, shape, defaultStrides(shape), this);
+        return new TensorCPU(
+            storage,
+            dtype,
+            shape,
+            defaultStrides(shape),
+            this
+        );
     }
 }
