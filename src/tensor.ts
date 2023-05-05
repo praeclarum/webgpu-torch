@@ -221,6 +221,9 @@ export class Tensor implements ITensor {
     abs(): Tensor {
         return ops.abs(this);
     }
+    absolute(): Tensor {
+        return ops.abs(this);
+    }
     abs_(): Tensor {
         this._impl.abs_();
         return this;
@@ -228,11 +231,17 @@ export class Tensor implements ITensor {
     acos(): Tensor {
         return ops.acos(this);
     }
+    arccos(): Tensor {
+        return ops.acos(this);
+    }
     acos_(): Tensor {
         this._impl.acos_();
         return this;
     }
     acosh(): Tensor {
+        return ops.acosh(this);
+    }
+    arccosh(): Tensor {
         return ops.acosh(this);
     }
     acosh_(): Tensor {
@@ -249,11 +258,17 @@ export class Tensor implements ITensor {
     asin(): Tensor {
         return ops.asin(this);
     }
+    arcsin(): Tensor {
+        return ops.asin(this);
+    }
     asin_(): Tensor {
         this._impl.asin_();
         return this;
     }
     asinh(): Tensor {
+        return ops.asinh(this);
+    }
+    arcsinh(): Tensor {
         return ops.asinh(this);
     }
     asinh_(): Tensor {
@@ -263,11 +278,17 @@ export class Tensor implements ITensor {
     atan(): Tensor {
         return ops.atan(this);
     }
+    arctan(): Tensor {
+        return ops.atan(this);
+    }
     atan_(): Tensor {
         this._impl.atan_();
         return this;
     }
     atan2(other: Tensor): Tensor {
+        return ops.atan2(this, other);
+    }
+    arctan2(other: Tensor): Tensor {
         return ops.atan2(this, other);
     }
     atan2_(other: Tensor): Tensor {
@@ -277,11 +298,17 @@ export class Tensor implements ITensor {
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
     }
+    multiply(other: Tensor, alpha?: number): Tensor {
+        return ops.mul(this, other, alpha);
+    }
     mul_(other: Tensor, alpha?: number): Tensor {
         this._impl.mul_(other._impl, alpha);
         return this;
     }
     sub(other: Tensor, alpha?: number): Tensor {
+        return ops.sub(this, other, alpha);
+    }
+    subtract(other: Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
     sub_(other: Tensor, alpha?: number): Tensor {

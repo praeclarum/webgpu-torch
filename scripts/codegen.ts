@@ -174,10 +174,28 @@ function writeTensorCode(): void {
         if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
+        const writeHeader = (name: string) => {
+            if (isBinary) {
+                if (hasAlpha) {
+                    w.writeLine(`${name}(other: Tensor, alpha?: number): Tensor {`);
+                }
+                else {
+                    w.writeLine(`${name}(other: Tensor): Tensor {`);
+                }
+            }
+            else {
+                if (hasAlpha) {
+                    w.writeLine(`${name}(alpha?: number): Tensor {`);
+                }
+                else {
+                    w.writeLine(`${name}(): Tensor {`);
+                }
+            }
+        };
+        writeHeader(kernelSpec.name);
+        w.indent();
         if (isBinary) {
             if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(other: Tensor, alpha?: number): Tensor {`);
-                w.indent();
                 if (isInplace) {
                     w.writeLine(`this._impl.${kernelSpec.name}(other._impl, alpha);`);
                     w.writeLine(`return this;`);
@@ -189,8 +207,6 @@ function writeTensorCode(): void {
                 w.writeLine(`}`);
             }
             else {
-                w.writeLine(`${kernelSpec.name}(other: Tensor): Tensor {`);
-                w.indent();
                 if (isInplace) {
                     w.writeLine(`this._impl.${kernelSpec.name}(other._impl);`);
                     w.writeLine(`return this;`);
@@ -204,8 +220,6 @@ function writeTensorCode(): void {
         }
         else {
             if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(alpha?: number): Tensor {`);
-                w.indent();
                 if (isInplace) {
                     w.writeLine(`this._impl.${kernelSpec.name}(alpha);`);
                     w.writeLine(`return this;`);
@@ -217,14 +231,36 @@ function writeTensorCode(): void {
                 w.writeLine(`}`);
             }
             else {
-                w.writeLine(`${kernelSpec.name}(): Tensor {`);
-                w.indent();
                 if (isInplace) {
                     w.writeLine(`this._impl.${kernelSpec.name}();`);
                     w.writeLine(`return this;`);
                 }
                 else {
                     w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                }
+                w.dedent();
+                w.writeLine(`}`);
+            }
+        }
+        if (!isInplace) {
+            for (const alias of opSpec.aliases ?? []) {
+                writeHeader(alias);
+                w.indent();
+                if (isBinary) {
+                    if (hasAlpha) {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
+                    }
+                }
+                else {
+                    if (hasAlpha) {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                    }
                 }
                 w.dedent();
                 w.writeLine(`}`);
@@ -434,14 +470,27 @@ import { shouldCreateGradient } from "./autograd";`);
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
+        const writeHeader = (name: string) => {
+            if (isBinary) {
+                if (hasAlpha) {
+                    w.writeLine(`export function ${name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
+                }
+                else {
+                    w.writeLine(`export function ${name}(input: Tensor, other: Tensor): Tensor {`);
+                }
             }
             else {
-                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, other: Tensor): Tensor {`);
+                if (hasAlpha) {
+                    w.writeLine(`export function ${name}(input: Tensor, alpha?: number): Tensor {`);
+                }
+                else {
+                    w.writeLine(`export function ${name}(input: Tensor): Tensor {`);
+                }
             }
-            w.indent();
+        };
+        writeHeader(kernelSpec.name);
+        w.indent();
+        if (isBinary) {
             w.writeLine(`if (input.shape.length !== other.shape.length) {`);
             w.indent();
             w.writeLine("throw new Error(`Shape dimensions of " + kernelSpec.name + " must match. Got ${input.shape} and ${other.shape}`);");
@@ -460,13 +509,6 @@ import { shouldCreateGradient } from "./autograd";`);
             }
         }
         else {
-            if (hasAlpha) {
-                w.writeLine(`export function ${kernelSpec.name}(input: Tensor, alpha?: number): Tensor {`);
-            }
-            else {
-                w.writeLine(`export function ${kernelSpec.name}(input: Tensor): Tensor {`);
-            }
-            w.indent();
             w.writeLine(`if (shouldCreateGradient(input)) {`);
             w.indent();
             w.writeLine(`return functions.${funcName}.apply(input);`);
@@ -481,6 +523,28 @@ import { shouldCreateGradient } from "./autograd";`);
         }
         w.dedent();
         w.writeLine(`}`);
+        for (const alias of opSpec.aliases ?? []) {
+            writeHeader(alias);
+            w.indent();
+            if (isBinary) {
+                if (hasAlpha) {
+                    w.writeLine(`return ${kernelSpec.name}(input, other, alpha);`);
+                }
+                else {
+                    w.writeLine(`return ${kernelSpec.name}(input, other);`);
+                }
+            }
+            else {
+                if (hasAlpha) {
+                    w.writeLine(`return ${kernelSpec.name}(input, alpha);`);
+                }
+                else {
+                    w.writeLine(`return ${kernelSpec.name}(input);`);
+                }
+            }
+            w.dedent();
+            w.writeLine(`}`);
+        }
     }
     w.writeLine("");
     const code = w.toString();
