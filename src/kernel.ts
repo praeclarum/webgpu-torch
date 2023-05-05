@@ -253,6 +253,13 @@ export function getKernelJavaScriptCode(
         env[configSpec.name] = configValue;
     }
 
+    // Build up the body of the kernel function
+    let jsCode = spec.shader.trim();
+    for (const [regex, replacement] of javaScriptSubstitutions) {
+        jsCode = jsCode.replace(regex, replacement);
+    }
+    
+    // Write the whole function
     const w = new CodeWriter();
     const params: string[] = [];
     let bindingIndex = 0;
@@ -273,15 +280,27 @@ export function getKernelJavaScriptCode(
     const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
     w.writeLine(`((${params.join(", ")}) => {`);
     w.indent();
+    w.writeLine(`function ${spec.name}Kernel(global_id_x, global_id_y, global_id_z) {`);
+    w.indent();
+    w.writeLine(jsCode);
+    w.dedent();
+    w.writeLine(`}`);
     w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
     w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
     w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
     w.writeLine(`console.log("workgroupCount", workgroupCountX, workgroupCountY, workgroupCountZ);`);
-    let jsCode = spec.shader.trim();
-    for (const [regex, replacement] of javaScriptSubstitutions) {
-        jsCode = jsCode.replace(regex, replacement);
-    }
-    w.writeLine(jsCode);
+    w.writeLine(`for (let wgZ = 0; wgZ < workgroupCountZ; wgZ++) {`);
+    w.indent();
+    w.writeLine(`for (let wgY = 0; wgY < workgroupCountY; wgY++) {`);
+    w.indent();
+    w.writeLine(`for (let wgX = 0; wgX < workgroupCountX; wgX++) {`);
+    w.indent();
+    w.dedent();
+    w.writeLine(`}`);
+    w.dedent();
+    w.writeLine(`}`);
+    w.dedent();
+    w.writeLine(`}`);
     w.dedent();
     w.writeLine(`})`);
     return w.toString();
