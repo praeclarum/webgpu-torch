@@ -1,6 +1,6 @@
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "assign" | "if" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
+export type ExprNodeType = "apply" | "block" | "assign" | "if" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
 
 export type ExprNode = string | number | [ExprNodeType, ExprNode[]];
 
@@ -73,7 +73,7 @@ function tokenIsIdent(token: string): boolean {
     if (!((c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || c === "_")) {
         return false;
     }
-    if (c === "if" || c === "else") {
+    if (c === "if" || c === "else" || c == "return") {
         return false;
     }
     return true;
@@ -236,7 +236,7 @@ export function parseCode(code: ExprCode): ExprNode {
         // Empty statement?
         if (tokens[i] === ";") {
             // console.log("parse Empty Statement:", i, tokens.slice(i));
-            return [["statements", []], i + 1];
+            return [["block", []], i + 1];
         }
         // Block statement?
         if (tokens[i] === "{") {
@@ -247,7 +247,7 @@ export function parseCode(code: ExprCode): ExprNode {
             }
             if (tokens[j] === "}") {
                 // console.log("block statement empty");
-                return [["statements", []], j + 1];
+                return [["block", []], j + 1];
             }
             const statements = parseStatements(j);
             if (statements === null) {
@@ -259,7 +259,13 @@ export function parseCode(code: ExprCode): ExprNode {
                 throw new Error(`Missing } (${tokens})`);
             }
             // console.log("block statement end:", j + 1, tokens[j + 1]);
-            return [statements[0], j + 1];
+            const statementsNode: ExprNode = statements[0];
+            if (statementsNode instanceof Array && statementsNode[0] === "statements") {
+                return [["block", statementsNode[1]], j + 1];
+            }
+            else {
+                return [["block", [statementsNode]], j + 1];
+            }
         }
         // If statement?
         if (tokens[i] === "if") {
@@ -293,6 +299,15 @@ export function parseCode(code: ExprCode): ExprNode {
             }
             j = elseExpr[1];
             return [["if", [condExpr[0], thenExpr[0], elseExpr[0]]], j];
+        }
+        // return statement?
+        if (tokens[i] === "return") {
+            // console.log("parse Return Statement:", i, tokens.slice(i));
+            const returnExpr = parseExpr(i + 1);
+            if (returnExpr === null) {
+                throw new Error("Missing expression after return");
+            }
+            return [["return", [returnExpr[0]]], returnExpr[1]];
         }
 
         // Expression statement?
