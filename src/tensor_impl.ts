@@ -14,7 +14,7 @@ export abstract class TensorImpl implements ITensor {
     abstract get strides(): Strides;
     abstract get device(): IDevice;
     abstract withShape(shape: Shape, strides: Strides): TensorImpl;
-    abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: TensorImpl[]): TensorImpl;
+    abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorImpl[]): TensorImpl[];
 
     abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;

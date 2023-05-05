@@ -1,5 +1,5 @@
-import { ATypedArray, Dtype } from "./dtype";
-import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
+import { Dtype } from "./dtype";
+import { Shape } from "./shape";
 import { IDevice } from "./device_if";
 import { Deviceish } from "./device";
 import { UntypedStorage } from "./storage";
@@ -20,7 +20,7 @@ export interface ITensor {
     get dtype(): Dtype;
     get shape(): Shape;
     get device(): IDevice;
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): ITensor;
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: ITensor[]): ITensor[];
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor, alpha?: number): ITensor;
     expand(shape: Shape): ITensor;

@@ -53,7 +53,7 @@ export class TensorCPU extends TensorImpl {
         return new TensorCPU(this._storage, shape, strides, this._device);
     }
 
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): TensorCPU {
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorCPU[]): TensorCPU[] {
         throw new Error("Running kernels on the CPU is not implemented.");
     }
 

@@ -95,17 +95,19 @@ export class TensorWebGPU extends TensorImpl {
         kernel.run(inputBuffers, params, outputBuffers);
         return this;
     }
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: TensorWebGPU[]): TensorWebGPU {
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorWebGPU[]): TensorWebGPU[] {
         const kernel = this._device.getKernel(name, config);
         const inputBuffers = [this.gpuBuffer, ...additionalInputs.map(t => t.gpuBuffer)];
         const outputBuffers = kernel.run(inputBuffers, params);
-        const outputBuffer = outputBuffers[0];
-        return new TensorWebGPU(
+        if (outputBuffers.length !== outputShapes.length) {
+            throw new Error(`Expected ${outputShapes.length} output buffers, got ${outputBuffers.length} when running kernel ${name}.`);
+        }
+        return outputBuffers.map((outputBuffer, i) => new TensorWebGPU(
             new GPUBufferStorage(outputBuffer, this.gpuDevice),
             this.dtype,
-            this.shape,
-            defaultStrides(this.shape),
-            this._device
+            outputShapes[i],
+            defaultStrides(outputShapes[i]),
+            this._device)
         );
     }
 
@@ -114,7 +116,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("abs", { dtype: this.dtype }, params);
+        return this.runKernel("abs", { dtype: this.dtype }, params, [this.shape])[0];
     }
     abs_(): TensorWebGPU {
         const params = {
@@ -126,7 +128,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("acos", { dtype: this.dtype }, params);
+        return this.runKernel("acos", { dtype: this.dtype }, params, [this.shape])[0];
     }
     acos_(): TensorWebGPU {
         const params = {
@@ -138,7 +140,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("acosh", { dtype: this.dtype }, params);
+        return this.runKernel("acosh", { dtype: this.dtype }, params, [this.shape])[0];
     }
     acosh_(): TensorWebGPU {
         const params = {
@@ -151,7 +153,7 @@ export class TensorWebGPU extends TensorImpl {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernel("add", { dtype: this.dtype }, params, other);
+        return this.runKernel("add", { dtype: this.dtype }, params, [this.shape], other)[0];
     }
     add_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {
@@ -164,7 +166,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("asin", { dtype: this.dtype }, params);
+        return this.runKernel("asin", { dtype: this.dtype }, params, [this.shape])[0];
     }
     asin_(): TensorWebGPU {
         const params = {
@@ -176,7 +178,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("asinh", { dtype: this.dtype }, params);
+        return this.runKernel("asinh", { dtype: this.dtype }, params, [this.shape])[0];
     }
     asinh_(): TensorWebGPU {
         const params = {
@@ -188,7 +190,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("atan", { dtype: this.dtype }, params);
+        return this.runKernel("atan", { dtype: this.dtype }, params, [this.shape])[0];
     }
     atan_(): TensorWebGPU {
         const params = {
@@ -200,7 +202,7 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("atan2", { dtype: this.dtype }, params, other);
+        return this.runKernel("atan2", { dtype: this.dtype }, params, [this.shape], other)[0];
     }
     atan2_(other: TensorWebGPU): TensorWebGPU {
         const params = {
@@ -213,7 +215,7 @@ export class TensorWebGPU extends TensorImpl {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernel("sub", { dtype: this.dtype }, params, other);
+        return this.runKernel("sub", { dtype: this.dtype }, params, [this.shape], other)[0];
     }
     sub_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {

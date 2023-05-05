@@ -13,7 +13,7 @@ export class AbsFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("abs", { dtype: input.dtype }, params);
+        return input.runKernel("abs", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -28,7 +28,7 @@ export class AbsFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("absGrad", { dtype: input.dtype }, params);
+        input.runKernel("absGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -38,7 +38,7 @@ export class AcosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acos", { dtype: input.dtype }, params);
+        return input.runKernel("acos", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -53,7 +53,7 @@ export class AcosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("acosGrad", { dtype: input.dtype }, params);
+        input.runKernel("acosGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -63,7 +63,7 @@ export class AcoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acosh", { dtype: input.dtype }, params);
+        return input.runKernel("acosh", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -78,7 +78,7 @@ export class AcoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("acoshGrad", { dtype: input.dtype }, params);
+        input.runKernel("acoshGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -89,7 +89,7 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: alpha || 1.0,
         };
-        return input.runKernel("add", { dtype: input.dtype }, params, other);
+        return input.runKernel("add", { dtype: input.dtype }, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -106,7 +106,7 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: alpha || 1.0,
         };
-        input.runKernel("addGrad", { dtype: input.dtype }, params, other);
+        input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape], other)[0];
         throw new Error("Not implemented");
     }
 }
@@ -116,7 +116,7 @@ export class AsinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asin", { dtype: input.dtype }, params);
+        return input.runKernel("asin", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -131,7 +131,7 @@ export class AsinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("asinGrad", { dtype: input.dtype }, params);
+        input.runKernel("asinGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -141,7 +141,7 @@ export class AsinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asinh", { dtype: input.dtype }, params);
+        return input.runKernel("asinh", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -156,7 +156,7 @@ export class AsinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("asinhGrad", { dtype: input.dtype }, params);
+        input.runKernel("asinhGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -166,7 +166,7 @@ export class AtanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atan", { dtype: input.dtype }, params);
+        return input.runKernel("atan", { dtype: input.dtype }, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -181,7 +181,7 @@ export class AtanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("atanGrad", { dtype: input.dtype }, params);
+        input.runKernel("atanGrad", { dtype: input.dtype }, params, [input.shape])[0];
         throw new Error("Not implemented");
     }
 }
@@ -191,7 +191,7 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atan2", { dtype: input.dtype }, params, other);
+        return input.runKernel("atan2", { dtype: input.dtype }, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -206,7 +206,7 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        input.runKernel("atan2Grad", { dtype: input.dtype }, params, other);
+        input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape], other)[0];
         throw new Error("Not implemented");
     }
 }
@@ -217,7 +217,7 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: alpha || 1.0,
         };
-        return input.runKernel("sub", { dtype: input.dtype }, params, other);
+        return input.runKernel("sub", { dtype: input.dtype }, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -234,7 +234,7 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: alpha || 1.0,
         };
-        input.runKernel("subGrad", { dtype: input.dtype }, params, other);
+        input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape], other)[0];
         throw new Error("Not implemented");
     }
 }

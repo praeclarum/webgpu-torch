@@ -257,7 +257,6 @@ export class Kernel {
                     buffer: outputBuffer,
                 },
             });
-            outputBuffers.push(outputBuffer);
         }
         entries.push({
             binding: bindingIndex,

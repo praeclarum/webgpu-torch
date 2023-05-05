@@ -183,8 +183,9 @@ export class Tensor implements ITensor {
         }
     }
 
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: Tensor[]): Tensor {
-        return new Tensor(this.impl.runKernel(name, config, params, ...additionalInputs.map(t => t.impl)));
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: Tensor[]): Tensor[] {
+        const impls = this.impl.runKernel(name, config, params, outputShapes, ...additionalInputs.map(t => t.impl));
+        return impls.map(impl => new Tensor(impl));
     }
 
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.

@@ -122,7 +122,7 @@ function writeTensorWebGPUCode(): void {
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
             }
             else {
-                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
+                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params, [this.shape], other)[0];`);
             }
             w.dedent();
             w.writeLine(`}`);
@@ -147,7 +147,7 @@ function writeTensorWebGPUCode(): void {
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params);`);
             }
             else {
-                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params);`);
+                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params, [this.shape])[0];`);
             }
             w.dedent();
             w.writeLine(`}`);
@@ -353,10 +353,10 @@ import * as ops from "./ops";`);
         writeUnpackInputs("");
         writeParams();
         if (isBinary) {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, other);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape], other)[0];`);
         }
         else {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape])[0];`);
         }
         w.dedent();
         w.writeLine(`}`);
@@ -395,10 +395,10 @@ import * as ops from "./ops";`);
         writeUnpackInputs("ctx.");
         writeParams();
         if (isBinary) {
-            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, other);`);
+            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], other)[0];`);
         }
         else {
-            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params);`);
+            w.writeLine(`input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape])[0];`);
         }
         w.writeLine(`throw new Error("Not implemented");`);
         w.dedent();
