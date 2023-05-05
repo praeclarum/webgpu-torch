@@ -39,7 +39,7 @@ export class AutoFunction {
     }
     static backward(
         ctx: GradientContext,
-        gradOutput: Tensor
+        outputGrad: Tensor
     ): GradientFunctionOutput[] {
         throw new Error("Do not call backward on AutoFunction directly.");
     }

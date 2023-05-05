@@ -146,7 +146,7 @@ export class Kernel {
         }
 
         // Get input buffers with storage usage
-        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i], i, env));
+        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i] ? inputs[i] : null, i, env));
 
         // Get output buffers with storage usage
         const storageOutputs = this.spec.outputs.map((output, i) => this.getStorageOutputBuffer(output, outputs ? outputs[i] : null, i, env));
@@ -200,9 +200,9 @@ export class Kernel {
         // Return the storage output buffers
         return storageOutputs;
     }
-    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer|undefined, inputIndex: number, env: EvalEnv): GPUBuffer {
-        if (providedInput === undefined) {
-            throw new Error(`Missing input buffer #${inputIndex} ${inputSpec.name} in kernel ${this._key}`);
+    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer|null, inputIndex: number, env: EvalEnv): GPUBuffer {
+        if (providedInput === null) {
+            throw new Error(`Missing input buffer #${inputIndex} (out of ${this._spec.inputs.length}) named "${inputSpec.name}" in kernel "${this._key}"`);
         }
         if (providedInput.usage & GPUBufferUsage.STORAGE) {
             providedInput.unmap();

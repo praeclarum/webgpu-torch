@@ -16,7 +16,7 @@ test("binary sub op generate kernel spec", () => {
         if (global_id.x >= parameters.size) {
             return;
         }
-        out[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
+        output[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
 });
 
 test("abs backward shader", () => {
@@ -26,7 +26,7 @@ test("abs backward shader", () => {
         if (global_id.x >= parameters.size) {
             return;
         }
-        inputGrad[global_id.x] = select((-outGrad[global_id.x]), outGrad[global_id.x], (input[global_id.x] > 0));`);
+        inputGrad[global_id.x] = select((-outputGrad[global_id.x]), outputGrad[global_id.x], (input[global_id.x] > 0));`);
 });
 
 test("atan2 forward shader", () => {
@@ -36,7 +36,7 @@ test("atan2 forward shader", () => {
         if (global_id.x >= parameters.size) {
             return;
         }
-        out[global_id.x] = atan2(input[global_id.x], other[global_id.x]);`);
+        output[global_id.x] = atan2(input[global_id.x], other[global_id.x]);`);
 });
 
 

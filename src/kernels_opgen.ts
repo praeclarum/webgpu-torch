@@ -25,7 +25,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -40,7 +40,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = abs(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = abs(input[global_id.x]);"
     },
     "abs_": {
         "name": "abs_",
@@ -94,7 +94,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -115,7 +115,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = select((-outGrad[global_id.x]), outGrad[global_id.x], (input[global_id.x] > 0));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = select((-outputGrad[global_id.x]), outputGrad[global_id.x], (input[global_id.x] > 0));"
     },
     "acos": {
         "name": "acos",
@@ -138,7 +138,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -153,7 +153,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = acos(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = acos(input[global_id.x]);"
     },
     "acos_": {
         "name": "acos_",
@@ -207,7 +207,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -228,7 +228,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((-outGrad[global_id.x]) / sqrt((1 - (input[global_id.x] * input[global_id.x]))));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((-outputGrad[global_id.x]) / sqrt((1 - (input[global_id.x] * input[global_id.x]))));"
     },
     "acosh": {
         "name": "acosh",
@@ -251,7 +251,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -266,7 +266,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = acosh(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = acosh(input[global_id.x]);"
     },
     "acosh_": {
         "name": "acosh_",
@@ -320,7 +320,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -341,7 +341,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outGrad[global_id.x] / sqrt(((input[global_id.x] * input[global_id.x]) - 1)));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / sqrt(((input[global_id.x] * input[global_id.x]) - 1)));"
     },
     "add": {
         "name": "add",
@@ -368,7 +368,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -383,7 +383,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] + other[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] + other[global_id.x]);"
     },
     "add_": {
         "name": "add_",
@@ -444,7 +444,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -459,7 +459,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = asin(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = asin(input[global_id.x]);"
     },
     "asin_": {
         "name": "asin_",
@@ -513,7 +513,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -534,7 +534,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outGrad[global_id.x] / sqrt((1 - (input[global_id.x] * input[global_id.x]))));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / sqrt((1 - (input[global_id.x] * input[global_id.x]))));"
     },
     "asinh": {
         "name": "asinh",
@@ -557,7 +557,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -572,7 +572,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = asinh(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = asinh(input[global_id.x]);"
     },
     "asinh_": {
         "name": "asinh_",
@@ -626,7 +626,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -647,7 +647,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outGrad[global_id.x] / sqrt(((input[global_id.x] * input[global_id.x]) + 1)));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / sqrt(((input[global_id.x] * input[global_id.x]) + 1)));"
     },
     "atan": {
         "name": "atan",
@@ -670,7 +670,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -685,7 +685,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = atan(input[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = atan(input[global_id.x]);"
     },
     "atan_": {
         "name": "atan_",
@@ -739,7 +739,7 @@ export const kernels: { [name: string]: KernelSpec } =
                 "shaderType": "array<f32>"
             },
             {
-                "name": "outGrad",
+                "name": "outputGrad",
                 "shaderType": "array<f32>"
             }
         ],
@@ -760,7 +760,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outGrad[global_id.x] / ((input[global_id.x] * input[global_id.x]) + 1));"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / ((input[global_id.x] * input[global_id.x]) + 1));"
     },
     "atan2": {
         "name": "atan2",
@@ -787,7 +787,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -802,7 +802,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
     },
     "atan2_": {
         "name": "atan2_",
@@ -867,7 +867,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -882,7 +882,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] * other[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] * other[global_id.x]);"
     },
     "mul_": {
         "name": "mul_",
@@ -947,7 +947,7 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "outputs": [
             {
-                "name": "out",
+                "name": "output",
                 "shaderType": "array<f32>",
                 "size": "size"
             }
@@ -962,7 +962,7 @@ export const kernels: { [name: string]: KernelSpec } =
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] - other[global_id.x]);"
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] - other[global_id.x]);"
     },
     "sub_": {
         "name": "sub_",

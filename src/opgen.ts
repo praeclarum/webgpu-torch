@@ -53,7 +53,7 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
     const subs = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
-        out: "out[global_id.x]",
+        output: "output[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
@@ -82,7 +82,7 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
         ],
         outputs: [
             {
-                name: "out",
+                name: "output",
                 shaderType: "array<f32>",
                 size: "size",
             },
@@ -104,7 +104,7 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
     const subs = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
-        out: "input[global_id.x]",
+        output: "input[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
@@ -150,7 +150,7 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
     const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
-        out: "out[global_id.x]",
+        output: "output[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
@@ -175,7 +175,7 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
         ],
         outputs: [
             {
-                name: "out",
+                name: "output",
                 shaderType: "array<f32>",
                 size: "size",
             },
@@ -196,7 +196,7 @@ function getUnaryInplaceKernelSpec(op: UnaryOpSpec): KernelSpec {
     const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
-        out: "input[global_id.x]",
+        output: "input[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
@@ -238,8 +238,8 @@ function getUnaryGradKernelSpec(op: UnaryOpSpec, backward: ExprCode): KernelSpec
     const subs = {
         input: "input[global_id.x]",
         inputGrad: "inputGrad[global_id.x]",
-        out: "out[global_id.x]",
-        outGrad: "outGrad[global_id.x]",
+        output: "output[global_id.x]",
+        outputGrad: "outputGrad[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
@@ -262,7 +262,7 @@ function getUnaryGradKernelSpec(op: UnaryOpSpec, backward: ExprCode): KernelSpec
                 shaderType: "array<f32>",
             },
             {
-                name: "outGrad",
+                name: "outputGrad",
                 shaderType: "array<f32>",
             },
         ],

@@ -70,7 +70,7 @@ test("linear forward", async () => {
     expect(await output.toArrayAsync()).toEqual(expected);
 });
 
-test("abs backwards", () => {
+test("abs backwards", async () => {
     const input = new Tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
     const output = input.abs();
     expect(output).toBeInstanceOf(Tensor);
@@ -78,6 +78,7 @@ test("abs backwards", () => {
     output.backward();
     expect(input.grad).not.toBeNull();
     expect(output.grad).not.toBeNull();
+    expect(await input.grad.toArrayAsync()).toEqual([[-1, 1, -1], [1, -1, 1]]);
 });
 
 test("linear backwards", () => {

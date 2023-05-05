@@ -389,10 +389,10 @@ import * as ops from "./ops";`);
         writeUnpackInputs("ctx.savedTensors", false);
         writeParams("ctx.alpha");
         if (isBinary) {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], other);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], other, outputGrad);`);
         }
         else {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape]);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);`);
         }
         w.dedent();
         w.writeLine(`}`);
