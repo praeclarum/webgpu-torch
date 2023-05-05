@@ -112,6 +112,7 @@ Here are the big components of the library:
 - [x] GPU Tensors
 - [x] GPU Kernels
 - [x] Autograd Functions
+- [ ] Datatypes beyond float32
 - [ ] Optimizers (SGD and Adam)
 - [ ] Modules
 - [ ] Save and restore (safetensors)

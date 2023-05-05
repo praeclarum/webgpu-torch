@@ -8,17 +8,19 @@ import {
     KernelOutputSpec,
     KernelParamsInput,
     KernelSpec,
-    getKernelShaderCode,
+    getKernelJavaScriptCode,
     getShaderTypeElementByteSize,
     shaderTypeToDtype,
 } from "./kernel";
 
 export class KernelCPU extends Kernel {
-    private _shaderCode: string;
+    private _javaScriptCode: string;
+    private _javaScriptFunction: Function;
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
-        this._shaderCode = getKernelShaderCode(spec, config);
+        this._javaScriptCode = getKernelJavaScriptCode(spec, config);
+        this._javaScriptFunction = eval(this._javaScriptCode);
     }
 
     run(
@@ -35,27 +37,34 @@ export class KernelCPU extends Kernel {
         const [workgroupCountX, workgroupCountY, workgroupCountZ] =
             this.getWorkgroupCounts(env);
 
+        // Build up the args
+        const args: any[] = [];
+        const outputsToReturn: ATypedArray[] = [];
+
         // Get input buffers with storage usage
-        const storageInputs = this.spec.inputs.map((input, i) =>
-            this.getStorageInputBuffer(
+        this.spec.inputs.forEach((input, i) =>
+            args.push(this.getStorageInputBuffer(
                 input,
                 inputs[i] ? inputs[i] : null,
                 i,
-                env
-            )
-        );
+                env)));
 
         // Get output buffers with storage usage
-        const storageOutputs = this.spec.outputs.map((output, i) =>
-            this.getStorageOutputBuffer(
+        this.spec.outputs.forEach((output, i) => {
+            const o = this.getStorageOutputBuffer(
                 output,
                 outputs ? outputs[i] : null,
                 i,
-                env
-            )
-        );
+                env);
+            args.push(o);
+            outputsToReturn.push(o);
+        });
 
-        throw new Error("CPU kernel runs are not implemented");
+        args.push(parameters);
+
+        this._javaScriptFunction.apply(null, args);
+
+        return outputsToReturn;
     }
 
     private getStorageInputBuffer(

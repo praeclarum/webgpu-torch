@@ -1,6 +1,7 @@
 import { Device } from "./device";
 import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
+import { CodeWriter } from "./opgen";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParamValue = number;
@@ -152,6 +153,42 @@ export function getKernelKey(
     return keyParts.join(",");
 }
 
+export function getShaderTypeElementByteSize(shaderType: ShaderType): number {
+    switch (shaderType) {
+        case "f32":
+        case "i32":
+        case "u32":
+        case "array<f32>":
+        case "array<i32>":
+        case "array<u32>":
+            return 4;
+        case "u8":
+        case "array<u8>":
+            return 1;
+        default:
+            throw new Error(`Unknown shader type ${shaderType}`);
+    }
+}
+
+export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
+    switch (shaderType) {
+        case "f32":
+        case "array<f32>":
+            return "float32";
+        case "i32":
+        case "array<i32>":
+            return "int32";
+        case "u32":
+        case "array<u32>":
+            return "uint32";
+        case "u8":
+        case "array<u8>":
+            return "uint8";
+        default:
+            throw new Error(`Unknown shader type ${shaderType}`);
+    }
+}
+
 export function getKernelShaderCode(
     spec: KernelSpec,
     config: KernelConfig
@@ -199,38 +236,36 @@ export function getKernelShaderCode(
     return shaderCodeParts.join("\n");
 }
 
-export function getShaderTypeElementByteSize(shaderType: ShaderType): number {
-    switch (shaderType) {
-        case "f32":
-        case "i32":
-        case "u32":
-        case "array<f32>":
-        case "array<i32>":
-        case "array<u32>":
-            return 4;
-        case "u8":
-        case "array<u8>":
-            return 1;
-        default:
-            throw new Error(`Unknown shader type ${shaderType}`);
+export function getKernelJavaScriptCode(
+    spec: KernelSpec,
+    config: KernelConfig
+): string {
+    const w = new CodeWriter();
+    const params: string[] = [];
+    let bindingIndex = 0;
+    for (let i = 0; i < spec.inputs.length; i++, bindingIndex++) {
+        let input = spec.inputs[i];
+        params.push(input.name);
     }
-}
-
-export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
-    switch (shaderType) {
-        case "f32":
-        case "array<f32>":
-            return "float32";
-        case "i32":
-        case "array<i32>":
-            return "int32";
-        case "u32":
-        case "array<u32>":
-            return "uint32";
-        case "u8":
-        case "array<u8>":
-            return "uint8";
-        default:
-            throw new Error(`Unknown shader type ${shaderType}`);
+    for (let i = 0; i < spec.outputs.length; i++, bindingIndex++) {
+        let output = spec.outputs[i];
+        params.push(output.name);
     }
+    params.push("parameters");
+    const env: { [name: string]: any } = {};
+    for (let i = 0; i < spec.config.length; i++) {
+        let configSpec = spec.config[i];
+        let configValue = config[i];
+        env[configSpec.name] = configValue;
+    }
+    // const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
+    // const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
+    // const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
+    // w.writeLine(`const workgroupSize = [${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ}];`);
+    w.writeLine(`((${params.join(", ")}) => {`);
+    w.indent();
+    w.writeLine(spec.shader.trim());
+    w.dedent();
+    w.writeLine(`})`);
+    return w.toString();
 }
