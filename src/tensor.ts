@@ -37,6 +37,9 @@ export class Tensor implements ITensor {
     get isContiguous(): boolean {
         return this._impl.isContiguous;
     }
+    get isScalar(): boolean {
+        return this._impl.isScalar;
+    }
 
     get(...indices: number[]): number | ITensor {
         return this._impl.get(...indices);
@@ -159,7 +162,16 @@ export class Tensor implements ITensor {
     }
 
     backward(gradient?: Tensor): void {
-        const grad = gradient || ones(1);
+        let grad: Tensor;
+        if (gradient) {
+            grad = gradient;
+        }
+        else {
+            if (!this.isScalar) {
+                throw new Error(`Gradient can only be implicitly created for scalar outputs`);
+            }
+            grad = ones(1);
+        }
         if (this._grad) {
             this._grad.add_(grad);
         } else {

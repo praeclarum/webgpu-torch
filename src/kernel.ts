@@ -325,9 +325,9 @@ export function getKernelJavaScriptCode(
     w.writeLine(jsCode);
     w.dedent();
     w.writeLine(`}`);
-    for (let p of params) {
-        w.writeLine(`console.log("param", "${p}", typeof ${p}, ${p});`);
-    }
+    // for (let p of params) {
+    //     w.writeLine(`console.log("param", "${p}", typeof ${p}, ${p});`);
+    // }
     w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
     w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
     w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
@@ -371,6 +371,6 @@ export function getKernelJavaScriptCode(
     w.dedent();
     w.writeLine(`})`);
     const code = w.toString();
-    console.log(code);
+    // console.log(code);
     return code;
 }

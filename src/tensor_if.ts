@@ -21,6 +21,7 @@ export interface ITensor {
     get shape(): Shape;
     get device(): IDevice;
     get isContiguous(): boolean;
+    get isScalar(): boolean;
     runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: ITensor[]): ITensor[];
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor, alpha?: number): ITensor;

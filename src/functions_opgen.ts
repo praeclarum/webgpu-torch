@@ -28,7 +28,6 @@ export class AbsFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("absGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -54,7 +53,6 @@ export class AcosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("acosGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -80,7 +78,6 @@ export class AcoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("acoshGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -110,7 +107,6 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -136,7 +132,6 @@ export class AsinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("asinGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -162,7 +157,6 @@ export class AsinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("asinhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -188,7 +182,6 @@ export class AtanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("atanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -215,7 +208,6 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -241,7 +233,6 @@ export class CeilFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("ceilGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -268,7 +259,6 @@ export class CopysignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("copysignGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -294,7 +284,6 @@ export class CosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("cosGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -320,7 +309,6 @@ export class CoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("coshGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -346,7 +334,6 @@ export class Deg2radFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("deg2radGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -376,7 +363,6 @@ export class DivFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("divGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -402,7 +388,6 @@ export class ExpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("expGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -428,7 +413,6 @@ export class Exp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("exp2Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -454,7 +438,6 @@ export class Expm1Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("expm1Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -480,7 +463,6 @@ export class FloorFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("floorGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -507,7 +489,6 @@ export class Floor_divideFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("floor_divideGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -533,7 +514,6 @@ export class FracFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("fracGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -560,7 +540,6 @@ export class HypotFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("hypotGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -587,7 +566,6 @@ export class LdexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("ldexpGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -613,7 +591,6 @@ export class LogFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("logGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -639,7 +616,6 @@ export class Log10Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("log10Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -665,7 +641,6 @@ export class Log1pFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("log1pGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -691,7 +666,6 @@ export class Log2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("log2Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -718,7 +692,6 @@ export class LogaddexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("logaddexpGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -745,7 +718,6 @@ export class Logaddexp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("logaddexp2Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -775,7 +747,6 @@ export class MulFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -801,7 +772,6 @@ export class NegFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("negGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -827,7 +797,6 @@ export class PositiveFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("positiveGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -854,7 +823,6 @@ export class PowFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("powGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -880,7 +848,6 @@ export class Rad2degFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("rad2degGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -906,7 +873,6 @@ export class ReciprocalFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("reciprocalGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -932,7 +898,6 @@ export class RoundFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("roundGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -958,7 +923,6 @@ export class RsqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("rsqrtGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -984,7 +948,6 @@ export class SigmoidFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("sigmoidGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1010,7 +973,6 @@ export class SignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("signGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1036,7 +998,6 @@ export class SinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("sinGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1062,7 +1023,6 @@ export class SincFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("sincGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1088,7 +1048,6 @@ export class SinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("sinhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1114,7 +1073,6 @@ export class SqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("sqrtGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1140,7 +1098,6 @@ export class SquareFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("squareGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1170,7 +1127,6 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
@@ -1196,7 +1152,6 @@ export class TanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("tanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1222,7 +1177,6 @@ export class TanhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("tanhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1248,7 +1202,6 @@ export class TruncFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("truncGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
     }
 }
@@ -1275,7 +1228,6 @@ export class XlogyFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }
         return input.runKernel("xlogyGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }

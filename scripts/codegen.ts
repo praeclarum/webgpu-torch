@@ -437,7 +437,6 @@ import { shapeSize } from "./shape";`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
         writeParams("ctx.alpha");
-        w.writeLine(`if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }`);
         if (isBinary) {
             w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);`);
         }

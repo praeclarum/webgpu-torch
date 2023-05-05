@@ -39,11 +39,15 @@ export class KernelCPU extends Kernel {
 
         // Get input buffers with storage usage
         this.spec.inputs.forEach((input, i) =>
-            args.push(this.getStorageInputBuffer(
-                input,
-                inputs[i] ? inputs[i] : null,
-                i,
-                env)));
+            args.push(
+                this.getStorageInputBuffer(
+                    input,
+                    inputs[i] ? inputs[i] : null,
+                    i,
+                    env
+                )
+            )
+        );
 
         // Get output buffers with storage usage
         this.spec.outputs.forEach((output, i) => {
@@ -51,7 +55,8 @@ export class KernelCPU extends Kernel {
                 output,
                 outputs ? outputs[i] : null,
                 i,
-                env);
+                env
+            );
             args.push(o);
             outputsToReturn.push(o);
         });
@@ -102,7 +107,7 @@ export class KernelCPU extends Kernel {
                 this._outputSizeFuncs[outputIndex](env)
             );
             const outputBufferSize = outputElementByteSize * outputElementCount;
-            console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
+            // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
             const outputBuffer = this.device.alloc(outputBufferSize);
             return outputBuffer.getTypedArray(
                 shaderTypeToDtype(outputSpec.shaderType)

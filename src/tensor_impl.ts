@@ -31,6 +31,9 @@ export abstract class TensorImpl implements ITensor {
         }
         return true;
     }
+    get isScalar(): boolean {
+        return this.shape.length === 0 || (this.shape.length === 1 && this.shape[0] === 1);
+    }
 
     expand(shape: Shape): TensorImpl {
         const newShape = shape.slice();
@@ -52,7 +55,7 @@ export abstract class TensorImpl implements ITensor {
                 newShape[j] = thisShape[i];
             }
         }
-        console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
+        // console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
         return this.withShape(newShape, newStrides);
     }
 
