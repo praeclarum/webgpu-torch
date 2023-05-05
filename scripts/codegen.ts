@@ -352,8 +352,7 @@ function writeFunctionsCode(): void {
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";
-import { shapeSize } from "./shape";
-import * as ops from "./ops";`);
+import { shapeSize } from "./shape";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -400,7 +399,9 @@ import * as ops from "./ops";`);
         w.indent();
         writeUnpackInputs("inputs", true);
         writeParams("alpha");
+        w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isBinary) {
+            w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
             w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape], other)[0];`);
         }
         else {
@@ -436,6 +437,7 @@ import * as ops from "./ops";`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
         writeParams("ctx.alpha");
+        w.writeLine(`if (!outputGrad.isContiguous) { throw new Error("Output gradient must be contiguous"); }`);
         if (isBinary) {
             w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);`);
         }

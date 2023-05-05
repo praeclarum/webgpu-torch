@@ -15,9 +15,22 @@ export abstract class TensorImpl implements ITensor {
     abstract get device(): IDevice;
     abstract withShape(shape: Shape, strides: Strides): TensorImpl;
     abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorImpl[]): TensorImpl[];
-
+    
     abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;
+
+    get isContiguous(): boolean {
+        let strides = this.strides;
+        let shape = this.shape;
+        let offset = 1;
+        for (let i = shape.length - 1; i >= 0; i--) {
+            if (strides[i] !== offset) {
+                return false;
+            }
+            offset *= shape[i];
+        }
+        return true;
+    }
 
     expand(shape: Shape): TensorImpl {
         const newShape = shape.slice();
@@ -39,6 +52,7 @@ export abstract class TensorImpl implements ITensor {
                 newShape[j] = thisShape[i];
             }
         }
+        console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
         return this.withShape(newShape, newStrides);
     }
 

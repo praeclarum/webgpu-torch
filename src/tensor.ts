@@ -34,6 +34,9 @@ export class Tensor implements ITensor {
     get device(): IDevice {
         return this._impl.device;
     }
+    get isContiguous(): boolean {
+        return this._impl.isContiguous;
+    }
 
     get(...indices: number[]): number | ITensor {
         return this._impl.get(...indices);

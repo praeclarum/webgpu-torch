@@ -1,7 +1,7 @@
-import { UntypedStorage } from "./storage";
-import { Tensor, tensor, ones } from "./index";
+import { ones } from "./factories";
 import { LinearFunction } from "./functions";
-import { TensorCPU } from "./tensor_cpu";
+import { tensor } from "./ops_artisanal";
+import { Tensor } from "./tensor";
 
 test("create tensor with storage and dtype", () => {
     const tensor = new Tensor([10, 20, 30], "float32");

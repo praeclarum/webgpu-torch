@@ -20,6 +20,7 @@ export interface ITensor {
     get dtype(): Dtype;
     get shape(): Shape;
     get device(): IDevice;
+    get isContiguous(): boolean;
     runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: ITensor[]): ITensor[];
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor, alpha?: number): ITensor;
