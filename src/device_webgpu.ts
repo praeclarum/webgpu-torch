@@ -13,7 +13,7 @@ import {
     getKernelConfig,
     getKernelKey,
 } from "./kernel";
-import { GPUKernel } from "./kernel_gpu";
+import { KernelWebGPU } from "./kernel_webgpu";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;
@@ -32,7 +32,7 @@ export class DeviceWebGPU extends Device {
         );
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
-        return new GPUKernel(spec, config, this);
+        return new KernelWebGPU(spec, config, this);
     }
     ones(shape: Shape, dtype: Dtype): TensorWebGPU {
         const storage = this.allocFor(shape, dtype) as GPUBufferStorage;

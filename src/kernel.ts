@@ -1,5 +1,5 @@
 import { Device } from "./device";
-import { ATypedArray } from "./dtype";
+import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
@@ -56,9 +56,9 @@ export abstract class Kernel {
     private _spec: KernelSpec;
     private _config: KernelConfig;
     private _device: Device;
-    protected _workgroupCountXFunc: CompiledExpr;
-    protected _workgroupCountYFunc: CompiledExpr;
-    protected _workgroupCountZFunc: CompiledExpr;
+    private _workgroupCountXFunc: CompiledExpr;
+    private _workgroupCountYFunc: CompiledExpr;
+    private _workgroupCountZFunc: CompiledExpr;
     protected _outputSizeFuncs: CompiledExpr[];
     get key(): KernelKey {
         return this._key;
@@ -87,11 +87,38 @@ export abstract class Kernel {
             this._outputSizeFuncs.push(outputElementCount);
         }
     }
+
     abstract run(
-        inputs: (GPUBuffer | ATypedArray | undefined)[],
+        inputs: (GPUBuffer | ATypedArray)[],
         parameters: KernelParamsInput,
-        outputs?: GPUBuffer[]
-        ): GPUBuffer[] | ATypedArray[];
+        outputs?: (GPUBuffer | ATypedArray)[]
+    ): (GPUBuffer | ATypedArray)[];
+
+    getRunEnv(parameters: KernelParamsInput): EvalEnv {
+        const env: EvalEnv = {};
+        for (let i = 0; i < this._spec.config.length; i++) {
+            const configSpec = this._spec.config[i];
+            const configValue = this._config[i];
+            env[configSpec.name] = configValue;
+        }
+        for (let i = 0; i < this.spec.parameters.length; i++) {
+            const param = this.spec.parameters[i];
+            const paramValue = parameters[param.name];
+            if (paramValue === undefined) {
+                throw new Error(`Missing parameter ${param.name}`);
+            }
+            env[param.name] = paramValue;
+        }
+        return env;
+    }
+
+    getWorkgroupCounts(env: EvalEnv): [number, number, number] {
+        return [
+            Math.ceil(this._workgroupCountXFunc(env)),
+            Math.ceil(this._workgroupCountYFunc(env)),
+            Math.ceil(this._workgroupCountZFunc(env)),
+        ];
+    }
 }
 
 export function getKernelConfig(
@@ -184,6 +211,25 @@ export function getShaderTypeElementByteSize(shaderType: ShaderType): number {
         case "u8":
         case "array<u8>":
             return 1;
+        default:
+            throw new Error(`Unknown shader type ${shaderType}`);
+    }
+}
+
+export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
+    switch (shaderType) {
+        case "f32":
+        case "array<f32>":
+            return "float32";
+        case "i32":
+        case "array<i32>":
+            return "int32";
+        case "u32":
+        case "array<u32>":
+            return "uint32";
+        case "u8":
+        case "array<u8>":
+            return "uint8";
         default:
             throw new Error(`Unknown shader type ${shaderType}`);
     }

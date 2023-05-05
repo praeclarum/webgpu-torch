@@ -1,9 +1,17 @@
 import { Device } from "./device";
-import { ATypedArray } from "./dtype";
-import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
-import { Kernel, KernelConfig, KernelInputSpec, KernelKey, KernelOutputSpec, KernelParamsInput, KernelSpec, getKernelKey, getKernelShaderCode, getShaderTypeElementByteSize } from "./kernel";
+import { EvalEnv } from "./expr";
+import {
+    Kernel,
+    KernelConfig,
+    KernelInputSpec,
+    KernelOutputSpec,
+    KernelParamsInput,
+    KernelSpec,
+    getKernelShaderCode,
+    getShaderTypeElementByteSize,
+} from "./kernel";
 
-export class GPUKernel extends Kernel {
+export class KernelWebGPU extends Kernel {
     private _gpuDevice: GPUDevice;
     private _bindGroupLayout: GPUBindGroupLayout;
     private _computePipeline: GPUComputePipeline;
@@ -13,7 +21,7 @@ export class GPUKernel extends Kernel {
         super(spec, config, device);
         const gpuDevice = (device as any).gpuDevice;
         if (!gpuDevice) {
-            throw new Error("Cannot create GPUKernel without GPUDevice");
+            throw new Error("Cannot create a GPU kernel without a GPU device");
         }
         this._gpuDevice = gpuDevice;
         let bindGroupLayoutEntries: GPUBindGroupLayoutEntry[] = [];
@@ -64,27 +72,36 @@ export class GPUKernel extends Kernel {
         inputs: GPUBuffer[],
         parameters: KernelParamsInput,
         outputs?: GPUBuffer[]
-        ): GPUBuffer[] {
-        console.log("run kernel", this.key);
+    ): GPUBuffer[] {
+        console.log("run gpu kernel", this.key);
 
         // Build the parameter environment
-        const env: EvalEnv = {};
+        const env: EvalEnv = this.getRunEnv(parameters);
         let paramsBufferSize = 0;
         for (let i = 0; i < this.spec.parameters.length; i++) {
             const param = this.spec.parameters[i];
-            const paramValue = parameters[param.name];
-            if (paramValue === undefined) {
-                throw new Error(`Missing parameter ${param.name}`);
-            }
-            env[param.name] = paramValue;
             paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
         }
 
         // Get input buffers with storage usage
-        const storageInputs = this.spec.inputs.map((input, i) => this.getStorageInputBuffer(input, inputs[i] ? inputs[i] : null, i, env));
+        const storageInputs = this.spec.inputs.map((input, i) =>
+            this.getStorageInputBuffer(
+                input,
+                inputs[i] ? inputs[i] : null,
+                i,
+                env
+            )
+        );
 
         // Get output buffers with storage usage
-        const storageOutputs = this.spec.outputs.map((output, i) => this.getStorageOutputBuffer(output, outputs ? outputs[i] : null, i, env));
+        const storageOutputs = this.spec.outputs.map((output, i) =>
+            this.getStorageOutputBuffer(
+                output,
+                outputs ? outputs[i] : null,
+                i,
+                env
+            )
+        );
 
         // Build the params buffer
         const paramsBuffer = this._gpuDevice.createBuffer({
@@ -107,12 +124,15 @@ export class GPUKernel extends Kernel {
         paramsBuffer.unmap();
 
         // Bind the buffers
-        const bindGroup = this.createBindGroup(storageInputs, paramsBuffer, storageOutputs);
+        const bindGroup = this.createBindGroup(
+            storageInputs,
+            paramsBuffer,
+            storageOutputs
+        );
 
         // Get the workgroup counts
-        const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
-        const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
-        const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
+        const [workgroupCountX, workgroupCountY, workgroupCountZ] =
+            this.getWorkgroupCounts(env);
 
         // Start a new command encoder
         const commandEncoder = this._gpuDevice.createCommandEncoder();
@@ -135,33 +155,46 @@ export class GPUKernel extends Kernel {
         // Return the storage output buffers
         return storageOutputs;
     }
-    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer|null, inputIndex: number, env: EvalEnv): GPUBuffer {
+    private getStorageInputBuffer(
+        inputSpec: KernelInputSpec,
+        providedInput: GPUBuffer | null,
+        inputIndex: number,
+        env: EvalEnv
+    ): GPUBuffer {
         if (providedInput === null) {
-            throw new Error(`Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`);
+            throw new Error(
+                `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
+            );
         }
         if (providedInput.usage & GPUBufferUsage.STORAGE) {
             providedInput.unmap();
             return providedInput;
-        }
-        else {
+        } else {
             throw new Error("Provided input buffer is not a storage buffer");
         }
     }
-    private getStorageOutputBuffer(outputSpec: KernelOutputSpec, providedOutput: GPUBuffer | null, outputIndex: number, env: EvalEnv): GPUBuffer {
+    private getStorageOutputBuffer(
+        outputSpec: KernelOutputSpec,
+        providedOutput: GPUBuffer | null,
+        outputIndex: number,
+        env: EvalEnv
+    ): GPUBuffer {
         if (providedOutput !== null) {
             if (providedOutput.usage & GPUBufferUsage.STORAGE) {
                 providedOutput.unmap();
                 return providedOutput;
+            } else {
+                throw new Error(
+                    "Provided output buffer is not a storage buffer"
+                );
             }
-            else {
-                throw new Error("Provided output buffer is not a storage buffer");
-            }
-        }
-        else {
+        } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
             );
-            const outputElementCount = Math.ceil(this._outputSizeFuncs[outputIndex](env));
+            const outputElementCount = Math.ceil(
+                this._outputSizeFuncs[outputIndex](env)
+            );
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
             const outputBuffer = this._gpuDevice.createBuffer({
