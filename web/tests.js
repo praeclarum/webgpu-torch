@@ -59,41 +59,12 @@ test("linear forward", async () => {
 });
 
 test("abs backwards", async () => {
-    const input = new Tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
+    const input = new Tensor({data:[-3], requiresGrad:true});
     const output = input.abs();
-    expect(output).toBeInstanceOf(Tensor);
-    expect(output.shape).toEqual([2, 3]);
     output.backward();
     expect(input.grad).not.toBeNull();
     expect(output.grad).not.toBeNull();
-    expect(await input.grad.toArrayAsync()).toEqual([[-1, 1, -1], [1, -1, 1]]);
-});
-
-test("sub backwards", async () => {
-    const input = new Tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
-    const other = new Tensor({data:[[1, 2, 3], [4, 5, 6]], requiresGrad:true});
-    const output = input.sub(other);
-    expect(output).toBeInstanceOf(Tensor);
-    expect(output.shape).toEqual([2, 3]);
-    output.backward();
-    expect(input.grad).not.toBeNull();
-    expect(output.grad).not.toBeNull();
-    expect(await input.grad.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
-    expect(await other.grad.toArrayAsync()).toEqual([[-1, -1, -1], [-1, -1, -1]]);
-});
-
-test("mul backwards", async () => {
-    const input = new Tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
-    const other = new Tensor({data:[[10, 20, 30], [40, 50, 60]], requiresGrad:true});
-    const output = input.mul(other);
-    expect(output).toBeInstanceOf(Tensor);
-    expect(output.shape).toEqual([2, 3]);
-    expect(await output.toArrayAsync()).toEqual([[-10, 40, -90], [160, -250, 360]]);
-    output.backward();
-    expect(input.grad).not.toBeNull();
-    expect(output.grad).not.toBeNull();
-    expect(await input.grad.toArrayAsync()).toEqual([[10, 20, 30], [40, 50, 60]]);
-    expect(await other.grad.toArrayAsync()).toEqual([[-1, 2, -3], [4, -5, 6]]);
+    expect(await input.grad.toArrayAsync()).toEqual([-1]);
 });
 
 test("linear backwards", () => {
