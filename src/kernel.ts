@@ -374,6 +374,6 @@ export function getKernelJavaScriptCode(
     w.dedent();
     w.writeLine(`})`);
     const code = w.toString();
-    console.log(code);
+    // console.log(code);
     return code;
 }

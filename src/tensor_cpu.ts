@@ -100,23 +100,6 @@ export class TensorCPU extends TensorImpl {
         );
     }
 
-    add_(other: TensorImpl, alpha?: number): TensorImpl {
-        if (!(other instanceof TensorCPU)) {
-            throw new Error("Only CPU tensors can be added to CPU tensors");
-        }
-        const d = this.getTypedArray();
-        const od = other.getTypedArray();
-        if (alpha === undefined) {
-            for (let i = 0; i < d.length; i++) {
-                d[i] += od[i];
-            }
-        } else {
-            for (let i = 0; i < d.length; i++) {
-                d[i] += alpha * od[i];
-            }
-        }
-        return this;
-    }
     sum(axis: number | null): TensorImpl {
         const d = this.getTypedArray();
         if (axis === null) {

@@ -19,7 +19,7 @@ struct mmParameters {
 @group(0) @binding(3) var<storage, read> parameters: mmParameters;
 @compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id : vec3u) {
-    if (global_id.x >= parameters.resultRows || global_id.y >= u32(parameters.resultCols)) {
+    if (global_id.x >= parameters.resultRows || global_id.y >= parameters.resultCols) {
         return;
     }
     var result = 0.0;
