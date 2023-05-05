@@ -10,7 +10,7 @@ export type TensorArrayData = Array<number | TensorArrayData>;
 
 export type TensorJsonData = {
     data: TensorArrayData | TensorImpl;
-    dtype: Dtype;
+    dtype?: Dtype;
     requiresGrad?: boolean;
     device?: Deviceish;
 };
