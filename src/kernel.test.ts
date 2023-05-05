@@ -1,5 +1,6 @@
 import { Kernel, getKernelConfig, getKernelShaderCode } from "./kernel";
 import { registry } from "./kernels";
+import { tensor } from "./index";
 
 test("mm shader code", () => {
     const spec = registry["mm"];
@@ -30,4 +31,11 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
     let index = global_id.y + global_id.x * parameters.resultCols;
     resultMatrix[index] = result;
 }`);
+});
+
+test("abs value with grad", async () => {
+    const x = tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
+    const y = x.abs();
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+    expect(y.requiresGrad).toBe(true);
 });
