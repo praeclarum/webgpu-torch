@@ -51,10 +51,10 @@ Math is fun, but it's even more fun when you do it backwards.
 
 ```js
 // Create a tensor
-const a = torch.tensor([[1, 2, 3], [4, 5, 6]]);
+const a = torch.tensor({data: [[1, 2, 3], [4, 5, 6]], requiresGrad: true});
 
 // Create another tensor
-const b = torch.tensor([[7, 8, 9], [10, 11, 12]]);
+const b = torch.tensor({data: [[7, 8, 9], [10, 11, 12]], requiresGrad: true});
 
 // Add them
 const c = a.add(b);
