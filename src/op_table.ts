@@ -74,8 +74,3 @@ export const registry: OpSpec[] = [
         backward: "inputGrad = outputGrad; otherGrad = -outputGrad",
     },
 ];
-
-export const opSpecs = registry.reduce((map, spec) => {
-    map[spec.name] = spec;
-    return map;
-}, {} as {[name: string]: any});

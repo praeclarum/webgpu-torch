@@ -1,5 +1,10 @@
 import { getKernelSpecs } from "./opgen";
-import { registry, opSpecs } from "./op_table";
+import { registry } from "./op_table";
+
+export const opSpecs = registry.reduce((map, spec) => {
+    map[spec.name] = spec;
+    return map;
+}, {} as {[name: string]: any});
 
 test("binary sub op generate kernel spec", () => {
     const spec = opSpecs["sub"];
