@@ -20,7 +20,7 @@ export class KernelCPU extends Kernel {
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
         this._javaScriptCode = getKernelJavaScriptCode(spec, config);
-        console.log("js code", this._javaScriptCode);
+        console.log(this._javaScriptCode);
         this._javaScriptFunction = eval(this._javaScriptCode);
     }
 
@@ -33,10 +33,6 @@ export class KernelCPU extends Kernel {
 
         // Build the parameter environment
         const env = this.getRunEnv(parameters);
-
-        // Get the workgroup counts
-        const [workgroupCountX, workgroupCountY, workgroupCountZ] =
-            this.getWorkgroupCounts(env);
 
         // Build up the args
         const args: any[] = [];
@@ -61,8 +57,15 @@ export class KernelCPU extends Kernel {
             outputsToReturn.push(o);
         });
 
-        // Finally, add the parameters
+        // Add the parameters
         args.push(parameters);
+
+        // Finally the workgroupCount
+        const [workgroupCountX, workgroupCountY, workgroupCountZ] =
+            this.getWorkgroupCounts(env);
+        args.push(workgroupCountX);
+        args.push(workgroupCountY);
+        args.push(workgroupCountZ);
 
         // Run the kernel
         this._javaScriptFunction.apply(null, args);

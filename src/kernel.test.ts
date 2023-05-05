@@ -33,8 +33,8 @@ fn main(@builtin(global_invocation_id) global_id : vec3u) {
 }`);
 });
 
-test("abs value with grad", async () => {
-    const x = tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
+test("cpu abs value with grad", async () => {
+    const x = tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true, device: "cpu"});
     const y = x.abs();
     expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
     expect(y.requiresGrad).toBe(true);

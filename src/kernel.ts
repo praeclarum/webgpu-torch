@@ -236,10 +236,23 @@ export function getKernelShaderCode(
     return shaderCodeParts.join("\n");
 }
 
+const javaScriptSubstitutions: [RegExp, string][] = [
+    ["global_id\\.x", "global_id_x"],
+    ["global_id\\.y", "global_id_y"],
+    ["global_id\\.z", "global_id_z"],
+].map(([regex, replacement]) => [new RegExp(regex, "g"), replacement]);
+
 export function getKernelJavaScriptCode(
     spec: KernelSpec,
     config: KernelConfig
 ): string {
+    const env: { [name: string]: any } = {};
+    for (let i = 0; i < spec.config.length; i++) {
+        let configSpec = spec.config[i];
+        let configValue = config[i];
+        env[configSpec.name] = configValue;
+    }
+
     const w = new CodeWriter();
     const params: string[] = [];
     let bindingIndex = 0;
@@ -252,19 +265,23 @@ export function getKernelJavaScriptCode(
         params.push(output.name);
     }
     params.push("parameters");
-    const env: { [name: string]: any } = {};
-    for (let i = 0; i < spec.config.length; i++) {
-        let configSpec = spec.config[i];
-        let configValue = config[i];
-        env[configSpec.name] = configValue;
-    }
-    // const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
-    // const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
-    // const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
-    // w.writeLine(`const workgroupSize = [${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ}];`);
+    params.push("workgroupCountX");
+    params.push("workgroupCountY");
+    params.push("workgroupCountZ");
+    const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
+    const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
+    const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
     w.writeLine(`((${params.join(", ")}) => {`);
     w.indent();
-    w.writeLine(spec.shader.trim());
+    w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
+    w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
+    w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
+    w.writeLine(`console.log("workgroupCount", workgroupCountX, workgroupCountY, workgroupCountZ);`);
+    let jsCode = spec.shader.trim();
+    for (const [regex, replacement] of javaScriptSubstitutions) {
+        jsCode = jsCode.replace(regex, replacement);
+    }
+    w.writeLine(jsCode);
     w.dedent();
     w.writeLine(`})`);
     return w.toString();
