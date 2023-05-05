@@ -117,33 +117,6 @@ export class TensorCPU extends TensorImpl {
         }
         return this;
     }
-    mm(other: TensorImpl): TensorImpl {
-        // Matrix multiply
-        const newShape = [this._shape[0], other.shape[1]];
-        const [newStorage, newData] = this.device.allocTypedArray(
-            newShape[0] * newShape[1],
-            this.dtype
-        );
-        const newStrides = defaultStrides(newShape);
-        for (let i = 0; i < newShape[0]; i++) {
-            for (let j = 0; j < newShape[1]; j++) {
-                let sum = 0;
-                for (let k = 0; k < this._shape[1]; k++) {
-                    sum +=
-                        (this.get(i, k) as number) *
-                        (other.get(k, j) as number);
-                }
-                newData[i * newStrides[0] + j] = sum;
-            }
-        }
-        return new TensorCPU(
-            newStorage as ArrayBufferStorage,
-            this._dtype,
-            newShape,
-            newStrides,
-            this._device
-        );
-    }
     sum(axis: number | null): TensorImpl {
         const d = this.getTypedArray();
         if (axis === null) {

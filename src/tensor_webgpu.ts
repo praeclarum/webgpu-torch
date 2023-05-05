@@ -102,32 +102,6 @@ export class TensorWebGPU extends TensorImpl {
         );
     }
 
-    mm(other: TensorWebGPU): TensorWebGPU {
-        const kernel = this._device.getKernel("mm", { resultDtype: "f32" });
-        const params = {
-            resultRows: this.shape[0],
-            resultCols: other.shape[1],
-            innerDim: this.shape[1],
-            alpha: 1.0,
-        };
-        this.gpuBuffer.unmap();
-        other.gpuBuffer.unmap();
-        const outputs = kernel.run(
-            [this.gpuBuffer, other.gpuBuffer],
-            params
-        ) as GPUBuffer[];
-        const readBuffer = outputs[0];
-        const readStorage = new GPUBufferStorage(readBuffer, this.gpuDevice);
-        const resultShape = [params.resultRows, params.resultCols];
-        const readTensor = new TensorWebGPU(
-            readStorage,
-            this.dtype,
-            resultShape,
-            defaultStrides(resultShape),
-            this._device
-        );
-        return readTensor;
-    }
     sum(axis: number | null): TensorImpl {
         throw new Error("Sum not implemented.");
     }

@@ -18,7 +18,6 @@ export abstract class TensorImpl implements ITensor {
     abstract runKernelInplace(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: TensorImpl[]): TensorImpl;
     abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorImpl[]): TensorImpl[];
     
-    abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;
 
     get isContiguous(): boolean {
@@ -74,6 +73,21 @@ export abstract class TensorImpl implements ITensor {
         throw new Error("Cannot get value from tensor with wrong number of indices");
     }
 
+    mm(other: TensorImpl): TensorImpl {
+        const params = {
+            resultRows: this.shape[0],
+            resultCols: other.shape[1],
+            innerDim: this.shape[1],
+            alpha: 1.0,
+        };
+        return this.runKernel(
+            "mm",
+            { resultDtype: this.dtype },
+            params,
+            [[params.resultRows, params.resultCols]],
+            other
+        )[0];
+    }
     t(): TensorImpl {
         let newShape = this.shape.slice();
         newShape.reverse();
