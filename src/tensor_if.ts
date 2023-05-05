@@ -4,6 +4,7 @@ import { IDevice } from "./device_if";
 import { Deviceish } from "./device";
 import { UntypedStorage } from "./storage";
 import { TensorImpl } from "./tensor_impl";
+import { KernelConfigInput, KernelParamsInput } from "./kernel";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
 
@@ -19,6 +20,7 @@ export interface ITensor {
     get dtype(): Dtype;
     get shape(): Shape;
     get device(): IDevice;
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): ITensor;
     get(...indices: number[]): number | ITensor;
     add_(other: ITensor, alpha?: number): ITensor;
     expand(shape: Shape): ITensor;

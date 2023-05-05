@@ -1,7 +1,7 @@
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 
 export type KernelParamType = "u32" | "f32";
-export type KernelParam = number;
+export type KernelParamValue = number;
 
 export type ShaderType =
     | KernelParamType
@@ -44,7 +44,8 @@ export interface KernelConfigSpec {
 }
 
 export type KernelConfigValue = string | number;
-export type KernelConfigInput = { [key: KernelKey]: KernelConfigValue };
+export type KernelConfigInput = { [name: string]: KernelConfigValue };
+export type KernelParamsInput = { [name: string]: KernelParamValue };
 export type KernelConfig = KernelConfigValue[];
 export type KernelKey = string;
 
@@ -126,7 +127,7 @@ export class Kernel {
     }
     run(
         inputs: GPUBuffer[],
-        parameters: { [name: string]: KernelParam },
+        parameters: KernelParamsInput,
         outputs?: GPUBuffer[]
         ): GPUBuffer[] {
         console.log("run kernel", this._key);

@@ -9,6 +9,7 @@ import { UntypedStorage } from "./storage";
 import { GradientFunction, GradientContext } from "./autograd";
 import { TensorImpl } from "./tensor_impl";
 import * as ops from "./ops";
+import { KernelConfigInput, KernelParamsInput } from "./kernel";
 
 export class Tensor implements ITensor {
     private _impl: TensorImpl;
@@ -180,6 +181,10 @@ export class Tensor implements ITensor {
                 );
             }
         }
+    }
+
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): Tensor {
+        return new Tensor(this.impl.runKernel(name, config, params));
     }
 
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.

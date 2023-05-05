@@ -1,5 +1,6 @@
 import { Device } from "./device";
 import { Dtype } from "./dtype";
+import { KernelConfigInput, KernelParamsInput } from "./kernel";
 import {
     Shape,
     Strides,
@@ -50,6 +51,10 @@ export class TensorCPU extends TensorImpl {
 
     withShape(shape: Shape, strides: Strides): TensorImpl {
         return new TensorCPU(this._storage, shape, strides, this._device);
+    }
+
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): TensorCPU {
+        throw new Error("Running kernels on the CPU is not implemented.");
     }
 
     add_(other: TensorImpl, alpha?: number): TensorImpl {

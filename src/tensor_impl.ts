@@ -4,6 +4,7 @@ import { IDevice } from "./device_if";
 import { Deviceish } from "./device";
 import { UntypedStorage } from "./storage";
 import { ITensor, TensorArrayData } from "./tensor_if";
+import { KernelConfigInput, KernelParamsInput } from "./kernel";
 
 export abstract class TensorImpl implements ITensor {
     abstract get storage(): UntypedStorage;
@@ -13,6 +14,7 @@ export abstract class TensorImpl implements ITensor {
     abstract get strides(): Strides;
     abstract get device(): IDevice;
     abstract withShape(shape: Shape, strides: Strides): TensorImpl;
+    abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): TensorImpl;
 
     abstract mm(other: TensorImpl): TensorImpl;
     abstract sum(axis: number | null): TensorImpl;
