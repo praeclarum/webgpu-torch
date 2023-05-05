@@ -305,8 +305,9 @@ function writeFunctionsCode(): void {
     GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
-import { Tensor } from "./tensor";`);
-    w.writeLine(`import * as ops from "./ops";`);
+import { Tensor } from "./tensor";
+import { shapeSize } from "./shape";
+import * as ops from "./ops";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -315,31 +316,44 @@ import { Tensor } from "./tensor";`);
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
+        const writeUnpackInputs = () => {
+            if (isBinary) {
+                if (hasAlpha) {
+                    w.writeLine(`const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];`);
+                }
+                else {
+                    w.writeLine(`const [input, other] = inputs as [Tensor, Tensor];`);
+                }
+            }
+            else {
+                if (hasAlpha) {
+                    w.writeLine(`const [input, alpha] = inputs as [Tensor, number|undefined];`);
+                }
+                else {
+                    w.writeLine(`const [input] = inputs as [Tensor];`);
+                }
+            }
+        }
         w.writeLine(`export class ${className} extends AutoFunction {`);
         w.indent();
 
         // Forward
         w.writeLine(`static forward(...inputs: FunctionInput[]): Tensor {`);
         w.indent();
+        writeUnpackInputs();
+        w.writeLine(`const params = {`);
+        w.indent();
+        w.writeLine(`size: shapeSize(input.shape),`);
+        if (hasAlpha) {
+            w.writeLine(`alpha: alpha || 1.0,`);
+        }
+        w.dedent();
+        w.writeLine(`};`);
         if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];`);
-                w.writeLine(`return ops.${kernelSpec.name}(input, other, alpha);`);
-            }
-            else {
-                w.writeLine(`const [input, other] = inputs as [Tensor, Tensor];`);
-                w.writeLine(`return ops.${kernelSpec.name}(input, other);`);
-            }
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, other);`);
         }
         else {
-            if (hasAlpha) {
-                w.writeLine(`const [input, alpha] = inputs as [Tensor, number|undefined];`);
-                w.writeLine(`return ops.${kernelSpec.name}(input, alpha);`);
-            }
-            else {
-                w.writeLine(`const [input] = inputs as [Tensor];`);
-                w.writeLine(`return ops.${kernelSpec.name}(input);`);
-            }
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params);`);
         }
         w.dedent();
         w.writeLine(`}`);

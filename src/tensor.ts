@@ -183,8 +183,8 @@ export class Tensor implements ITensor {
         }
     }
 
-    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput): Tensor {
-        return new Tensor(this.impl.runKernel(name, config, params));
+    runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: Tensor[]): Tensor {
+        return new Tensor(this.impl.runKernel(name, config, params, ...additionalInputs.map(t => t.impl)));
     }
 
     /** Returns a new view of this tensor with singleton dimensions expanded to a larger size.

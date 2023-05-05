@@ -39,6 +39,19 @@ test("add_ vectors", async () => {
     expect(await a.toArrayAsync()).toEqual([101, 202, 303]);
 });
 
+test("abs value", async () => {
+    const x = tensor([[-1, 2, -3], [4, -5, 6]]);
+    const y = x.abs();
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+});
+
+test("abs value with grad", async () => {
+    const x = tensor({data:[[-1, 2, -3], [4, -5, 6]], requiresGrad:true});
+    const y = x.abs();
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+    expect(y.requiresGrad).toBe(true);
+});
+
 test("matrix multiply", async () => {
     const a = tensor([[1, 2, 3], [4, 5, 6]]);
     const b = tensor([[7, 8], [9, 10], [11, 12]]);
@@ -56,10 +69,15 @@ test("linear forward", async () => {
     expect(await output.toArrayAsync()).toEqual(expected);
 });
 
-test("abs value", async () => {
-    const x = tensor([[-1, 2, -3], [4, -5, 6]]);
-    const y = x.abs();
-    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+test("linear forward with grad", async () => {
+    const input = tensor([[3]]);
+    const weight = tensor({data:[[10], [11]], requiresGrad:true});
+    const bias = tensor({data:[[1000, 10000]], requiresGrad:true});
+    const output = LinearFunction.apply(input, weight, bias);
+    const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
+    expect(output.shape).toEqual([1, 2]);
+    expect(await output.toArrayAsync()).toEqual(expected);
+    expect(output.requiresGrad).toBe(true);
 });
 
 

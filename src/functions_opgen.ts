@@ -5,11 +5,15 @@ import {
     GradientFunctionOutput,
 } from "./autograd";
 import { Tensor } from "./tensor";
+import { shapeSize } from "./shape";
 import * as ops from "./ops";
 export class AbsFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.abs(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("abs", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -26,7 +30,10 @@ export class AbsFunction extends AutoFunction {
 export class AcosFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.acos(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("acos", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -43,7 +50,10 @@ export class AcosFunction extends AutoFunction {
 export class AcoshFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.acosh(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("acosh", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -60,7 +70,11 @@ export class AcoshFunction extends AutoFunction {
 export class AddFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        return ops.add(input, other, alpha);
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("add", { dtype: input.dtype }, params, other);
     }
     static setupContext(
         ctx: GradientContext,
@@ -78,7 +92,10 @@ export class AddFunction extends AutoFunction {
 export class AsinFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.asin(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("asin", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -95,7 +112,10 @@ export class AsinFunction extends AutoFunction {
 export class AsinhFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.asinh(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("asinh", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -112,7 +132,10 @@ export class AsinhFunction extends AutoFunction {
 export class AtanFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        return ops.atan(input);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("atan", { dtype: input.dtype }, params);
     }
     static setupContext(
         ctx: GradientContext,
@@ -129,7 +152,10 @@ export class AtanFunction extends AutoFunction {
 export class Atan2Function extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        return ops.atan2(input, other);
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("atan2", { dtype: input.dtype }, params, other);
     }
     static setupContext(
         ctx: GradientContext,
@@ -146,7 +172,11 @@ export class Atan2Function extends AutoFunction {
 export class SubFunction extends AutoFunction {
     static forward(...inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        return ops.sub(input, other, alpha);
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("sub", { dtype: input.dtype }, params, other);
     }
     static setupContext(
         ctx: GradientContext,
