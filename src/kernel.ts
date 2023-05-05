@@ -200,7 +200,10 @@ export class Kernel {
         // Return the storage output buffers
         return storageOutputs;
     }
-    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer, inputIndex: number, env: EvalEnv): GPUBuffer {
+    private getStorageInputBuffer(inputSpec: KernelInputSpec, providedInput: GPUBuffer|undefined, inputIndex: number, env: EvalEnv): GPUBuffer {
+        if (providedInput === undefined) {
+            throw new Error(`Missing input buffer #${inputIndex} ${inputSpec.name} in kernel ${this._key}`);
+        }
         if (providedInput.usage & GPUBufferUsage.STORAGE) {
             providedInput.unmap();
             return providedInput;
