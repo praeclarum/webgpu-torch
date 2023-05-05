@@ -9,6 +9,7 @@ import {
     UntypedStorage,
     newTypedArrayFromArray,
 } from "./storage";
+import { Kernel, KernelConfig, KernelSpec } from "./kernel";
 
 export class DeviceCPU extends Device {
     constructor() {
@@ -16,6 +17,9 @@ export class DeviceCPU extends Device {
     }
     alloc(byteSize: number): UntypedStorage {
         return new ArrayBufferStorage(byteSize);
+    }
+    createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
+        throw new Error("Cannot create CPU kernels");
     }
     ones(shape: Shape, dtype: Dtype): TensorImpl {
         const storage = this.allocFor(shape, dtype) as ArrayBufferStorage;

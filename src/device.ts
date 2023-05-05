@@ -4,7 +4,7 @@ import { TensorArrayData } from "./tensor_if";
 import { IDevice } from "./device_if";
 import { UntypedStorage } from "./storage";
 import { TensorImpl } from "./tensor_impl";
-import { Kernel, KernelConfigInput, KernelKey, getKernelConfig, getKernelKey } from "./kernel";
+import { Kernel, KernelConfig, KernelConfigInput, KernelKey, KernelSpec, getKernelConfig, getKernelKey } from "./kernel";
 import { registry as kernelRegistry } from "./kernels";
 
 export type DeviceType = "cpu" | "webgpu";
@@ -47,11 +47,12 @@ export abstract class Device implements IDevice {
         const key = getKernelKey(spec, kconfig);
         let kernel = this._kernels[key];
         if (kernel === undefined) {
-            kernel = new Kernel(spec, kconfig, this);
+            kernel = this.createKernel(spec, kconfig);
             this._kernels[key] = kernel;
         }
         return kernel;
     }
+    abstract createKernel(spec: KernelSpec, config: KernelConfig): Kernel;
     abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
     abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;
     abstract zeros(shape: Shape, dtype: Dtype): TensorImpl;
