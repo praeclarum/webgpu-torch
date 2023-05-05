@@ -225,18 +225,12 @@ export class Tensor implements ITensor {
         this._impl.abs_();
         return this;
     }
-    absGrad(): Tensor {
-        return ops.absGrad(this);
-    }
     acos(): Tensor {
         return ops.acos(this);
     }
     acos_(): Tensor {
         this._impl.acos_();
         return this;
-    }
-    acosGrad(): Tensor {
-        return ops.acosGrad(this);
     }
     acosh(): Tensor {
         return ops.acosh(this);
@@ -245,18 +239,12 @@ export class Tensor implements ITensor {
         this._impl.acosh_();
         return this;
     }
-    acoshGrad(): Tensor {
-        return ops.acoshGrad(this);
-    }
     add(other: Tensor, alpha?: number): Tensor {
         return ops.add(this, other, alpha);
     }
     add_(other: Tensor, alpha?: number): Tensor {
         this._impl.add_(other._impl, alpha);
         return this;
-    }
-    addGrad(other: Tensor, alpha?: number): Tensor {
-        return ops.addGrad(this, other, alpha);
     }
     asin(): Tensor {
         return ops.asin(this);
@@ -265,18 +253,12 @@ export class Tensor implements ITensor {
         this._impl.asin_();
         return this;
     }
-    asinGrad(): Tensor {
-        return ops.asinGrad(this);
-    }
     asinh(): Tensor {
         return ops.asinh(this);
     }
     asinh_(): Tensor {
         this._impl.asinh_();
         return this;
-    }
-    asinhGrad(): Tensor {
-        return ops.asinhGrad(this);
     }
     atan(): Tensor {
         return ops.atan(this);
@@ -285,18 +267,12 @@ export class Tensor implements ITensor {
         this._impl.atan_();
         return this;
     }
-    atanGrad(): Tensor {
-        return ops.atanGrad(this);
-    }
     atan2(other: Tensor): Tensor {
         return ops.atan2(this, other);
     }
     atan2_(other: Tensor): Tensor {
         this._impl.atan2_(other._impl);
         return this;
-    }
-    atan2Grad(other: Tensor): Tensor {
-        return ops.atan2Grad(this, other);
     }
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
@@ -305,18 +281,12 @@ export class Tensor implements ITensor {
         this._impl.mul_(other._impl, alpha);
         return this;
     }
-    mulGrad(other: Tensor, alpha?: number): Tensor {
-        return ops.mulGrad(this, other, alpha);
-    }
     sub(other: Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
     sub_(other: Tensor, alpha?: number): Tensor {
         this._impl.sub_(other._impl, alpha);
         return this;
-    }
-    subGrad(other: Tensor, alpha?: number): Tensor {
-        return ops.subGrad(this, other, alpha);
     }
     // End codegen marker
 }

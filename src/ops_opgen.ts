@@ -7,35 +7,17 @@ export function abs(input: Tensor): Tensor {
     }
     return new Tensor(input.impl.abs());
 }
-export function absGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AbsGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.absGrad());
-}
 export function acos(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
         return functions.AcosFunction.apply(input);
     }
     return new Tensor(input.impl.acos());
 }
-export function acosGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AcosGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.acosGrad());
-}
 export function acosh(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
         return functions.AcoshFunction.apply(input);
     }
     return new Tensor(input.impl.acosh());
-}
-export function acoshGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AcoshGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.acoshGrad());
 }
 export function add(input: Tensor, other: Tensor, alpha?: number): Tensor {
     if (input.shape.length !== other.shape.length) {
@@ -46,26 +28,11 @@ export function add(input: Tensor, other: Tensor, alpha?: number): Tensor {
     }
     return new Tensor(input.impl.add(other.impl, alpha));
 }
-export function addGrad(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions of addGrad must match. Got ${input.shape} and ${other.shape}`);
-    }
-    if (shouldCreateGradient(input, other)) {
-        return functions.AddGradFunction.apply(input, other);
-    }
-    return new Tensor(input.impl.addGrad(other.impl, alpha));
-}
 export function asin(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
         return functions.AsinFunction.apply(input);
     }
     return new Tensor(input.impl.asin());
-}
-export function asinGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AsinGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.asinGrad());
 }
 export function asinh(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
@@ -73,23 +40,11 @@ export function asinh(input: Tensor): Tensor {
     }
     return new Tensor(input.impl.asinh());
 }
-export function asinhGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AsinhGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.asinhGrad());
-}
 export function atan(input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
         return functions.AtanFunction.apply(input);
     }
     return new Tensor(input.impl.atan());
-}
-export function atanGrad(input: Tensor): Tensor {
-    if (shouldCreateGradient(input)) {
-        return functions.AtanGradFunction.apply(input);
-    }
-    return new Tensor(input.impl.atanGrad());
 }
 export function atan2(input: Tensor, other: Tensor): Tensor {
     if (input.shape.length !== other.shape.length) {
@@ -100,15 +55,6 @@ export function atan2(input: Tensor, other: Tensor): Tensor {
     }
     return new Tensor(input.impl.atan2(other.impl));
 }
-export function atan2Grad(input: Tensor, other: Tensor): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions of atan2Grad must match. Got ${input.shape} and ${other.shape}`);
-    }
-    if (shouldCreateGradient(input, other)) {
-        return functions.Atan2GradFunction.apply(input, other);
-    }
-    return new Tensor(input.impl.atan2Grad(other.impl));
-}
 export function mul(input: Tensor, other: Tensor, alpha?: number): Tensor {
     if (input.shape.length !== other.shape.length) {
         throw new Error(`Shape dimensions of mul must match. Got ${input.shape} and ${other.shape}`);
@@ -118,15 +64,6 @@ export function mul(input: Tensor, other: Tensor, alpha?: number): Tensor {
     }
     return new Tensor(input.impl.mul(other.impl, alpha));
 }
-export function mulGrad(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions of mulGrad must match. Got ${input.shape} and ${other.shape}`);
-    }
-    if (shouldCreateGradient(input, other)) {
-        return functions.MulGradFunction.apply(input, other);
-    }
-    return new Tensor(input.impl.mulGrad(other.impl, alpha));
-}
 export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
     if (input.shape.length !== other.shape.length) {
         throw new Error(`Shape dimensions of sub must match. Got ${input.shape} and ${other.shape}`);
@@ -135,13 +72,4 @@ export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
         return functions.SubFunction.apply(input, other);
     }
     return new Tensor(input.impl.sub(other.impl, alpha));
-}
-export function subGrad(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions of subGrad must match. Got ${input.shape} and ${other.shape}`);
-    }
-    if (shouldCreateGradient(input, other)) {
-        return functions.SubGradFunction.apply(input, other);
-    }
-    return new Tensor(input.impl.subGrad(other.impl, alpha));
 }

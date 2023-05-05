@@ -150,17 +150,11 @@ export class TensorCPU extends TensorImpl {
     abs_(): TensorCPU {
         throw new Error("CPU abs_ not supported");
     }
-    absGrad(): TensorCPU {
-        throw new Error("CPU absGrad not supported");
-    }
     acos(): TensorCPU {
         throw new Error("CPU acos not supported");
     }
     acos_(): TensorCPU {
         throw new Error("CPU acos_ not supported");
-    }
-    acosGrad(): TensorCPU {
-        throw new Error("CPU acosGrad not supported");
     }
     acosh(): TensorCPU {
         throw new Error("CPU acosh not supported");
@@ -168,14 +162,8 @@ export class TensorCPU extends TensorImpl {
     acosh_(): TensorCPU {
         throw new Error("CPU acosh_ not supported");
     }
-    acoshGrad(): TensorCPU {
-        throw new Error("CPU acoshGrad not supported");
-    }
     add(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU add not supported");
-    }
-    addGrad(other: TensorCPU, alpha?: number): TensorCPU {
-        throw new Error("CPU addGrad not supported");
     }
     asin(): TensorCPU {
         throw new Error("CPU asin not supported");
@@ -183,17 +171,11 @@ export class TensorCPU extends TensorImpl {
     asin_(): TensorCPU {
         throw new Error("CPU asin_ not supported");
     }
-    asinGrad(): TensorCPU {
-        throw new Error("CPU asinGrad not supported");
-    }
     asinh(): TensorCPU {
         throw new Error("CPU asinh not supported");
     }
     asinh_(): TensorCPU {
         throw new Error("CPU asinh_ not supported");
-    }
-    asinhGrad(): TensorCPU {
-        throw new Error("CPU asinhGrad not supported");
     }
     atan(): TensorCPU {
         throw new Error("CPU atan not supported");
@@ -201,17 +183,11 @@ export class TensorCPU extends TensorImpl {
     atan_(): TensorCPU {
         throw new Error("CPU atan_ not supported");
     }
-    atanGrad(): TensorCPU {
-        throw new Error("CPU atanGrad not supported");
-    }
     atan2(other: TensorCPU): TensorCPU {
         throw new Error("CPU atan2 not supported");
     }
     atan2_(other: TensorCPU): TensorCPU {
         throw new Error("CPU atan2_ not supported");
-    }
-    atan2Grad(other: TensorCPU): TensorCPU {
-        throw new Error("CPU atan2Grad not supported");
     }
     mul(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul not supported");
@@ -219,17 +195,11 @@ export class TensorCPU extends TensorImpl {
     mul_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul_ not supported");
     }
-    mulGrad(other: TensorCPU, alpha?: number): TensorCPU {
-        throw new Error("CPU mulGrad not supported");
-    }
     sub(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub not supported");
     }
     sub_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub_ not supported");
-    }
-    subGrad(other: TensorCPU, alpha?: number): TensorCPU {
-        throw new Error("CPU subGrad not supported");
     }
     // End codegen marker
 }

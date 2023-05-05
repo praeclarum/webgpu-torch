@@ -59,6 +59,8 @@ function writeTensorCPUCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (kernelSpec.name == "add_") continue;
@@ -100,6 +102,8 @@ function writeTensorWebGPUCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
@@ -166,6 +170,8 @@ function writeTensorCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
@@ -238,6 +244,8 @@ function writeITensorCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
@@ -270,6 +278,8 @@ function writeTensorImplCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
@@ -419,6 +429,8 @@ import { shouldCreateGradient } from "./autograd";`);
         if (isInplace) {
             continue;
         }
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";

@@ -66,33 +66,23 @@ export abstract class TensorImpl implements ITensor {
     // Codegen marker
     abstract abs(): TensorImpl;
     abstract abs_(): TensorImpl;
-    abstract absGrad(): TensorImpl;
     abstract acos(): TensorImpl;
     abstract acos_(): TensorImpl;
-    abstract acosGrad(): TensorImpl;
     abstract acosh(): TensorImpl;
     abstract acosh_(): TensorImpl;
-    abstract acoshGrad(): TensorImpl;
     abstract add(other: TensorImpl, alpha?: number): TensorImpl;
     abstract add_(other: TensorImpl, alpha?: number): TensorImpl;
-    abstract addGrad(other: TensorImpl, alpha?: number): TensorImpl;
     abstract asin(): TensorImpl;
     abstract asin_(): TensorImpl;
-    abstract asinGrad(): TensorImpl;
     abstract asinh(): TensorImpl;
     abstract asinh_(): TensorImpl;
-    abstract asinhGrad(): TensorImpl;
     abstract atan(): TensorImpl;
     abstract atan_(): TensorImpl;
-    abstract atanGrad(): TensorImpl;
     abstract atan2(other: TensorImpl): TensorImpl;
     abstract atan2_(other: TensorImpl): TensorImpl;
-    abstract atan2Grad(other: TensorImpl): TensorImpl;
     abstract mul(other: TensorImpl, alpha?: number): TensorImpl;
     abstract mul_(other: TensorImpl, alpha?: number): TensorImpl;
-    abstract mulGrad(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub_(other: TensorImpl, alpha?: number): TensorImpl;
-    abstract subGrad(other: TensorImpl, alpha?: number): TensorImpl;
     // End codegen marker
 }
