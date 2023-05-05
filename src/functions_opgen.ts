@@ -24,6 +24,11 @@ export class AbsFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("absGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -44,6 +49,11 @@ export class AcosFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("acosGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -64,6 +74,11 @@ export class AcoshFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("acoshGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -86,6 +101,12 @@ export class AddFunction extends AutoFunction {
         ctx.saveForBackward(input, other);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input, other, alpha] = ctx.inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        input.runKernel("addGrad", { dtype: input.dtype }, params, other);
         throw new Error("Not implemented");
     }
 }
@@ -106,6 +127,11 @@ export class AsinFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("asinGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -126,6 +152,11 @@ export class AsinhFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("asinhGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -146,6 +177,11 @@ export class AtanFunction extends AutoFunction {
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("atanGrad", { dtype: input.dtype }, params);
         throw new Error("Not implemented");
     }
 }
@@ -166,6 +202,11 @@ export class Atan2Function extends AutoFunction {
         ctx.saveForBackward(input, other);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.inputs as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        input.runKernel("atan2Grad", { dtype: input.dtype }, params, other);
         throw new Error("Not implemented");
     }
 }
@@ -188,6 +229,12 @@ export class SubFunction extends AutoFunction {
         ctx.saveForBackward(input, other);
     }
     static backward(ctx: GradientContext, gradOutput: Tensor): GradientFunctionOutput[] {
+        const [input, other, alpha] = ctx.inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        input.runKernel("subGrad", { dtype: input.dtype }, params, other);
         throw new Error("Not implemented");
     }
 }
