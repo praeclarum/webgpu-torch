@@ -8,17 +8,14 @@ export type OpSpec = {
     aliases?: string[];
     alpha?: boolean;
     type: OpType;
-    gradients?: ExprCode[];
-    webGPU: ExprCode;
-    javaScript: ExprCode;    
+    forward: ExprCode;
+    backward?: ExprCode;
 }
 
 export type UnaryOpSpec = OpSpec & {
     type: "unary";
-    gradients?: [ExprCode];
 }
 
 export type BinaryOpSpec = OpSpec & {
     type: "binary";
-    gradients?: [ExprCode, ExprCode];
 }

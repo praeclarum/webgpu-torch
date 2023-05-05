@@ -407,6 +407,18 @@ export function exprNodeToString(ast: ExprNode): string {
         const argstrs = args.map(exprNodeToString);
         return `${fstr}(${argstrs.join(", ")})`;
     }
+    if (ast[0] === "assign") {
+        const lhs = ast[1][0];
+        const rhs = ast[1][1];
+        return `${exprNodeToString(lhs)} = ${exprNodeToString(rhs)}`;
+    }
+    if (ast[0] === "if") {
+        const cond = ast[1][0];
+        const then = ast[1][1];
+        const else_ = ast[1][2];
+        return `if (${exprNodeToString(cond)}) { ${exprNodeToString(then)} } else { ${exprNodeToString(else_)} }`;
+    }
+
     throw new Error(`Unknown AST node type when printing: ${ast[0]}`);
 }
 

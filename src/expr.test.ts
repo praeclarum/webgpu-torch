@@ -1,4 +1,4 @@
-import { compileCode, evalCode, parseCode } from "./expr";
+import { compileCode, evalCode, exprNodeToString, parseCode } from "./expr";
 
 test("just a number", () => {
     const expr = "3.14";
@@ -117,4 +117,11 @@ test("parse return", () => {
     const expr = "return 3";
     const parsed = parseCode(expr);
     expect(parsed).toEqual(["return", [3]]);
+});
+
+test("exprNodeToString assignment", () => {
+    const expr = "x = 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["assign", ["x", 3]]);
+    expect(exprNodeToString(parsed)).toEqual("x = 3");
 });

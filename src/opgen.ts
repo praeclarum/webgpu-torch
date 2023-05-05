@@ -30,10 +30,11 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(op.webGPU);
+    const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
+        out: "out[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToString(shaderAst);
@@ -41,7 +42,7 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
         if (global_id.x >= parameters.size) {
             return;
         }
-        out[global_id.x] = ${shaderSnippet};`;
+        ${shaderSnippet};`;
     return {
         name: op.name,
         config: [
@@ -80,10 +81,11 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(op.webGPU);
+    const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
+        out: "input[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToString(shaderAst);
@@ -91,7 +93,7 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
         if (global_id.x >= parameters.size) {
             return;
         }
-        input[global_id.x] = ${shaderSnippet};`;
+        ${shaderSnippet};`;
     return {
         name: op.name + "_",
         config: [
@@ -130,9 +132,10 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(op.webGPU);
+    const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
+        out: "out[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToString(shaderAst);
@@ -140,7 +143,7 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
         if (global_id.x >= parameters.size) {
             return;
         }
-        out[global_id.x] = ${shaderSnippet};`;
+        ${shaderSnippet};`;
     return {
         name: op.name,
         config: [
@@ -175,9 +178,10 @@ function getUnaryInplaceKernelSpec(op: UnaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(op.webGPU);
+    const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
+        out: "input[global_id.x]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToString(shaderAst);
@@ -185,7 +189,7 @@ function getUnaryInplaceKernelSpec(op: UnaryOpSpec): KernelSpec {
         if (global_id.x >= parameters.size) {
             return;
         }
-        input[global_id.x] = ${shaderSnippet};`;
+        ${shaderSnippet};`;
     return {
         name: op.name + "_",
         config: [
