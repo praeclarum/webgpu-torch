@@ -53,51 +53,8 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
     fs.writeFileSync(path, newCode);
 }
 
-// Write the TensorCPU class
-function writeTensorCPUCode(): void {
-    const w = new CodeWriter();
-    w.indent();
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
-        const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
-        if (isGrad) continue;
-        const isBinary = opSpec.type === "binary";
-        const hasAlpha = opSpec.alpha ?? false;
-        if (kernelSpec.name == "add_") continue;
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(other: TensorCPU, alpha?: number): TensorCPU {`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(other: TensorCPU): TensorCPU {`);
-            }
-            w.indent();
-            w.writeLine(`throw new Error("CPU ${kernelSpec.name} not supported");`);
-            w.dedent();
-            w.writeLine(`}`);
-        }
-        else {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorCPU {`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(): TensorCPU {`);
-            }
-            w.indent();
-            w.writeLine(`throw new Error("CPU ${kernelSpec.name} not supported");`);
-            w.dedent();
-            w.writeLine(`}`);
-        }
-    }
-    const code = w.toString();
-    // console.log(code);
-    const path = absSrcDir + "/tensor_cpu.ts";
-    insertCodegenIntoFile(path, code);
-}
-writeTensorCPUCode();
-
-// Write the TensorWebGPU class
-function writeTensorWebGPUCode(): void {
+// Write the TensorImpl class
+function writeTensorImplCode(): void {
     const w = new CodeWriter();
     w.indent();
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
@@ -108,10 +65,10 @@ function writeTensorWebGPUCode(): void {
         const hasAlpha = opSpec.alpha ?? false;
         if (isBinary) {
             if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(other: TensorWebGPU, alpha?: number): TensorWebGPU {`);
+                w.writeLine(`${kernelSpec.name}(other: TensorImpl, alpha?: number): TensorImpl {`);
             }
             else {
-                w.writeLine(`${kernelSpec.name}(other: TensorWebGPU): TensorWebGPU {`);
+                w.writeLine(`${kernelSpec.name}(other: TensorImpl): TensorImpl {`);
             }
             w.indent();
             w.writeLine(`const params = {`);
@@ -133,10 +90,10 @@ function writeTensorWebGPUCode(): void {
         }
         else {
             if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorWebGPU {`);
+                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorImpl {`);
             }
             else {
-                w.writeLine(`${kernelSpec.name}(): TensorWebGPU {`);
+                w.writeLine(`${kernelSpec.name}(): TensorImpl {`);
             }
             w.indent();
             w.writeLine(`const params = {`);
@@ -160,9 +117,11 @@ function writeTensorWebGPUCode(): void {
     const code = w.toString();
     // console.log(code);
     const path = absSrcDir + "/tensor_webgpu.ts";
-    insertCodegenIntoFile(path, code);
+    insertCodegenIntoFile(path, "");
+    const path2 = absSrcDir + "/tensor_impl.ts";
+    insertCodegenIntoFile(path2, code);
 }
-writeTensorWebGPUCode();
+writeTensorImplCode();
 
 // Write the Tensor class
 function writeTensorCode(): void {
@@ -307,40 +266,6 @@ function writeITensorCode(): void {
     insertCodegenIntoFile(path, code);
 }
 writeITensorCode();
-
-// Write the ITensor interface
-function writeTensorImplCode(): void {
-    const w = new CodeWriter();
-    w.indent();
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
-        const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
-        if (isGrad) continue;
-        const isBinary = opSpec.type === "binary";
-        const hasAlpha = opSpec.alpha ?? false;
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl, alpha?: number): TensorImpl;`);
-            }
-            else {
-                w.writeLine(`abstract ${kernelSpec.name}(other: TensorImpl): TensorImpl;`);
-            }
-        }
-        else {
-            if (hasAlpha) {
-                w.writeLine(`abstract ${kernelSpec.name}(alpha?: number): TensorImpl;`);
-            }
-            else {
-                w.writeLine(`abstract ${kernelSpec.name}(): TensorImpl;`);
-            }
-        }
-    }
-    const code = w.toString();
-    // console.log(code);
-    const path = absSrcDir + "/tensor_impl.ts";
-    insertCodegenIntoFile(path, code);
-}
-writeTensorImplCode();
 
 // Write autograd functions
 function writeFunctionsCode(): void {
