@@ -20,7 +20,6 @@ export class KernelCPU extends Kernel {
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
         this._javaScriptCode = getKernelJavaScriptCode(spec, config);
-        // console.log(this._javaScriptCode);
         this._javaScriptFunction = eval(this._javaScriptCode);
     }
 

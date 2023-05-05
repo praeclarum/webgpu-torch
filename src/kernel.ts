@@ -249,6 +249,20 @@ for (const name of Object.getOwnPropertyNames(Math)) {
     }
 }
 
+const javaScriptGlobalFunctions: {[name: string]: string} = {
+    select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
+}
+
+function getIdentifiers(code: string): string[] {
+    const identifierRegex = /[a-zA-Z_][a-zA-Z0-9_]*/g;
+    const identifiers = new Set<string>();
+    let match: RegExpExecArray | null;
+    while ((match = identifierRegex.exec(code)) !== null) {
+        identifiers.add(match[0]);
+    }
+    return Array.from(identifiers);
+}
+
 export function getKernelJavaScriptCode(
     spec: KernelSpec,
     config: KernelConfig
@@ -265,6 +279,16 @@ export function getKernelJavaScriptCode(
     for (const [regex, replacement] of javaScriptSubstitutions) {
         jsCode = jsCode.replace(regex, replacement);
     }
+
+    // Find needed functions
+    const identifiers = getIdentifiers(jsCode);
+    const neededFunctions = new Set<string>();
+    for (const identifier of identifiers) {
+        if (identifier in javaScriptGlobalFunctions) {
+            neededFunctions.add(identifier);
+        }
+    }
+    const neededFunctionsArray = Array.from(neededFunctions);
 
     // Write the whole function
     const w = new CodeWriter();
@@ -287,6 +311,13 @@ export function getKernelJavaScriptCode(
     const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
     w.writeLine(`((${params.join(", ")}) => {`);
     w.indent();
+
+    // Write dependent functions
+    for (const neededFunction of neededFunctionsArray) {
+        w.writeLine(javaScriptGlobalFunctions[neededFunction]);
+    }
+
+    // Write the kernel function
     w.writeLine(
         `function ${spec.name}Kernel(global_id_x, global_id_y, global_id_z) {`
     );
@@ -339,5 +370,7 @@ export function getKernelJavaScriptCode(
     w.writeLine(`}`);
     w.dedent();
     w.writeLine(`})`);
-    return w.toString();
+    const code = w.toString();
+    console.log(code);
+    return code;
 }
