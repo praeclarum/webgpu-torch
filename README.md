@@ -78,9 +78,9 @@ Its API surface is therefore not 100% compatible with pytorch, but I prioritize 
 * `Shape` is an array of integers that specifies the size of each dimension of a tensor. For example, `[32, 3, 128, 256]` would be 32 batched 256x128 RGB images.
 * `Tensor` is a multi-dimensional array of data. It has a `device`, a `dtype`, a `shape`, and `storage` properties. It can be created in a variety of ways.
     * **Directly** with `torch.tensor(array)` or `new torch.Tensor(array)`
-    * **From a factory function** like `torch.zeros(shape)` or `torch.ones(shape)`
-    * **From an operation** like `a.add(b)` or `a.mm(b)`
-    * **From a gradient calculations** like `a.add(b).backward()`
+    * **From factory functions** like `torch.zeros(shape)` or `torch.ones(shape)`
+    * **From operations** like `a.add(b)` or `a.mm(b)`
+    * **From a gradient calculation** like `a.add(b).backward()`
 * `AutoFunction` is the base class for all autograd functions. It has a `forward` method that computes the output tensor and a `backward` method that computes the gradients of the inputs. They live in the `torch.functions` object. Functions should be called using their `apply` method.
 * `Kernel` is basic operation that can be executed on the GPU.
 
