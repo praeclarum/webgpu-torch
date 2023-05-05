@@ -66,11 +66,59 @@ c.backward();
 After this code executes, there will be gradient tensor values in `a.grad`, `b.grad`, and `c.grad`.
 
 
+## API
+
+Although this library was inspired by pytorch, it is not a clone and was written from scratch.
+Its API surface is therefore not 100% compatible with pytorch, but I prioritize making it as similar as possible.
+
+### Fundamental Types
+
+* `Device` is an abstraction over CPUs and GPUs allowing you to specify where tensors are allocated and executed.
+* `Dtype` is the data type of tensors and are specified as strings. Currently only `"float32"` is supported.
+* `Shape` is an array of integers that specifies the size of each dimension of a tensor. For example, `[32, 3, 128, 256]` would be 32 batched 256x128 RGB images.
+* `Tensor` is a multi-dimensional array of data. It has a `device`, a `dtype`, a `shape`, and `storage` properties. It can be created in a variety of ways.
+    * **Directly** with `torch.tensor(array)` or `new torch.Tensor(array)`
+    * **From a factory function** like `torch.zeros(shape)` or `torch.ones(shape)`
+    * **From an operation** like `a.add(b)` or `a.mm(b)`
+    * **From a gradient calculations** like `a.add(b).backward()`
+* `AutoFunction` is the base class for all autograd functions. It has a `forward` method that computes the output tensor and a `backward` method that computes the gradients of the inputs. They live in the `torch.functions` object. Functions should be called using their `apply` method.
+* `Kernel` is basic operation that can be executed on the GPU.
+
+### Tensor Operations
+
+You have your basic unary operations like `abs` that can be called from a global function or on the tensor directly:
+
+```js
+const a = torch.tensor([[-1, 2, -3], [4, -5, 6]]);
+const abs = torch.abs(a);
+const abs2 = a.abs();
+```
+
+Your binary operations like `add` can be called in the same way:
+
+```js
+const b = torch.tensor([[7, -8, 9], [-10, 11, -12]]);
+const sum = torch.add(a, b);
+const sum2 = a.add(b);
+```
+
+I'm working on documenting the full list. For now, checkout the file [op_table.ts](src/op_table.ts) for a list of most of the operations.
+
+
 ## TODO
 
-- [x] Tensors
-- [x] Autograd
-- [ ] Optimizers
+Here are the big components of the library:
+
+- [x] GPU Tensors
+- [x] GPU Kernels
+- [x] Autograd Functions
+- [ ] Optimizers (SGD and Adam)
+- [ ] Modules
+- [ ] Save and restore (safetensors)
+
+In terms of supported operations, there's still a bit of work to be done:
+
+- [x] Basic math
 - [ ] Convolution
 - [ ] Indexing
 - [ ] Broadcasting
