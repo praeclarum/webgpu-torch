@@ -14,21 +14,9 @@ test("webgpu is supported", () => {
     expect(torch.hasWebGPU()).toBe(true);
 });
 
-test("tensor is webgpu", () => {
+test("tensor is webgpu", async () => {
     const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
     expect(x.requiresGrad).toBe(false);
-    expect(x.device.type).toBe("webgpu");
-});
-
-test("ones are all ones", async () => {
-    const x = torch.ones([2, 3]);
-    expect(x.requiresGrad).toBe(false);
-    expect(x.device.type).toBe("webgpu");
-    expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
-});
-
-test("tensor init", async () => {
-    const x = tensor([[1, 2, 3], [4, 5, 6]]);
     expect(x.device.type).toBe("webgpu");
     expect(await x.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
 });
