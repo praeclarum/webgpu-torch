@@ -213,6 +213,9 @@ export class Tensor implements ITensor {
         this._impl.abs_();
         return this;
     }
+    absGrad(): Tensor {
+        return ops.absGrad(this);
+    }
     acos(): Tensor {
         return ops.acos(this);
     }
@@ -220,12 +223,18 @@ export class Tensor implements ITensor {
         this._impl.acos_();
         return this;
     }
+    acosGrad(): Tensor {
+        return ops.acosGrad(this);
+    }
     acosh(): Tensor {
         return ops.acosh(this);
     }
     acosh_(): Tensor {
         this._impl.acosh_();
         return this;
+    }
+    acoshGrad(): Tensor {
+        return ops.acoshGrad(this);
     }
     add(other: Tensor, alpha?: number): Tensor {
         return ops.add(this, other, alpha);
@@ -241,6 +250,9 @@ export class Tensor implements ITensor {
         this._impl.asin_();
         return this;
     }
+    asinGrad(): Tensor {
+        return ops.asinGrad(this);
+    }
     asinh(): Tensor {
         return ops.asinh(this);
     }
@@ -248,12 +260,18 @@ export class Tensor implements ITensor {
         this._impl.asinh_();
         return this;
     }
+    asinhGrad(): Tensor {
+        return ops.asinhGrad(this);
+    }
     atan(): Tensor {
         return ops.atan(this);
     }
     atan_(): Tensor {
         this._impl.atan_();
         return this;
+    }
+    atanGrad(): Tensor {
+        return ops.atanGrad(this);
     }
     atan2(other: Tensor): Tensor {
         return ops.atan2(this, other);

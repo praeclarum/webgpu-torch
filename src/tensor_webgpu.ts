@@ -124,6 +124,12 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("abs_", { dtype: this.dtype }, params);
     }
+    absGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("absGrad", { dtype: this.dtype }, params, [this.shape])[0];
+    }
     acos(): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -136,6 +142,12 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("acos_", { dtype: this.dtype }, params);
     }
+    acosGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("acosGrad", { dtype: this.dtype }, params, [this.shape])[0];
+    }
     acosh(): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -147,6 +159,12 @@ export class TensorWebGPU extends TensorImpl {
             size: shapeSize(this.shape),
         };
         return this.runKernelInplace("acosh_", { dtype: this.dtype }, params);
+    }
+    acoshGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("acoshGrad", { dtype: this.dtype }, params, [this.shape])[0];
     }
     add(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {
@@ -174,6 +192,12 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("asin_", { dtype: this.dtype }, params);
     }
+    asinGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("asinGrad", { dtype: this.dtype }, params, [this.shape])[0];
+    }
     asinh(): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -186,6 +210,12 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("asinh_", { dtype: this.dtype }, params);
     }
+    asinhGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("asinhGrad", { dtype: this.dtype }, params, [this.shape])[0];
+    }
     atan(): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),
@@ -197,6 +227,12 @@ export class TensorWebGPU extends TensorImpl {
             size: shapeSize(this.shape),
         };
         return this.runKernelInplace("atan_", { dtype: this.dtype }, params);
+    }
+    atanGrad(): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("atanGrad", { dtype: this.dtype }, params, [this.shape])[0];
     }
     atan2(other: TensorWebGPU): TensorWebGPU {
         const params = {

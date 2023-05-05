@@ -19,7 +19,17 @@ test("binary sub op generate kernel spec", () => {
         out[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
 });
 
-test("binary atan2 op kernel spec shader", () => {
+test("abs backward shader", () => {
+    const spec = opSpecs["abs"];
+    const kernels = getKernelSpecs(spec);
+    expect(kernels[2].shader).toBe(`
+        if (global_id.x >= parameters.size) {
+            return;
+        }
+        inputGrad[global_id.x] = select((-outGrad[global_id.x]), outGrad[global_id.x], (input[global_id.x] > 0));`);
+});
+
+test("atan2 forward shader", () => {
     const spec = opSpecs["atan2"];
     const kernels = getKernelSpecs(spec);
     expect(kernels[0].shader).toBe(`
@@ -28,6 +38,7 @@ test("binary atan2 op kernel spec shader", () => {
         }
         out[global_id.x] = atan2(input[global_id.x], other[global_id.x]);`);
 });
+
 
 test("can generate all kernel specs", () => {
     for (const spec of registry) {

@@ -158,6 +158,7 @@ async function runTestsAsync($testDiv) {
             }
         } catch (e) {
             error = e;
+            console.error(e);
         }
         const $testRow = document.createElement('tr');
         $testRow.className = error ? 'error' : 'success';

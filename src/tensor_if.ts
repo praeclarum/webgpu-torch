@@ -30,18 +30,24 @@ export interface ITensor {
     // Codegen marker
     abs(): ITensor;
     abs_(): ITensor;
+    absGrad(): ITensor;
     acos(): ITensor;
     acos_(): ITensor;
+    acosGrad(): ITensor;
     acosh(): ITensor;
     acosh_(): ITensor;
+    acoshGrad(): ITensor;
     add(other: ITensor, alpha?: number): ITensor;
     add_(other: ITensor, alpha?: number): ITensor;
     asin(): ITensor;
     asin_(): ITensor;
+    asinGrad(): ITensor;
     asinh(): ITensor;
     asinh_(): ITensor;
+    asinhGrad(): ITensor;
     atan(): ITensor;
     atan_(): ITensor;
+    atanGrad(): ITensor;
     atan2(other: ITensor): ITensor;
     atan2_(other: ITensor): ITensor;
     mul(other: ITensor, alpha?: number): ITensor;

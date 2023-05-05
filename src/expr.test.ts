@@ -119,6 +119,18 @@ test("parse return", () => {
     expect(parsed).toEqual(["return", [3]]);
 });
 
+test("parse unary - of ident", () => {
+    const expr = "-x";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["negate", ["x"]]);
+});
+
+test("parse conditional operator", () => {
+    const expr = "x > 3 ? 4 : 5";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["?", [[">", ["x", 3]], 4, 5]]);
+});
+
 test("exprNodeToString assignment", () => {
     const expr = "x = 3";
     const parsed = parseCode(expr);

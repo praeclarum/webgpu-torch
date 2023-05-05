@@ -1,8 +1,10 @@
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "block" | "assign" | "if" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%";
+export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
 
-export type ExprNode = string | number | [ExprNodeType, ExprNode[]];
+export type ExprAtom = string | number;
+export type ExprCell = [ExprNodeType, ExprNode[]];
+export type ExprNode = ExprAtom | ExprCell;
 
 export type ParsedExpr = ExprNode;
 
@@ -154,7 +156,44 @@ export function parseCode(code: ExprCode): ExprNode {
         return result;
     }
     function parseExpr(i: number): ParseState|null {
-        return parseComparison(i);
+        if (i >= tokens.length) {
+            return null;
+        }
+        return parseConditional(i);
+    }
+    function parseConditional(i: number): ParseState|null {
+        if (i >= tokens.length) {
+            return null;
+        }
+        let expr = parseComparison(i);
+        if (expr === null) {
+            return null;
+        }
+        i = expr[1];
+        if (i >= tokens.length) {
+            return expr;
+        }
+        const t = tokens[i];
+        if (t !== "?") {
+            return expr;
+        }
+        const expr2 = parseExpr(i + 1);
+        if (expr2 === null) {
+            throw new Error("Missing expression after ?");
+        }
+        i = expr2[1];
+        if (i >= tokens.length) {
+            throw new Error("Unexpected end of conditional expression");
+        }
+        const t2 = tokens[i];
+        if (typeof t2 !== "string" || t2 !== ":") {
+            throw new Error("Expected :");
+        }
+        const expr3 = parseExpr(i + 1);
+        if (expr3 === null) {
+            throw new Error(`Missing expression after : \`${code}\``);
+        }
+        return [[t, [expr[0], expr2[0], expr3[0]]], expr3[1]];
     }
     function parseComparison(i: number): ParseState|null {
         let expr = parseAddOrSubtract(i);
@@ -204,8 +243,34 @@ export function parseCode(code: ExprCode): ExprNode {
         }
         return expr;
     }
+    function parseUnary(i: number): ParseState|null {
+        if (i >= tokens.length) {
+            return null;
+        }
+        const t = tokens[i];
+        if (typeof t === "string") {
+            if (t === "+" || t === "-") {
+                const expr = parseUnary(i + 1);
+                if (expr === null) {
+                    throw new Error("Missing expression");
+                }
+                if (t === "+") {
+                    return expr;
+                }
+                return [["negate", [expr[0]]], expr[1]];
+            }
+            if (t === "!") {
+                const expr = parseUnary(i + 1);
+                if (expr === null) {
+                    throw new Error("Missing expression");
+                }
+                return [[t, [expr[0]]], expr[1]];
+            }
+        }
+        return parsePrimary(i);
+    }
     function parseMultiplyOrDivide(i: number): ParseState|null {
-        let expr = parsePrimary(i);
+        let expr = parseUnary(i);
         if (expr === null) {
             return null;
         }
@@ -216,7 +281,7 @@ export function parseCode(code: ExprCode): ExprNode {
                 break;
             }
             if (t === "*" || t === "/") {
-                const expr2 = parsePrimary(i + 1);
+                const expr2 = parseUnary(i + 1);
                 if (expr2 === null) {
                     throw new Error("Missing expression");
                 }
@@ -364,6 +429,23 @@ export function parseCode(code: ExprCode): ExprNode {
     }
 }
 
+export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, replace: (node: ExprNode)=>ExprNode): ExprNode {
+    if (match(ast)) {
+        return replace(ast);
+    }
+    if (typeof ast === "number") {
+        return ast;
+    }
+    if (typeof ast === "string") {
+        return ast;
+    }
+    const newChildren: ExprNode[] = [];
+    for (const child of ast[1]) {
+        newChildren.push(substitute(child, match, replace));
+    }
+    return [ast[0], newChildren];
+}
+
 export function substituteIdentifiers(ast: ExprNode, subs: { [name: string]: ExprNode }): ExprNode {
     if (typeof ast === "number") {
         return ast;
@@ -388,39 +470,84 @@ export function exprNodeToString(ast: ExprNode): string {
     if (typeof ast === "string") {
         return ast;
     }
-    if (ast[0] === "+") {
+    const nodeType: ExprNodeType = ast[0];
+    switch (nodeType) {
+    case "+":
         return `(${exprNodeToString(ast[1][0])} + ${exprNodeToString(ast[1][1])})`;
-    }
-    if (ast[0] === "-") {
+    case "-":
         return `(${exprNodeToString(ast[1][0])} - ${exprNodeToString(ast[1][1])})`;
-    }
-    if (ast[0] === "*") {
+    case "*":
         return `(${exprNodeToString(ast[1][0])} * ${exprNodeToString(ast[1][1])})`;
-    }
-    if (ast[0] === "/") {
+    case "/":
         return `(${exprNodeToString(ast[1][0])} / ${exprNodeToString(ast[1][1])})`;
-    }
-    if (ast[0] === "apply") {
+    case "%":
+        return `(${exprNodeToString(ast[1][0])} % ${exprNodeToString(ast[1][1])})`;
+    case "==":
+        return `(${exprNodeToString(ast[1][0])} == ${exprNodeToString(ast[1][1])})`;
+    case "!=":
+        return `(${exprNodeToString(ast[1][0])} != ${exprNodeToString(ast[1][1])})`;
+    case "<":
+        return `(${exprNodeToString(ast[1][0])} < ${exprNodeToString(ast[1][1])})`;
+    case ">":
+        return `(${exprNodeToString(ast[1][0])} > ${exprNodeToString(ast[1][1])})`;
+    case "<=":
+        return `(${exprNodeToString(ast[1][0])} <= ${exprNodeToString(ast[1][1])})`;
+    case ">=":
+        return `(${exprNodeToString(ast[1][0])} >= ${exprNodeToString(ast[1][1])})`;
+    case "&&":
+        return `(${exprNodeToString(ast[1][0])} && ${exprNodeToString(ast[1][1])})`;
+    case "||":
+        return `(${exprNodeToString(ast[1][0])} || ${exprNodeToString(ast[1][1])})`;
+    case "?":
+        return `(${exprNodeToString(ast[1][0])} ? ${exprNodeToString(ast[1][1])} : ${exprNodeToString(ast[1][2])})`;
+    case "apply":
         const f = ast[1][0];
         const fstr = exprNodeToString(f);
         const args = ast[1].slice(1);
         const argstrs = args.map(exprNodeToString);
         return `${fstr}(${argstrs.join(", ")})`;
-    }
-    if (ast[0] === "assign") {
+    case "block":
+        return `{ ${ast[1].map(exprNodeToString).join("; ")} }`;
+    case "assign":
         const lhs = ast[1][0];
         const rhs = ast[1][1];
         return `${exprNodeToString(lhs)} = ${exprNodeToString(rhs)}`;
-    }
-    if (ast[0] === "if") {
+    case "if":
         const cond = ast[1][0];
         const then = ast[1][1];
         const else_ = ast[1][2];
         return `if (${exprNodeToString(cond)}) { ${exprNodeToString(then)} } else { ${exprNodeToString(else_)} }`;
+    case "negate":
+        return `(-${exprNodeToString(ast[1][0])})`;
+    case "statements":
+        return ast[1].map(exprNodeToString).join("; ");
+    case "return":
+        return `return ${exprNodeToString(ast[1][0])}`;
+    default:
+        throw new Error(`Unknown AST node type when printing: ${ast[0]}`);
     }
-
-    throw new Error(`Unknown AST node type when printing: ${ast[0]}`);
 }
+
+export function exprNodeToWebGLShader(ast: ExprNode): string {
+    // Convert conditional into select
+    ast = substitute(ast, (node) => {
+        if (!(node instanceof Array)) {
+            return false;
+        }
+        if (node[0] === "?") {
+            return true;
+        }
+        return false;
+    }, (node) => {
+        node = node as ExprCell;
+        const cond = node[1][0];
+        const then = node[1][1];
+        const else_ = node[1][2];
+        return ["apply", ["select", else_, then, cond]];
+    });
+    return exprNodeToString(ast);
+}
+
 
 
 /*== COMPILER ==*/
