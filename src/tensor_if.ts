@@ -44,6 +44,8 @@ export interface ITensor {
     atan_(): ITensor;
     atan2(other: ITensor): ITensor;
     atan2_(other: ITensor): ITensor;
+    mul(other: ITensor, alpha?: number): ITensor;
+    mul_(other: ITensor, alpha?: number): ITensor;
     sub(other: ITensor, alpha?: number): ITensor;
     sub_(other: ITensor, alpha?: number): ITensor;
     // End codegen marker

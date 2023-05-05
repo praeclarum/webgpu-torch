@@ -58,6 +58,14 @@ export const registry: OpSpec[] = [
         backward: "inputGrad = outGrad * other / (input * input + other * other); otherGrad = -outGrad * input / (input * input + other * other)",
     },
     {
+        name: "mul",
+        aliases: ["multiply"],
+        type: "binary",
+        alpha: true,
+        forward: "out = input * other",
+        backward: "inputGrad = outGrad * other; otherGrad = outGrad * input",
+    },
+    {
         name: "sub",
         aliases: ["subtract"],
         type: "binary",

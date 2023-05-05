@@ -590,6 +590,86 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = atan2(input[global_id.x], other[global_id.x]);"
     },
+    "mul": {
+        "name": "mul",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "out",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        out[global_id.x] = (input[global_id.x] * other[global_id.x]);"
+    },
+    "mul_": {
+        "name": "mul_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * other[global_id.x]);"
+    },
     "sub": {
         "name": "sub",
         "config": [

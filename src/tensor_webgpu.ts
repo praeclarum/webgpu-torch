@@ -210,6 +210,20 @@ export class TensorWebGPU extends TensorImpl {
         };
         return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
+    mul(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        return this.runKernel("mul", { dtype: this.dtype }, params, [this.shape], other)[0];
+    }
+    mul_(other: TensorWebGPU, alpha?: number): TensorWebGPU {
+        const params = {
+            size: shapeSize(this.shape),
+            alpha: alpha || 1.0,
+        };
+        return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
+    }
     sub(other: TensorWebGPU, alpha?: number): TensorWebGPU {
         const params = {
             size: shapeSize(this.shape),

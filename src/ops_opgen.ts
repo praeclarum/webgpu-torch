@@ -55,6 +55,15 @@ export function atan2(input: Tensor, other: Tensor): Tensor {
     }
     return new Tensor(input.impl.atan2(other.impl));
 }
+export function mul(input: Tensor, other: Tensor, alpha?: number): Tensor {
+    if (input.shape.length !== other.shape.length) {
+        throw new Error(`Shape dimensions of mul must match. Got ${input.shape} and ${other.shape}`);
+    }
+    if (shouldCreateGradient(input, other)) {
+        return functions.MulFunction.apply(input, other);
+    }
+    return new Tensor(input.impl.mul(other.impl, alpha));
+}
 export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
     if (input.shape.length !== other.shape.length) {
         throw new Error(`Shape dimensions of sub must match. Got ${input.shape} and ${other.shape}`);

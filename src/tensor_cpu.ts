@@ -189,6 +189,12 @@ export class TensorCPU extends TensorImpl {
     atan2_(other: TensorCPU): TensorCPU {
         throw new Error("CPU atan2_ not supported");
     }
+    mul(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU mul not supported");
+    }
+    mul_(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU mul_ not supported");
+    }
     sub(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub not supported");
     }

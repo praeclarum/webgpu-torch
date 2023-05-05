@@ -262,6 +262,13 @@ export class Tensor implements ITensor {
         this._impl.atan2_(other._impl);
         return this;
     }
+    mul(other: Tensor, alpha?: number): Tensor {
+        return ops.mul(this, other, alpha);
+    }
+    mul_(other: Tensor, alpha?: number): Tensor {
+        this._impl.mul_(other._impl, alpha);
+        return this;
+    }
     sub(other: Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }

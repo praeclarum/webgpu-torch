@@ -80,6 +80,8 @@ export abstract class TensorImpl implements ITensor {
     abstract atan_(): TensorImpl;
     abstract atan2(other: TensorImpl): TensorImpl;
     abstract atan2_(other: TensorImpl): TensorImpl;
+    abstract mul(other: TensorImpl, alpha?: number): TensorImpl;
+    abstract mul_(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub(other: TensorImpl, alpha?: number): TensorImpl;
     abstract sub_(other: TensorImpl, alpha?: number): TensorImpl;
     // End codegen marker

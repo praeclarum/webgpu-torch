@@ -202,6 +202,33 @@ export class Atan2Function extends AutoFunction {
         return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape], other);
     }
 }
+export class MulFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: alpha || 1.0,
+        };
+        return input.runKernel("mul", { dtype: input.dtype }, params, [input.shape], other)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        ctx.alpha = alpha;
+        ctx.saveForBackward(input, other);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+            alpha: ctx.alpha || 1.0,
+        };
+        return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape], other);
+    }
+}
 export class SubFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
