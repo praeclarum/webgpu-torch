@@ -249,9 +249,9 @@ for (const name of Object.getOwnPropertyNames(Math)) {
     }
 }
 
-const javaScriptGlobalFunctions: {[name: string]: string} = {
+const javaScriptGlobalFunctions: { [name: string]: string } = {
     select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
-}
+};
 
 function getIdentifiers(code: string): string[] {
     const identifierRegex = /[a-zA-Z_][a-zA-Z0-9_]*/g;
@@ -325,12 +325,12 @@ export function getKernelJavaScriptCode(
     w.writeLine(jsCode);
     w.dedent();
     w.writeLine(`}`);
+    for (let p of params) {
+        w.writeLine(`console.log("param", "${p}", typeof ${p}, ${p});`);
+    }
     w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
     w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
     w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
-    // w.writeLine(
-    //     `console.log("workgroupCount", workgroupCountX, workgroupCountY, workgroupCountZ);`
-    // );
     w.writeLine(`for (let wgZ = 0; wgZ < workgroupCountZ; wgZ++) {`);
     w.indent();
     w.writeLine(`for (let wgY = 0; wgY < workgroupCountY; wgY++) {`);

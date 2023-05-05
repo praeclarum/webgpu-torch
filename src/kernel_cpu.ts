@@ -101,8 +101,8 @@ export class KernelCPU extends Kernel {
             const outputElementCount = Math.ceil(
                 this._outputSizeFuncs[outputIndex](env)
             );
-            // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
+            console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
             const outputBuffer = this.device.alloc(outputBufferSize);
             return outputBuffer.getTypedArray(
                 shaderTypeToDtype(outputSpec.shaderType)
