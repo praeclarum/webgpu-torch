@@ -1,6 +1,8 @@
 import { OpSpec } from "./op_spec";
 
 export const registry: OpSpec[] = [
+    // https://pytorch.org/docs/stable/torch.html
+    // === Math operations ===
     {
         name: "abs",
         aliases: ["absolute"],
@@ -29,6 +31,9 @@ export const registry: OpSpec[] = [
         forward: "output = input + other",
         backward: "inputGrad = outputGrad; otherGrad = outputGrad",
     },
+    // addcdiv: trinary
+    // addcmul: trinary
+    // angle: complex
     {
         name: "asin",
         aliases: ["arcsin"],
@@ -57,6 +62,158 @@ export const registry: OpSpec[] = [
         forward: "output = atan2(input, other)",
         backward: "inputGrad = outputGrad * other / (input * input + other * other); otherGrad = -outputGrad * input / (input * input + other * other)",
     },
+    // bitwise_not: integral or boolean type
+    // bitwise_and: integral or boolean type
+    // bitwise_or: integral or boolean type
+    // bitwise_xor: integral or boolean type
+    // bitwise_left_shift: integral or boolean type
+    // bitwise_right_shift: integral or boolean type
+    {
+        name: "ceil",
+        type: "unary",
+        forward: "output = ceil(input)",
+        backward: "inputGrad = outputGrad",
+    },
+    // clamp: beta
+    // clip: alias for clamp
+    // conj_physical: complex
+    {
+        name: "copysign",
+        type: "binary",
+        forward: "output = other >= 0.0 ? abs(input) : -abs(input)",
+        backward: "inputGrad = outputGrad * (other >= 0.0 ? 1.0 : -1.0)",
+    },
+    {
+        name: "cos",
+        type: "unary",
+        forward: "output = cos(input)",
+        backward: "inputGrad = -outputGrad * sin(input)",
+    },
+    {
+        name: "cosh",
+        type: "unary",
+        forward: "output = cosh(input)",
+        backward: "inputGrad = outputGrad * sinh(input)",
+    },
+    {
+        name: "deg2rad",
+        type: "unary",
+        forward: "output = input * 0.017453292519943295",
+        backward: "inputGrad = outputGrad * 0.017453292519943295",
+    },
+    {
+        name: "div",
+        aliases: ["divide"],
+        type: "binary",
+        alpha: true,
+        forward: "output = input / other",
+        backward: "inputGrad = outputGrad / other; otherGrad = -outputGrad * input / (other * other)",
+    },
+    // digamma: special
+    // erf: special
+    // erfc: special
+    // erfinv: special
+    {
+        name: "exp",
+        type: "unary",
+        forward: "output = exp(input)",
+        backward: "inputGrad = outputGrad * output",
+    },
+    {
+        name: "exp2",
+        type: "unary",
+        forward: "output = exp2(input)",
+        backward: "inputGrad = outputGrad * output * 0.6931471805599453",
+    },
+    {
+        name: "expm1",
+        type: "unary",
+        forward: "output = exp(input) - 1.0",
+        backward: "inputGrad = outputGrad * output",
+    },
+    // fake_quantize_per_channel_affine: quantization
+    // fake_quantize_per_tensor_affine: quantization
+    // float_power: double
+    {
+        name: "floor",
+        type: "unary",
+        forward: "output = floor(input)",
+        backward: "inputGrad = outputGrad",
+    },
+    {
+        name: "floor_divide",
+        type: "binary",
+        forward: "output = floor(input / other)",
+        backward: "inputGrad = outputGrad / other; otherGrad = -outputGrad * floor(input / other) / other",
+    },
+    // fmod: meh
+    {
+        name: "frac",
+        type: "unary",
+        forward: "output = fract(input)",
+        backward: "inputGrad = outputGrad",
+    },
+    // frexp: jfc
+    // gradient: jfc
+    {
+        name: "hypot",
+        type: "binary",
+        forward: "output = sqrt(input * input + other * other)",
+        backward: "inputGrad = outputGrad * input / sqrt(input * input + other * other); otherGrad = outputGrad * other / sqrt(input * input + other * other)",
+    },
+    // i0: special
+    // igamma: special
+    // igammac: special
+    // imag: complex
+    {
+        name: "ldexp",
+        type: "binary",
+        forward: "output = input * pow(2.0, other)",
+        backward: "inputGrad = outputGrad * pow(2.0, other); otherGrad = outputGrad * input * log(2.0)",
+    },
+    // lerp: trinary
+    // lgamma: idk
+    {
+        name: "log",
+        type: "unary",
+        forward: "output = log(input)",
+        backward: "inputGrad = outputGrad / input",
+    },
+    {
+        name: "log10",
+        type: "unary",
+        forward: "output = log(input) * 0.4342944819032518",
+        backward: "inputGrad = outputGrad / (input * 2.302585092994046)",
+    },
+    {
+        name: "log1p",
+        type: "unary",
+        forward: "output = log(input + 1.0)",
+        backward: "inputGrad = outputGrad / (input + 1.0)",
+    },
+    {
+        name: "log2",
+        type: "unary",
+        forward: "output = log2(input)",
+        backward: "inputGrad = outputGrad / (input * 0.6931471805599453)",
+    },
+    {
+        name: "logaddexp",
+        type: "binary",
+        forward: "output = log(exp(input) + exp(other))",
+        backward: "inputGrad = outputGrad * exp(input) / (exp(input) + exp(other)); otherGrad = outputGrad * exp(other) / (exp(input) + exp(other))",
+    },
+    {
+        name: "logaddexp2",
+        type: "binary",
+        forward: "output = log2(exp2(input) + exp2(other))",
+        backward: "inputGrad = outputGrad * exp2(input) / (exp2(input) + exp2(other)) * 1.4426950408889634; otherGrad = outputGrad * exp2(other) / (exp2(input) + exp2(other)) * 1.4426950408889634",
+    },
+    // logical_and: boolean
+    // logical_not: boolean
+    // logical_or: boolean
+    // logical_xor: boolean
+    // logit: yikes
     {
         name: "mul",
         aliases: ["multiply"],
@@ -64,6 +221,103 @@ export const registry: OpSpec[] = [
         alpha: true,
         forward: "output = input * other",
         backward: "inputGrad = outputGrad * other; otherGrad = outputGrad * input",
+    },
+    // mvlgamma: special
+    // nan_to_num: special
+    {
+        name: "neg",
+        aliases: ["negative"],
+        type: "unary",
+        forward: "output = -input",
+        backward: "inputGrad = -outputGrad",
+    },
+    // nextafter: jfc
+    // polygamma: special
+    {
+        name: "positive",
+        type: "unary",
+        forward: "output = input",
+        backward: "inputGrad = outputGrad",
+    },
+    {
+        name: "pow",
+        type: "binary",
+        forward: "output = pow(input, other)",
+        backward: "inputGrad = outputGrad * other * pow(input, other - 1.0); otherGrad = outputGrad * pow(input, other) * log(input)",
+    },
+    // quantized_batch_norm: quantization
+    // quantized_max_pool1d: quantization
+    // quantized_max_pool2d: quantization
+    {
+        name: "rad2deg",
+        type: "unary",
+        forward: "output = input * 57.29577951308232",
+        backward: "inputGrad = outputGrad * 57.29577951308232",
+    },
+    // real: complex
+    {
+        name: "reciprocal",
+        type: "unary",
+        forward: "output = 1.0 / input",
+        backward: "inputGrad = -outputGrad / (input * input)",
+    },
+    // remainder: meh
+    {
+        name: "round",
+        type: "unary",
+        forward: "output = round(input)",
+        backward: "inputGrad = outputGrad",
+    },
+    {
+        name: "rsqrt",
+        type: "unary",
+        forward: "output = 1.0 / sqrt(input)",
+        backward: "inputGrad = -outputGrad / (2.0 * sqrt(input) * input)",
+    },
+    {
+        name: "sigmoid",
+        type: "unary",
+        forward: "output = 1.0 / (1.0 + exp(-input))",
+        backward: "inputGrad = outputGrad * output * (1.0 - output)",
+    },
+    {
+        name: "sign",
+        type: "unary",
+        forward: "output = sign(input)",
+        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : 1.0)",
+    },
+    // sgn: complex
+    // signbit: integer
+    {
+        name: "sin",
+        type: "unary",
+        forward: "output = sin(input)",
+        backward: "inputGrad = outputGrad * cos(input)",
+    },
+    {
+        name: "sinc",
+        type: "unary",
+        forward: "output = input == 0.0 ? 1.0 : sin(input * 3.141592653589793) / (input * 3.141592653589793)",
+        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))",
+    },
+    {
+        name: "sinh",
+        type: "unary",
+        forward: "output = sinh(input)",
+        backward: "inputGrad = outputGrad * cosh(input)",
+    },
+    // softmax: artisanal
+    {
+        name: "sqrt",
+        type: "unary",
+        forward: "output = sqrt(input)",
+        backward: "inputGrad = outputGrad / (2.0 * sqrt(input))",
+    },
+    {
+        name: "square",
+        type: "unary",
+        forward: "output = input * input",
+        backward: "inputGrad = outputGrad * 2.0 * input",
     },
     {
         name: "sub",
@@ -73,4 +327,30 @@ export const registry: OpSpec[] = [
         forward: "output = input - other",
         backward: "inputGrad = outputGrad; otherGrad = -outputGrad",
     },
+    {
+        name: "tan",
+        type: "unary",
+        forward: "output = tan(input)",
+        backward: "inputGrad = outputGrad / (cos(input) * cos(input))",
+    },
+    {
+        name: "tanh",
+        type: "unary",
+        forward: "output = tanh(input)",
+        backward: "inputGrad = outputGrad * (1.0 - output * output)",
+    },
+    // true_divide: meh
+    {
+        name: "trunc",
+        aliases: ["fix"],
+        type: "unary",
+        forward: "output = trunc(input)",
+        backward: "inputGrad = outputGrad",
+    },
+    {
+        name: "xlogy",
+        type: "binary",
+        forward: "output = input == 0.0 ? 0.0 : input * log(other)",
+        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : log(other))",
+    }
 ];

@@ -944,6 +944,2392 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * other[global_id.x]) / ((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x]))); otherGrad[global_id.x] = (((-outputGrad[global_id.x]) * input[global_id.x]) / ((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x])));"
     },
+    "ceil": {
+        "name": "ceil",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = ceil(input[global_id.x]);"
+    },
+    "ceil_": {
+        "name": "ceil_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = ceil(input[global_id.x]);"
+    },
+    "ceilGrad": {
+        "name": "ceilGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "copysign": {
+        "name": "copysign",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = select((-abs(input[global_id.x])), abs(input[global_id.x]), (other[global_id.x] >= 0));"
+    },
+    "copysign_": {
+        "name": "copysign_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = select((-abs(input[global_id.x])), abs(input[global_id.x]), (other[global_id.x] >= 0));"
+    },
+    "copysignGrad": {
+        "name": "copysignGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * select((-1), 1, (other[global_id.x] >= 0)));"
+    },
+    "cos": {
+        "name": "cos",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = cos(input[global_id.x]);"
+    },
+    "cos_": {
+        "name": "cos_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = cos(input[global_id.x]);"
+    },
+    "cosGrad": {
+        "name": "cosGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((-outputGrad[global_id.x]) * sin(input[global_id.x]));"
+    },
+    "cosh": {
+        "name": "cosh",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = cosh(input[global_id.x]);"
+    },
+    "cosh_": {
+        "name": "cosh_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = cosh(input[global_id.x]);"
+    },
+    "coshGrad": {
+        "name": "coshGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * sinh(input[global_id.x]));"
+    },
+    "deg2rad": {
+        "name": "deg2rad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] * 0.017453292519943295);"
+    },
+    "deg2rad_": {
+        "name": "deg2rad_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * 0.017453292519943295);"
+    },
+    "deg2radGrad": {
+        "name": "deg2radGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * 0.017453292519943295);"
+    },
+    "div": {
+        "name": "div",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] / other[global_id.x]);"
+    },
+    "div_": {
+        "name": "div_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] / other[global_id.x]);"
+    },
+    "divGrad": {
+        "name": "divGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / other[global_id.x]); otherGrad[global_id.x] = (((-outputGrad[global_id.x]) * input[global_id.x]) / (other[global_id.x] * other[global_id.x]));"
+    },
+    "exp": {
+        "name": "exp",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = exp(input[global_id.x]);"
+    },
+    "exp_": {
+        "name": "exp_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = exp(input[global_id.x]);"
+    },
+    "expGrad": {
+        "name": "expGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * output[global_id.x]);"
+    },
+    "exp2": {
+        "name": "exp2",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = exp2(input[global_id.x]);"
+    },
+    "exp2_": {
+        "name": "exp2_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = exp2(input[global_id.x]);"
+    },
+    "exp2Grad": {
+        "name": "exp2Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * output[global_id.x]) * 0.6931471805599453);"
+    },
+    "expm1": {
+        "name": "expm1",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (exp(input[global_id.x]) - 1);"
+    },
+    "expm1_": {
+        "name": "expm1_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (exp(input[global_id.x]) - 1);"
+    },
+    "expm1Grad": {
+        "name": "expm1Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * output[global_id.x]);"
+    },
+    "floor": {
+        "name": "floor",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = floor(input[global_id.x]);"
+    },
+    "floor_": {
+        "name": "floor_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = floor(input[global_id.x]);"
+    },
+    "floorGrad": {
+        "name": "floorGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "floor_divide": {
+        "name": "floor_divide",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = floor((input[global_id.x] / other[global_id.x]));"
+    },
+    "floor_divide_": {
+        "name": "floor_divide_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = floor((input[global_id.x] / other[global_id.x]));"
+    },
+    "floor_divideGrad": {
+        "name": "floor_divideGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / other[global_id.x]); otherGrad[global_id.x] = (((-outputGrad[global_id.x]) * floor((input[global_id.x] / other[global_id.x]))) / other[global_id.x]);"
+    },
+    "frac": {
+        "name": "frac",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = fract(input[global_id.x]);"
+    },
+    "frac_": {
+        "name": "frac_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = fract(input[global_id.x]);"
+    },
+    "fracGrad": {
+        "name": "fracGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "hypot": {
+        "name": "hypot",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = sqrt(((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x])));"
+    },
+    "hypot_": {
+        "name": "hypot_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = sqrt(((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x])));"
+    },
+    "hypotGrad": {
+        "name": "hypotGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * input[global_id.x]) / sqrt(((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x])))); otherGrad[global_id.x] = ((outputGrad[global_id.x] * other[global_id.x]) / sqrt(((input[global_id.x] * input[global_id.x]) + (other[global_id.x] * other[global_id.x]))));"
+    },
+    "ldexp": {
+        "name": "ldexp",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] * pow(2, other[global_id.x]));"
+    },
+    "ldexp_": {
+        "name": "ldexp_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * pow(2, other[global_id.x]));"
+    },
+    "ldexpGrad": {
+        "name": "ldexpGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * pow(2, other[global_id.x])); otherGrad[global_id.x] = ((outputGrad[global_id.x] * input[global_id.x]) * log(2));"
+    },
+    "log": {
+        "name": "log",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = log(input[global_id.x]);"
+    },
+    "log_": {
+        "name": "log_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = log(input[global_id.x]);"
+    },
+    "logGrad": {
+        "name": "logGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / input[global_id.x]);"
+    },
+    "log10": {
+        "name": "log10",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (log(input[global_id.x]) * 0.4342944819032518);"
+    },
+    "log10_": {
+        "name": "log10_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (log(input[global_id.x]) * 0.4342944819032518);"
+    },
+    "log10Grad": {
+        "name": "log10Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / (input[global_id.x] * 2.302585092994046));"
+    },
+    "log1p": {
+        "name": "log1p",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = log((input[global_id.x] + 1));"
+    },
+    "log1p_": {
+        "name": "log1p_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = log((input[global_id.x] + 1));"
+    },
+    "log1pGrad": {
+        "name": "log1pGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / (input[global_id.x] + 1));"
+    },
+    "log2": {
+        "name": "log2",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = log2(input[global_id.x]);"
+    },
+    "log2_": {
+        "name": "log2_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = log2(input[global_id.x]);"
+    },
+    "log2Grad": {
+        "name": "log2Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / (input[global_id.x] * 0.6931471805599453));"
+    },
+    "logaddexp": {
+        "name": "logaddexp",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = log((exp(input[global_id.x]) + exp(other[global_id.x])));"
+    },
+    "logaddexp_": {
+        "name": "logaddexp_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = log((exp(input[global_id.x]) + exp(other[global_id.x])));"
+    },
+    "logaddexpGrad": {
+        "name": "logaddexpGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * exp(input[global_id.x])) / (exp(input[global_id.x]) + exp(other[global_id.x]))); otherGrad[global_id.x] = ((outputGrad[global_id.x] * exp(other[global_id.x])) / (exp(input[global_id.x]) + exp(other[global_id.x])));"
+    },
+    "logaddexp2": {
+        "name": "logaddexp2",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = log2((exp2(input[global_id.x]) + exp2(other[global_id.x])));"
+    },
+    "logaddexp2_": {
+        "name": "logaddexp2_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = log2((exp2(input[global_id.x]) + exp2(other[global_id.x])));"
+    },
+    "logaddexp2Grad": {
+        "name": "logaddexp2Grad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (((outputGrad[global_id.x] * exp2(input[global_id.x])) / (exp2(input[global_id.x]) + exp2(other[global_id.x]))) * 1.4426950408889634); otherGrad[global_id.x] = (((outputGrad[global_id.x] * exp2(other[global_id.x])) / (exp2(input[global_id.x]) + exp2(other[global_id.x]))) * 1.4426950408889634);"
+    },
     "mul": {
         "name": "mul",
         "config": [
@@ -1075,6 +3461,1606 @@ export const kernels: { [name: string]: KernelSpec } =
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * other[global_id.x]); otherGrad[global_id.x] = (outputGrad[global_id.x] * input[global_id.x]);"
     },
+    "neg": {
+        "name": "neg",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (-input[global_id.x]);"
+    },
+    "neg_": {
+        "name": "neg_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (-input[global_id.x]);"
+    },
+    "negGrad": {
+        "name": "negGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (-outputGrad[global_id.x]);"
+    },
+    "positive": {
+        "name": "positive",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = input[global_id.x];"
+    },
+    "positive_": {
+        "name": "positive_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = input[global_id.x];"
+    },
+    "positiveGrad": {
+        "name": "positiveGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "pow": {
+        "name": "pow",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = pow(input[global_id.x], other[global_id.x]);"
+    },
+    "pow_": {
+        "name": "pow_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = pow(input[global_id.x], other[global_id.x]);"
+    },
+    "powGrad": {
+        "name": "powGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * other[global_id.x]) * pow(input[global_id.x], (other[global_id.x] - 1))); otherGrad[global_id.x] = ((outputGrad[global_id.x] * pow(input[global_id.x], other[global_id.x])) * log(input[global_id.x]));"
+    },
+    "rad2deg": {
+        "name": "rad2deg",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] * 57.29577951308232);"
+    },
+    "rad2deg_": {
+        "name": "rad2deg_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * 57.29577951308232);"
+    },
+    "rad2degGrad": {
+        "name": "rad2degGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * 57.29577951308232);"
+    },
+    "reciprocal": {
+        "name": "reciprocal",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (1 / input[global_id.x]);"
+    },
+    "reciprocal_": {
+        "name": "reciprocal_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (1 / input[global_id.x]);"
+    },
+    "reciprocalGrad": {
+        "name": "reciprocalGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((-outputGrad[global_id.x]) / (input[global_id.x] * input[global_id.x]));"
+    },
+    "round": {
+        "name": "round",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = round(input[global_id.x]);"
+    },
+    "round_": {
+        "name": "round_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = round(input[global_id.x]);"
+    },
+    "roundGrad": {
+        "name": "roundGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "rsqrt": {
+        "name": "rsqrt",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (1 / sqrt(input[global_id.x]));"
+    },
+    "rsqrt_": {
+        "name": "rsqrt_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (1 / sqrt(input[global_id.x]));"
+    },
+    "rsqrtGrad": {
+        "name": "rsqrtGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((-outputGrad[global_id.x]) / ((2 * sqrt(input[global_id.x])) * input[global_id.x]));"
+    },
+    "sigmoid": {
+        "name": "sigmoid",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (1 / (1 + exp((-input[global_id.x]))));"
+    },
+    "sigmoid_": {
+        "name": "sigmoid_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (1 / (1 + exp((-input[global_id.x]))));"
+    },
+    "sigmoidGrad": {
+        "name": "sigmoidGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * output[global_id.x]) * (1 - output[global_id.x]));"
+    },
+    "sign": {
+        "name": "sign",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = sign(input[global_id.x]);"
+    },
+    "sign_": {
+        "name": "sign_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = sign(input[global_id.x]);"
+    },
+    "signGrad": {
+        "name": "signGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * select(1, 0, (input[global_id.x] == 0)));"
+    },
+    "sin": {
+        "name": "sin",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = sin(input[global_id.x]);"
+    },
+    "sin_": {
+        "name": "sin_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = sin(input[global_id.x]);"
+    },
+    "sinGrad": {
+        "name": "sinGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * cos(input[global_id.x]));"
+    },
+    "sinc": {
+        "name": "sinc",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = select((sin((input[global_id.x] * 3.141592653589793)) / (input[global_id.x] * 3.141592653589793)), 1, (input[global_id.x] == 0));"
+    },
+    "sinc_": {
+        "name": "sinc_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = select((sin((input[global_id.x] * 3.141592653589793)) / (input[global_id.x] * 3.141592653589793)), 1, (input[global_id.x] == 0));"
+    },
+    "sincGrad": {
+        "name": "sincGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * select(((cos((input[global_id.x] * 3.141592653589793)) / (input[global_id.x] * 3.141592653589793)) - (sin((input[global_id.x] * 3.141592653589793)) / ((input[global_id.x] * input[global_id.x]) * 3.141592653589793))), 0, (input[global_id.x] == 0)));"
+    },
+    "sinh": {
+        "name": "sinh",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = sinh(input[global_id.x]);"
+    },
+    "sinh_": {
+        "name": "sinh_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = sinh(input[global_id.x]);"
+    },
+    "sinhGrad": {
+        "name": "sinhGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * cosh(input[global_id.x]));"
+    },
+    "sqrt": {
+        "name": "sqrt",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = sqrt(input[global_id.x]);"
+    },
+    "sqrt_": {
+        "name": "sqrt_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = sqrt(input[global_id.x]);"
+    },
+    "sqrtGrad": {
+        "name": "sqrtGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / (2 * sqrt(input[global_id.x])));"
+    },
+    "square": {
+        "name": "square",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (input[global_id.x] * input[global_id.x]);"
+    },
+    "square_": {
+        "name": "square_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * input[global_id.x]);"
+    },
+    "squareGrad": {
+        "name": "squareGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * 2) * input[global_id.x]);"
+    },
     "sub": {
         "name": "sub",
         "config": [
@@ -1205,5 +5191,475 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x]; otherGrad[global_id.x] = (-outputGrad[global_id.x]);"
+    },
+    "tan": {
+        "name": "tan",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = tan(input[global_id.x]);"
+    },
+    "tan_": {
+        "name": "tan_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = tan(input[global_id.x]);"
+    },
+    "tanGrad": {
+        "name": "tanGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / (cos(input[global_id.x]) * cos(input[global_id.x])));"
+    },
+    "tanh": {
+        "name": "tanh",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = tanh(input[global_id.x]);"
+    },
+    "tanh_": {
+        "name": "tanh_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = tanh(input[global_id.x]);"
+    },
+    "tanhGrad": {
+        "name": "tanhGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * (1 - (output[global_id.x] * output[global_id.x])));"
+    },
+    "trunc": {
+        "name": "trunc",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = trunc(input[global_id.x]);"
+    },
+    "trunc_": {
+        "name": "trunc_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = trunc(input[global_id.x]);"
+    },
+    "truncGrad": {
+        "name": "truncGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+    },
+    "xlogy": {
+        "name": "xlogy",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "output",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = select((input[global_id.x] * log(other[global_id.x])), 0, (input[global_id.x] == 0));"
+    },
+    "xlogy_": {
+        "name": "xlogy_",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = select((input[global_id.x] * log(other[global_id.x])), 0, (input[global_id.x] == 0));"
+    },
+    "xlogyGrad": {
+        "name": "xlogyGrad",
+        "config": [
+            {
+                "name": "dtype"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "size",
+                "shaderType": "u32"
+            }
+        ],
+        "inputs": [
+            {
+                "name": "input",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "other",
+                "shaderType": "array<f32>"
+            },
+            {
+                "name": "outputGrad",
+                "shaderType": "array<f32>"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "inputGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            },
+            {
+                "name": "otherGrad",
+                "shaderType": "array<f32>",
+                "size": "size"
+            }
+        ],
+        "workgroupSize": [
+            64,
+            1,
+            1
+        ],
+        "workgroupCount": [
+            "size/8",
+            1,
+            1
+        ],
+        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] * select(log(other[global_id.x]), 0, (input[global_id.x] == 0)));"
     }
 };

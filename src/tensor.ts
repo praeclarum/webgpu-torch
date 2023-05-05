@@ -295,6 +295,149 @@ export class Tensor implements ITensor {
         this._impl.atan2_(other._impl);
         return this;
     }
+    ceil(): Tensor {
+        return ops.ceil(this);
+    }
+    ceil_(): Tensor {
+        this._impl.ceil_();
+        return this;
+    }
+    copysign(other: Tensor): Tensor {
+        return ops.copysign(this, other);
+    }
+    copysign_(other: Tensor): Tensor {
+        this._impl.copysign_(other._impl);
+        return this;
+    }
+    cos(): Tensor {
+        return ops.cos(this);
+    }
+    cos_(): Tensor {
+        this._impl.cos_();
+        return this;
+    }
+    cosh(): Tensor {
+        return ops.cosh(this);
+    }
+    cosh_(): Tensor {
+        this._impl.cosh_();
+        return this;
+    }
+    deg2rad(): Tensor {
+        return ops.deg2rad(this);
+    }
+    deg2rad_(): Tensor {
+        this._impl.deg2rad_();
+        return this;
+    }
+    div(other: Tensor, alpha?: number): Tensor {
+        return ops.div(this, other, alpha);
+    }
+    divide(other: Tensor, alpha?: number): Tensor {
+        return ops.div(this, other, alpha);
+    }
+    div_(other: Tensor, alpha?: number): Tensor {
+        this._impl.div_(other._impl, alpha);
+        return this;
+    }
+    exp(): Tensor {
+        return ops.exp(this);
+    }
+    exp_(): Tensor {
+        this._impl.exp_();
+        return this;
+    }
+    exp2(): Tensor {
+        return ops.exp2(this);
+    }
+    exp2_(): Tensor {
+        this._impl.exp2_();
+        return this;
+    }
+    expm1(): Tensor {
+        return ops.expm1(this);
+    }
+    expm1_(): Tensor {
+        this._impl.expm1_();
+        return this;
+    }
+    floor(): Tensor {
+        return ops.floor(this);
+    }
+    floor_(): Tensor {
+        this._impl.floor_();
+        return this;
+    }
+    floor_divide(other: Tensor): Tensor {
+        return ops.floor_divide(this, other);
+    }
+    floor_divide_(other: Tensor): Tensor {
+        this._impl.floor_divide_(other._impl);
+        return this;
+    }
+    frac(): Tensor {
+        return ops.frac(this);
+    }
+    frac_(): Tensor {
+        this._impl.frac_();
+        return this;
+    }
+    hypot(other: Tensor): Tensor {
+        return ops.hypot(this, other);
+    }
+    hypot_(other: Tensor): Tensor {
+        this._impl.hypot_(other._impl);
+        return this;
+    }
+    ldexp(other: Tensor): Tensor {
+        return ops.ldexp(this, other);
+    }
+    ldexp_(other: Tensor): Tensor {
+        this._impl.ldexp_(other._impl);
+        return this;
+    }
+    log(): Tensor {
+        return ops.log(this);
+    }
+    log_(): Tensor {
+        this._impl.log_();
+        return this;
+    }
+    log10(): Tensor {
+        return ops.log10(this);
+    }
+    log10_(): Tensor {
+        this._impl.log10_();
+        return this;
+    }
+    log1p(): Tensor {
+        return ops.log1p(this);
+    }
+    log1p_(): Tensor {
+        this._impl.log1p_();
+        return this;
+    }
+    log2(): Tensor {
+        return ops.log2(this);
+    }
+    log2_(): Tensor {
+        this._impl.log2_();
+        return this;
+    }
+    logaddexp(other: Tensor): Tensor {
+        return ops.logaddexp(this, other);
+    }
+    logaddexp_(other: Tensor): Tensor {
+        this._impl.logaddexp_(other._impl);
+        return this;
+    }
+    logaddexp2(other: Tensor): Tensor {
+        return ops.logaddexp2(this, other);
+    }
+    logaddexp2_(other: Tensor): Tensor {
+        this._impl.logaddexp2_(other._impl);
+        return this;
+    }
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
     }
@@ -305,6 +448,107 @@ export class Tensor implements ITensor {
         this._impl.mul_(other._impl, alpha);
         return this;
     }
+    neg(): Tensor {
+        return ops.neg(this);
+    }
+    negative(): Tensor {
+        return ops.neg(this);
+    }
+    neg_(): Tensor {
+        this._impl.neg_();
+        return this;
+    }
+    positive(): Tensor {
+        return ops.positive(this);
+    }
+    positive_(): Tensor {
+        this._impl.positive_();
+        return this;
+    }
+    pow(other: Tensor): Tensor {
+        return ops.pow(this, other);
+    }
+    pow_(other: Tensor): Tensor {
+        this._impl.pow_(other._impl);
+        return this;
+    }
+    rad2deg(): Tensor {
+        return ops.rad2deg(this);
+    }
+    rad2deg_(): Tensor {
+        this._impl.rad2deg_();
+        return this;
+    }
+    reciprocal(): Tensor {
+        return ops.reciprocal(this);
+    }
+    reciprocal_(): Tensor {
+        this._impl.reciprocal_();
+        return this;
+    }
+    round(): Tensor {
+        return ops.round(this);
+    }
+    round_(): Tensor {
+        this._impl.round_();
+        return this;
+    }
+    rsqrt(): Tensor {
+        return ops.rsqrt(this);
+    }
+    rsqrt_(): Tensor {
+        this._impl.rsqrt_();
+        return this;
+    }
+    sigmoid(): Tensor {
+        return ops.sigmoid(this);
+    }
+    sigmoid_(): Tensor {
+        this._impl.sigmoid_();
+        return this;
+    }
+    sign(): Tensor {
+        return ops.sign(this);
+    }
+    sign_(): Tensor {
+        this._impl.sign_();
+        return this;
+    }
+    sin(): Tensor {
+        return ops.sin(this);
+    }
+    sin_(): Tensor {
+        this._impl.sin_();
+        return this;
+    }
+    sinc(): Tensor {
+        return ops.sinc(this);
+    }
+    sinc_(): Tensor {
+        this._impl.sinc_();
+        return this;
+    }
+    sinh(): Tensor {
+        return ops.sinh(this);
+    }
+    sinh_(): Tensor {
+        this._impl.sinh_();
+        return this;
+    }
+    sqrt(): Tensor {
+        return ops.sqrt(this);
+    }
+    sqrt_(): Tensor {
+        this._impl.sqrt_();
+        return this;
+    }
+    square(): Tensor {
+        return ops.square(this);
+    }
+    square_(): Tensor {
+        this._impl.square_();
+        return this;
+    }
     sub(other: Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
@@ -313,6 +557,37 @@ export class Tensor implements ITensor {
     }
     sub_(other: Tensor, alpha?: number): Tensor {
         this._impl.sub_(other._impl, alpha);
+        return this;
+    }
+    tan(): Tensor {
+        return ops.tan(this);
+    }
+    tan_(): Tensor {
+        this._impl.tan_();
+        return this;
+    }
+    tanh(): Tensor {
+        return ops.tanh(this);
+    }
+    tanh_(): Tensor {
+        this._impl.tanh_();
+        return this;
+    }
+    trunc(): Tensor {
+        return ops.trunc(this);
+    }
+    fix(): Tensor {
+        return ops.trunc(this);
+    }
+    trunc_(): Tensor {
+        this._impl.trunc_();
+        return this;
+    }
+    xlogy(other: Tensor): Tensor {
+        return ops.xlogy(this, other);
+    }
+    xlogy_(other: Tensor): Tensor {
+        this._impl.xlogy_(other._impl);
         return this;
     }
     // End codegen marker

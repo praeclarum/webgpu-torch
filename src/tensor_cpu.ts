@@ -189,17 +189,245 @@ export class TensorCPU extends TensorImpl {
     atan2_(other: TensorCPU): TensorCPU {
         throw new Error("CPU atan2_ not supported");
     }
+    ceil(): TensorCPU {
+        throw new Error("CPU ceil not supported");
+    }
+    ceil_(): TensorCPU {
+        throw new Error("CPU ceil_ not supported");
+    }
+    copysign(other: TensorCPU): TensorCPU {
+        throw new Error("CPU copysign not supported");
+    }
+    copysign_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU copysign_ not supported");
+    }
+    cos(): TensorCPU {
+        throw new Error("CPU cos not supported");
+    }
+    cos_(): TensorCPU {
+        throw new Error("CPU cos_ not supported");
+    }
+    cosh(): TensorCPU {
+        throw new Error("CPU cosh not supported");
+    }
+    cosh_(): TensorCPU {
+        throw new Error("CPU cosh_ not supported");
+    }
+    deg2rad(): TensorCPU {
+        throw new Error("CPU deg2rad not supported");
+    }
+    deg2rad_(): TensorCPU {
+        throw new Error("CPU deg2rad_ not supported");
+    }
+    div(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU div not supported");
+    }
+    div_(other: TensorCPU, alpha?: number): TensorCPU {
+        throw new Error("CPU div_ not supported");
+    }
+    exp(): TensorCPU {
+        throw new Error("CPU exp not supported");
+    }
+    exp_(): TensorCPU {
+        throw new Error("CPU exp_ not supported");
+    }
+    exp2(): TensorCPU {
+        throw new Error("CPU exp2 not supported");
+    }
+    exp2_(): TensorCPU {
+        throw new Error("CPU exp2_ not supported");
+    }
+    expm1(): TensorCPU {
+        throw new Error("CPU expm1 not supported");
+    }
+    expm1_(): TensorCPU {
+        throw new Error("CPU expm1_ not supported");
+    }
+    floor(): TensorCPU {
+        throw new Error("CPU floor not supported");
+    }
+    floor_(): TensorCPU {
+        throw new Error("CPU floor_ not supported");
+    }
+    floor_divide(other: TensorCPU): TensorCPU {
+        throw new Error("CPU floor_divide not supported");
+    }
+    floor_divide_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU floor_divide_ not supported");
+    }
+    frac(): TensorCPU {
+        throw new Error("CPU frac not supported");
+    }
+    frac_(): TensorCPU {
+        throw new Error("CPU frac_ not supported");
+    }
+    hypot(other: TensorCPU): TensorCPU {
+        throw new Error("CPU hypot not supported");
+    }
+    hypot_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU hypot_ not supported");
+    }
+    ldexp(other: TensorCPU): TensorCPU {
+        throw new Error("CPU ldexp not supported");
+    }
+    ldexp_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU ldexp_ not supported");
+    }
+    log(): TensorCPU {
+        throw new Error("CPU log not supported");
+    }
+    log_(): TensorCPU {
+        throw new Error("CPU log_ not supported");
+    }
+    log10(): TensorCPU {
+        throw new Error("CPU log10 not supported");
+    }
+    log10_(): TensorCPU {
+        throw new Error("CPU log10_ not supported");
+    }
+    log1p(): TensorCPU {
+        throw new Error("CPU log1p not supported");
+    }
+    log1p_(): TensorCPU {
+        throw new Error("CPU log1p_ not supported");
+    }
+    log2(): TensorCPU {
+        throw new Error("CPU log2 not supported");
+    }
+    log2_(): TensorCPU {
+        throw new Error("CPU log2_ not supported");
+    }
+    logaddexp(other: TensorCPU): TensorCPU {
+        throw new Error("CPU logaddexp not supported");
+    }
+    logaddexp_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU logaddexp_ not supported");
+    }
+    logaddexp2(other: TensorCPU): TensorCPU {
+        throw new Error("CPU logaddexp2 not supported");
+    }
+    logaddexp2_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU logaddexp2_ not supported");
+    }
     mul(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul not supported");
     }
     mul_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU mul_ not supported");
     }
+    neg(): TensorCPU {
+        throw new Error("CPU neg not supported");
+    }
+    neg_(): TensorCPU {
+        throw new Error("CPU neg_ not supported");
+    }
+    positive(): TensorCPU {
+        throw new Error("CPU positive not supported");
+    }
+    positive_(): TensorCPU {
+        throw new Error("CPU positive_ not supported");
+    }
+    pow(other: TensorCPU): TensorCPU {
+        throw new Error("CPU pow not supported");
+    }
+    pow_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU pow_ not supported");
+    }
+    rad2deg(): TensorCPU {
+        throw new Error("CPU rad2deg not supported");
+    }
+    rad2deg_(): TensorCPU {
+        throw new Error("CPU rad2deg_ not supported");
+    }
+    reciprocal(): TensorCPU {
+        throw new Error("CPU reciprocal not supported");
+    }
+    reciprocal_(): TensorCPU {
+        throw new Error("CPU reciprocal_ not supported");
+    }
+    round(): TensorCPU {
+        throw new Error("CPU round not supported");
+    }
+    round_(): TensorCPU {
+        throw new Error("CPU round_ not supported");
+    }
+    rsqrt(): TensorCPU {
+        throw new Error("CPU rsqrt not supported");
+    }
+    rsqrt_(): TensorCPU {
+        throw new Error("CPU rsqrt_ not supported");
+    }
+    sigmoid(): TensorCPU {
+        throw new Error("CPU sigmoid not supported");
+    }
+    sigmoid_(): TensorCPU {
+        throw new Error("CPU sigmoid_ not supported");
+    }
+    sign(): TensorCPU {
+        throw new Error("CPU sign not supported");
+    }
+    sign_(): TensorCPU {
+        throw new Error("CPU sign_ not supported");
+    }
+    sin(): TensorCPU {
+        throw new Error("CPU sin not supported");
+    }
+    sin_(): TensorCPU {
+        throw new Error("CPU sin_ not supported");
+    }
+    sinc(): TensorCPU {
+        throw new Error("CPU sinc not supported");
+    }
+    sinc_(): TensorCPU {
+        throw new Error("CPU sinc_ not supported");
+    }
+    sinh(): TensorCPU {
+        throw new Error("CPU sinh not supported");
+    }
+    sinh_(): TensorCPU {
+        throw new Error("CPU sinh_ not supported");
+    }
+    sqrt(): TensorCPU {
+        throw new Error("CPU sqrt not supported");
+    }
+    sqrt_(): TensorCPU {
+        throw new Error("CPU sqrt_ not supported");
+    }
+    square(): TensorCPU {
+        throw new Error("CPU square not supported");
+    }
+    square_(): TensorCPU {
+        throw new Error("CPU square_ not supported");
+    }
     sub(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub not supported");
     }
     sub_(other: TensorCPU, alpha?: number): TensorCPU {
         throw new Error("CPU sub_ not supported");
+    }
+    tan(): TensorCPU {
+        throw new Error("CPU tan not supported");
+    }
+    tan_(): TensorCPU {
+        throw new Error("CPU tan_ not supported");
+    }
+    tanh(): TensorCPU {
+        throw new Error("CPU tanh not supported");
+    }
+    tanh_(): TensorCPU {
+        throw new Error("CPU tanh_ not supported");
+    }
+    trunc(): TensorCPU {
+        throw new Error("CPU trunc not supported");
+    }
+    trunc_(): TensorCPU {
+        throw new Error("CPU trunc_ not supported");
+    }
+    xlogy(other: TensorCPU): TensorCPU {
+        throw new Error("CPU xlogy not supported");
+    }
+    xlogy_(other: TensorCPU): TensorCPU {
+        throw new Error("CPU xlogy_ not supported");
     }
     // End codegen marker
 }

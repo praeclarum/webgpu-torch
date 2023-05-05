@@ -359,6 +359,8 @@ import * as ops from "./ops";`);
         if (isInplace) {
             continue;
         }
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
