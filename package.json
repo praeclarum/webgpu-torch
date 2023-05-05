@@ -1,6 +1,6 @@
 {
   "name": "webgpu-torch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Tensor computation and autograd with WebGPU acceleration",
   "main": "index.js",
   "scripts": {
