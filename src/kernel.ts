@@ -199,8 +199,10 @@ function getIdentifiers(code: string): string[] {
     return Array.from(identifiers);
 }
 
-function configShader(spec: KernelSpec,
-    config: KernelConfig): [string, EvalEnv] {
+function configShader(
+    spec: KernelSpec,
+    config: KernelConfig
+): [string, EvalEnv] {
     const substituions: [string, string][] = [];
     const env: EvalEnv = {};
     for (let i = 0; i < spec.config.length; i++) {
@@ -255,17 +257,17 @@ export function getKernelShaderCode(
     let head = "";
     if (configdShader.includes("global_id")) {
         shaderCodeParts.push(
-            `${head}@builtin(global_invocation_id) global_id: vec3u`
+            `    ${head}@builtin(global_invocation_id) global_id: vec3u`
         );
         head = ", ";
     }
     if (configdShader.includes("local_id")) {
         shaderCodeParts.push(
-            `${head}@builtin(local_invocation_id) local_id: vec3u`
+            `    ${head}@builtin(local_invocation_id) local_id: vec3u`
         );
         head = ", ";
     }
-    shaderCodeParts.push(`) {`);
+    shaderCodeParts.push(`    ) {`);
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     return shaderCodeParts.join("\n");
@@ -281,6 +283,8 @@ const javaScriptSubstitutions: [RegExp, string][] = [
     ["local_id\\.x", "local_id_x"],
     ["local_id\\.y", "local_id_y"],
     ["local_id\\.z", "local_id_z"],
+    ["workgroupBarrier\\s*\\(\\s*\\)\\s*;", "yield \"workgroupBarrier\";"],
+    ["storageBarrier\\s*\\(\\s*\\)\\s*;", "yield \"storageBarrier\";"],
 ].map(([regex, replacement]) => [new RegExp(regex, "g"), replacement]);
 
 // Add all the Math. functions to the substitution list
@@ -302,6 +306,9 @@ export function getKernelJavaScriptCode(
 
     const usesGlobalId = configdShader.includes("global_id");
     const usesLocalId = configdShader.includes("local_id");
+    const usesBarrier =
+        configdShader.includes("workgroupBarrier") ||
+        configdShader.includes("storageBarrier");
 
     // Build up the body of the kernel function
     let jsCode = configdShader;
@@ -358,8 +365,11 @@ export function getKernelJavaScriptCode(
         kernelParams.push("local_id_y");
         kernelParams.push("local_id_z");
     }
+    const kernelParamsString = kernelParams.join(", ");
     w.writeLine(
-        `function ${spec.name}Kernel(${kernelParams.join(", ")}) {`
+        `function${usesBarrier ? "*" : ""} ${
+            spec.name
+        }Kernel(${kernelParamsString}) {`
     );
     w.indent();
     w.writeLine(jsCode);
@@ -368,11 +378,17 @@ export function getKernelJavaScriptCode(
     // for (let p of params) {
     //     w.writeLine(`console.log("param", "${p}", typeof ${p}, ${p});`);
     // }
+    const workgroupSize = workgroupSizeX * workgroupSizeY * workgroupSizeZ;
+    if (usesBarrier) {
+        w.writeLine(`var barriers = new Array(${workgroupSize});`);
+    }
     w.writeLine(`for (let wgZ = 0; wgZ < workgroupCountZ; wgZ++) {`);
     w.indent();
     w.writeLine(`for (let wgY = 0; wgY < workgroupCountY; wgY++) {`);
     w.indent();
-    w.writeLine(`for (let group_id_x = 0; group_id_x < workgroupCountX; group_id_x++) {`);
+    w.writeLine(
+        `for (let group_id_x = 0; group_id_x < workgroupCountX; group_id_x++) {`
+    );
     w.indent();
     w.writeLine(`const globalStartX = group_id_x * ${workgroupSizeX};`);
     w.writeLine(`const globalEndX = globalStartX + ${workgroupSizeX};`);
@@ -380,6 +396,9 @@ export function getKernelJavaScriptCode(
     w.writeLine(`const globalEndY = globalStartY + ${workgroupSizeY};`);
     w.writeLine(`const globalStartZ = wgZ * ${workgroupSizeZ};`);
     w.writeLine(`const globalEndZ = globalStartZ + ${workgroupSizeZ};`);
+    if (usesBarrier) {
+        w.writeLine(`let allDone = true;`);
+    }
     w.writeLine(
         `for (let global_id_z = globalStartZ; global_id_z < globalEndZ; global_id_z++) {`
     );
@@ -397,13 +416,41 @@ export function getKernelJavaScriptCode(
         w.writeLine(`const local_id_y = global_id_y - globalStartY;`);
         w.writeLine(`const local_id_z = global_id_z - globalStartZ;`);
     }
-    w.writeLine(`${spec.name}Kernel(${kernelParams.join(", ")});`);
+    if (usesBarrier) {
+        w.writeLine(
+            `const local_index = local_id_x + local_id_y * ${workgroupSizeX} + local_id_z * ${
+                workgroupSizeX * workgroupSizeY
+            };`
+        );
+        w.writeLine(
+            `const barrier = ${spec.name}Kernel(${kernelParamsString});`
+        );
+        w.writeLine(`const firstBarrierValue = barrier.next();`);
+        w.writeLine(`allDone = allDone && firstBarrierValue.done;`);
+        w.writeLine(`barriers[local_index] = barrier;`);
+    } else {
+        w.writeLine(`${spec.name}Kernel(${kernelParamsString});`);
+    }
     w.dedent();
     w.writeLine(`}`);
     w.dedent();
     w.writeLine(`}`);
     w.dedent();
     w.writeLine(`}`);
+    if (usesBarrier) {
+        w.writeLine(`while (!allDone) {`);
+        w.indent();
+        w.writeLine(`allDone = true;`);
+        w.writeLine(`for (let local_index = 0; local_index < ${workgroupSize}; local_index++) {`);
+        w.indent();
+        w.writeLine(`const barrier = barriers[local_index];`);
+        w.writeLine(`const barrierValue = barrier.next();`);
+        w.writeLine(`allDone = allDone && barrierValue.done;`);
+        w.dedent();
+        w.writeLine(`}`);
+        w.dedent();
+        w.writeLine(`}`);
+    }
     w.dedent();
     w.writeLine(`}`);
     w.dedent();
@@ -413,6 +460,6 @@ export function getKernelJavaScriptCode(
     w.dedent();
     w.writeLine(`})`);
     const code = w.toString();
-    console.log(code);
+    // console.log(code);
     return code;
 }
