@@ -103,6 +103,16 @@ export class TensorCPU extends TensorImpl {
     sum(axis: number | null): TensorImpl {
         const d = this.getTypedArray();
         if (axis === null) {
+            if (true) {
+                const config = {
+                    dtype: this.dtype,
+                    workgroupSize: 64,
+                };
+                const params = {
+                    size: shapeSize(this.shape),
+                };
+                return this.runKernel("sum", config, params, [[]])[0];
+            }
             let sum = 0;
             for (let i = 0; i < d.length; i++) {
                 sum += d[i];

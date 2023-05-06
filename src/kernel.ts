@@ -189,26 +189,39 @@ export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
     }
 }
 
+function getIdentifiers(code: string): string[] {
+    const identifierRegex = /[a-zA-Z_][a-zA-Z0-9_]*/g;
+    const identifiers = new Set<string>();
+    let match: RegExpExecArray | null;
+    while ((match = identifierRegex.exec(code)) !== null) {
+        identifiers.add(match[0]);
+    }
+    return Array.from(identifiers);
+}
+
 function configShader(spec: KernelSpec,
-    config: KernelConfig): string {
-    let substituions: [string, string][] = [];
+    config: KernelConfig): [string, EvalEnv] {
+    const substituions: [string, string][] = [];
+    const env: EvalEnv = {};
     for (let i = 0; i < spec.config.length; i++) {
         let configSpec = spec.config[i];
         let configValue = config[i];
         substituions.push([configSpec.name, configValue.toString()]);
+        env[configSpec.name] = configValue;
     }
     let result = spec.shader.trim();
     for (let [key, value] of substituions) {
         result = result.replace(new RegExp(`\\$\\$${key}\\$\\$`, "g"), value);
     }
-    return result;
+    return [result, env];
 }
 
 export function getKernelShaderCode(
     spec: KernelSpec,
     config: KernelConfig
 ): string {
-    const configdShader = configShader(spec, config);
+    const [configdShader, env] = configShader(spec, config);
+
     let shaderCodeParts: string[] = ["// " + spec.name + " kernel"];
     shaderCodeParts.push(`struct ${spec.name}Parameters {`);
     for (let i = 0; i < spec.parameters.length; i++) {
@@ -232,12 +245,6 @@ export function getKernelShaderCode(
     shaderCodeParts.push(
         `@group(0) @binding(${bindingIndex}) var<storage, read> parameters: ${spec.name}Parameters;`
     );
-    const env: { [name: string]: any } = {};
-    for (let i = 0; i < spec.config.length; i++) {
-        let configSpec = spec.config[i];
-        let configValue = config[i];
-        env[configSpec.name] = configValue;
-    }
     const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
     const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
     const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
@@ -287,27 +294,14 @@ const javaScriptGlobalFunctions: { [name: string]: string } = {
     select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
 };
 
-function getIdentifiers(code: string): string[] {
-    const identifierRegex = /[a-zA-Z_][a-zA-Z0-9_]*/g;
-    const identifiers = new Set<string>();
-    let match: RegExpExecArray | null;
-    while ((match = identifierRegex.exec(code)) !== null) {
-        identifiers.add(match[0]);
-    }
-    return Array.from(identifiers);
-}
-
 export function getKernelJavaScriptCode(
     spec: KernelSpec,
     config: KernelConfig
 ): string {
-    const configdShader = configShader(spec, config);
-    const env: { [name: string]: any } = {};
-    for (let i = 0; i < spec.config.length; i++) {
-        let configSpec = spec.config[i];
-        let configValue = config[i];
-        env[configSpec.name] = configValue;
-    }
+    const [configdShader, env] = configShader(spec, config);
+
+    const usesGlobalId = configdShader.includes("global_id");
+    const usesLocalId = configdShader.includes("local_id");
 
     // Build up the body of the kernel function
     let jsCode = configdShader;
@@ -353,8 +347,19 @@ export function getKernelJavaScriptCode(
     }
 
     // Write the kernel function
+    const kernelParams = [];
+    if (usesGlobalId) {
+        kernelParams.push("global_id_x");
+        kernelParams.push("global_id_y");
+        kernelParams.push("global_id_z");
+    }
+    if (usesLocalId) {
+        kernelParams.push("local_id_x");
+        kernelParams.push("local_id_y");
+        kernelParams.push("local_id_z");
+    }
     w.writeLine(
-        `function ${spec.name}Kernel(global_id_x, global_id_y, global_id_z) {`
+        `function ${spec.name}Kernel(${kernelParams.join(", ")}) {`
     );
     w.indent();
     w.writeLine(jsCode);
@@ -363,21 +368,18 @@ export function getKernelJavaScriptCode(
     // for (let p of params) {
     //     w.writeLine(`console.log("param", "${p}", typeof ${p}, ${p});`);
     // }
-    w.writeLine(`const workgroupSizeX = ${workgroupSizeX};`);
-    w.writeLine(`const workgroupSizeY = ${workgroupSizeY};`);
-    w.writeLine(`const workgroupSizeZ = ${workgroupSizeZ};`);
     w.writeLine(`for (let wgZ = 0; wgZ < workgroupCountZ; wgZ++) {`);
     w.indent();
     w.writeLine(`for (let wgY = 0; wgY < workgroupCountY; wgY++) {`);
     w.indent();
-    w.writeLine(`for (let wgX = 0; wgX < workgroupCountX; wgX++) {`);
+    w.writeLine(`for (let group_id_x = 0; group_id_x < workgroupCountX; group_id_x++) {`);
     w.indent();
-    w.writeLine(`const globalStartX = wgX * workgroupSizeX;`);
-    w.writeLine(`const globalEndX = globalStartX + workgroupSizeX;`);
-    w.writeLine(`const globalStartY = wgY * workgroupSizeY;`);
-    w.writeLine(`const globalEndY = globalStartY + workgroupSizeY;`);
-    w.writeLine(`const globalStartZ = wgZ * workgroupSizeZ;`);
-    w.writeLine(`const globalEndZ = globalStartZ + workgroupSizeZ;`);
+    w.writeLine(`const globalStartX = group_id_x * ${workgroupSizeX};`);
+    w.writeLine(`const globalEndX = globalStartX + ${workgroupSizeX};`);
+    w.writeLine(`const globalStartY = wgY * ${workgroupSizeY};`);
+    w.writeLine(`const globalEndY = globalStartY + ${workgroupSizeY};`);
+    w.writeLine(`const globalStartZ = wgZ * ${workgroupSizeZ};`);
+    w.writeLine(`const globalEndZ = globalStartZ + ${workgroupSizeZ};`);
     w.writeLine(
         `for (let global_id_z = globalStartZ; global_id_z < globalEndZ; global_id_z++) {`
     );
@@ -390,7 +392,12 @@ export function getKernelJavaScriptCode(
         `for (let global_id_x = globalStartX; global_id_x < globalEndX; global_id_x++) {`
     );
     w.indent();
-    w.writeLine(`${spec.name}Kernel(global_id_x, global_id_y, global_id_z);`);
+    if (usesLocalId) {
+        w.writeLine(`const local_id_x = global_id_x - globalStartX;`);
+        w.writeLine(`const local_id_y = global_id_y - globalStartY;`);
+        w.writeLine(`const local_id_z = global_id_z - globalStartZ;`);
+    }
+    w.writeLine(`${spec.name}Kernel(${kernelParams.join(", ")});`);
     w.dedent();
     w.writeLine(`}`);
     w.dedent();
@@ -406,6 +413,6 @@ export function getKernelJavaScriptCode(
     w.dedent();
     w.writeLine(`})`);
     const code = w.toString();
-    // console.log(code);
+    console.log(code);
     return code;
 }
