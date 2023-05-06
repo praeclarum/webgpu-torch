@@ -110,6 +110,6 @@ export class TensorWebGPU extends TensorImpl {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernel("sum", config, params, [[config.workgroupSize]])[0];
+        return this.runKernel("sum", config, params, [[]])[0];
     }
 }
