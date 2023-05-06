@@ -1,7 +1,7 @@
 import { KernelParamSpec, KernelSpec } from "./kernel";
 import { ExprCode, exprNodeToString, parseCode, substituteIdentifiers } from "./expr";
 
-export type OpType = "unary" | "binary";
+export type OpType = "unary" | "binary" | "reduction";
 
 export type OpSpec = {
     name: string;
@@ -19,3 +19,11 @@ export type UnaryOpSpec = OpSpec & {
 export type BinaryOpSpec = OpSpec & {
     type: "binary";
 }
+
+export type ReductionOpSpec = OpSpec & {
+    type: "reduction";
+    init: ExprCode;
+    reduce?: ExprCode;
+}
+
+export type AnOpSpec = UnaryOpSpec | BinaryOpSpec | ReductionOpSpec;

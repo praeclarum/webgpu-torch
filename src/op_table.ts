@@ -1,8 +1,8 @@
-import { OpSpec } from "./op_spec";
+import { AnOpSpec } from "./op_spec";
 
-export const registry: OpSpec[] = [
+export const registry: AnOpSpec[] = [
     // https://pytorch.org/docs/stable/torch.html
-    // === Math operations ===
+    // === Math operations / Pointwise Ops ===
     {
         name: "abs",
         aliases: ["absolute"],
@@ -351,6 +351,78 @@ export const registry: OpSpec[] = [
         name: "xlogy",
         type: "binary",
         forward: "output = input == 0.0 ? 0.0 : input * log(other)",
-        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : log(other))",
+        backward: "inputGrad = input == 0.0 ? 0.0 : outputGrad * log(other)",
+    },
+    // === Math operations / Reduction Ops ===
+    // argmax: indices
+    // argmin: indices
+    // amax: research
+    // amin: research
+    // minmax: two outputs
+    {
+        name: "all",
+        type: "reduction",
+        init: "output = 1",
+        forward: "output = output && input",
+        backward: "inputGrad = output ? outputGrad : 0.0",
+    },
+    {
+        name: "any",
+        type: "reduction",
+        init: "output = 0",
+        forward: "output = output || input",
+        backward: "inputGrad = output ? outputGrad : 0.0",
+    },
+    // dist: idk
+    // logsumexp: init is -inf
+    // max: init is input
+    {
+        name: "mean",
+        type: "reduction",
+        init: "output = 0",
+        forward: "output = output + input",
+        reduce: "output = output / input.size()",
+        backward: "inputGrad = outputGrad / input.size()",
+    },
+    // median: artisanal
+    // min: init is input
+    // mode: indices
+    // nanmean: artisanal
+    // nanmedian: artisanal
+    // nansum: artisanal
+    {
+        name: "norm",
+        type: "reduction",
+        init: "output = 0",
+        forward: "output = output + input * input",
+        reduce: "output = sqrt(output)",
+        backward: "inputGrad = outputGrad * input / output",
+    },
+    {
+        name: "prod",
+        type: "reduction",
+        init: "output = 1",
+        forward: "output = output * input",
+        backward: "inputGrad = outputGrad * output / input",
+    },
+    // quantile: wtf
+    // std: two step
+    // std_mean: two step
+    {
+        name: "sum",
+        type: "reduction",
+        init: "output = 0",
+        forward: "output = output + input",
+        backward: "inputGrad = outputGrad",
+    },
+    // unique: omg
+    // unique_consecutive: omg
+    // var: two step
+    // var_mean: two step
+    {
+        name: "countNonzero",
+        type: "reduction",
+        init: "output = 0",
+        forward: "output = output + (input != 0)",
     }
 ];

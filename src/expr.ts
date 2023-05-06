@@ -1,3 +1,7 @@
+// "Any sufficiently complicated C or Fortran program contains an ad hoc,
+// informally-specified, bug-ridden, slow implementation of half of Common Lisp."
+// - Greenspun's Tenth Rule
+
 export type ExprCode = number | string;
 
 export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
