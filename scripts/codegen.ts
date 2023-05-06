@@ -116,8 +116,6 @@ function writeTensorImplCode(): void {
     }
     const code = w.toString();
     // console.log(code);
-    const path = absSrcDir + "/tensor_webgpu.ts";
-    insertCodegenIntoFile(path, "");
     const path2 = absSrcDir + "/tensor_impl.ts";
     insertCodegenIntoFile(path2, code);
 }
@@ -387,7 +385,7 @@ function writeOpsCode(): void {
     const w = new CodeWriter();
     w.writeLine(`import * as functions from "./functions";
 import { Tensor } from "./tensor";
-import { shouldCreateGradient } from "./autograd";`);
+import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -419,34 +417,19 @@ import { shouldCreateGradient } from "./autograd";`);
         writeHeader(kernelSpec.name);
         w.indent();
         if (isBinary) {
-            w.writeLine(`if (input.shape.length !== other.shape.length) {`);
-            w.indent();
-            w.writeLine("throw new Error(`Shape dimensions of " + kernelSpec.name + " must match. Got ${input.shape} and ${other.shape}`);");
-            w.dedent();
-            w.writeLine(`}`);
-            w.writeLine(`if (shouldCreateGradient(input, other)) {`);
-            w.indent();
-            w.writeLine(`return functions.${funcName}.apply(input, other);`);
-            w.dedent();
-            w.writeLine(`}`);
             if (hasAlpha) {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl, alpha));`);
+                w.writeLine(`return binaryWithAlpha(functions.${funcName}, input, other, alpha);`);
             }
             else {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl));`);
+                w.writeLine(`return binary(functions.${funcName}, input, other);`);
             }
         }
         else {
-            w.writeLine(`if (shouldCreateGradient(input)) {`);
-            w.indent();
-            w.writeLine(`return functions.${funcName}.apply(input);`);
-            w.dedent();
-            w.writeLine(`}`);
             if (hasAlpha) {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(alpha));`);
+                w.writeLine(`return unaryWithAlpha(functions.${funcName}, input, alpha);`);
             }
             else {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}());`);
+                w.writeLine(`return unary(functions.${funcName}, input);`);
             }
         }
         w.dedent();

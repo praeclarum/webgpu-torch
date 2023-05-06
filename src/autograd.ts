@@ -1,6 +1,6 @@
 import { Tensor } from "./tensor";
 
-export type FunctionInput = Tensor | number | boolean | string;
+export type FunctionInput = Tensor | number | boolean | string | undefined;
 export type GradientFunctionOutput = Tensor | null;
 
 export class GradientContext {
@@ -25,6 +25,12 @@ export type GradientFunction = (
     ctx: GradientContext,
     output: Tensor
 ) => (Tensor | null)[];
+
+export interface IAutoFunction {
+    forward(inputs: FunctionInput[]): Tensor;
+    apply(...inputs: FunctionInput[]): Tensor;
+    backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[];
+}
 
 export class AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
