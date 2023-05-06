@@ -46,14 +46,17 @@ export class LinearFunction extends AutoFunction {
 
 export class SumAxisFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        throw new Error("Method not implemented.");
+        const [input, axis] = inputs as [Tensor, number];
+        return input.sum(axis);
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ) {
-        throw new Error("Method not implemented.");
+        const [input, axis] = inputs as [Tensor, number];
+        ctx.saveForBackward(input);
+        ctx.axis = axis;
     }
     static backward(
         ctx: GradientContext,
