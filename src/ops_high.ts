@@ -36,3 +36,10 @@ export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: Tenso
     }
     return func.forward([input, other, alpha]);
 }
+
+export function reduction(func: IAutoFunction, input: Tensor, axis?: number, keepDim?: boolean): Tensor {
+    if (shouldCreateGradient(input)) {
+        return func.apply(input, axis, keepDim);
+    }
+    return func.forward([input, axis, keepDim]);
+}
