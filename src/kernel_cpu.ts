@@ -28,7 +28,7 @@ export class KernelCPU extends Kernel {
         parameters: KernelParamsInput,
         outputs?: ATypedArray[]
     ): ATypedArray[] {
-        console.log("run cpu kernel", this.key);
+        // console.log("run cpu kernel", this.key);
 
         // Build the parameter environment
         const env = this.getRunEnv(parameters);

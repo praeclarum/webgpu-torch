@@ -73,7 +73,7 @@ export class KernelWebGPU extends Kernel {
         parameters: KernelParamsInput,
         outputs?: GPUBuffer[]
     ): GPUBuffer[] {
-        console.log("run gpu kernel", this.key);
+        // console.log("run gpu kernel", this.key);
 
         // Build the parameter environment
         const env: EvalEnv = this.getRunEnv(parameters);

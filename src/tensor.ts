@@ -111,6 +111,9 @@ export class Tensor implements ITensor {
         const data = this._impl.getTypedArray();
         const shape = this._impl.shape;
         const strides = this._impl.strides;
+        if (shape.length == 0 || (shape.length == 1 && shape[0] == 1)) {
+            return [data[0]];
+        }
         const index: number[] = [];
         return readArray(index);
         function readArray(index: number[]): TensorArrayData {

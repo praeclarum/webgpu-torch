@@ -28,19 +28,19 @@ export class LinearFunction extends AutoFunction {
         gradOutput: Tensor
     ): GradientFunctionOutput[] {
         const [input, weight, bias] = ctx.savedTensors;
-        let gradInput: Tensor | null = null;
-        let gradWeight: Tensor | null = null;
-        let gradBias: Tensor | null = null;
+        let inputGrad: Tensor | null = null;
+        let weightGrad: Tensor | null = null;
+        let biasGrad: Tensor | null = null;
         if (ctx.needsInputGradient[0]) {
-            gradInput = gradOutput.mm(weight);
+            inputGrad = gradOutput.mm(weight);
         }
         if (ctx.needsInputGradient[1]) {
-            gradWeight = input.t().mm(gradOutput);
+            weightGrad = input.t().mm(gradOutput);
         }
         if (ctx.needsInputGradient[2]) {
-            gradBias = gradOutput.sum(0);
+            biasGrad = gradOutput.sum(0);
         }
-        return [gradInput, gradWeight, gradBias];
+        return [inputGrad, weightGrad, biasGrad];
     }
 }
 

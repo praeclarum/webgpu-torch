@@ -111,6 +111,7 @@ export class TensorCPU extends TensorImpl {
                 1,
                 this.dtype
             );
+            newData[0] = sum;
             return new TensorCPU(
                 newStorage as ArrayBufferStorage,
                 this._dtype,

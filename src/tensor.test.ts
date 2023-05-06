@@ -78,3 +78,15 @@ test("matrix multiply", async () => {
     const c = a.mm(b);
     expect(await c.toArrayAsync()).toEqual([[58, 64], [139, 154]]);
 });
+
+test("sum(x, n=911)", async () => {
+    const n = 911;
+    const xar: number[] = [];
+    for (let i = 0; i < n; i++) {
+        xar.push(i);
+    }
+    const x = tensor(xar);
+    const sum = x.sum();
+    expect(sum.shape).toEqual([]);
+    expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
+});
