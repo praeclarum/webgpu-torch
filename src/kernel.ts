@@ -270,7 +270,9 @@ export function getKernelShaderCode(
     shaderCodeParts.push(`    ) {`);
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
-    return shaderCodeParts.join("\n");
+    const shaderCode = shaderCodeParts.join("\n");
+    console.log(shaderCode);
+    return shaderCode;
 }
 
 const javaScriptSubstitutions: [RegExp, string][] = [
