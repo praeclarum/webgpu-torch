@@ -6,7 +6,7 @@ import { UntypedStorage } from "./storage";
 import { ITensor, TensorArrayData } from "./tensor_if";
 import { KernelConfigInput, KernelParamsInput } from "./kernel";
 
-export abstract class TensorImpl implements ITensor {
+export abstract class TensorImpl {
     abstract get storage(): UntypedStorage;
     getTypedArray(): ATypedArray { return this.storage.getTypedArray(this.dtype); }
     abstract get dtype(): Dtype;
