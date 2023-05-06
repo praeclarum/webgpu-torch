@@ -189,10 +189,26 @@ export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
     }
 }
 
+function configShader(spec: KernelSpec,
+    config: KernelConfig): string {
+    let substituions: [string, string][] = [];
+    for (let i = 0; i < spec.config.length; i++) {
+        let configSpec = spec.config[i];
+        let configValue = config[i];
+        substituions.push([configSpec.name, configValue.toString()]);
+    }
+    let result = spec.shader.trim();
+    for (let [key, value] of substituions) {
+        result = result.replace(new RegExp(`\\$\\$${key}\\$\\$`, "g"), value);
+    }
+    return result;
+}
+
 export function getKernelShaderCode(
     spec: KernelSpec,
     config: KernelConfig
 ): string {
+    const configdShader = configShader(spec, config);
     let shaderCodeParts: string[] = ["// " + spec.name + " kernel"];
     shaderCodeParts.push(`struct ${spec.name}Parameters {`);
     for (let i = 0; i < spec.parameters.length; i++) {
@@ -228,10 +244,22 @@ export function getKernelShaderCode(
     shaderCodeParts.push(
         `@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`
     );
-    shaderCodeParts.push(
-        `fn main(@builtin(global_invocation_id) global_id : vec3u) {`
-    );
-    shaderCodeParts.push("    " + spec.shader.trim());
+    shaderCodeParts.push(`fn main(`);
+    let head = "";
+    if (configdShader.includes("global_id")) {
+        shaderCodeParts.push(
+            `${head}@builtin(global_invocation_id) global_id: vec3u`
+        );
+        head = ", ";
+    }
+    if (configdShader.includes("local_id")) {
+        shaderCodeParts.push(
+            `${head}@builtin(local_invocation_id) local_id: vec3u`
+        );
+        head = ", ";
+    }
+    shaderCodeParts.push(`) {`);
+    shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     return shaderCodeParts.join("\n");
 }
@@ -243,6 +271,9 @@ const javaScriptSubstitutions: [RegExp, string][] = [
     ["global_id\\.x", "global_id_x"],
     ["global_id\\.y", "global_id_y"],
     ["global_id\\.z", "global_id_z"],
+    ["local_id\\.x", "local_id_x"],
+    ["local_id\\.y", "local_id_y"],
+    ["local_id\\.z", "local_id_z"],
 ].map(([regex, replacement]) => [new RegExp(regex, "g"), replacement]);
 
 // Add all the Math. functions to the substitution list
@@ -270,6 +301,7 @@ export function getKernelJavaScriptCode(
     spec: KernelSpec,
     config: KernelConfig
 ): string {
+    const configdShader = configShader(spec, config);
     const env: { [name: string]: any } = {};
     for (let i = 0; i < spec.config.length; i++) {
         let configSpec = spec.config[i];
@@ -278,7 +310,7 @@ export function getKernelJavaScriptCode(
     }
 
     // Build up the body of the kernel function
-    let jsCode = spec.shader.trim();
+    let jsCode = configdShader;
     for (const [regex, replacement] of javaScriptSubstitutions) {
         jsCode = jsCode.replace(regex, replacement);
     }

@@ -2,7 +2,7 @@ import { Device } from "./device";
 import { DeviceWebGPU } from "./device_webgpu";
 import { Dtype } from "./dtype";
 import { KernelConfigInput, KernelParamsInput } from "./kernel";
-import { Shape, Strides, defaultStrides } from "./shape";
+import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { GPUBufferStorage } from "./storage";
 import { TensorImpl } from "./tensor_impl";
 
@@ -103,6 +103,13 @@ export class TensorWebGPU extends TensorImpl {
     }
 
     sum(axis: number | null): TensorImpl {
-        throw new Error("Sum not implemented.");
+        const config = {
+            dtype: this.dtype,
+            workgroupSize: 64,
+        };
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernel("sum", config, params, [[config.workgroupSize]])[0];
     }
 }
