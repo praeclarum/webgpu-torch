@@ -13,7 +13,10 @@ export type ShaderType =
     | "i32"
     | "array<i32>"
     | "array<u32>"
-    | "array<f32>";
+    | "array<f32>"
+    | "vec3<i32>"
+    | "vec3<u32>"
+    | "vec3<f32>";
 
 export interface KernelSpec {
     name: string;

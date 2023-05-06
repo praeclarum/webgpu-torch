@@ -18,8 +18,6 @@ export abstract class TensorImpl implements ITensor {
     abstract runKernelInplace(name: string, config: KernelConfigInput, params: KernelParamsInput, ...additionalInputs: TensorImpl[]): TensorImpl;
     abstract runKernel(name: string, config: KernelConfigInput, params: KernelParamsInput, outputShapes: Shape[], ...additionalInputs: TensorImpl[]): TensorImpl[];
     
-    abstract sum(axis: number | null): TensorImpl;
-
     get isContiguous(): boolean {
         let strides = this.strides;
         let shape = this.shape;
@@ -36,6 +34,45 @@ export abstract class TensorImpl implements ITensor {
         return this.shape.length === 0 || (this.shape.length === 1 && this.shape[0] === 1);
     }
 
+    sum(axis: number | null): TensorImpl {
+        
+        // To perform a sumDim operation on an 11D tensor using 3D workgroups, you can follow these steps:
+        // 1. Choose the dimension you want to reduce the tensor along, let's refer to it as dimToSum. Now, you have three groups of dimensions:
+        //    - Dimensions before dimToSum
+        //    - The dimension dimToSum
+        //    - Dimensions after dimToSum
+        // 2. Reshape the original 11D tensor into a 3D tensor that can be processed with 3D workgroups:
+        //    - Merge all the dimensions before dimToSum, calculating their product to form the first dimension of the new 3D tensor: let's call it DimA
+        //    - Keep the dimension dimToSum as the second dimension of the 3D tensor: let's call it DimB
+        //    - Merge all dimensions after dimToSum, calculating their product to form the third dimension of the new 3D tensor: let's call it DimC
+        //    - In summary, reshape the tensor to a new shape (DimA, DimB, DimC)
+        // 3. Perform the sumDim operation using the reshaped 3D tensor. As you've already transformed the tensor, sum along dimension 1, which is the dimToSum in the 
+        // original tensor. The result will be a 3D tensor with the shape (DimA, 1, DimC).
+        // 4. Reshape this resulting 3D tensor back to its original 11D form:
+        //    - Recover dimensions before dimToSum from DimA
+        //    - Remove dimToSum (as it is summed)
+        //    - Recover dimensions after dimToSum from DimC
+        //    - The new shape will have the same dimensions as the original 11D tensor, except for dimToSum, which will have a size of 1.
+        // Here's a general example with a pseudo-code approach:
+        // # Original 11D tensor shape
+        // original_shape = [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11]
+        // # Assume we want to sum over dimension d6
+        // dimToSum = 5
+        // # Reshape into a 3D tensor
+        // DimA = d1 * d2 * d3 * d4 * d5
+        // DimB = d6
+        // DimC = d7 * d8 * d9 * d10 * d11
+        // new_shape = [DimA, DimB, DimC]
+        // tensor_3D = tensor.reshape(new_shape)
+        // # Perform the sumDim operation on the reshaped 3D tensor
+        // reduced_tensor = sumDim(tensor_3D, dim=1)
+        // # Reshape the resulting 3D tensor back to an 11D tensor (with dimension d6 having size 1)
+        // output_shape = [d1, d2, d3, d4, d5, 1, d7, d8, d9, d10, d11]
+        // tensor_11D = reduced_tensor.reshape(output_shape)
+        // After these steps, you obtain a tensor with the same dimensions as the original 11D tensor, but with the specified dimension dimToSum reduced after applying the 
+        // sumDim operation.
+        throw new Error("Not implemented");
+    }
     expand(shape: Shape): TensorImpl {
         const newShape = shape.slice();
         const newStrides = Array(newShape.length).fill(0);
