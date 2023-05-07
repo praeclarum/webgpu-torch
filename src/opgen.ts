@@ -1,6 +1,11 @@
 import { KernelParamSpec, KernelSpec } from "./kernel";
-import { ExprCode, exprNodeToWebGLShader, parseCode, substituteIdentifiers } from "./expr";
-import { BinaryOpSpec, OpSpec, UnaryOpSpec } from "./op_spec";
+import {
+    ExprCode,
+    exprNodeToWebGLShader,
+    parseCode,
+    substituteIdentifiers,
+} from "./expr";
+import { BinaryOpSpec, OpSpec, ReductionOpSpec, UnaryOpSpec } from "./op_spec";
 
 export class CodeWriter {
     private indentLevel = 0;
@@ -20,18 +25,25 @@ export class CodeWriter {
 }
 
 export function getKernelSpecs(op: OpSpec): KernelSpec[] {
-    if (op.type == "binary") {
+    if (op.type == "reduction") {
+        return getReductionKernelSpecs(op as ReductionOpSpec);
+    } else if (op.type == "binary") {
         return getBinaryKernelSpecs(op as BinaryOpSpec);
     } else {
         return getUnaryKernelSpecs(op as UnaryOpSpec);
     }
 }
 
+function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
+    const specs = [getReductionKernelSpec(op)];
+    if (op.backward) {
+        // specs.push(getReductionGradKernelSpec(op, op.backward));
+    }
+    return specs;
+}
+
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
-    const specs = [
-        getBinaryKernelSpec(op),
-        getBinaryInplaceKernelSpec(op),
-    ];
+    const specs = [getBinaryKernelSpec(op), getBinaryInplaceKernelSpec(op)];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
     }
@@ -39,14 +51,80 @@ function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
 }
 
 function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
-    const specs = [
-        getUnaryKernelSpec(op),
-        getUnaryInplaceKernelSpec(op),
-    ];
+    const specs = [getUnaryKernelSpec(op), getUnaryInplaceKernelSpec(op)];
     if (op.backward) {
         specs.push(getUnaryGradKernelSpec(op, op.backward));
     }
     return specs;
+}
+
+function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
+    const parameters: KernelParamSpec[] = [
+        {
+            name: "workgroupSize",
+            shaderType: "u32",
+        },
+    ];
+    const ast = parseCode(op.forward);
+    const subs = {
+        input: "input[global_id.x]",
+        output: "output[global_id.x]",
+    };
+    const shaderAst = substituteIdentifiers(ast, subs);
+    const shaderSnippet = exprNodeToWebGLShader(shaderAst);
+    const shader = `
+    var local_sum = 0.0;
+    // Load inputData into local memory
+    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {
+        local_sum += input[i];
+    }
+    // Write partial group sum to outputData
+    output[local_id.x] = local_sum;
+
+    workgroupBarrier(); // Make sure all threads have completed summation
+
+    // First thread sums up results from all other threads
+    if (local_id.x == 0u) {
+        for (var i = 1u; i < $$workgroupSize$$; i++) {
+            local_sum += output[i];
+        }
+        // Store final sum in the first element of result array
+        output[0] = local_sum;
+    }
+`;
+    return {
+        name: op.name,
+        config: [
+            {
+                name: "dtype",
+            },
+            {
+                name: "workgroupSize",
+            },
+        ],
+        parameters: [
+            {
+                name: "size",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: ["workgroupSize", 1, 1],
+        workgroupCount: [1, 1, 1],
+        shader: shader,
+    };
 }
 
 function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
@@ -147,7 +225,10 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
     };
 }
 
-function getBinaryGradKernelSpec(op: BinaryOpSpec, backward: ExprCode): KernelSpec {
+function getBinaryGradKernelSpec(
+    op: BinaryOpSpec,
+    backward: ExprCode
+): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
@@ -297,7 +378,10 @@ function getUnaryInplaceKernelSpec(op: UnaryOpSpec): KernelSpec {
     };
 }
 
-function getUnaryGradKernelSpec(op: UnaryOpSpec, backward: ExprCode): KernelSpec {
+function getUnaryGradKernelSpec(
+    op: UnaryOpSpec,
+    backward: ExprCode
+): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",

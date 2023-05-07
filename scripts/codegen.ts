@@ -206,10 +206,21 @@ import { shapeSize } from "./shape";`);
         const isGrad = kernelSpec.name.endsWith("Grad");
         if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
+        const isReduction = opSpec.type === "reduction";
         const hasAlpha = opSpec.alpha ?? false;
         const className = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
+        const config: {[name: string]: number|string} = {dtype: "float32"};
+        let outputShapesS: string = "[input.shape]";
+        if (isReduction) {
+            outputShapesS = "[[]]";
+            config["workgroupSize"] = 64;
+        }
+        const configS = JSON.stringify(config);
         const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
-            if (isBinary) {
+            if (isReduction) {
+                w.writeLine(`const [input] = ${inputsName} as [Tensor];`);
+            }
+            else if (isBinary) {
                 if (hasAlpha && includeAlpha) {
                     w.writeLine(`const [input, other, alpha] = ${inputsName} as [Tensor, Tensor, number|undefined];`);
                 }
@@ -247,10 +258,10 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isBinary) {
             w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape], other)[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
         }
         else {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", { dtype: input.dtype }, params, [input.shape])[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS})[0];`);
         }
         w.dedent();
         w.writeLine(`}`);
@@ -282,11 +293,14 @@ import { shapeSize } from "./shape";`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
         writeParams("ctx.alpha");
-        if (isBinary) {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);`);
+        if (isReduction) {
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape], outputGrad);`);
+        }
+        else if (isBinary) {
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape, other.shape], other, outputGrad);`);
         }
         else {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape], outputGrad);`);
         }
         w.dedent();
         w.writeLine(`}`);

@@ -136,7 +136,7 @@ export function getKernelConfig(
         let configValue = config[configSpec.name];
         if (configValue === undefined) {
             throw new Error(
-                `Missing config value for ${configSpec.name} in kernel ${spec.name}`
+                `Missing config value "${configSpec.name}" for kernel "${spec.name}"`
             );
         }
         configValues.push(configValue);

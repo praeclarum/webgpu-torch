@@ -13,7 +13,7 @@ export class AbsFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("abs", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("abs", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -28,7 +28,7 @@ export class AbsFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("absGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("absGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AcosFunction extends AutoFunction {
@@ -38,7 +38,7 @@ export class AcosFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("acos", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("acos", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -53,7 +53,7 @@ export class AcosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acosGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("acosGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AcoshFunction extends AutoFunction {
@@ -63,7 +63,7 @@ export class AcoshFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("acosh", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("acosh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -78,7 +78,7 @@ export class AcoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acoshGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("acoshGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AddFunction extends AutoFunction {
@@ -90,7 +90,7 @@ export class AddFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("add", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -107,7 +107,7 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("addGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("addGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class AsinFunction extends AutoFunction {
@@ -117,7 +117,7 @@ export class AsinFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("asin", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("asin", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -132,7 +132,7 @@ export class AsinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asinGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("asinGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AsinhFunction extends AutoFunction {
@@ -142,7 +142,7 @@ export class AsinhFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("asinh", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("asinh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -157,7 +157,7 @@ export class AsinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asinhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("asinhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AtanFunction extends AutoFunction {
@@ -167,7 +167,7 @@ export class AtanFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("atan", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("atan", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -182,7 +182,7 @@ export class AtanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("atanGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Atan2Function extends AutoFunction {
@@ -193,7 +193,7 @@ export class Atan2Function extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("atan2", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -208,7 +208,7 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atan2Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("atan2Grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class CeilFunction extends AutoFunction {
@@ -218,7 +218,7 @@ export class CeilFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("ceil", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("ceil", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -233,7 +233,7 @@ export class CeilFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("ceilGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("ceilGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class CopysignFunction extends AutoFunction {
@@ -244,7 +244,7 @@ export class CopysignFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("copysign", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -259,7 +259,7 @@ export class CopysignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("copysignGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("copysignGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class CosFunction extends AutoFunction {
@@ -269,7 +269,7 @@ export class CosFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("cos", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("cos", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -284,7 +284,7 @@ export class CosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("cosGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("cosGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class CoshFunction extends AutoFunction {
@@ -294,7 +294,7 @@ export class CoshFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("cosh", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("cosh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -309,7 +309,7 @@ export class CoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("coshGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("coshGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Deg2radFunction extends AutoFunction {
@@ -319,7 +319,7 @@ export class Deg2radFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("deg2rad", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("deg2rad", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -334,7 +334,7 @@ export class Deg2radFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("deg2radGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("deg2radGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class DivFunction extends AutoFunction {
@@ -346,7 +346,7 @@ export class DivFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("div", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -363,7 +363,7 @@ export class DivFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("divGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("divGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class ExpFunction extends AutoFunction {
@@ -373,7 +373,7 @@ export class ExpFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("exp", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("exp", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -388,7 +388,7 @@ export class ExpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("expGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("expGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Exp2Function extends AutoFunction {
@@ -398,7 +398,7 @@ export class Exp2Function extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("exp2", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("exp2", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -413,7 +413,7 @@ export class Exp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("exp2Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("exp2Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Expm1Function extends AutoFunction {
@@ -423,7 +423,7 @@ export class Expm1Function extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("expm1", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("expm1", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -438,7 +438,7 @@ export class Expm1Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("expm1Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("expm1Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class FloorFunction extends AutoFunction {
@@ -448,7 +448,7 @@ export class FloorFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("floor", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("floor", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -463,7 +463,7 @@ export class FloorFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("floorGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("floorGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Floor_divideFunction extends AutoFunction {
@@ -474,7 +474,7 @@ export class Floor_divideFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("floor_divide", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("floor_divide", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -489,7 +489,7 @@ export class Floor_divideFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("floor_divideGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("floor_divideGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class FracFunction extends AutoFunction {
@@ -499,7 +499,7 @@ export class FracFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("frac", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("frac", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -514,7 +514,7 @@ export class FracFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("fracGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("fracGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class HypotFunction extends AutoFunction {
@@ -525,7 +525,7 @@ export class HypotFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("hypot", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -540,7 +540,7 @@ export class HypotFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("hypotGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("hypotGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class LdexpFunction extends AutoFunction {
@@ -551,7 +551,7 @@ export class LdexpFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("ldexp", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -566,7 +566,7 @@ export class LdexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("ldexpGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("ldexpGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class LogFunction extends AutoFunction {
@@ -576,7 +576,7 @@ export class LogFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("log", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("log", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -591,7 +591,7 @@ export class LogFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("logGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log10Function extends AutoFunction {
@@ -601,7 +601,7 @@ export class Log10Function extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("log10", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("log10", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -616,7 +616,7 @@ export class Log10Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log10Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("log10Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log1pFunction extends AutoFunction {
@@ -626,7 +626,7 @@ export class Log1pFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("log1p", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("log1p", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -641,7 +641,7 @@ export class Log1pFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log1pGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("log1pGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log2Function extends AutoFunction {
@@ -651,7 +651,7 @@ export class Log2Function extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("log2", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("log2", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -666,7 +666,7 @@ export class Log2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log2Grad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("log2Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class LogaddexpFunction extends AutoFunction {
@@ -677,7 +677,7 @@ export class LogaddexpFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("logaddexp", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -692,7 +692,7 @@ export class LogaddexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logaddexpGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("logaddexpGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class Logaddexp2Function extends AutoFunction {
@@ -703,7 +703,7 @@ export class Logaddexp2Function extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("logaddexp2", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -718,7 +718,7 @@ export class Logaddexp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logaddexp2Grad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("logaddexp2Grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class MulFunction extends AutoFunction {
@@ -730,7 +730,7 @@ export class MulFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("mul", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -747,7 +747,7 @@ export class MulFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("mulGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("mulGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class NegFunction extends AutoFunction {
@@ -757,7 +757,7 @@ export class NegFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("neg", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("neg", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -772,7 +772,7 @@ export class NegFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("negGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("negGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class PositiveFunction extends AutoFunction {
@@ -782,7 +782,7 @@ export class PositiveFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("positive", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("positive", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -797,7 +797,7 @@ export class PositiveFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("positiveGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("positiveGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class PowFunction extends AutoFunction {
@@ -808,7 +808,7 @@ export class PowFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("pow", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -823,7 +823,7 @@ export class PowFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("powGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("powGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class Rad2degFunction extends AutoFunction {
@@ -833,7 +833,7 @@ export class Rad2degFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("rad2deg", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("rad2deg", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -848,7 +848,7 @@ export class Rad2degFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("rad2degGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("rad2degGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class ReciprocalFunction extends AutoFunction {
@@ -858,7 +858,7 @@ export class ReciprocalFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("reciprocal", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("reciprocal", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -873,7 +873,7 @@ export class ReciprocalFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("reciprocalGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("reciprocalGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class RoundFunction extends AutoFunction {
@@ -883,7 +883,7 @@ export class RoundFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("round", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("round", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -898,7 +898,7 @@ export class RoundFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("roundGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("roundGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class RsqrtFunction extends AutoFunction {
@@ -908,7 +908,7 @@ export class RsqrtFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("rsqrt", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("rsqrt", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -923,7 +923,7 @@ export class RsqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("rsqrtGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("rsqrtGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SigmoidFunction extends AutoFunction {
@@ -933,7 +933,7 @@ export class SigmoidFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sigmoid", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sigmoid", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -948,7 +948,7 @@ export class SigmoidFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sigmoidGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sigmoidGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SignFunction extends AutoFunction {
@@ -958,7 +958,7 @@ export class SignFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sign", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sign", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -973,7 +973,7 @@ export class SignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("signGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("signGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SinFunction extends AutoFunction {
@@ -983,7 +983,7 @@ export class SinFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sin", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sin", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -998,7 +998,7 @@ export class SinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sinGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sinGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SincFunction extends AutoFunction {
@@ -1008,7 +1008,7 @@ export class SincFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sinc", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sinc", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1023,7 +1023,7 @@ export class SincFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sincGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sincGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SinhFunction extends AutoFunction {
@@ -1033,7 +1033,7 @@ export class SinhFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sinh", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sinh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1048,7 +1048,7 @@ export class SinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sinhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sinhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SqrtFunction extends AutoFunction {
@@ -1058,7 +1058,7 @@ export class SqrtFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sqrt", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sqrt", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1073,7 +1073,7 @@ export class SqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sqrtGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sqrtGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SquareFunction extends AutoFunction {
@@ -1083,7 +1083,7 @@ export class SquareFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("square", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("square", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1098,7 +1098,7 @@ export class SquareFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("squareGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("squareGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SubFunction extends AutoFunction {
@@ -1110,7 +1110,7 @@ export class SubFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("sub", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1127,7 +1127,7 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("subGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("subGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class TanFunction extends AutoFunction {
@@ -1137,7 +1137,7 @@ export class TanFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("tan", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("tan", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1152,7 +1152,7 @@ export class TanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("tanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("tanGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class TanhFunction extends AutoFunction {
@@ -1162,7 +1162,7 @@ export class TanhFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("tanh", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("tanh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1177,7 +1177,7 @@ export class TanhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("tanhGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("tanhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class TruncFunction extends AutoFunction {
@@ -1187,7 +1187,7 @@ export class TruncFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("trunc", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("trunc", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1202,7 +1202,7 @@ export class TruncFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("truncGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("truncGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class XlogyFunction extends AutoFunction {
@@ -1213,7 +1213,7 @@ export class XlogyFunction extends AutoFunction {
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("xlogy", { dtype: input.dtype }, params, [input.shape], other)[0];
+        return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1228,7 +1228,7 @@ export class XlogyFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("xlogyGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("xlogyGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class AllFunction extends AutoFunction {
@@ -1238,7 +1238,7 @@ export class AllFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("all", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("all", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1253,7 +1253,7 @@ export class AllFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("allGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("allGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class AnyFunction extends AutoFunction {
@@ -1263,7 +1263,7 @@ export class AnyFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("any", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("any", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1278,7 +1278,7 @@ export class AnyFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("anyGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("anyGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class MeanFunction extends AutoFunction {
@@ -1288,7 +1288,7 @@ export class MeanFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("mean", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("mean", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1303,7 +1303,7 @@ export class MeanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("meanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("meanGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class NormFunction extends AutoFunction {
@@ -1313,7 +1313,7 @@ export class NormFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("norm", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("norm", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1328,7 +1328,7 @@ export class NormFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("normGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("normGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class ProdFunction extends AutoFunction {
@@ -1338,7 +1338,7 @@ export class ProdFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("prod", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("prod", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1353,7 +1353,7 @@ export class ProdFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("prodGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("prodGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class SumFunction extends AutoFunction {
@@ -1363,7 +1363,7 @@ export class SumFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("sum", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("sum", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1378,7 +1378,7 @@ export class SumFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sumGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("sumGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class CountNonzeroFunction extends AutoFunction {
@@ -1388,7 +1388,7 @@ export class CountNonzeroFunction extends AutoFunction {
             size: shapeSize(input.shape),
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        return input.runKernel("countNonzero", { dtype: input.dtype }, params, [input.shape])[0];
+        return input.runKernel("countNonzero", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
         ctx: GradientContext,
@@ -1403,6 +1403,6 @@ export class CountNonzeroFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("countNonzeroGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+        return input.runKernel("countNonzeroGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }

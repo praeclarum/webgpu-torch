@@ -5667,6 +5667,9 @@ export const kernels: { [name: string]: KernelSpec } =
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -5689,97 +5692,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] && input[global_id.x]);"
-    },
-    "all_": {
-        "name": "all_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] && input[global_id.x]);"
-    },
-    "allGrad": {
-        "name": "allGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = select(0, outputGrad[global_id.x], output[global_id.x]);"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "any": {
         "name": "any",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -5802,97 +5733,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] || input[global_id.x]);"
-    },
-    "any_": {
-        "name": "any_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] || input[global_id.x]);"
-    },
-    "anyGrad": {
-        "name": "anyGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = select(0, outputGrad[global_id.x], output[global_id.x]);"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "mean": {
         "name": "mean",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -5915,97 +5774,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] + input[global_id.x]);"
-    },
-    "mean_": {
-        "name": "mean_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + input[global_id.x]);"
-    },
-    "meanGrad": {
-        "name": "meanGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = (outputGrad[global_id.x] / inputSize);"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "norm": {
         "name": "norm",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -6028,97 +5815,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] + (input[global_id.x] * input[global_id.x]));"
-    },
-    "norm_": {
-        "name": "norm_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + (input[global_id.x] * input[global_id.x]));"
-    },
-    "normGrad": {
-        "name": "normGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * input[global_id.x]) / output[global_id.x]);"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "prod": {
         "name": "prod",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -6141,97 +5856,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] * input[global_id.x]);"
-    },
-    "prod_": {
-        "name": "prod_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] * input[global_id.x]);"
-    },
-    "prodGrad": {
-        "name": "prodGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = ((outputGrad[global_id.x] * output[global_id.x]) / input[global_id.x]);"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "sum": {
         "name": "sum",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -6254,97 +5897,25 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] + input[global_id.x]);"
-    },
-    "sum_": {
-        "name": "sum_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + input[global_id.x]);"
-    },
-    "sumGrad": {
-        "name": "sumGrad",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>"
-            },
-            {
-                "name": "outputGrad",
-                "shaderType": "array<f32>"
-            }
-        ],
-        "outputs": [
-            {
-                "name": "inputGrad",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        inputGrad[global_id.x] = outputGrad[global_id.x];"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "countNonzero": {
         "name": "countNonzero",
         "config": [
             {
                 "name": "dtype"
+            },
+            {
+                "name": "workgroupSize"
             }
         ],
         "parameters": [
@@ -6367,48 +5938,15 @@ export const kernels: { [name: string]: KernelSpec } =
             }
         ],
         "workgroupSize": [
-            64,
+            "workgroupSize",
             1,
             1
         ],
         "workgroupCount": [
-            "size/8",
+            1,
             1,
             1
         ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        output[global_id.x] = (output[global_id.x] + (input[global_id.x] != 0));"
-    },
-    "countNonzero_": {
-        "name": "countNonzero_",
-        "config": [
-            {
-                "name": "dtype"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "size",
-                "shaderType": "u32"
-            }
-        ],
-        "inputs": [],
-        "outputs": [
-            {
-                "name": "input",
-                "shaderType": "array<f32>",
-                "size": "size"
-            }
-        ],
-        "workgroupSize": [
-            64,
-            1,
-            1
-        ],
-        "workgroupCount": [
-            "size/8",
-            1,
-            1
-        ],
-        "shader": "\n        if (global_id.x >= parameters.size) {\n            return;\n        }\n        input[global_id.x] = (input[global_id.x] + (input[global_id.x] != 0));"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     }
 };

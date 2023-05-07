@@ -387,12 +387,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "add_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
     }
     asin(): Tensor {
         return ops.asin(this);
@@ -440,12 +435,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "atan2_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
     ceil(): Tensor {
         return ops.ceil(this);
@@ -463,12 +453,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "copysign_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
     }
     cos(): Tensor {
         return ops.cos(this);
@@ -508,12 +493,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "div_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
     }
     exp(): Tensor {
         return ops.exp(this);
@@ -558,12 +538,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "floor_divide_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("floor_divide_", { dtype: this.dtype }, params, other);
     }
     frac(): Tensor {
         return ops.frac(this);
@@ -581,12 +556,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "hypot_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("hypot_", { dtype: this.dtype }, params, other);
     }
     ldexp(other: Tensor): Tensor {
         return ops.ldexp(this, other);
@@ -595,12 +565,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "ldexp_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
     }
     log(): Tensor {
         return ops.log(this);
@@ -645,12 +610,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "logaddexp_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("logaddexp_", { dtype: this.dtype }, params, other);
     }
     logaddexp2(other: Tensor): Tensor {
         return ops.logaddexp2(this, other);
@@ -659,12 +619,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "logaddexp2_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("logaddexp2_", { dtype: this.dtype }, params, other);
     }
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
@@ -677,12 +632,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "mul_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
     neg(): Tensor {
         return ops.neg(this);
@@ -703,11 +653,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "positive_",
-            { dtype: this.dtype },
-            params
-        );
+        return this.runKernelInplace("positive_", { dtype: this.dtype }, params);
     }
     pow(other: Tensor): Tensor {
         return ops.pow(this, other);
@@ -716,12 +662,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "pow_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
     }
     rad2deg(): Tensor {
         return ops.rad2deg(this);
@@ -739,11 +680,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "reciprocal_",
-            { dtype: this.dtype },
-            params
-        );
+        return this.runKernelInplace("reciprocal_", { dtype: this.dtype }, params);
     }
     round(): Tensor {
         return ops.round(this);
@@ -837,12 +774,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "sub_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
     }
     tan(): Tensor {
         return ops.tan(this);
@@ -881,79 +813,28 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "xlogy_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("xlogy_", { dtype: this.dtype }, params, other);
     }
     all(dim?: number, keepdim?: boolean): Tensor {
         return ops.all(this);
     }
-    all_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("all_", { dtype: this.dtype }, params);
-    }
     any(dim?: number, keepdim?: boolean): Tensor {
         return ops.any(this);
-    }
-    any_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("any_", { dtype: this.dtype }, params);
     }
     mean(dim?: number, keepdim?: boolean): Tensor {
         return ops.mean(this);
     }
-    mean_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("mean_", { dtype: this.dtype }, params);
-    }
     norm(dim?: number, keepdim?: boolean): Tensor {
         return ops.norm(this);
-    }
-    norm_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("norm_", { dtype: this.dtype }, params);
     }
     prod(dim?: number, keepdim?: boolean): Tensor {
         return ops.prod(this);
     }
-    prod_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("prod_", { dtype: this.dtype }, params);
-    }
     sum(dim?: number, keepdim?: boolean): Tensor {
         return ops.sum(this);
     }
-    sum_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("sum_", { dtype: this.dtype }, params);
-    }
     countNonzero(dim?: number, keepdim?: boolean): Tensor {
         return ops.countNonzero(this);
-    }
-    countNonzero_(dim?: number, keepdim?: boolean): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace(
-            "countNonzero_",
-            { dtype: this.dtype },
-            params
-        );
     }
     // End codegen marker
 }
