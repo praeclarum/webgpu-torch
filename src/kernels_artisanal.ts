@@ -51,6 +51,10 @@ export const kernels: { [name: string]: KernelSpec } = {
                 name: "input",
                 shaderType: "array<f32>",
             },
+            {
+                name: "weight",
+                shaderType: "array<f32>",
+            },
         ],
         outputs: [
             {
@@ -68,14 +72,34 @@ export const kernels: { [name: string]: KernelSpec } = {
     // input shape = [B, C, H, W]
     for (var batch = 0u; batch < parameters.batchSize; batch++) {
         for (var outputChannel = 0u; outputChannel < parameters.outputChannels; outputChannel++) {
-            var result = 42.0;
+            var result = 0.0;
             // Do the convolution
-            let index = 
-                batch * parameters.outputChannels * parameters.inputHeight * parameters.inputWidth +
+            for (var inputChannel = 0u; inputChannel < parameters.inputChannels; inputChannel++) {
+                for (var kernelY = 0u; kernelY < parameters.kernelHeight; kernelY++) {
+                    for (var kernelX = 0u; kernelX < parameters.kernelWidth; kernelX++) {
+                        var inputY = global_id.y + kernelY;
+                        var inputX = global_id.x + kernelX;
+                        var inputIndex =
+                            batch * parameters.inputChannels * parameters.inputHeight * parameters.inputWidth +
+                            inputChannel * parameters.inputHeight * parameters.inputWidth +
+                            inputY * parameters.inputWidth +
+                            inputX;
+                        var kernelIndex =
+                            outputChannel * parameters.inputChannels * parameters.kernelHeight * parameters.kernelWidth +
+                            inputChannel * parameters.kernelHeight * parameters.kernelWidth +
+                            kernelY * parameters.kernelWidth +
+                            kernelX;
+                        result = result + input[inputIndex] * weight[kernelIndex];
+                    }
+                }
+            }
+            // Output
+            let outputIndex = 
+                batch * parameters.outputChannels * parameters.outputHeight * parameters.outputWidth +
                 outputChannel * parameters.outputHeight * parameters.outputWidth +
                 global_id.y * parameters.outputWidth +
                 global_id.x;
-            output[index] = result;
+            output[outputIndex] = result;
         }
     }
 `
