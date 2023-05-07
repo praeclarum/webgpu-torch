@@ -1,5 +1,4 @@
 export type Dtype = "float32" | "int32" | "uint32" | "uint8";
-export type Dtypeish = Dtype;
 
 export type ATypedArray = Uint8Array | Int32Array | Uint32Array | Float32Array;
 
@@ -25,8 +24,8 @@ export function dtypeByteSize(dtype: Dtype): number {
     }
 }
 
-export function getDtype(dtype: Dtype | ATypedArray | null, defaultType?: Dtype): Dtype {
-    if (dtype === null) {
+export function getDtype(dtype?: Dtype | ATypedArray | null, defaultType?: Dtype): Dtype {
+    if (dtype === null || dtype === undefined) {
         return defaultType || "float32";
     } else if (dtype instanceof String && (dtype as Dtype) in dtypeArrayCtors) {
         return dtype as Dtype;

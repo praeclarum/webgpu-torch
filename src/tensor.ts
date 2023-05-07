@@ -2,13 +2,11 @@ import { Device, Deviceish } from "./device";
 import { getDevice } from "./devices";
 import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { ones } from "./factories";
-import { Dtype } from "./dtype";
-import { UntypedStorage } from "./storage";
+import { ATypedArray, Dtype } from "./dtype";
+import { TensorArrayData, UntypedStorage } from "./storage";
 import { GradientFunction, GradientContext } from "./autograd";
-import * as ops from "./ops";
 import { KernelConfigInput, KernelParamsInput } from "./kernel";
-
-export type TensorArrayData = Array<number | TensorArrayData>;
+import * as ops from "./ops";
 
 export type TensorJsonData = {
     data: TensorArrayData | UntypedStorage;
@@ -178,6 +176,52 @@ export class Tensor {
         }
     }
 
+    runKernelInplace(
+        name: string,
+        config: KernelConfigInput,
+        params: KernelParamsInput,
+        ...additionalInputs: Tensor[]
+    ): Tensor {
+        const d = this.device;
+        const kernel = this.device.getKernel(name, config);
+        const inputBuffers = additionalInputs.map((t) =>
+            d.getBufferForKernel(t.storage, t.dtype)
+        );
+        const outputBuffers = [d.getBufferForKernel(this.storage, this.dtype)];
+        kernel.run(inputBuffers, params, outputBuffers);
+        return this;
+    }
+    runKernel(
+        name: string,
+        config: KernelConfigInput,
+        params: KernelParamsInput,
+        outputShapes: Shape[],
+        ...additionalInputs: Tensor[]
+    ): Tensor[] {
+        const d = this.device;
+        const kernel = d.getKernel(name, config);
+        const inputBuffers = [
+            d.getBufferForKernel(this.storage, this.dtype),
+            ...additionalInputs.map((t) => d.getBufferForKernel(t.storage, t.dtype)),
+        ];
+        const outputBuffers = kernel.run(inputBuffers, params) as (GPUBuffer|ATypedArray)[];
+        if (outputBuffers.length !== outputShapes.length) {
+            throw new Error(
+                `Expected ${outputShapes.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`
+            );
+        }
+        return outputBuffers.map(
+            (outputBuffer, i) =>
+                new Tensor({
+                    data: this.device.getStorageFromKernel(outputBuffer),
+                    dtype: this.dtype,
+                    shape: outputShapes[i],
+                    strides: defaultStrides(outputShapes[i]),
+                    device: this.device,
+                })
+        );
+    }
+
     detach(): Tensor {
         if (this._requiresGrad || this._gradFunc) {
             return new Tensor({
@@ -237,52 +281,6 @@ export class Tensor {
                 );
             }
         }
-    }
-
-    runKernelInplace(
-        name: string,
-        config: KernelConfigInput,
-        params: KernelParamsInput,
-        ...additionalInputs: Tensor[]
-    ): Tensor {
-        const d = this.device;
-        const kernel = this.device.getKernel(name, config);
-        const inputBuffers = additionalInputs.map((t) =>
-            d.unwrapKernelStorage(t.storage)
-        );
-        const outputBuffers = [d.unwrapKernelStorage(this.storage)];
-        kernel.run(inputBuffers, params, outputBuffers);
-        return this;
-    }
-    runKernel(
-        name: string,
-        config: KernelConfigInput,
-        params: KernelParamsInput,
-        outputShapes: Shape[],
-        ...additionalInputs: Tensor[]
-    ): Tensor[] {
-        const d = this.device;
-        const kernel = d.getKernel(name, config);
-        const inputBuffers = [
-            d.unwrapKernelStorage(this.storage),
-            ...additionalInputs.map((t) => d.unwrapKernelStorage(t.storage)),
-        ];
-        const outputBuffers = kernel.run(inputBuffers, params) as GPUBuffer[];
-        if (outputBuffers.length !== outputShapes.length) {
-            throw new Error(
-                `Expected ${outputShapes.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`
-            );
-        }
-        return outputBuffers.map(
-            (outputBuffer, i) =>
-                new Tensor({
-                    data: this.device.wrapKernelStorage(outputBuffer),
-                    dtype: this.dtype,
-                    shape: outputShapes[i],
-                    strides: defaultStrides(outputShapes[i]),
-                    device: this.device,
-                })
-        );
     }
 
     expand(shape: Shape): Tensor {
@@ -360,12 +358,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "add_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
     }
     asin(): Tensor {
         return ops.asin(this);
@@ -413,12 +406,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "atan2_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
     ceil(): Tensor {
         return ops.ceil(this);
@@ -436,12 +424,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "copysign_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
     }
     cos(): Tensor {
         return ops.cos(this);
@@ -481,12 +464,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "div_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
     }
     exp(): Tensor {
         return ops.exp(this);
@@ -531,12 +509,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "floor_divide_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("floor_divide_", { dtype: this.dtype }, params, other);
     }
     frac(): Tensor {
         return ops.frac(this);
@@ -554,12 +527,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "hypot_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("hypot_", { dtype: this.dtype }, params, other);
     }
     ldexp(other: Tensor): Tensor {
         return ops.ldexp(this, other);
@@ -568,12 +536,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "ldexp_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
     }
     log(): Tensor {
         return ops.log(this);
@@ -618,12 +581,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "logaddexp_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("logaddexp_", { dtype: this.dtype }, params, other);
     }
     logaddexp2(other: Tensor): Tensor {
         return ops.logaddexp2(this, other);
@@ -632,12 +590,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "logaddexp2_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("logaddexp2_", { dtype: this.dtype }, params, other);
     }
     mul(other: Tensor, alpha?: number): Tensor {
         return ops.mul(this, other, alpha);
@@ -650,12 +603,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "mul_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
     neg(): Tensor {
         return ops.neg(this);
@@ -676,11 +624,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "positive_",
-            { dtype: this.dtype },
-            params
-        );
+        return this.runKernelInplace("positive_", { dtype: this.dtype }, params);
     }
     pow(other: Tensor): Tensor {
         return ops.pow(this, other);
@@ -689,12 +633,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "pow_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
     }
     rad2deg(): Tensor {
         return ops.rad2deg(this);
@@ -712,11 +651,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "reciprocal_",
-            { dtype: this.dtype },
-            params
-        );
+        return this.runKernelInplace("reciprocal_", { dtype: this.dtype }, params);
     }
     round(): Tensor {
         return ops.round(this);
@@ -810,12 +745,7 @@ export class Tensor {
             size: shapeSize(this.shape),
             alpha: alpha || 1.0,
         };
-        return this.runKernelInplace(
-            "sub_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
     }
     tan(): Tensor {
         return ops.tan(this);
@@ -854,12 +784,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "xlogy_",
-            { dtype: this.dtype },
-            params,
-            other
-        );
+        return this.runKernelInplace("xlogy_", { dtype: this.dtype }, params, other);
     }
     all(dim?: number, keepdim?: boolean): Tensor {
         return ops.all(this);
@@ -922,11 +847,7 @@ export class Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
-        return this.runKernelInplace(
-            "countNonzero_",
-            { dtype: this.dtype },
-            params
-        );
+        return this.runKernelInplace("countNonzero_", { dtype: this.dtype }, params);
     }
     // End codegen marker
 }

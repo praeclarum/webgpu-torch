@@ -1,8 +1,15 @@
-import { Shape, Shapeish, shapeSize } from "./shape";
+import { Shape, shapeSize } from "./shape";
 import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
-import { Tensor, TensorArrayData } from "./tensor";
 import { UntypedStorage } from "./storage";
-import { Kernel, KernelConfig, KernelConfigInput, KernelKey, KernelSpec, getKernelConfig, getKernelKey } from "./kernel";
+import {
+    Kernel,
+    KernelConfig,
+    KernelConfigInput,
+    KernelKey,
+    KernelSpec,
+    getKernelConfig,
+    getKernelKey,
+} from "./kernel";
 import { registry as kernelRegistry } from "./kernels";
 
 export type DeviceType = "cpu" | "webgpu";
@@ -50,10 +57,12 @@ export abstract class Device {
         }
         return kernel;
     }
-    abstract wrapKernelStorage(storage: ATypedArray | GPUBuffer): UntypedStorage;
-    abstract unwrapKernelStorage(storage: UntypedStorage): ATypedArray | GPUBuffer;
     abstract createKernel(spec: KernelSpec, config: KernelConfig): Kernel;
-    abstract ones(shape: Shape, dtype: Dtype): Tensor;
-    abstract tensor(data: TensorArrayData | null, dtype: Dtype): Tensor;
-    abstract zeros(shape: Shape, dtype: Dtype): Tensor;
+    abstract getBufferForKernel(
+        storage: UntypedStorage,
+        dtype: Dtype
+    ): ATypedArray | GPUBuffer;
+    abstract getStorageFromKernel(
+        buffer: ATypedArray | GPUBuffer
+    ): UntypedStorage;
 }

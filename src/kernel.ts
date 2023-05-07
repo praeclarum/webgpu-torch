@@ -2,6 +2,7 @@ import { Device } from "./device";
 import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 import { CodeWriter } from "./opgen";
+import { ArrayBufferStorage, UntypedStorage } from "./storage";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParamValue = number;
