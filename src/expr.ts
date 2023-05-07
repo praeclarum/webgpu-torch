@@ -22,7 +22,7 @@ export class ManifestNumber {
 
 export type ParsedExpr = ExprNode;
 
-export type EvalEnv = { [name: string]: any };
+export type EvalEnv = { [name: string]: number | string };
 
 function lexn(code: string): (string | ManifestNumber)[] {
     const tokens: (string | ManifestNumber)[] = [];

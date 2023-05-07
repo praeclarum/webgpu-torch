@@ -117,7 +117,7 @@ export class KernelWebGPU extends Kernel {
             for (let i = 0; i < this.spec.parameters.length; i++) {
                 const param = this.spec.parameters[i];
                 if (param.shaderType === paramDtype) {
-                    paramsArray[i] = env[param.name];
+                    paramsArray[i] = +env[param.name];
                 }
             }
         }
