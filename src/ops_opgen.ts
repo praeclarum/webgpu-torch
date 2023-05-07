@@ -181,3 +181,24 @@ export function fix(input: Tensor): Tensor {
 export function xlogy(input: Tensor, other: Tensor): Tensor {
     return binary(functions.XlogyFunction, input, other);
 }
+export function all(input: Tensor): Tensor {
+    return unary(functions.AllFunction, input);
+}
+export function any(input: Tensor): Tensor {
+    return unary(functions.AnyFunction, input);
+}
+export function mean(input: Tensor): Tensor {
+    return unary(functions.MeanFunction, input);
+}
+export function norm(input: Tensor): Tensor {
+    return unary(functions.NormFunction, input);
+}
+export function prod(input: Tensor): Tensor {
+    return unary(functions.ProdFunction, input);
+}
+export function sum(input: Tensor): Tensor {
+    return unary(functions.SumFunction, input);
+}
+export function countNonzero(input: Tensor): Tensor {
+    return unary(functions.CountNonzeroFunction, input);
+}
