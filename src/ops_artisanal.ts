@@ -3,7 +3,24 @@ import { Dtype } from "./dtype";
 import { Tensor, TensorData, TensorJsonData } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
 
-export function conv2d(input: Tensor, weight: Tensor): Tensor {
+/**
+ * Applies a 2D convolution over an input image composed of several input planes.
+ * 
+ * #### Forward
+ * ```
+ * output[y, x] = sum(Ky, sum(Kx, input[y + ky, x + kx] * weight[ky, kx])) + bias
+ * ```
+ * 
+ * @param input input tensor of shape [B, inChannels, iH, iW]
+ * @param weight filters of shape [outChannels, inChannels, kH, kW]
+ * @param bias optional bias tensor of shape [outChannels]
+ * @param stride the stride of the convolving kernel. Can be a single number or a tuple (sH, sW). Default: 1
+ * @param padding implicit padding on both sides of the kernel. Can be a single number or a tuple (padH, padW). Default: 0
+ *     `padding="valid"` is the same as no padding. `padding="same"` pads the input so the output has the shape as the input.
+ *     However, this mode can only be used when `stride` is 1.
+ * @returns 
+ */
+export function conv2d(input: Tensor, weight: Tensor, bias?: Tensor, stride?: number | [number, number], padding?: number | [number, number] | "valid" | "same"): Tensor {
     if (shouldCreateGradient(input, weight)) {
         throw new Error("conv2d gradient not supported yet");
     } else {
