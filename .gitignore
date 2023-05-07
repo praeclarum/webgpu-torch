@@ -1,3 +1,5 @@
+/web/docs
+*.DS_Store
 _site
 
 # Logs
