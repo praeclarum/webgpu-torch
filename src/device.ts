@@ -46,7 +46,7 @@ export abstract class Device {
     getKernel(name: string, config: KernelConfigInput): Kernel {
         const spec = kernelRegistry[name];
         if (spec === undefined) {
-            throw new Error(`Kernel ${name} not found`);
+            throw new Error(`Kernel "${name}" not found`);
         }
         const kconfig = getKernelConfig(spec, config);
         const key = getKernelKey(spec, kconfig);

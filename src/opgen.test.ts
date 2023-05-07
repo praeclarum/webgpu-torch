@@ -1,4 +1,4 @@
-import { getKernelSpecs } from "./opgen";
+import { opSpecToKernelSpecs } from "./opgen";
 import { registry } from "./op_table";
 
 export const opSpecs = registry.reduce((map, spec) => {
@@ -8,7 +8,7 @@ export const opSpecs = registry.reduce((map, spec) => {
 
 test("binary sub op generate kernel spec", () => {
     const spec = opSpecs["sub"];
-    const kernels = getKernelSpecs(spec);
+    const kernels = opSpecToKernelSpecs(spec);
     expect(kernels.length).toBeGreaterThan(0);
     const kernel = kernels[0];
     expect(kernel.name).toBe("sub");
@@ -26,7 +26,7 @@ test("binary sub op generate kernel spec", () => {
 
 test("abs backward shader", () => {
     const spec = opSpecs["abs"];
-    const kernels = getKernelSpecs(spec);
+    const kernels = opSpecToKernelSpecs(spec);
     expect(kernels[2].shader).toBe(`
         if (global_id.x >= parameters.size) {
             return;
@@ -36,7 +36,7 @@ test("abs backward shader", () => {
 
 test("atan2 forward shader", () => {
     const spec = opSpecs["atan2"];
-    const kernels = getKernelSpecs(spec);
+    const kernels = opSpecToKernelSpecs(spec);
     expect(kernels[0].shader).toBe(`
         if (global_id.x >= parameters.size) {
             return;
@@ -47,7 +47,7 @@ test("atan2 forward shader", () => {
 
 test("can generate all kernel specs", () => {
     for (const spec of registry) {
-        const kernels = getKernelSpecs(spec);
+        const kernels = opSpecToKernelSpecs(spec);
         expect(kernels.length).toBeGreaterThan(0);
     }
 });

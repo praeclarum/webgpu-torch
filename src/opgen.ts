@@ -24,7 +24,7 @@ export class CodeWriter {
     }
 }
 
-export function getKernelSpecs(op: OpSpec): KernelSpec[] {
+export function opSpecToKernelSpecs(op: OpSpec): KernelSpec[] {
     if (op.type == "reduction") {
         return getReductionKernelSpecs(op as ReductionOpSpec);
     } else if (op.type == "binary") {
