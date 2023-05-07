@@ -98,7 +98,7 @@ export abstract class Kernel {
         outputs?: (GPUBuffer | ATypedArray)[]
     ): (GPUBuffer | ATypedArray)[];
 
-    getRunEnv(parameters: KernelParamsInput): EvalEnv {
+    protected getRunEnv(parameters: KernelParamsInput): EvalEnv {
         const env: EvalEnv = {};
         for (let i = 0; i < this._spec.config.length; i++) {
             const configSpec = this._spec.config[i];
