@@ -59,12 +59,6 @@ function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
 }
 
 function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
-    const parameters: KernelParamSpec[] = [
-        {
-            name: "workgroupSize",
-            shaderType: "u32",
-        },
-    ];
     const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
@@ -85,7 +79,8 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
 
     // First thread sums up results from all other threads
     if (local_id.x == 0u) {
-        for (var i = 1u; i < $$workgroupSize$$; i++) {
+        var numToSum = min(parameters.size, $$workgroupSize$$u);
+        for (var i = 1u; i < numToSum; i++) {
             local_sum += output[i];
         }
         // Store final sum in the first element of result array
@@ -118,11 +113,11 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
             {
                 name: "output",
                 shaderType: "array<f32>",
-                size: "size",
+                size: "workgroupSize",
             },
         ],
         workgroupSize: ["workgroupSize", 1, 1],
-        workgroupCount: [1, 1, 1],
+        workgroupCount: ["size/workgroupSize", 1, 1],
         shader: shader,
     };
 }

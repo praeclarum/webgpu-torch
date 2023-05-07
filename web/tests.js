@@ -84,6 +84,30 @@ test("linear backwards", () => {
     // expect(output.grad).not.toBeNull();
 });
 
+test("sum(x, n=2)", async () => {
+    const n = 2;
+    const xar = [];
+    for (let i = 0; i < n; i++) {
+        xar.push(i);
+    }
+    const x = tensor(xar);
+    const sum = x.sum();
+    expect(sum.shape).toEqual([]);
+    expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
+});
+
+test("sum(x, n=3)", async () => {
+    const n = 3;
+    const xar = [];
+    for (let i = 0; i < n; i++) {
+        xar.push(i);
+    }
+    const x = tensor(xar);
+    const sum = x.sum();
+    expect(sum.shape).toEqual([]);
+    expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
+});
+
 test("sum(x, n=911)", async () => {
     const n = 911;
     const xar = [];
@@ -92,6 +116,13 @@ test("sum(x, n=911)", async () => {
     }
     const x = tensor(xar);
     const sum = x.sum();
-    // expect(sum.shape).toEqual([]);
+    expect(sum.shape).toEqual([]);
     expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
 });
+
+// test("norm", async () => {
+//     const x = tensor([3, 4]);
+//     const norm = x.norm();
+//     expect(norm.shape).toEqual([]);
+//     expect(await norm.toArrayAsync()).toEqual([5]);
+// });

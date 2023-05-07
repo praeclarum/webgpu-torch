@@ -5688,7 +5688,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5697,11 +5697,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "any": {
         "name": "any",
@@ -5729,7 +5729,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5738,11 +5738,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "mean": {
         "name": "mean",
@@ -5770,7 +5770,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5779,11 +5779,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "norm": {
         "name": "norm",
@@ -5811,7 +5811,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5820,11 +5820,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "prod": {
         "name": "prod",
@@ -5852,7 +5852,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5861,11 +5861,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "sum": {
         "name": "sum",
@@ -5893,7 +5893,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5902,11 +5902,11 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     },
     "countNonzero": {
         "name": "countNonzero",
@@ -5934,7 +5934,7 @@ export const kernels: { [name: string]: KernelSpec } =
             {
                 "name": "output",
                 "shaderType": "array<f32>",
-                "size": "size"
+                "size": "workgroupSize"
             }
         ],
         "workgroupSize": [
@@ -5943,10 +5943,10 @@ export const kernels: { [name: string]: KernelSpec } =
             1
         ],
         "workgroupCount": [
-            1,
+            "size/workgroupSize",
             1,
             1
         ],
-        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        for (var i = 1u; i < $$workgroupSize$$; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
+        "shader": "\n    var local_sum = 0.0;\n    // Load inputData into local memory\n    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {\n        local_sum += input[i];\n    }\n    // Write partial group sum to outputData\n    output[local_id.x] = local_sum;\n\n    workgroupBarrier(); // Make sure all threads have completed summation\n\n    // First thread sums up results from all other threads\n    if (local_id.x == 0u) {\n        var numToSum = min(parameters.size, $$workgroupSize$$u);\n        for (var i = 1u; i < numToSum; i++) {\n            local_sum += output[i];\n        }\n        // Store final sum in the first element of result array\n        output[0] = local_sum;\n    }\n"
     }
 };
