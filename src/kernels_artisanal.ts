@@ -1,6 +1,76 @@
 import { KernelSpec } from "./kernel";
 
 export const kernels: { [name: string]: KernelSpec } = {
+    conv2d: {
+        name: "conv2d",
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "batchSize",
+                shaderType: "u32",
+            },
+            {
+                name: "inputChannels",
+                shaderType: "u32",
+            },
+            {
+                name: "outputChannels",
+                shaderType: "u32",
+            },
+            {
+                name: "inputHeight",
+                shaderType: "u32",
+            },
+            {
+                name: "inputWidth",
+                shaderType: "u32",
+            },
+            {
+                name: "kernelHeight",
+                shaderType: "u32",
+            },
+            {
+                name: "kernelWidth",
+                shaderType: "u32",
+            },
+            {
+                name: "outputHeight",
+                shaderType: "u32",
+            },
+            {
+                name: "outputWidth",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "outputChannels * outputHeight * outputWidth",
+            },
+        ],
+        workgroupSize: [1, 1, 1],
+        workgroupCount: ["outputWidth", "outputHeight", 1],
+        shader: `
+    if (global_id.x >= parameters.outputWidth || global_id.y >= parameters.outputHeight) {
+        return;
+    }
+    var result = 42.0;
+    // Do the convolution
+    let index = global_id.x + global_id.y * parameters.outputWidth;
+    output[index] = result;
+`
+    },
     mm: {
         name: "mm",
         config: [

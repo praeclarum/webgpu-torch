@@ -1,6 +1,6 @@
 import { ones } from "./factories";
 import { LinearFunction } from "./functions";
-import { tensor } from "./ops_artisanal";
+import { tensor, conv2d } from "./ops_artisanal";
 import { Tensor } from "./tensor";
 
 test("create tensor with storage and dtype", () => {
@@ -27,7 +27,7 @@ test("linear forward", async () => {
 });
 
 test("abs backwards", async () => {
-    const input = new Tensor({data:[-3], requiresGrad:true});
+    const input = new Tensor({ data: [-3], requiresGrad: true });
     const output = input.abs();
     output.backward();
     expect(input.grad).not.toBeNull();
@@ -36,26 +36,47 @@ test("abs backwards", async () => {
 });
 
 test("complete sum over 2D tensor", () => {
-    const input = new Tensor([[1, 2, 3], [4, 5, 6]], "float32");
+    const input = new Tensor(
+        [
+            [1, 2, 3],
+            [4, 5, 6],
+        ],
+        "float32"
+    );
     const sum = input.sum();
     expect(sum).toBeInstanceOf(Tensor);
     expect(sum.shape).toEqual([]);
 });
 
 test("tensor from json", () => {
-    const x = tensor({data: [[1, 2, 3], [4, 5, 6]], dtype:"float32"});
+    const x = tensor({
+        data: [
+            [1, 2, 3],
+            [4, 5, 6],
+        ],
+        dtype: "float32",
+    });
     expect(x.shape).toEqual([2, 3]);
     expect(x.dtype).toEqual("float32");
 });
 
 test("ones are all ones", async () => {
     const x = ones([2, 3]);
-    expect(await x.toArrayAsync()).toEqual([[1, 1, 1], [1, 1, 1]]);
+    expect(await x.toArrayAsync()).toEqual([
+        [1, 1, 1],
+        [1, 1, 1],
+    ]);
 });
 
 test("tensor init", async () => {
-    const a = tensor([[1, 2, 3], [4, 5, 6]]);
-    expect(await a.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+    const a = tensor([
+        [1, 2, 3],
+        [4, 5, 6],
+    ]);
+    expect(await a.toArrayAsync()).toEqual([
+        [1, 2, 3],
+        [4, 5, 6],
+    ]);
 });
 
 test("add_ vectors", async () => {
@@ -73,10 +94,20 @@ test("add_ vectors", async () => {
 // });
 
 test("matrix multiply", async () => {
-    const a = tensor([[1, 2, 3], [4, 5, 6]]);
-    const b = tensor([[7, 8], [9, 10], [11, 12]]);
+    const a = tensor([
+        [1, 2, 3],
+        [4, 5, 6],
+    ]);
+    const b = tensor([
+        [7, 8],
+        [9, 10],
+        [11, 12],
+    ]);
     const c = a.mm(b);
-    expect(await c.toArrayAsync()).toEqual([[58, 64], [139, 154]]);
+    expect(await c.toArrayAsync()).toEqual([
+        [58, 64],
+        [139, 154],
+    ]);
 });
 
 test("sum(x, n=3)", async () => {
@@ -88,7 +119,7 @@ test("sum(x, n=3)", async () => {
     const x = tensor(xar);
     const sum = x.sum();
     expect(sum.shape).toEqual([]);
-    expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
+    expect(await sum.toArrayAsync()).toEqual([(n * (n - 1)) / 2]);
 });
 
 test("sum(x, n=911)", async () => {
@@ -100,7 +131,7 @@ test("sum(x, n=911)", async () => {
     const x = tensor(xar);
     const sum = x.sum();
     expect(sum.shape).toEqual([]);
-    expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
+    expect(await sum.toArrayAsync()).toEqual([(n * (n - 1)) / 2]);
 });
 
 test("norm", async () => {
@@ -108,4 +139,38 @@ test("norm", async () => {
     const norm = x.norm();
     expect(norm.shape).toEqual([]);
     expect(await norm.toArrayAsync()).toEqual([5]);
+});
+
+test("conv2d", async () => {
+    const image = tensor([
+        [
+            [
+                [10, 0, 26, 64],
+                [61, 90, 62, 54],
+                [7, 85, 95, 86],
+                [46, 0, 76, 37],
+                [9, 31, 56, 64],
+            ],
+        ],
+    ]);
+    expect(image.shape).toEqual([1, 1, 5, 4]);
+    const kernel = tensor([
+        [
+            [
+                [15, 42, 14],
+                [17, 31, 32],
+                [4, 12, 0],
+            ],
+        ],
+        [
+            [
+                [26, 10, 26],
+                [25, 31, 48],
+                [21, 42, 13],
+            ],
+        ],
+    ]);
+    expect(kernel.shape).toEqual([2, 1, 3, 3]);
+    const conv = conv2d(image, kernel);
+    expect(conv.shape).toEqual([1, 2, 3, 2]);
 });

@@ -3,6 +3,41 @@ import { Dtype } from "./dtype";
 import { Tensor, TensorData, TensorJsonData } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
 
+export function conv2d(input: Tensor, weight: Tensor): Tensor {
+    if (shouldCreateGradient(input, weight)) {
+        throw new Error("conv2d gradient not supported yet");
+    } else {
+        if (input.shape.length !== 4 || weight.shape.length !== 4) {
+            throw new Error(
+                `Expected image tensor, got ${input.shape} and kernel ${weight.shape}`
+            );
+        }
+        if (input.shape[1] !== weight.shape[1]) {
+            throw new Error(
+                `Expected number of chennels in input image to match number of channels in kernel, got ${input.shape} and ${weight.shape}`
+            );
+        }
+        const params = {
+            batchSize: input.shape[0],
+            inputChannels: input.shape[1],
+            outputChannels: weight.shape[0],
+            inputHeight: input.shape[2],
+            inputWidth: input.shape[3],
+            kernelHeight: weight.shape[2],
+            kernelWidth: weight.shape[3],
+            outputHeight: input.shape[2] - weight.shape[2] + 1,
+            outputWidth: input.shape[3] - weight.shape[3] + 1,
+        };
+        return input.runKernel(
+            "conv2d",
+            { dtype: input.dtype },
+            params,
+            [[params.batchSize, params.outputChannels, params.outputHeight, params.outputWidth]],
+            weight
+        )[0];
+    }
+}
+
 export function mm(input: Tensor, other: Tensor): Tensor {
     if (shouldCreateGradient(input, other)) {
         throw new Error("mm gradient not supported yet");

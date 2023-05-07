@@ -115,7 +115,7 @@ Here are the big components of the library:
 - [ ] Datatypes beyond float32
 - [ ] Optimizers (SGD and Adam)
 - [ ] Modules
-- [ ] Save and restore (safetensors)
+- [ ] Save and restore (ONNX, safetensors)
 
 In terms of supported operations, there's still a bit of work to be done:
 
