@@ -103,9 +103,9 @@ test("sum(x, n=911)", async () => {
     expect(await sum.toArrayAsync()).toEqual([n * (n - 1) / 2]);
 });
 
-// test("norm", async () => {
-//     const x = tensor([3, 4]);
-//     const norm = x.norm();
-//     expect(norm.shape).toEqual([]);
-//     expect(await norm.toArrayAsync()).toEqual([5]);
-// });
+test("norm", async () => {
+    const x = tensor([3, 4]);
+    const norm = x.norm();
+    expect(norm.shape).toEqual([]);
+    expect(await norm.toArrayAsync()).toEqual([5]);
+});

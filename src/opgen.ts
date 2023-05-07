@@ -1,6 +1,8 @@
+// Generate code from op_spec.ts and op_table.ts
 import { KernelParamSpec, KernelSpec } from "./kernel";
 import {
     ExprCode,
+    exprCodeToWebGLShader,
     exprNodeToWebGLShader,
     parseCode,
     substituteIdentifiers,
@@ -59,21 +61,26 @@ function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
 }
 
 function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
-    const ast = parseCode(op.forward);
-    const subs = {
+    const initCode = exprCodeToWebGLShader(op.init, {
         input: "input[global_id.x]",
-        output: "output[global_id.x]",
-    };
-    const shaderAst = substituteIdentifiers(ast, subs);
-    const shaderSnippet = exprNodeToWebGLShader(shaderAst);
+        output: "accumulator",
+    });
+    const forwardCode = exprCodeToWebGLShader(op.forward, {
+        input: "input[i]",
+        output: "accumulator",
+    });
+    const reduceCode = op.reduce === undefined ? "" : exprCodeToWebGLShader(op.reduce, {
+        input: "input[i]",
+        output: "accumulator",
+    });
     const shader = `
-    var local_sum = 0.0;
+    var ${initCode};
     // Load inputData into local memory
     for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {
-        local_sum += input[i];
+        ${forwardCode};
     }
     // Write partial group sum to outputData
-    output[local_id.x] = local_sum;
+    output[local_id.x] = accumulator;
 
     workgroupBarrier(); // Make sure all threads have completed summation
 
@@ -81,10 +88,11 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     if (local_id.x == 0u) {
         var numToSum = min(parameters.size, $$workgroupSize$$u);
         for (var i = 1u; i < numToSum; i++) {
-            local_sum += output[i];
+            accumulator ${op.combineOp}= output[i];
         }
-        // Store final sum in the first element of result array
-        output[0] = local_sum;
+        // Store final reduction in the first element of result array
+        ${reduceCode};
+        output[0] = accumulator;
     }
 `;
     return {
@@ -129,14 +137,12 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(op.forward);
     const subs = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
         output: "output[global_id.x]",
     };
-    const shaderAst = substituteIdentifiers(ast, subs);
-    const shaderSnippet = exprNodeToWebGLShader(shaderAst);
+    const shaderSnippet = exprCodeToWebGLShader(op.forward, subs);
     const shader = `
         if (global_id.x >= parameters.size) {
             return;

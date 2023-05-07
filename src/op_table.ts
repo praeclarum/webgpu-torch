@@ -362,6 +362,7 @@ export const registry: AnOpSpec[] = [
     {
         name: "all",
         type: "reduction",
+        combineOp: "&&",
         init: "output = 1",
         forward: "output = output && input",
         backward: "inputGrad = output ? outputGrad : 0.0",
@@ -369,6 +370,7 @@ export const registry: AnOpSpec[] = [
     {
         name: "any",
         type: "reduction",
+        combineOp: "||",
         init: "output = 0",
         forward: "output = output || input",
         backward: "inputGrad = output ? outputGrad : 0.0",
@@ -379,7 +381,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "mean",
         type: "reduction",
-        init: "output = 0",
+        combineOp: "+",
+        init: "output = 0.0",
         forward: "output = output + input",
         reduce: "output = output / inputSize",
         backward: "inputGrad = outputGrad / inputSize",
@@ -393,7 +396,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "norm",
         type: "reduction",
-        init: "output = 0",
+        combineOp: "+",
+        init: "output = 0.0",
         forward: "output = output + input * input",
         reduce: "output = sqrt(output)",
         backward: "inputGrad = outputGrad * input / output",
@@ -401,7 +405,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "prod",
         type: "reduction",
-        init: "output = 1",
+        combineOp: "*",
+        init: "output = 1.0",
         forward: "output = output * input",
         backward: "inputGrad = outputGrad * output / input",
     },
@@ -411,7 +416,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "sum",
         type: "reduction",
-        init: "output = 0",
+        combineOp: "+",
+        init: "output = 0.0",
         forward: "output = output + input",
         backward: "inputGrad = outputGrad",
     },
@@ -422,7 +428,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "countNonzero",
         type: "reduction",
-        init: "output = 0",
+        combineOp: "+",
+        init: "output = 0.0",
         forward: "output = output + (input != 0)",
     }
 ];

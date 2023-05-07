@@ -1,4 +1,10 @@
-import { compileCode, evalCode, exprNodeToString, parseCode } from "./expr";
+import {
+    compileCode,
+    evalCode,
+    exprNodeToString,
+    parseCode,
+    ManifestNumber,
+} from "./expr";
 
 test("just a number", () => {
     const expr = "3.14";
@@ -44,55 +50,68 @@ test("compile number", () => {
 test("parse apply", () => {
     const expr = "f(3)";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["apply", ["f", 3]]);
+    expect(parsed).toEqual([
+        "apply",
+        ["f", new ManifestNumber("intAbstract", 3)],
+    ]);
 });
 
 test("parse assign", () => {
     const expr = "x = 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["assign", ["x", 3]]);
+    expect(parsed).toEqual([
+        "assign",
+        ["x", new ManifestNumber("intAbstract", 3)],
+    ]);
 });
 
 test("parse statements", () => {
     const expr = "x = 3; y = 4; x+y";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["statements", [["assign", ["x", 3]], ["assign", ["y", 4]], ["+", ["x", "y"]]]]);
+    expect(parsed).toEqual([
+        "statements",
+        [
+            ["assign", ["x", new ManifestNumber("intAbstract", 3)]],
+            ["assign", ["y", new ManifestNumber("intAbstract", 4)]],
+            ["+", ["x", "y"]],
+        ],
+    ]);
 });
 
 test("parse >", () => {
     const expr = "x > 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual([">", ["x", 3]]);
+    expect(parsed).toEqual([">", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse >=", () => {
     const expr = "x >= 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual([">=", ["x", 3]]);
+    expect(parsed).toEqual([">=", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse <", () => {
     const expr = "x < 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["<", ["x", 3]]);
+    expect(parsed).toEqual(["<", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse <=", () => {
     const expr = "x <= 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["<=", ["x", 3]]);
+    expect(parsed).toEqual(["<=", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse ==", () => {
     const expr = "x == 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["==", ["x", 3]]);
+    expect(parsed).toEqual(["==", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse !=", () => {
     const expr = "x != 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["!=", ["x", 3]]);
+    expect(parsed).toEqual(["!=", ["x", new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse &&", () => {
@@ -104,25 +123,59 @@ test("parse &&", () => {
 test("parse nest blocks", () => {
     const expr = "{ x = 3; { y = 4; z = 5; } }";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["block", [["assign", ["x", 3]], ["block", [["assign", ["y", 4]], ["assign", ["z", 5]]]]]]);
+    expect(parsed).toEqual([
+        "block",
+        [
+            ["assign", ["x", new ManifestNumber("intAbstract", 3)]],
+            [
+                "block",
+                [
+                    ["assign", ["y", new ManifestNumber("intAbstract", 4)]],
+                    ["assign", ["z", new ManifestNumber("intAbstract", 5)]],
+                ],
+            ],
+        ],
+    ]);
 });
 
 test("parse if", () => {
     const expr = "if (x > 3) { y = 4; }";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["if", [[">", ["x", 3]], ["block", [["assign", ["y", 4]]]]]]);
+    expect(parsed).toEqual([
+        "if",
+        [
+            [">", ["x", new ManifestNumber("intAbstract", 3)]],
+            [
+                "block",
+                [["assign", ["y", new ManifestNumber("intAbstract", 4)]]],
+            ],
+        ],
+    ]);
 });
 
 test("parse if else", () => {
     const expr = "if (x > 3) { y = 4; } else { y = 5; }";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["if", [[">", ["x", 3]], ["block", [["assign", ["y", 4]]]], ["block", [["assign", ["y", 5]]]]]]);
+    expect(parsed).toEqual([
+        "if",
+        [
+            [">", ["x", new ManifestNumber("intAbstract", 3)]],
+            [
+                "block",
+                [["assign", ["y", new ManifestNumber("intAbstract", 4)]]],
+            ],
+            [
+                "block",
+                [["assign", ["y", new ManifestNumber("intAbstract", 5)]]],
+            ],
+        ],
+    ]);
 });
 
 test("parse return", () => {
     const expr = "return 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["return", [3]]);
+    expect(parsed).toEqual(["return", [new ManifestNumber("intAbstract", 3)]]);
 });
 
 test("parse unary - of ident", () => {
@@ -134,12 +187,22 @@ test("parse unary - of ident", () => {
 test("parse conditional operator", () => {
     const expr = "x > 3 ? 4 : 5";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["?", [[">", ["x", 3]], 4, 5]]);
+    expect(parsed).toEqual([
+        "?",
+        [
+            [">", ["x", new ManifestNumber("intAbstract", 3)]],
+            new ManifestNumber("intAbstract", 4),
+            new ManifestNumber("intAbstract", 5),
+        ],
+    ]);
 });
 
 test("exprNodeToString assignment", () => {
     const expr = "x = 3";
     const parsed = parseCode(expr);
-    expect(parsed).toEqual(["assign", ["x", 3]]);
+    expect(parsed).toEqual([
+        "assign",
+        ["x", new ManifestNumber("intAbstract", 3)],
+    ]);
     expect(exprNodeToString(parsed)).toEqual("x = 3");
 });

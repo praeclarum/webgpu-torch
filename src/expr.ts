@@ -6,16 +6,26 @@ export type ExprCode = number | string;
 
 export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
 
-export type ExprAtom = string | number;
+export type ExprAtom = string | ManifestNumber;
 export type ExprCell = [ExprNodeType, ExprNode[]];
 export type ExprNode = ExprAtom | ExprCell;
+
+export type ManifestNumberType = "intAbstract" | "floatAbstract";
+export class ManifestNumber {
+    type: ManifestNumberType;
+    value: number;
+    constructor(type: ManifestNumberType, value: number) {
+        this.type = type;
+        this.value = value;
+    }
+}
 
 export type ParsedExpr = ExprNode;
 
 export type EvalEnv = { [name: string]: any };
 
-function lexn(code: string): (string | number)[] {
-    const tokens: (string | number)[] = [];
+function lexn(code: string): (string | ManifestNumber)[] {
+    const tokens: (string | ManifestNumber)[] = [];
     const n = code.length;
     let i = 0;
     while (i < n) {
@@ -61,11 +71,19 @@ function lexn(code: string): (string | number)[] {
         }
         if (c >= "0" && c <= "9") {
             let s = "";
+            let hasDecimal = false;
             while (i < n && (code[i] >= "0" && code[i] <= "9" || code[i] === ".")) {
+                if (code[i] === ".") {
+                    if (hasDecimal) {
+                        throw new Error("Invalid number");
+                    }
+                    hasDecimal = true;
+                }
                 s += code[i];
                 i++;
             }
-            tokens.push(parseFloat(s));
+            const numType = hasDecimal ? "floatAbstract" : "intAbstract";
+            tokens.push(new ManifestNumber(numType, parseFloat(s)));
             continue;
         }
         if (
@@ -92,7 +110,10 @@ function lexn(code: string): (string | number)[] {
     return tokens;
 }
 
-function tokenIsIdent(token: string): boolean {
+function tokenIsIdent(token: string | ManifestNumber): boolean {
+    if (token instanceof ManifestNumber) {
+        return false;
+    }
     if (token.length <= 0)
         return false;
     const c = token[0];
@@ -111,7 +132,11 @@ type Parser = (i: number) => ParserResult;
 
 export function parseCode(code: ExprCode): ExprNode {
     if (typeof code === "number") {
-        return code;
+        // Detect if code is an integer
+        if (code % 1 === 0) {
+            return new ManifestNumber("intAbstract", code);
+        }
+        return new ManifestNumber("floatAbstract", code);
     }
     const tokens = lexn(code);
     const parsePrimary: Parser = (i: number): ParserResult => {
@@ -119,7 +144,7 @@ export function parseCode(code: ExprCode): ExprNode {
             return null;
         }
         const t = tokens[i];
-        if (typeof t === "number") {
+        if (t instanceof ManifestNumber) {
             return [t, i + 1];
         }
         if (t === "(") {
@@ -422,7 +447,7 @@ export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, repl
     if (match(ast)) {
         return replace(ast);
     }
-    if (typeof ast === "number") {
+    if (ast instanceof ManifestNumber) {
         return ast;
     }
     if (typeof ast === "string") {
@@ -436,7 +461,7 @@ export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, repl
 }
 
 export function substituteIdentifiers(ast: ExprNode, subs: { [name: string]: ExprNode }): ExprNode {
-    if (typeof ast === "number") {
+    if (ast instanceof ManifestNumber) {
         return ast;
     }
     if (typeof ast === "string") {
@@ -453,8 +478,17 @@ export function substituteIdentifiers(ast: ExprNode, subs: { [name: string]: Exp
 }
 
 export function exprNodeToString(ast: ExprNode): string {
-    if (typeof ast === "number") {
-        return ast.toString();
+    if (ast instanceof ManifestNumber) {
+        let s = "";
+        if (ast.type === "floatAbstract") {
+            s = ast.value.toString();
+            if (s.indexOf(".") === -1) {
+                s += "f";
+            }
+        } else {
+            s = ast.value.toString();
+        }
+        return s;
     }
     if (typeof ast === "string") {
         return ast;
@@ -537,6 +571,14 @@ export function exprNodeToWebGLShader(ast: ExprNode): string {
     return exprNodeToString(ast);
 }
 
+export function exprCodeToWebGLShader(code: ExprCode, identifierSubs?: {[ident: string]: ExprNode}): string {
+    let ast = parseCode(code);
+    if (identifierSubs) {
+        ast = substituteIdentifiers(ast, identifierSubs);
+    }
+    return exprNodeToWebGLShader(ast);
+}
+
 
 
 /*== COMPILER ==*/
@@ -558,8 +600,8 @@ export function compileCode(code: ExprCode): CompiledExpr {
     // console.log("parsed", expr);
     const instructions: [number, (number|string|null)][] = [];
     function emit(node: ExprNode) {
-        if (typeof node === "number") {
-            instructions.push([OP_CONSTANT, node]);
+        if (node instanceof ManifestNumber) {
+            instructions.push([OP_CONSTANT, node.value]);
             return;
         }
         if (typeof node === "string") {

@@ -23,6 +23,7 @@ export type BinaryOpSpec = OpSpec & {
 export type ReductionOpSpec = OpSpec & {
     type: "reduction";
     init: ExprCode;
+    combineOp: "+" | "*" | "&&" | "||";
     reduce?: ExprCode;
 }
 
