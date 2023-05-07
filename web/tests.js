@@ -8,6 +8,7 @@ function test(description, callback) { tests.push({ description, callback }); }
 const tensor = torch.tensor;
 const Tensor = torch.Tensor;
 const functions = torch.functions;
+const conv2d = torch.conv2d;
 
 
 test("webgpu is supported", () => {
@@ -132,4 +133,52 @@ test("prod", async () => {
     const norm = x.prod();
     expect(norm.shape).toEqual([]);
     expect(await norm.toArrayAsync()).toEqual([12]);
+});
+
+test("conv2d", async () => {
+    const image = tensor([
+        [
+            [
+                [10, 0, 26, 64],
+                [61, 90, 62, 54],
+                [7, 85, 95, 86],
+                [46, 0, 76, 37],
+                [9, 31, 56, 64],
+            ],
+        ],
+    ]);
+    expect(image.shape).toEqual([1, 1, 5, 4]);
+    const kernel = tensor([
+        [
+            [
+                [15, 42, 14],
+                [17, 31, 32],
+                [4, 12, 0],
+            ],
+        ],
+        [
+            [
+                [26, 10, 26],
+                [25, 31, 48],
+                [21, 42, 13],
+            ],
+        ],
+    ]);
+    expect(kernel.shape).toEqual([2, 1, 3, 3]);
+    const conv = conv2d(image, kernel);
+    expect(conv.shape).toEqual([1, 2, 3, 2]);
+    expect(await conv.toArrayAsync()).toEqual([
+        [
+            [
+                [7373, 8648],
+                [11541, 12764],
+                [8627, 10805],
+            ],
+            [
+                [13179, 15581],
+                [13422, 17235],
+                [10519, 13363],
+            ],
+        ],
+    ]);
 });

@@ -173,4 +173,18 @@ test("conv2d", async () => {
     expect(kernel.shape).toEqual([2, 1, 3, 3]);
     const conv = conv2d(image, kernel);
     expect(conv.shape).toEqual([1, 2, 3, 2]);
+    expect(await conv.toArrayAsync()).toEqual([
+        [
+            [
+                [7373, 8648],
+                [11541, 12764],
+                [8627, 10805],
+            ],
+            [
+                [13179, 15581],
+                [13422, 17235],
+                [10519, 13363],
+            ],
+        ],
+    ]);
 });

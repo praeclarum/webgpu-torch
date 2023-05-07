@@ -56,7 +56,7 @@ export const kernels: { [name: string]: KernelSpec } = {
             {
                 name: "output",
                 shaderType: "array<f32>",
-                size: "outputChannels * outputHeight * outputWidth",
+                size: "batchSize * outputChannels * outputHeight * outputWidth",
             },
         ],
         workgroupSize: [1, 1, 1],
@@ -65,10 +65,19 @@ export const kernels: { [name: string]: KernelSpec } = {
     if (global_id.x >= parameters.outputWidth || global_id.y >= parameters.outputHeight) {
         return;
     }
-    var result = 42.0;
-    // Do the convolution
-    let index = global_id.x + global_id.y * parameters.outputWidth;
-    output[index] = result;
+    // input shape = [B, C, H, W]
+    for (var batch = 0u; batch < parameters.batchSize; batch++) {
+        for (var outputChannel = 0u; outputChannel < parameters.outputChannels; outputChannel++) {
+            var result = 42.0;
+            // Do the convolution
+            let index = 
+                batch * parameters.outputChannels * parameters.inputHeight * parameters.inputWidth +
+                outputChannel * parameters.outputHeight * parameters.outputWidth +
+                global_id.y * parameters.outputWidth +
+                global_id.x;
+            output[index] = result;
+        }
+    }
 `
     },
     mm: {
