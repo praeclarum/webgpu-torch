@@ -1,6 +1,6 @@
-import { Kernel, getKernelConfig, getKernelShaderCode } from "./kernel";
+import { getKernelConfig, getKernelShaderCode } from "./kernel";
 import { registry } from "./kernels";
-import { tensor } from "./index";
+import { tensor } from "./ops_artisanal";
 
 test("mm shader code", () => {
     const spec = registry["mm"];
