@@ -1,3 +1,7 @@
+// "Any sufficiently complicated C or Fortran program contains an ad hoc,
+// informally-specified, bug-ridden, slow implementation of half of Common Lisp."
+// - Greenspun's Tenth Rule
+
 export type ExprCode = number | string;
 
 export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
@@ -32,6 +36,26 @@ function lexn(code: string): (string | number)[] {
                 continue;
             }
             tokens.push(c);
+            i++;
+            continue;
+        }
+        if (c == "&") {
+            if (i + 1 < n && code[i + 1] == "&") {
+                tokens.push("&&");
+                i += 2;
+                continue;
+            }
+            tokens.push("&");
+            i++;
+            continue;
+        }
+        if (c == "|") {
+            if (i + 1 < n && code[i + 1] == "|") {
+                tokens.push("||");
+                i += 2;
+                continue;
+            }
+            tokens.push("|");
             i++;
             continue;
         }
@@ -82,22 +106,15 @@ function tokenIsIdent(token: string): boolean {
 }
 
 type ParseState = [ExprNode, number];
+type ParserResult = ParseState|null;
+type Parser = (i: number) => ParserResult;
 
 export function parseCode(code: ExprCode): ExprNode {
     if (typeof code === "number") {
         return code;
     }
     const tokens = lexn(code);
-    const expr = parseStatements(0);
-    if (expr === null) {
-        throw new Error("Missing expression");
-    }
-    if (expr[1] < tokens.length) {
-        console.log("bad tree:", "e0:", expr[0], "e1:", expr[1], "numTokens:", tokens.length, "token:", tokens[expr[1]])
-        throw new Error(`Unexpected token: '${tokens[expr[1]]}' after parsing: ${JSON.stringify(expr[0])}`);
-    }
-    return expr[0];
-    function parsePrimary(i: number): ParseState|null {
+    const parsePrimary: Parser = (i: number): ParserResult => {
         if (i >= tokens.length) {
             return null;
         }
@@ -155,7 +172,7 @@ export function parseCode(code: ExprCode): ExprNode {
         }
         return result;
     }
-    function parseExpr(i: number): ParseState|null {
+    function parseExpr(i: number): ParserResult {
         if (i >= tokens.length) {
             return null;
         }
@@ -165,7 +182,7 @@ export function parseCode(code: ExprCode): ExprNode {
         if (i >= tokens.length) {
             return null;
         }
-        let expr = parseComparison(i);
+        let expr = parseLogicalOr(i);
         if (expr === null) {
             return null;
         }
@@ -189,60 +206,48 @@ export function parseCode(code: ExprCode): ExprNode {
         if (typeof t2 !== "string" || t2 !== ":") {
             throw new Error("Expected :");
         }
-        const expr3 = parseExpr(i + 1);
+        const expr3 = parseConditional(i + 1);
         if (expr3 === null) {
             throw new Error(`Missing expression after : \`${code}\``);
         }
         return [[t, [expr[0], expr2[0], expr3[0]]], expr3[1]];
     }
-    function parseComparison(i: number): ParseState|null {
-        let expr = parseAddOrSubtract(i);
-        if (expr === null) {
-            return null;
+    function genericParseSeparatedList(parseChild: Parser, seps: string[]): (i: number)=> ParseState|null {
+        const sepIndex: {[name:string]: boolean} = {};
+        for (const sep of seps) {
+            sepIndex[sep] = true;
         }
-        i = expr[1];
-        while (i < tokens.length) {
-            const t = tokens[i];
-            if (typeof t !== "string") {
+        return (i: number) => {
+            let expr = parseChild(i);
+            if (expr === null) {
+                return null;
+            }
+            i = expr[1];
+            while (i < tokens.length) {
+                const t = tokens[i];
+                if (typeof t !== "string") {
+                    break;
+                }
+                if (t in sepIndex) {
+                    const expr2 = parseChild(i + 1);
+                    if (expr2 === null) {
+                        throw new Error("Missing expression after " + t);
+                    }
+                    expr = [[t as ExprNodeType, [expr[0], expr2[0]]], expr2[1]];
+                    i = expr2[1];
+                    continue;
+                }
                 break;
             }
-            if (t === "==" || t === "!=" || t === "<" || t === ">" || t === "<=" || t === ">=") {
-                const expr2 = parseAddOrSubtract(i + 1);
-                if (expr2 === null) {
-                    throw new Error("Missing expression after " + t);
-                }
-                expr = [[t, [expr[0], expr2[0]]], expr2[1]];
-                i = expr2[1];
-                continue;
-            }
-            break;
-        }
-        return expr;
+            return expr;
+        };
     }
-    function parseAddOrSubtract(i: number): ParseState|null {
-        let expr = parseMultiplyOrDivide(i);
-        if (expr === null) {
-            return null;
-        }
-        i = expr[1];
-        while (i < tokens.length) {
-            const t = tokens[i];
-            if (typeof t !== "string") {
-                break;
-            }
-            if (t === "+" || t === "-") {
-                const expr2 = parseMultiplyOrDivide(i + 1);
-                if (expr2 === null) {
-                    throw new Error("Missing expression");
-                }
-                expr = [[t, [expr[0], expr2[0]]], expr2[1]];
-                i = expr2[1];
-                continue;
-            }
-            break;
-        }
-        return expr;
-    }
+    const parseMultiplyOrDivide = genericParseSeparatedList(parseUnary, ["*", "/"]);
+    const parseAddOrSubtract =genericParseSeparatedList(parseMultiplyOrDivide, ["+", "-"]);
+    const parseRelational = genericParseSeparatedList(parseAddOrSubtract, ["<", ">", "<=", ">="]);
+    const parseEquality = genericParseSeparatedList(parseRelational, ["==", "!="]);
+    const parseLogicalAnd = genericParseSeparatedList(parseEquality, ["&&"]);
+    const parseLogicalOr = genericParseSeparatedList(parseLogicalAnd, ["||"]);
     function parseUnary(i: number): ParseState|null {
         if (i >= tokens.length) {
             return null;
@@ -268,30 +273,6 @@ export function parseCode(code: ExprCode): ExprNode {
             }
         }
         return parsePrimary(i);
-    }
-    function parseMultiplyOrDivide(i: number): ParseState|null {
-        let expr = parseUnary(i);
-        if (expr === null) {
-            return null;
-        }
-        i = expr[1];
-        while (i < tokens.length) {
-            const t = tokens[i];
-            if (typeof t !== "string") {
-                break;
-            }
-            if (t === "*" || t === "/") {
-                const expr2 = parseUnary(i + 1);
-                if (expr2 === null) {
-                    throw new Error("Missing expression");
-                }
-                expr = [[t, [expr[0], expr2[0]]], expr2[1]];
-                i = expr2[1];
-                continue;
-            }
-            break;
-        }
-        return expr;
     }
     function parseStatement(i: number): ParseState|null {
         if (i >= tokens.length) {
@@ -427,6 +408,14 @@ export function parseCode(code: ExprCode): ExprNode {
         // console.log("parsed statements", i, tokens.slice(i));
         return [["statements", children], i];
     }
+    const expr = parseStatements(0);
+    if (expr === null) {
+        throw new Error("Missing expression");
+    }
+    if (expr[1] < tokens.length) {
+        throw new Error(`Unexpected token '${tokens[expr[1]]}' after parsing ${JSON.stringify(expr[0])} from tokens [${tokens.slice(0, expr[1]+1)}]`);
+    }
+    return expr[0];
 }
 
 export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, replace: (node: ExprNode)=>ExprNode): ExprNode {

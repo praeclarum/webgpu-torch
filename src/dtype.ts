@@ -1,5 +1,4 @@
 export type Dtype = "float32" | "int32" | "uint32" | "uint8";
-export type Dtypeish = Dtype;
 
 export type ATypedArray = Uint8Array | Int32Array | Uint32Array | Float32Array;
 
@@ -25,11 +24,17 @@ export function dtypeByteSize(dtype: Dtype): number {
     }
 }
 
-export function getDtype(dtype: Dtype | ATypedArray | null, defaultType?: Dtype): Dtype {
-    if (dtype === null) {
+export function getDtype(dtype?: Dtype | ATypedArray | null, defaultType?: Dtype): Dtype {
+    if (dtype === null || dtype === undefined) {
         return defaultType || "float32";
-    } else if (dtype instanceof String && (dtype as Dtype) in dtypeArrayCtors) {
-        return dtype as Dtype;
+    } else if (dtype === "uint8") {
+        return "uint8";
+    } else if (dtype === "int32") {
+        return "int32";
+    } else if (dtype === "uint32") {
+        return "uint32";
+    } else if (dtype === "float32") {
+        return "float32";
     } else if (dtype instanceof Uint8Array) {
         return "uint8";
     } else if (dtype instanceof Int32Array) {
@@ -39,6 +44,6 @@ export function getDtype(dtype: Dtype | ATypedArray | null, defaultType?: Dtype)
     } else if (dtype instanceof Float32Array) {
         return "float32";
     } else {
-        throw new Error(`Invalid dtype ${dtype}`);
+        throw new Error(`Invalid dtype ${JSON.stringify(dtype)}`);
     }
 }

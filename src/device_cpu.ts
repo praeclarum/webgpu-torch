@@ -1,14 +1,6 @@
 import { Device } from "./device";
-import { Dtype } from "./dtype";
-import { Shape, defaultStrides } from "./shape";
-import { TensorArrayData } from "./tensor_if";
-import { TensorImpl } from "./tensor_impl";
-import { TensorCPU } from "./tensor_cpu";
-import {
-    ArrayBufferStorage,
-    UntypedStorage,
-    newTypedArrayFromArray,
-} from "./storage";
+import { ATypedArray, Dtype } from "./dtype";
+import { ArrayBufferStorage, UntypedStorage } from "./storage";
 import { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelCPU } from "./kernel_cpu";
 
@@ -22,38 +14,28 @@ export class DeviceCPU extends Device {
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);
     }
-    ones(shape: Shape, dtype: Dtype): TensorImpl {
-        const storage = this.allocFor(shape, dtype) as ArrayBufferStorage;
-        const array = storage.getTypedArray(dtype);
-        array.fill(1);
-        return new TensorCPU(
-            storage,
-            dtype,
-            shape,
-            defaultStrides(shape),
-            this
+    getStorageFromKernel(storage: ATypedArray | GPUBuffer): UntypedStorage {
+        if (
+            storage instanceof Uint8Array ||
+            storage instanceof Uint32Array ||
+            storage instanceof Int32Array ||
+            storage instanceof Float32Array
+        ) {
+            return new ArrayBufferStorage(storage.buffer);
+        }
+        throw new Error(
+            `Cannot wrap buffer of type ${storage.constructor.name} to get CPU storage`
         );
     }
-    tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl {
-        const info = newTypedArrayFromArray(data, dtype, (shape) =>
-            this.allocFor(shape, dtype)
-        );
-        return new TensorCPU(
-            info.storage as ArrayBufferStorage,
-            dtype,
-            info.shape,
-            info.strides,
-            this
-        );
-    }
-    zeros(shape: Shape, dtype: Dtype): TensorImpl {
-        const storage = this.allocFor(shape, dtype) as ArrayBufferStorage;
-        return new TensorCPU(
-            storage,
-            dtype,
-            shape,
-            defaultStrides(shape),
-            this
+    getBufferForKernel(
+        storage: UntypedStorage,
+        dtype: Dtype
+    ): ATypedArray | GPUBuffer {
+        if (storage instanceof ArrayBufferStorage) {
+            return storage.getTypedArray(dtype);
+        }
+        throw new Error(
+            `Cannot unwrap buffer of type ${storage.constructor.name} to get CPU buffer`
         );
     }
 }

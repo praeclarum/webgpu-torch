@@ -1,19 +1,12 @@
 import { Device } from "./device";
-import { Dtype } from "./dtype";
-import { Shape, defaultStrides } from "./shape";
-import { TensorArrayData } from "./tensor_if";
-import { TensorWebGPU } from "./tensor_webgpu";
-import { GPUBufferStorage, newTypedArrayFromArray } from "./storage";
 import {
-    Kernel,
-    KernelConfig,
-    KernelConfigInput,
-    KernelKey,
-    KernelSpec,
-    getKernelConfig,
-    getKernelKey,
-} from "./kernel";
+    GPUBufferStorage,
+    UntypedStorage,
+    newTypedArrayFromArray,
+} from "./storage";
+import { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelWebGPU } from "./kernel_webgpu";
+import { ATypedArray, Dtype } from "./dtype";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;
@@ -34,38 +27,23 @@ export class DeviceWebGPU extends Device {
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelWebGPU(spec, config, this);
     }
-    ones(shape: Shape, dtype: Dtype): TensorWebGPU {
-        const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
-        const array = storage.getTypedArray(dtype);
-        array.fill(1);
-        return new TensorWebGPU(
-            storage,
-            dtype,
-            shape,
-            defaultStrides(shape),
-            this
+    getStorageFromKernel(storage: ATypedArray | GPUBuffer): UntypedStorage {
+        if (storage instanceof GPUBuffer) {
+            return new GPUBufferStorage(storage, this.gpuDevice);
+        }
+        throw new Error(
+            `Cannot wrap buffer of type ${storage.constructor.name} to get GPU storage`
         );
     }
-    tensor(data: TensorArrayData | null, dtype: Dtype): TensorWebGPU {
-        const info = newTypedArrayFromArray(data, dtype, (shape) =>
-            this.allocFor(shape, dtype)
-        );
-        return new TensorWebGPU(
-            info.storage as GPUBufferStorage,
-            dtype,
-            info.shape,
-            info.strides,
-            this
-        );
-    }
-    zeros(shape: Shape, dtype: Dtype): TensorWebGPU {
-        const storage = this.allocFor(shape, dtype) as GPUBufferStorage;
-        return new TensorWebGPU(
-            storage,
-            dtype,
-            shape,
-            defaultStrides(shape),
-            this
+    getBufferForKernel(
+        storage: UntypedStorage,
+        dtype: Dtype
+    ): ATypedArray | GPUBuffer {
+        if (storage instanceof GPUBufferStorage) {
+            return storage.gpuBuffer;
+        }
+        throw new Error(
+            `Cannot unwrap storage of type ${storage.constructor.name} to get GPU buffer`
         );
     }
 }

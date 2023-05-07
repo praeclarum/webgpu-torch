@@ -23,8 +23,8 @@ export async function discoverWebGPUDevicesAsync() {
     console.log("Found WebGPU device", device);
 }
 
-export function getDevice(device: Deviceish | null): Device {
-    if (device === null) {
+export function getDevice(device: Deviceish | null | undefined): Device {
+    if (device === null || device === undefined) {
         return webgpuDevice || cpuDevice;
     } else if (typeof device === "string") {
         if (device in devices) {

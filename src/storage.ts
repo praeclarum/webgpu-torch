@@ -1,6 +1,8 @@
+import { Device } from "./device";
 import { ATypedArray, Dtype, dtypeArrayCtors } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
-import { TensorArrayData } from "./tensor_if";
+
+export type TensorArrayData = Array<number | TensorArrayData>;
 
 export abstract class UntypedStorage {
     abstract get byteSize(): number;
@@ -23,6 +25,9 @@ export abstract class UntypedStorage {
 
 export class ArrayBufferStorage extends UntypedStorage {
     private _buffer: ArrayBuffer;
+    get cpuBuffer(): ArrayBuffer {
+        return this._buffer;
+    }
     get byteSize(): number {
         return this._buffer.byteLength;
     }
@@ -185,8 +190,7 @@ export function newTypedArrayForDtype(length: number, dtype: Dtype) {
 export function newTypedArrayFromArray(
     data: TensorArrayData | null,
     dtype: Dtype,
-    allocFor: (shape: Shape) => UntypedStorage
-): { storage: UntypedStorage; shape: number[]; strides: number[] } {
+    device: Device): { storage: UntypedStorage; shape: number[]; strides: number[] } {
     const shape: number[] = [];
     function getShape(data: TensorArrayData | number) {
         if (typeof data === "number") {
@@ -200,7 +204,7 @@ export function newTypedArrayFromArray(
     }
     const strides = defaultStrides(shape);
     const size = shapeSize(shape);
-    const storage = allocFor(shape);
+    const storage = device.allocFor(shape, dtype);
     const flatData = storage.getTypedArray(dtype);
     let flatIndex = 0;
     function flatten(data: TensorArrayData) {

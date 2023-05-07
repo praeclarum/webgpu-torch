@@ -2,6 +2,7 @@ import { Device } from "./device";
 import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 import { CodeWriter } from "./opgen";
+import { ArrayBufferStorage, UntypedStorage } from "./storage";
 
 export type KernelParamType = "u32" | "f32";
 export type KernelParamValue = number;
@@ -13,7 +14,10 @@ export type ShaderType =
     | "i32"
     | "array<i32>"
     | "array<u32>"
-    | "array<f32>";
+    | "array<f32>"
+    | "vec3<i32>"
+    | "vec3<u32>"
+    | "vec3<f32>";
 
 export interface KernelSpec {
     name: string;
@@ -270,7 +274,9 @@ export function getKernelShaderCode(
     shaderCodeParts.push(`    ) {`);
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
-    return shaderCodeParts.join("\n");
+    const shaderCode = shaderCodeParts.join("\n");
+    // console.log(shaderCode);
+    return shaderCode;
 }
 
 const javaScriptSubstitutions: [RegExp, string][] = [

@@ -53,76 +53,6 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
     fs.writeFileSync(path, newCode);
 }
 
-// Write the TensorImpl class
-function writeTensorImplCode(): void {
-    const w = new CodeWriter();
-    w.indent();
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
-        const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
-        if (isGrad) continue;
-        const isBinary = opSpec.type === "binary";
-        const hasAlpha = opSpec.alpha ?? false;
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(other: TensorImpl, alpha?: number): TensorImpl {`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(other: TensorImpl): TensorImpl {`);
-            }
-            w.indent();
-            w.writeLine(`const params = {`);
-            w.indent();
-            w.writeLine(`size: shapeSize(this.shape),`);
-            if (hasAlpha) {
-                w.writeLine(`alpha: alpha || 1.0,`);
-            }
-            w.dedent();
-            w.writeLine(`};`);
-            if (isInplace) {
-                w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
-            }
-            else {
-                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params, [this.shape], other)[0];`);
-            }
-            w.dedent();
-            w.writeLine(`}`);
-        }
-        else {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(alpha?: number): TensorImpl {`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(): TensorImpl {`);
-            }
-            w.indent();
-            w.writeLine(`const params = {`);
-            w.indent();
-            w.writeLine(`size: shapeSize(this.shape),`);
-            if (hasAlpha) {
-                w.writeLine(`alpha: alpha || 1.0,`);
-            }
-            w.dedent();
-            w.writeLine(`};`);
-            if (isInplace) {
-                w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params);`);
-            }
-            else {
-                w.writeLine(`return this.runKernel("${kernelSpec.name}", { dtype: this.dtype }, params, [this.shape])[0];`);
-            }
-            w.dedent();
-            w.writeLine(`}`);
-        }
-    }
-    const code = w.toString();
-    // console.log(code);
-    const path = absSrcDir + "/tensor_webgpu.ts";
-    insertCodegenIntoFile(path, "");
-    const path2 = absSrcDir + "/tensor_impl.ts";
-    insertCodegenIntoFile(path2, code);
-}
-writeTensorImplCode();
-
 // Write the Tensor class
 function writeTensorCode(): void {
     const w = new CodeWriter();
@@ -133,8 +63,12 @@ function writeTensorCode(): void {
         if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
+        const isReduction = opSpec.type === "reduction";
         const writeHeader = (name: string) => {
-            if (isBinary) {
+            if (isReduction) {
+                w.writeLine(`${name}(dim?: number, keepdim?: boolean): Tensor {`);
+            }
+            else if (isBinary) {
                 if (hasAlpha) {
                     w.writeLine(`${name}(other: Tensor, alpha?: number): Tensor {`);
                 }
@@ -153,54 +87,74 @@ function writeTensorCode(): void {
         };
         writeHeader(kernelSpec.name);
         w.indent();
-        if (isBinary) {
-            if (hasAlpha) {
-                if (isInplace) {
-                    w.writeLine(`this._impl.${kernelSpec.name}(other._impl, alpha);`);
-                    w.writeLine(`return this;`);
-                }
-                else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
+        if (isInplace) {
+            if (isBinary) {
+                w.writeLine(`const params = {`);
+                w.indent();
+                w.writeLine(`size: shapeSize(this.shape),`);
+                if (hasAlpha) {
+                    w.writeLine(`alpha: alpha || 1.0,`);
                 }
                 w.dedent();
-                w.writeLine(`}`);
+                w.writeLine(`};`);
+                w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
             }
             else {
-                if (isInplace) {
-                    w.writeLine(`this._impl.${kernelSpec.name}(other._impl);`);
-                    w.writeLine(`return this;`);
-                }
-                else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
+                w.writeLine(`const params = {`);
+                w.indent();
+                w.writeLine(`size: shapeSize(this.shape),`);
+                if (hasAlpha) {
+                    w.writeLine(`alpha: alpha || 1.0,`);
                 }
                 w.dedent();
-                w.writeLine(`}`);
+                w.writeLine(`};`);
+                w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params);`);
             }
         }
         else {
-            if (hasAlpha) {
-                if (isInplace) {
-                    w.writeLine(`this._impl.${kernelSpec.name}(alpha);`);
-                    w.writeLine(`return this;`);
+            if (isBinary) {
+                if (hasAlpha) {
+                    if (isInplace) {
+                        w.writeLine(`this._impl.${kernelSpec.name}(other._impl, alpha);`);
+                        w.writeLine(`return this;`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
+                    }
                 }
                 else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
+                    if (isInplace) {
+                        w.writeLine(`this._impl.${kernelSpec.name}(other._impl);`);
+                        w.writeLine(`return this;`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
+                    }
                 }
-                w.dedent();
-                w.writeLine(`}`);
             }
             else {
-                if (isInplace) {
-                    w.writeLine(`this._impl.${kernelSpec.name}();`);
-                    w.writeLine(`return this;`);
+                if (hasAlpha) {
+                    if (isInplace) {
+                        w.writeLine(`this._impl.${kernelSpec.name}(alpha);`);
+                        w.writeLine(`return this;`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
+                    }
                 }
                 else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                    if (isInplace) {
+                        w.writeLine(`this._impl.${kernelSpec.name}();`);
+                        w.writeLine(`return this;`);
+                    }
+                    else {
+                        w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                    }
                 }
-                w.dedent();
-                w.writeLine(`}`);
             }
         }
+        w.dedent();
+        w.writeLine(`}`);
         if (!isInplace) {
             for (const alias of opSpec.aliases ?? []) {
                 writeHeader(alias);
@@ -232,40 +186,6 @@ function writeTensorCode(): void {
     insertCodegenIntoFile(path, code);
 }
 writeTensorCode();
-
-// Write the ITensor interface
-function writeITensorCode(): void {
-    const w = new CodeWriter();
-    w.indent();
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
-        const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
-        if (isGrad) continue;
-        const isBinary = opSpec.type === "binary";
-        const hasAlpha = opSpec.alpha ?? false;
-        if (isBinary) {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(other: ITensor, alpha?: number): ITensor;`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(other: ITensor): ITensor;`);
-            }
-        }
-        else {
-            if (hasAlpha) {
-                w.writeLine(`${kernelSpec.name}(alpha?: number): ITensor;`);
-            }
-            else {
-                w.writeLine(`${kernelSpec.name}(): ITensor;`);
-            }
-        }
-    }
-    const code = w.toString();
-    // console.log(code);
-    const path = absSrcDir + "/tensor_if.ts";
-    insertCodegenIntoFile(path, code);
-}
-writeITensorCode();
 
 // Write autograd functions
 function writeFunctionsCode(): void {
@@ -387,7 +307,7 @@ function writeOpsCode(): void {
     const w = new CodeWriter();
     w.writeLine(`import * as functions from "./functions";
 import { Tensor } from "./tensor";
-import { shouldCreateGradient } from "./autograd";`);
+import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
     for (const [opSpec, kernelSpec] of kernelsSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -419,34 +339,19 @@ import { shouldCreateGradient } from "./autograd";`);
         writeHeader(kernelSpec.name);
         w.indent();
         if (isBinary) {
-            w.writeLine(`if (input.shape.length !== other.shape.length) {`);
-            w.indent();
-            w.writeLine("throw new Error(`Shape dimensions of " + kernelSpec.name + " must match. Got ${input.shape} and ${other.shape}`);");
-            w.dedent();
-            w.writeLine(`}`);
-            w.writeLine(`if (shouldCreateGradient(input, other)) {`);
-            w.indent();
-            w.writeLine(`return functions.${funcName}.apply(input, other);`);
-            w.dedent();
-            w.writeLine(`}`);
             if (hasAlpha) {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl, alpha));`);
+                w.writeLine(`return binaryWithAlpha(functions.${funcName}, input, other, alpha);`);
             }
             else {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(other.impl));`);
+                w.writeLine(`return binary(functions.${funcName}, input, other);`);
             }
         }
         else {
-            w.writeLine(`if (shouldCreateGradient(input)) {`);
-            w.indent();
-            w.writeLine(`return functions.${funcName}.apply(input);`);
-            w.dedent();
-            w.writeLine(`}`);
             if (hasAlpha) {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}(alpha));`);
+                w.writeLine(`return unaryWithAlpha(functions.${funcName}, input, alpha);`);
             }
             else {
-                w.writeLine(`return new Tensor(input.impl.${kernelSpec.name}());`);
+                w.writeLine(`return unary(functions.${funcName}, input);`);
             }
         }
         w.dedent();

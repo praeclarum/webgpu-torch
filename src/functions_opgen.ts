@@ -1231,3 +1231,178 @@ export class XlogyFunction extends AutoFunction {
         return input.runKernel("xlogyGrad", { dtype: input.dtype }, params, [input.shape, other.shape], other, outputGrad);
     }
 }
+export class AllFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("all", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("allGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class AnyFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("any", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("anyGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class MeanFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("mean", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("meanGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class NormFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("norm", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("normGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class ProdFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("prod", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("prodGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class SumFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("sum", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("sumGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}
+export class CountNonzeroFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("countNonzero", { dtype: input.dtype }, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("countNonzeroGrad", { dtype: input.dtype }, params, [input.shape], outputGrad);
+    }
+}

@@ -1,23 +1,45 @@
-import { Shapeish, getShape } from "./shape";
+import { Shapeish, defaultStrides, getShape } from "./shape";
 import { Deviceish } from "./device";
 import { getDevice } from "./devices";
-import { Dtypeish, getDtype } from "./dtype";
+import { Dtype, getDtype } from "./dtype";
 import { Tensor } from "./tensor";
 
 export function ones(
     shape: Shapeish,
-    dtype: Dtypeish | null = null,
-    device: Deviceish | null = null
+    dtype?: Dtype,
+    device?: Deviceish
 ): Tensor {
-    return new Tensor(getDevice(device).ones(getShape(shape), getDtype(dtype)));
+    const d = getDevice(device);
+    const s = getShape(shape);
+    const dt = getDtype(dtype);
+    const storage = d.allocFor(s, dt);
+    const array = storage.getTypedArray(dt);
+    array.fill(1);
+    return new Tensor({
+        data: storage,
+        dtype: dt,
+        shape: s,
+        strides: defaultStrides(s),
+        device: d,
+    });
 }
 
 export function zeros(
     shape: Shapeish,
-    dtype: Dtypeish | null = null,
-    device: Deviceish | null = null
+    dtype?: Dtype,
+    device?: Deviceish
 ): Tensor {
-    return new Tensor(
-        getDevice(device).zeros(getShape(shape), getDtype(dtype))
-    );
+    const d = getDevice(device);
+    const s = getShape(shape);
+    const dt = getDtype(dtype);
+    const storage = d.allocFor(s, dt);
+    const array = storage.getTypedArray(dt);
+    array.fill(1);
+    return new Tensor({
+        data: storage,
+        dtype: dt,
+        shape: s,
+        strides: defaultStrides(s),
+        device: d,
+    });
 }
