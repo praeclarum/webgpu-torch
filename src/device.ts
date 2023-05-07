@@ -1,9 +1,7 @@
 import { Shape, Shapeish, shapeSize } from "./shape";
 import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
-import { TensorArrayData } from "./tensor_if";
-import { IDevice } from "./device_if";
+import { Tensor, TensorArrayData } from "./tensor";
 import { UntypedStorage } from "./storage";
-import { TensorImpl } from "./tensor_impl";
 import { Kernel, KernelConfig, KernelConfigInput, KernelKey, KernelSpec, getKernelConfig, getKernelKey } from "./kernel";
 import { registry as kernelRegistry } from "./kernels";
 
@@ -12,7 +10,7 @@ export type DeviceId = string;
 
 export type Deviceish = DeviceType | Device | DeviceId;
 
-export abstract class Device implements IDevice {
+export abstract class Device {
     private _id: DeviceId;
     private _type: DeviceType;
     private _kernels: { [key: KernelKey]: Kernel } = {};
@@ -52,8 +50,10 @@ export abstract class Device implements IDevice {
         }
         return kernel;
     }
+    abstract wrapKernelStorage(storage: ATypedArray | GPUBuffer): UntypedStorage;
+    abstract unwrapKernelStorage(storage: UntypedStorage): ATypedArray | GPUBuffer;
     abstract createKernel(spec: KernelSpec, config: KernelConfig): Kernel;
-    abstract ones(shape: Shape, dtype: Dtype): TensorImpl;
-    abstract tensor(data: TensorArrayData | null, dtype: Dtype): TensorImpl;
-    abstract zeros(shape: Shape, dtype: Dtype): TensorImpl;
+    abstract ones(shape: Shape, dtype: Dtype): Tensor;
+    abstract tensor(data: TensorArrayData | null, dtype: Dtype): Tensor;
+    abstract zeros(shape: Shape, dtype: Dtype): Tensor;
 }
