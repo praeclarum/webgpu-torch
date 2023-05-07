@@ -15,8 +15,13 @@ export class DeviceCPU extends Device {
         return new KernelCPU(spec, config, this);
     }
     getStorageFromKernel(storage: ATypedArray | GPUBuffer): UntypedStorage {
-        if (storage instanceof ArrayBuffer) {
-            return new ArrayBufferStorage(storage);
+        if (
+            storage instanceof Uint8Array ||
+            storage instanceof Uint32Array ||
+            storage instanceof Int32Array ||
+            storage instanceof Float32Array
+        ) {
+            return new ArrayBufferStorage(storage.buffer);
         }
         throw new Error(
             `Cannot wrap buffer of type ${storage.constructor.name} to get CPU storage`
