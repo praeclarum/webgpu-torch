@@ -63,8 +63,8 @@ export const kernels: { [name: string]: KernelSpec } = {
                 size: "batchSize * outputChannels * outputHeight * outputWidth",
             },
         ],
-        workgroupSize: [1, 1, 1],
-        workgroupCount: ["outputWidth", "outputHeight", 1],
+        workgroupSize: [4, 4, 1],
+        workgroupCount: ["outputWidth/4", "outputHeight/4", 1],
         shader: `
     if (global_id.x >= parameters.outputWidth || global_id.y >= parameters.outputHeight) {
         return;

@@ -189,7 +189,7 @@ test("conv2d", async () => {
     ]);
 });
 
-test("conv2d", async () => {
+test("batched conv2d", async () => {
     const image = tensor([
         [
             [
