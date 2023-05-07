@@ -95,6 +95,12 @@ test("parse !=", () => {
     expect(parsed).toEqual(["!=", ["x", 3]]);
 });
 
+test("parse &&", () => {
+    const expr = "x && y";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual(["&&", ["x", "y"]]);
+});
+
 test("parse nest blocks", () => {
     const expr = "{ x = 3; { y = 4; z = 5; } }";
     const parsed = parseCode(expr);

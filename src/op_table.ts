@@ -381,8 +381,8 @@ export const registry: AnOpSpec[] = [
         type: "reduction",
         init: "output = 0",
         forward: "output = output + input",
-        reduce: "output = output / input.size()",
-        backward: "inputGrad = outputGrad / input.size()",
+        reduce: "output = output / inputSize",
+        backward: "inputGrad = outputGrad / inputSize",
     },
     // median: artisanal
     // min: init is input

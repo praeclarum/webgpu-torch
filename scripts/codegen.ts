@@ -117,7 +117,7 @@ function writeTensorImplCode(): void {
     const code = w.toString();
     // console.log(code);
     const path2 = absSrcDir + "/tensor_impl.ts";
-    insertCodegenIntoFile(path2, code);
+    insertCodegenIntoFile(path2, "");
 }
 writeTensorImplCode();
 
