@@ -4,7 +4,7 @@
 
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
+export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "var" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
 
 export type ExprAtom = string | ManifestNumber;
 export type ExprCell = [ExprNodeType, ExprNode[]];
@@ -371,6 +371,23 @@ export function parseCode(code: ExprCode): ExprNode {
             j = elseExpr[1];
             return [["if", [condExpr[0], thenExpr[0], elseExpr[0]]], j];
         }
+        // var statement?
+        if (tokens[i] === "var") {
+            // console.log("parse Var Statement:", i, tokens.slice(i));
+            const name = tokens[i + 1];
+            if (typeof name !== "string") {
+                throw new Error("Missing variable name after var");
+            }
+            const varEquals = tokens[i + 2];
+            if (varEquals !== "=") {
+                throw new Error("Missing = after var");
+            }
+            const varInit = parseExpr(i + 3);
+            if (varInit === null) {
+                throw new Error("Missing initial value after var");
+            }
+            return [["var", [name, varInit[0]]], varInit[1]];
+        }
         // return statement?
         if (tokens[i] === "return") {
             // console.log("parse Return Statement:", i, tokens.slice(i));
@@ -547,6 +564,8 @@ export function exprNodeToString(ast: ExprNode): string {
         return ast[1].map(exprNodeToString).join("; ");
     case "return":
         return `return ${exprNodeToString(ast[1][0])}`;
+    case "var":
+        return `var ${ast[1][0]} = ${exprNodeToString(ast[1][1])}`;
     default:
         throw new Error(`Unknown AST node type when printing: ${ast[0]}`);
     }

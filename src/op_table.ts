@@ -278,7 +278,7 @@ export const registry: AnOpSpec[] = [
         name: "sigmoid",
         type: "unary",
         forward: "output = 1.0 / (1.0 + exp(-input))",
-        backward: "inputGrad = outputGrad * output * (1.0 - output)",
+        backward: "var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * out * (1.0 - out)",
     },
     {
         name: "sign",

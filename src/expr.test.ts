@@ -206,3 +206,12 @@ test("exprNodeToString assignment", () => {
     ]);
     expect(exprNodeToString(parsed)).toEqual("x = 3");
 });
+
+test("parse var", () => {
+    const expr = "var x = 3";
+    const parsed = parseCode(expr);
+    expect(parsed).toEqual([
+        "var",
+        ["x", new ManifestNumber("intAbstract", 3)],
+    ]);
+});
