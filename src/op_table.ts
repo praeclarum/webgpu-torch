@@ -337,7 +337,7 @@ export const registry: AnOpSpec[] = [
         name: "tanh",
         type: "unary",
         forward: "output = tanh(input)",
-        backward: "inputGrad = outputGrad * (1.0 - output * output)",
+        backward: "inputGrad = outputGrad * (1.0 - tanh(input) * tanh(input))",
     },
     // true_divide: meh
     {
