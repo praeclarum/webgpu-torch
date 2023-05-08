@@ -768,7 +768,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -784,7 +784,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1110,7 +1110,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1126,7 +1126,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1760,7 +1760,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1776,7 +1776,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1865,7 +1865,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input == 0.0 ? 0.0 : 1.0)
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -1881,7 +1881,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input == 0.0 ? 0.0 : 1.0)
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -2205,7 +2205,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -2223,7 +2223,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor
@@ -2239,7 +2239,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad
+    * inputGrad = 0
     * ```
     *
     * @returns the output tensor

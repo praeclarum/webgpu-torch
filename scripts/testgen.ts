@@ -161,16 +161,25 @@ for (const [opName, kernelName, inputs, outputs, grads, gradError] of pythonTest
 
 function writeTypeScriptTestCode() {
     const w = new CodeWriter();
-    w.writeLine(`import { runOpgenTest as t } from "./ops_opgen_test_support";`);
+    w.writeLine(`import { runOpgenTestForward as f, runOpgenTestBackward as b } from "./ops_opgen_test_support";`);
     for (var kernelName in resultsByKernelName) {
-        w.writeLine(`test("${kernelName}", async () => {`);
-        w.indent();
         const results = resultsByKernelName[kernelName];
+        const isInPlace = kernelName.endsWith("_");
         for (const r of results) {
-            w.writeLine(`await t("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${JSON.stringify(r[2])}, ${JSON.stringify(r[3])});`);
+            const inputArgs = r[0].map(x => JSON.stringify(x));
+            w.writeLine(`test("${kernelName}(${inputArgs.join(", ")})", async () => {`);
+            w.indent();
+            w.writeLine(`await f("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[1])});`);
+            w.dedent();
+            w.writeLine(`});`);
+            if (!isInPlace) {
+                w.writeLine(`test("${kernelName}(${inputArgs.join(", ")}) gradient", async () => {`);
+                w.indent();
+                w.writeLine(`await b("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[2])}, ${JSON.stringify(r[3])});`);
+                w.dedent();
+                w.writeLine(`});`);
+            }
         }
-        w.dedent();
-        w.writeLine(`});`);
     }
     fs.writeFileSync(typeScriptTestsPath, w.toString(), "utf-8");
 }

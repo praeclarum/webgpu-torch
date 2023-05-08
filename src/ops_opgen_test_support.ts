@@ -39,7 +39,7 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData): void {
     }
 }
 
-export async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expectedOutputs: TestArrayData[], expectedGrads: TestArrayData[], gradError: boolean): Promise<void> {
+async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expectedOutputs: TestArrayData[], expectedGrads: TestArrayData[], gradError: boolean, runBackward: boolean): Promise<void> {
     let outputTensor: Tensor;
     let inputGrads: Tensor[];
     if (kernelName.endsWith("_")) {
@@ -54,15 +54,32 @@ export async function runOpgenTest(kernelName: string, inputs: TensorArrayData[]
         const inputTensors = inputs.map(input => tensor({data: input, requiresGrad: true}));
         const op: Function = (torch as any)[kernelName];
         outputTensor = op.apply(null, inputTensors);
-        outputTensor.backward();
-        inputGrads = inputTensors.map(input => input.grad!);
+        if (runBackward) {
+            outputTensor.backward();
+            inputGrads = inputTensors.map(input => input.grad!);
+        }
+        else {
+            inputGrads = [];
+        }
     }
     const expectedOutput = expectedOutputs[0];
-    compareArrays(await outputTensor.toArrayAsync(), expectedOutput);
-    expect(inputGrads).toHaveLength(expectedGrads.length);
-    for (let i = 0; i < inputGrads.length; i++) {
-        const inputGrad = inputGrads[i];
-        const expectedGrad = expectedGrads[i];
-        compareArrays(await inputGrad.toArrayAsync(), expectedGrad);
+    if (runBackward) {
+        expect(inputGrads).toHaveLength(expectedGrads.length);
+        for (let i = 0; i < inputGrads.length; i++) {
+            const inputGrad = inputGrads[i];
+            const expectedGrad = expectedGrads[i];
+            compareArrays(await inputGrad.toArrayAsync(), expectedGrad);
+        }
     }
+    else {
+        compareArrays(await outputTensor.toArrayAsync(), expectedOutput);
+    }
+}
+
+export async function runOpgenTestForward(kernelName: string, inputs: TensorArrayData[], expectedOutputs: TestArrayData[]): Promise<void> {
+    await runOpgenTest(kernelName, inputs, expectedOutputs, [], false, false);
+}
+
+export async function runOpgenTestBackward(kernelName: string, inputs: TensorArrayData[], expectedGrads: TestArrayData[], gradError: boolean): Promise<void> {
+    await runOpgenTest(kernelName, inputs, [], expectedGrads, gradError, true);
 }

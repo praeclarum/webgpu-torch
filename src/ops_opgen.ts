@@ -282,7 +282,7 @@ export function arctan2(input: Tensor, other: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -459,7 +459,7 @@ export function expm1(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -796,7 +796,7 @@ export function reciprocal(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -847,7 +847,7 @@ export function sigmoid(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * (input == 0.0 ? 0.0 : 1.0)
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -1023,7 +1023,7 @@ export function tanh(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -1042,7 +1042,7 @@ export function trunc(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad
+* inputGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
