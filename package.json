@@ -6,7 +6,8 @@
   "scripts": {
     "build": "ts-node ./scripts/codegen.ts && webpack --mode production && npx typedoc --out web/docs src/index.ts",
     "test": "jest",
-    "start": "webpack-dev-server --open"
+    "start": "webpack-dev-server --open",
+    "testgen": "ts-node ./scripts/testgen.ts"
   },
   "repository": {
     "type": "git",

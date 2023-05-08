@@ -26,6 +26,12 @@
 			"script": "codegen",
 			"problemMatcher": [],
 			"label": "npm: codegen",
+		},
+		{
+			"type": "npm",
+			"script": "testgen",
+			"problemMatcher": [],
+			"label": "npm: testgen",
 		}
 	]
 }

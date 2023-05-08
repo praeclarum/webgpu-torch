@@ -1,3 +1,5 @@
+/scripts/testgen_tests.py
+/scripts/testgen_tests_results.json
 /web/docs
 *.DS_Store
 _site
