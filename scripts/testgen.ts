@@ -9,9 +9,12 @@ import { TensorArrayData } from "../src/storage";
 
 console.log("Running test code generator...");
 
+const unaryTestValues = [
+    -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0
+];
+
 const absSrcDir = fs.realpathSync(__dirname + "/../src");
 console.log("src dir:", absSrcDir);
-
 const pythonTestsPath = `${absSrcDir}/../scripts/testgen_tests.py`;
 const pythonTestResultsPath = `${absSrcDir}/../scripts/testgen_tests_results.json`;
 const typeScriptTestsPath = `${absSrcDir}/ops_opgen.test.ts`;
@@ -49,9 +52,6 @@ function writePythonTests() {
     w.indent();
     w.writeLine(`results.append([op_name, kernel_name, [tensor_to_list(x) for x in inputs], [tensor_to_list(x) for x in outputs], [tensor_to_list(x) for x in grads] if grads is not None else None, gradError])`);
     w.dedent();
-    const unaryTestValues = [
-        -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0
-    ];
     function shouldOutputKernelSpec(kernelSpec: KernelSpec): boolean {
         const kernelName = kernelSpec.name;
         const isGrad = kernelName.endsWith("Grad");

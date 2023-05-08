@@ -292,7 +292,7 @@ const javaScriptSubstitutions: [RegExp, string][] = [
 // Add all the Math. functions to the substitution list
 for (const name of Object.getOwnPropertyNames(Math)) {
     if (typeof (Math as any)[name] === "function") {
-        javaScriptSubstitutions.push([new RegExp(name, "g"), `Math.${name}`]);
+        javaScriptSubstitutions.push([new RegExp(`\\b${name}\\(`, "g"), `Math.${name}(`]);
     }
 }
 
