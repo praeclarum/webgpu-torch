@@ -444,9 +444,6 @@ export function parseCode(code: ExprCode): ExprNode {
 }
 
 export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, replace: (node: ExprNode)=>ExprNode): ExprNode {
-    if (match(ast)) {
-        return replace(ast);
-    }
     if (ast instanceof ManifestNumber) {
         return ast;
     }
@@ -457,7 +454,11 @@ export function substitute(ast: ExprNode, match: (node: ExprNode)=>boolean, repl
     for (const child of ast[1]) {
         newChildren.push(substitute(child, match, replace));
     }
-    return [ast[0], newChildren];
+    ast = [ast[0], newChildren];
+    if (match(ast)) {
+        ast = replace(ast);
+    }
+    return ast;
 }
 
 export function substituteIdentifiers(ast: ExprNode, subs: { [name: string]: ExprNode }): ExprNode {

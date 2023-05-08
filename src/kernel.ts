@@ -271,7 +271,7 @@ export function getKernelShaderCode(
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     const shaderCode = shaderCodeParts.join("\n");
-    // console.log(shaderCode);
+    console.log(shaderCode);
     return shaderCode;
 }
 

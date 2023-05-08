@@ -8,7 +8,7 @@ export const registry: AnOpSpec[] = [
         aliases: ["absolute"],
         type: "unary",
         forward: "output = abs(input)",
-        backward: "inputGrad = input > 0 ? outputGrad : -outputGrad",
+        backward: "inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)",
     },
     {
         name: "acos",

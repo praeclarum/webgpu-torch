@@ -1,6 +1,6 @@
 import { hasWebGPU } from "./webgpu";
 
-test("webgpu is not available in test", async () => {
+test("hasWebGPU returns a result", async () => {
     const available = hasWebGPU();
     expect(typeof available).toBe("boolean");
 });

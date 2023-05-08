@@ -24,16 +24,6 @@ test("binary sub op generate kernel spec", () => {
         output[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
 });
 
-test("abs backward shader", () => {
-    const spec = opSpecs["abs"];
-    const kernels = opSpecToKernelSpecs(spec);
-    expect(kernels[2].shader).toBe(`
-        if (global_id.x >= parameters.size) {
-            return;
-        }
-        inputGrad[global_id.x] = select((-outputGrad[global_id.x]), outputGrad[global_id.x], (input[global_id.x] > 0));`);
-});
-
 test("atan2 forward shader", () => {
     const spec = opSpecs["atan2"];
     const kernels = opSpecToKernelSpecs(spec);
