@@ -1,21 +1,28 @@
 import * as torch from "./ops_opgen";
+import { registry } from "./op_table";
 import { tensor } from "./ops_artisanal";
 
 import { TensorArrayData } from "./storage";
 import { Tensor } from "./tensor";
 import { DeviceType } from "./device";
+import { AnOpSpec } from "./op_spec";
 
 type TestArrayData = (number | "NaN" | "+Inf" | "-Inf" | TestArrayData)[];
 
-function compareArrays(x: TensorArrayData, expected: TestArrayData, deviceType: DeviceType): void {
+const opSpecByName: { [name: string]: AnOpSpec } = {};
+for (const opSpec of registry) {
+    opSpecByName[opSpec.name] = opSpec;
+}
+
+function compareArrays(x: TensorArrayData, expected: TestArrayData, precision: number, deviceType: DeviceType): void {
     expect(x.length).toEqual(expected.length);
     for (let i = 0; i < x.length; i++) {
         const actual = x[i];
         const expectedValue = expected[i];
         if (typeof expectedValue == "number") {
             expect(typeof actual).toEqual("number");
-            expect(actual).not.toBeNaN();            
-            expect(actual).toBeCloseTo(expectedValue, 6);
+            expect(actual).not.toBeNaN();
+            expect(actual).toBeCloseTo(expectedValue, precision);
         }
         else if (typeof expectedValue == "string") {
             if (expectedValue == "NaN") {
@@ -43,7 +50,7 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData, deviceType: 
             }
         }
         else if (actual instanceof Array) {
-            compareArrays(actual, expectedValue, deviceType);
+            compareArrays(actual, expectedValue, precision, deviceType);
         }
         else {
             throw new Error(`Unexpected value: ${actual}`);
@@ -75,16 +82,30 @@ async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expec
         }
     }
     const expectedOutput = expectedOutputs[0];
+    let precision = 6;
+    let opName = kernelName;
+    if (opName.endsWith("_")) {
+        opName = opName.slice(0, -1);
+    }
+    if (opName in opSpecByName) {
+        const opSpec = opSpecByName[opName];
+        if (opSpec.precision !== undefined) {
+            precision = opSpec.precision;
+        }
+    }
+    else {
+        console.warn(`Missing op spec for ${kernelName}`);
+    }
     if (runBackward) {
         expect(inputGrads).toHaveLength(expectedGrads.length);
         for (let i = 0; i < inputGrads.length; i++) {
             const inputGrad = inputGrads[i];
             const expectedGrad = expectedGrads[i];
-            compareArrays(await inputGrad.toArrayAsync(), expectedGrad, inputGrad.device.type);
+            compareArrays(await inputGrad.toArrayAsync(), expectedGrad, precision, inputGrad.device.type);
         }
     }
     else {
-        compareArrays(await outputTensor.toArrayAsync(), expectedOutput, outputTensor.device.type);
+        compareArrays(await outputTensor.toArrayAsync(), expectedOutput, precision, outputTensor.device.type);
     }
 }
 

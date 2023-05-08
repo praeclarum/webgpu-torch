@@ -8,6 +8,7 @@ export type OpSpec = {
     aliases?: string[];
     alpha?: boolean;
     type: OpType;
+    precision?: number;
     forward: ExprCode;
     backward?: ExprCode;
 }

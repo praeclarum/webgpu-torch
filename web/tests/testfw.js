@@ -6,7 +6,7 @@ function test(description, callback) { testreg.push({ description, callback }); 
 class Expect {
     constructor(value, truth) { this.value = value; this.truth = truth; }
     toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected «${this.value}» to be «${expected}»`); } }
-    toBeCloseTo(expected, precision) { if (this.truth(Math.abs(this.value - expected) > Math.pow(10, -precision))) { throw new Error(`Expected «${this.value}» to be close to «${expected}»`); } }
+    toBeCloseTo(expected, precision) { const expDiff = Math.pow(10, -precision)/2; if (this.truth(Math.abs(this.value - expected) >= expDiff)) { throw new Error(`Expected «${this.value}» to be close to «${expected}» (diff: < ${expDiff.toFixed(precision+1)})`); } }
     toBeGreaterThan(expected) { if (this.truth(!(this.value > expected))) { throw new Error(`Expected «${this.value}» to be greater than «${expected}»`); } }
     toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected «${this.value}» to be instance of «${expected}»`); } }
     toBeNaN() { if (this.truth(!Number.isNaN(this.value))) { throw new Error(`Expected «${this.value}» to be NaN`); } }

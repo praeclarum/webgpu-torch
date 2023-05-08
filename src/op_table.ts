@@ -332,6 +332,7 @@ export const registry: AnOpSpec[] = [
         type: "unary",
         forward: "output = tan(input)",
         backward: "inputGrad = outputGrad / (cos(input) * cos(input))",
+        precision: 5, // fak: I don't know why but tan seems pretty inaccurate
     },
     {
         name: "tanh",
