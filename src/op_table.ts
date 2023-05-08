@@ -117,19 +117,19 @@ export const registry: AnOpSpec[] = [
         name: "exp",
         type: "unary",
         forward: "output = exp(input)",
-        backward: "inputGrad = outputGrad * output",
+        backward: "inputGrad = outputGrad * exp(input)",
     },
     {
         name: "exp2",
         type: "unary",
         forward: "output = exp2(input)",
-        backward: "inputGrad = outputGrad * output * 0.6931471805599453",
+        backward: "inputGrad = outputGrad * exp2(input) * 0.6931471805599453",
     },
     {
         name: "expm1",
         type: "unary",
         forward: "output = exp(input) - 1.0",
-        backward: "inputGrad = outputGrad * output",
+        backward: "inputGrad = outputGrad * exp(input)",
     },
     // fake_quantize_per_channel_affine: quantization
     // fake_quantize_per_tensor_affine: quantization
