@@ -150,7 +150,7 @@ export const registry: AnOpSpec[] = [
     {
         name: "frac",
         type: "unary",
-        forward: "output = fract(input)",
+        forward: "output = input >= 0.0 ? fract(input) : -fract(-input)",
         backward: "inputGrad = outputGrad",
     },
     // frexp: jfc
