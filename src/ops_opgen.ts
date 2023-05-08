@@ -9,7 +9,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";
 *
 * Gradient:
 * ```js
-* inputGrad = input > 0 ? outputGrad : -outputGrad
+* inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)
 * ```
 *
 * @param input the input tensor of any shape
@@ -28,7 +28,7 @@ export function abs(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = input > 0 ? outputGrad : -outputGrad
+* inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)
 * ```
 *
 * @param input the input tensor of any shape
@@ -408,7 +408,7 @@ export function divide(input: Tensor, other: Tensor, alpha?: number): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * output
+* inputGrad = outputGrad * exp(input)
 * ```
 *
 * @param input the input tensor of any shape
@@ -425,7 +425,7 @@ export function exp(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * output * 0.6931471805599453
+* inputGrad = outputGrad * exp2(input) * 0.6931471805599453
 * ```
 *
 * @param input the input tensor of any shape
@@ -442,7 +442,7 @@ export function exp2(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * output
+* inputGrad = outputGrad * exp(input)
 * ```
 *
 * @param input the input tensor of any shape
@@ -830,7 +830,7 @@ export function rsqrt(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * output * (1.0 - output)
+* var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * out * (1.0 - out)
 * ```
 *
 * @param input the input tensor of any shape

@@ -354,7 +354,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = input > 0 ? outputGrad : -outputGrad
+    * inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)
     * ```
     *
     * @returns the output tensor
@@ -372,7 +372,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = input > 0 ? outputGrad : -outputGrad
+    * inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)
     * ```
     *
     * @returns the output tensor
@@ -388,7 +388,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = input > 0 ? outputGrad : -outputGrad
+    * inputGrad = input == 0 ? 0 : (input > 0 ? outputGrad : -outputGrad)
     * ```
     *
     * @returns the output tensor
@@ -1005,7 +1005,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output
+    * inputGrad = outputGrad * exp(input)
     * ```
     *
     * @returns the output tensor
@@ -1021,7 +1021,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output
+    * inputGrad = outputGrad * exp(input)
     * ```
     *
     * @returns the output tensor
@@ -1040,7 +1040,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output * 0.6931471805599453
+    * inputGrad = outputGrad * exp2(input) * 0.6931471805599453
     * ```
     *
     * @returns the output tensor
@@ -1056,7 +1056,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output * 0.6931471805599453
+    * inputGrad = outputGrad * exp2(input) * 0.6931471805599453
     * ```
     *
     * @returns the output tensor
@@ -1075,7 +1075,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output
+    * inputGrad = outputGrad * exp(input)
     * ```
     *
     * @returns the output tensor
@@ -1091,7 +1091,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output
+    * inputGrad = outputGrad * exp(input)
     * ```
     *
     * @returns the output tensor
@@ -1830,7 +1830,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output * (1.0 - output)
+    * var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * out * (1.0 - out)
     * ```
     *
     * @returns the output tensor
@@ -1846,7 +1846,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * output * (1.0 - output)
+    * var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * out * (1.0 - out)
     * ```
     *
     * @returns the output tensor
