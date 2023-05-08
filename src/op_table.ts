@@ -80,8 +80,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "copysign",
         type: "binary",
-        forward: "output = other >= 0.0 ? abs(input) : -abs(input)",
-        backward: "inputGrad = outputGrad * (other >= 0.0 ? 1.0 : -1.0)",
+        forward: "output = other >= 0 ? abs(input) : -abs(input)",
+        backward: "var dir = other >= 0 ? (input >= 0 ? 1.0 : -1.0) : (input >= 0 ? -1.0 : 1.0); inputGrad = input == 0.0 ? 0.0 : outputGrad * dir; otherGrad = 0",
     },
     {
         name: "cos",

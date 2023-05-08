@@ -11,7 +11,7 @@ class Expect {
     toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected «${this.value}» to be instance of «${expected}»`); } }
     toBeNaN() { if (this.truth(!Number.isNaN(this.value))) { throw new Error(`Expected «${this.value}» to be NaN`); } }
     toBeNull() { if (this.truth(this.value !== null)) { throw new Error(`Expected «${this.value}» to be null`); } }
-    toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected «${this.value}» to equal «${expected}»`); } }
+    toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected «${JSON.stringify(this.value)}» to equal «${JSON.stringify(expected)}»`); } }
     toHaveLength(expected) { if (this.truth(this.value.length !== expected)) { throw new Error(`Expected «${this.value}» to have length «${expected}»`); } }
     toThrow(expected) {
         try { this.value(); } catch (e) {
