@@ -1,7 +1,6 @@
-import { KernelSpec } from "../src/kernel";
-import { CodeWriter, opSpecToKernelSpecs } from "../src/opgen";
+import { CodeWriter } from "../src/opgen";
 import { OpSpec, ReductionOpSpec } from "../src/op_spec";
-import { registry } from "../src/op_table";
+import { opKernelSpecs } from "../src/kernels_opgen";
 
 // import fs
 import * as fs from "fs";
@@ -10,17 +9,6 @@ console.log("Running code generator...");
 
 const absSrcDir = fs.realpathSync(__dirname + "/../src");
 console.log("src dir:", absSrcDir);
-
-// Generate op kernels
-const kernelsSpecsIndex: {[name: string]: KernelSpec} = {};
-const kernelsSpecs: [OpSpec, KernelSpec][] = [];
-for (const spec of registry) {
-    const kernels = opSpecToKernelSpecs(spec);
-    for (const kernel of kernels) {
-        kernelsSpecsIndex[kernel.name] = kernel;
-        kernelsSpecs.push([spec, kernel]);
-    }
-}
 
 function insertCodegenIntoFile(path: string, codegen: string): void {
     const code = fs.readFileSync(path, "utf8");
@@ -42,7 +30,7 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
 function writeTensorCode(): void {
     const w = new CodeWriter();
     w.indent();
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+    for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         const isGrad = kernelSpec.name.endsWith("Grad");
         if (isGrad) continue;
@@ -184,7 +172,7 @@ function writeFunctionsCode(): void {
 } from "./autograd";
 import { Tensor } from "./tensor";
 import { shapeSize } from "./shape";`);
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+    for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
             continue;
@@ -354,7 +342,7 @@ function writeOpsCode(): void {
     w.writeLine(`import * as functions from "./functions";
 import { Tensor } from "./tensor";
 import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
-    for (const [opSpec, kernelSpec] of kernelsSpecs) {
+    for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
             continue;

@@ -1,6 +1,7 @@
 import { Tensor } from "./tensor";
 import { AutoFunction, GradientContext } from "./autograd";
-import { zeros, functions } from "./index";
+import { zeros } from "./factories";
+import * as functions from "./functions";
 
 test("auto function forward fails", () => {
     expect(() => AutoFunction.forward([])).toThrow();
