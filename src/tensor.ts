@@ -14,7 +14,7 @@ import * as ops from "./ops";
 
 export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
 
-export type TensorJsonData = {
+export type TensorSpec = {
     data: TensorData;
     dtype?: Dtype;
     requiresGrad?: boolean;
@@ -89,7 +89,7 @@ export class Tensor {
     }
 
     constructor(
-        arrayOrSpec: TensorData | TensorJsonData,
+        arrayOrSpec: TensorData | TensorSpec,
         dtype?: Dtype,
         device?: Deviceish,
         requiresGrad?: boolean
@@ -105,7 +105,7 @@ export class Tensor {
             this._shape = array.shape;
             this._strides = array.strides;
         } else if (arrayOrSpec.hasOwnProperty("data")) {
-            const jdata = arrayOrSpec as TensorJsonData;
+            const jdata = arrayOrSpec as TensorSpec;
             dt = jdata.dtype ? getDtype(jdata.dtype) : dt;
             requiresGrad = requiresGrad || jdata.requiresGrad;
             if (jdata.data instanceof Array) {

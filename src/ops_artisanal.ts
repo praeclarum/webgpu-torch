@@ -1,6 +1,6 @@
 import { Deviceish } from "./device";
 import { Dtype } from "./dtype";
-import { Tensor, TensorData, TensorJsonData } from "./tensor";
+import { Tensor, TensorData, TensorSpec } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
 
 /**
@@ -102,7 +102,7 @@ export function t(input: Tensor): Tensor {
 }
 
 
-export function tensor(spec: TensorJsonData): Tensor;
+export function tensor(spec: TensorSpec): Tensor;
 export function tensor(
     array: TensorData,
     dtype?: Dtype,
@@ -110,7 +110,7 @@ export function tensor(
     requiresGrad?: boolean
 ): Tensor;
 export function tensor(
-    arrayOrSpec: TensorData | TensorJsonData,
+    arrayOrSpec: TensorData | TensorSpec,
     dtype?: Dtype,
     device?: Deviceish,
     requiresGrad?: boolean

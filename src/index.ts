@@ -13,18 +13,15 @@ export * from "./factories";
 // export * as functions from "./functions";
 export {
     Kernel,
-    KernelSpec,
     KernelConfig,
     KernelConfigInput,
     KernelConfigSpec,
-    KernelConfigValue,
     KernelInputSpec,
     KernelKey,
     KernelOutputSpec,
     KernelParamSpec,
-    KernelParamType,
-    KernelParamValue,
     KernelParamsInput,
+    KernelSpec,
     ShaderType,
 } from "./kernel";
 export * from "./ops";

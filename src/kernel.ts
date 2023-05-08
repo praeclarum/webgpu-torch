@@ -3,16 +3,14 @@ import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 import { CodeWriter } from "./opgen";
 
-export type KernelParamType = "u32" | "f32";
-export type KernelParamValue = number;
-
 export type ShaderType =
-    | KernelParamType
     | "u8"
     | "array<u8>"
     | "i32"
     | "array<i32>"
+    | "u32"
     | "array<u32>"
+    | "f32"
     | "array<f32>"
     | "vec3<i32>"
     | "vec3<u32>"
@@ -42,17 +40,16 @@ export interface KernelOutputSpec {
 
 export interface KernelParamSpec {
     name: string;
-    shaderType: KernelParamType;
+    shaderType: "u32" | "f32";
 }
 
 export interface KernelConfigSpec {
     name: string;
 }
 
-export type KernelConfigValue = string | number;
-export type KernelConfigInput = { [name: string]: KernelConfigValue };
-export type KernelParamsInput = { [name: string]: KernelParamValue };
-export type KernelConfig = KernelConfigValue[];
+export type KernelConfigInput = { [name: string]: string | number };
+export type KernelParamsInput = { [name: string]: number };
+export type KernelConfig = (string | number)[];
 export type KernelKey = string;
 
 export abstract class Kernel {
