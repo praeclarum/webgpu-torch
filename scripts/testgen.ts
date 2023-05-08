@@ -5,6 +5,7 @@ import { opKernelSpecs } from "../src/kernels_opgen";
 // import fs
 import * as fs from "fs";
 import { KernelSpec } from "../src/kernel";
+import { TensorArrayData } from "../src/storage";
 
 console.log("Running test code generator...");
 
@@ -13,6 +14,7 @@ console.log("src dir:", absSrcDir);
 
 const pythonTestsPath = `${absSrcDir}/../scripts/testgen_tests.py`;
 const pythonTestResultsPath = `${absSrcDir}/../scripts/testgen_tests_results.json`;
+const typeScriptTestsPath = `${absSrcDir}/ops_opgen.test.ts`;
 
 function writePythonTests() {
     const w = new CodeWriter();
@@ -144,5 +146,32 @@ function runPythonTests() {
 runPythonTests();
 
 // Load the results
-const pythonTestResults = JSON.parse(fs.readFileSync(pythonTestResultsPath, "utf-8"));
+const pythonTestResults: [string, string, TensorArrayData[], TensorArrayData[], TensorArrayData[]|null, boolean][] = JSON.parse(fs.readFileSync(pythonTestResultsPath, "utf-8"));
 console.log("pythonTestResults:", pythonTestResults.length);
+const resultsByKernelName:{[name:string]:[TensorArrayData[], TensorArrayData[], TensorArrayData[]|null, boolean][]}= {};
+for (const [opName, kernelName, inputs, outputs, grads, gradError] of pythonTestResults) {
+    const key = kernelName;
+    let results = resultsByKernelName[key];
+    if (!results) {
+        results = [];
+        resultsByKernelName[key] = results;
+    }
+    results.push([inputs, outputs, grads, gradError]);
+}
+
+function writeTypeScriptTestCode() {
+    const w = new CodeWriter();
+    w.writeLine(`import { runOpgenTest as t } from "./ops_opgen_test_support";`);
+    for (var kernelName in resultsByKernelName) {
+        w.writeLine(`test("${kernelName}", () => {`);
+        w.indent();
+        const results = resultsByKernelName[kernelName];
+        for (const r of results) {
+            w.writeLine(`t("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${JSON.stringify(r[2])}, ${JSON.stringify(r[3])});`);
+        }
+        w.dedent();
+        w.writeLine(`});`);
+    }
+    fs.writeFileSync(typeScriptTestsPath, w.toString(), "utf-8");
+}
+writeTypeScriptTestCode();
