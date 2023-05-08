@@ -1,5 +1,8 @@
 /*======== TEST FRAMEWORK ========*/
 
+const testreg = [];
+function test(description, callback) { testreg.push({ description, callback }); }
+
 class Expect {
     constructor(value, truth) { this.value = value; this.truth = truth; }
     toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected «${this.value}» to be «${expected}»`); } }
@@ -47,7 +50,7 @@ async function runTestsAsync($testDiv) {
     $testTable.appendChild($testTableBody);
 
     // Run the tests
-    for (let t of tests) {
+    for (let t of testreg) {
         let error = undefined;
         try {
             let result = t.callback();

@@ -11,17 +11,6 @@ const functions = torch.functions;
 const conv2d = torch.conv2d;
 
 
-test("webgpu is supported", () => {
-    expect(torch.hasWebGPU()).toBe(true);
-});
-
-test("tensor is webgpu", async () => {
-    const x = torch.tensor([[1, 2, 3], [4, 5, 6]]);
-    expect(x.requiresGrad).toBe(false);
-    expect(x.device.type).toBe("webgpu");
-    expect(await x.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
-});
-
 test("add_ vectors", async () => {
     const a = tensor([1, 2, 3]);
     const b = tensor([100, 200, 300]);

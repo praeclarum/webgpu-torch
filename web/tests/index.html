@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>webgpu-torch tests</title>
+    <link rel="stylesheet" href="../docs/assets/style.css">
+    <link rel="stylesheet" href="tests.css">
+</head>
+<body>
+    <h1><a href="../">webgpu-torch</a> tests</h1>
+    <div id="tests"></div>
+    <script src="testfw.js"></script>
+    <script>
+        test("webgpu is supported", () => {
+            expect(tests.hasWebGPU()).toBe(true);
+        });
+        test("tensor is webgpu", async () => {
+            const x = tests.tensor([[1, 2, 3], [4, 5, 6]]);
+            expect(x.requiresGrad).toBe(false);
+            expect(x.device.type).toBe("webgpu");
+            expect(await x.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+        });
+    </script>
+    <script src="tests.js"></script>
+    <script>
+        async function run() {
+            await tests.initWebGPUAsync();
+            await runTestsAsync(document.getElementById("tests"));
+        }
+        run();
+    </script>
+</body>
+</html>

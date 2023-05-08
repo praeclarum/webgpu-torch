@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>webgpu-torch</title>
+    <link rel="stylesheet" href="./docs/assets/style.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>webgpu-torch</h1>
-    <div id="tests"></div>
+    <h1><a href="./">webgpu-torch</a></h1>
+    <p>Tensor computation and autograd with WebGPU acceleration inspired by pytorch.</p>
+    <nav>
+        <a class="nav-item" href="./docs/">Docs</a>
+        <a class="nav-item" href="./tests/">Tests</a>
+    </nav>
     <script src="../dist/torch.js"></script>
-    <script src="testfw.js"></script>
-    <script src="tests.js"></script>
     <script>
         async function run() {
             await torch.initWebGPUAsync();
-            await runTestsAsync(document.getElementById("tests"));
         }
         run();
     </script>

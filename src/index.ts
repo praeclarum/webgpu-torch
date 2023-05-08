@@ -1,5 +1,3 @@
-import { discoverWebGPUDevicesAsync } from "./devices";
-
 export {
     FunctionInput,
     GradientContext,
@@ -28,8 +26,4 @@ export * from "./ops";
 export * from "./shape";
 export { TensorArrayData, UntypedStorage } from "./storage";
 export * from "./tensor";
-export { hasWebGPU } from "./webgpu";
-
-export async function initWebGPUAsync() {
-    await discoverWebGPUDevicesAsync();
-}
+export { hasWebGPU, initWebGPUAsync } from "./webgpu";

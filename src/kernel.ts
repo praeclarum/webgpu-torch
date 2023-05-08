@@ -297,6 +297,8 @@ for (const name of Object.getOwnPropertyNames(Math)) {
 }
 
 const javaScriptGlobalFunctions: { [name: string]: string } = {
+    exp2: "function exp2(x) { return Math.pow(2, x); }",
+    fract: "function fract(x) { return x - Math.floor(x); }",
     select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
 };
 
