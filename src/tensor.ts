@@ -206,6 +206,9 @@ export class Tensor {
         params: KernelParamsInput,
         ...additionalInputs: Tensor[]
     ): Tensor {
+        if (this.requiresGrad) {
+            throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
+        }
         const d = this.device;
         const kernel = this.device.getKernel(name, config);
         const inputBuffers = additionalInputs.map((t) =>
