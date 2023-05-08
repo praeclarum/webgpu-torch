@@ -164,7 +164,7 @@ export const registry: AnOpSpec[] = [
         name: "ldexp",
         type: "binary",
         forward: "output = input * pow(2.0, other)",
-        backward: "inputGrad = outputGrad * pow(2.0, other); otherGrad = outputGrad * input * log(2.0)",
+        backward: "var out = pow(2.0, other); inputGrad = outputGrad * out; otherGrad = outputGrad * input * out * 0.6931471805599453",
     },
     // lerp: trinary
     // lgamma: idk
