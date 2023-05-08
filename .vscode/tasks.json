@@ -29,9 +29,9 @@
 		},
 		{
 			"type": "npm",
-			"script": "testgen",
+			"script": "build-tests",
 			"problemMatcher": [],
-			"label": "npm: testgen",
+			"label": "npm: build-tests",
 		}
 	]
 }

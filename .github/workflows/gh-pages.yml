@@ -39,6 +39,8 @@ jobs:
         run: cp -a dist web/
       - name: Patch dist location
         run: sed -i 's/..\/dist/dist/g' web/index.html
+      - name: Build Tests
+        run: npm run build-tests
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Build with Jekyll
