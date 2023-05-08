@@ -163,11 +163,11 @@ function writeTypeScriptTestCode() {
     const w = new CodeWriter();
     w.writeLine(`import { runOpgenTest as t } from "./ops_opgen_test_support";`);
     for (var kernelName in resultsByKernelName) {
-        w.writeLine(`test("${kernelName}", () => {`);
+        w.writeLine(`test("${kernelName}", async () => {`);
         w.indent();
         const results = resultsByKernelName[kernelName];
         for (const r of results) {
-            w.writeLine(`t("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${JSON.stringify(r[2])}, ${JSON.stringify(r[3])});`);
+            w.writeLine(`await t("${kernelName}", ${JSON.stringify(r[0])}, ${JSON.stringify(r[1])}, ${JSON.stringify(r[2])}, ${JSON.stringify(r[3])});`);
         }
         w.dedent();
         w.writeLine(`});`);
