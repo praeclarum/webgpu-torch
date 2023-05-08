@@ -489,7 +489,7 @@ export function floor_divide(input: Tensor, other: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = fract(input)
+* output = input >= 0.0 ? fract(input) : -fract(-input)
 * ```
 *
 * Gradient:
@@ -876,12 +876,12 @@ export function sin(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = input == 0.0 ? 1.0 : sin(input * 3.141592653589793) / (input * 3.141592653589793)
+* var inpi = input * 3.141592653589793; output = input == 0.0 ? 1.0 : sin(inpi) / inpi
 * ```
 *
 * Gradient:
 * ```js
-* inputGrad = input == 0.0 ? 0.0 : outputGrad * (cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))
+* var inpi = input * 3.141592653589793; inputGrad = input == 0.0 ? 0.0 : (outputGrad * 3.141592653589793 * (inpi*cos(inpi) - sin(inpi)) / (inpi*inpi))
 * ```
 *
 * @param input the input tensor of any shape

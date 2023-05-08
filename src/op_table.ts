@@ -297,8 +297,8 @@ export const registry: AnOpSpec[] = [
     {
         name: "sinc",
         type: "unary",
-        forward: "output = input == 0.0 ? 1.0 : sin(input * 3.141592653589793) / (input * 3.141592653589793)",
-        backward: "inputGrad = input == 0.0 ? 0.0 : outputGrad * (cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))",
+        forward: "var inpi = input * 3.141592653589793; output = input == 0.0 ? 1.0 : sin(inpi) / inpi",
+        backward: "var inpi = input * 3.141592653589793; inputGrad = input == 0.0 ? 0.0 : (outputGrad * 3.141592653589793 * (inpi*cos(inpi) - sin(inpi)) / (inpi*inpi))",
     },
     {
         name: "sinh",
