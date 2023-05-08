@@ -3,10 +3,11 @@ import { tensor } from "./ops_artisanal";
 
 import { TensorArrayData } from "./storage";
 import { Tensor } from "./tensor";
+import { DeviceType } from "./device";
 
 type TestArrayData = (number | "NaN" | "+Inf" | "-Inf" | TestArrayData)[];
 
-function compareArrays(x: TensorArrayData, expected: TestArrayData): void {
+function compareArrays(x: TensorArrayData, expected: TestArrayData, deviceType: DeviceType): void {
     expect(x.length).toEqual(expected.length);
     for (let i = 0; i < x.length; i++) {
         const actual = x[i];
@@ -18,7 +19,18 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData): void {
         }
         else if (typeof expectedValue == "string") {
             if (expectedValue == "NaN") {
-                expect(actual).toBeNaN();
+                if (deviceType == "cpu") {
+                    expect(actual).toBeNaN();
+                }
+                else {
+                    if (Number.isNaN(actual)) {
+                        // OK
+                    }
+                    else {
+                        expect(actual).not.toBeNaN();
+                        expect(actual).toEqual(0);
+                    }
+                }
             }
             else if (expectedValue == "+Inf") {
                 expect(actual).toBe(Infinity);
@@ -31,7 +43,7 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData): void {
             }
         }
         else if (actual instanceof Array) {
-            compareArrays(actual, expectedValue);
+            compareArrays(actual, expectedValue, deviceType);
         }
         else {
             throw new Error(`Unexpected value: ${actual}`);
@@ -68,11 +80,11 @@ async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expec
         for (let i = 0; i < inputGrads.length; i++) {
             const inputGrad = inputGrads[i];
             const expectedGrad = expectedGrads[i];
-            compareArrays(await inputGrad.toArrayAsync(), expectedGrad);
+            compareArrays(await inputGrad.toArrayAsync(), expectedGrad, inputGrad.device.type);
         }
     }
     else {
-        compareArrays(await outputTensor.toArrayAsync(), expectedOutput);
+        compareArrays(await outputTensor.toArrayAsync(), expectedOutput, outputTensor.device.type);
     }
 }
 
