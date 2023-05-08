@@ -72,7 +72,7 @@ export const registry: AnOpSpec[] = [
         name: "ceil",
         type: "unary",
         forward: "output = ceil(input)",
-        backward: "inputGrad = outputGrad",
+        backward: "inputGrad = 0",
     },
     // clamp: beta
     // clip: alias for clamp
@@ -138,7 +138,7 @@ export const registry: AnOpSpec[] = [
         name: "floor",
         type: "unary",
         forward: "output = floor(input)",
-        backward: "inputGrad = outputGrad",
+        backward: "inputGrad = 0",
     },
     {
         name: "floor_divide",
@@ -266,7 +266,7 @@ export const registry: AnOpSpec[] = [
         name: "round",
         type: "unary",
         forward: "output = round(input)",
-        backward: "inputGrad = outputGrad",
+        backward: "inputGrad = 0",
     },
     {
         name: "rsqrt",
@@ -284,7 +284,7 @@ export const registry: AnOpSpec[] = [
         name: "sign",
         type: "unary",
         forward: "output = sign(input)",
-        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : 1.0)",
+        backward: "inputGrad = 0",
     },
     // sgn: complex
     // signbit: integer
@@ -345,7 +345,7 @@ export const registry: AnOpSpec[] = [
         aliases: ["fix"],
         type: "unary",
         forward: "output = trunc(input)",
-        backward: "inputGrad = outputGrad",
+        backward: "inputGrad = 0",
     },
     {
         name: "xlogy",
