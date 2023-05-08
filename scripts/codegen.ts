@@ -1,6 +1,6 @@
 import { KernelSpec } from "../src/kernel";
 import { CodeWriter, opSpecToKernelSpecs } from "../src/opgen";
-import { OpSpec } from "../src/op_spec";
+import { OpSpec, ReductionOpSpec } from "../src/op_spec";
 import { registry } from "../src/op_table";
 
 // import fs
@@ -49,7 +49,8 @@ function writeTensorCode(): void {
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const isReduction = opSpec.type === "reduction";
-        const writeHeader = (name: string) => {
+        const writeHeader = (name: string, isAlias: boolean) => {
+            writeOpDocs(opSpec, "this", isAlias, w);
             if (isReduction) {
                 w.writeLine(`${name}(dim?: number, keepdim?: boolean): Tensor {`);
             }
@@ -70,7 +71,7 @@ function writeTensorCode(): void {
                 }
             }
         };
-        writeHeader(kernelSpec.name);
+        writeHeader(kernelSpec.name, false);
         w.indent();
         if (isInplace) {
             if (isBinary) {
@@ -142,7 +143,7 @@ function writeTensorCode(): void {
         w.writeLine(`}`);
         if (!isInplace) {
             for (const alias of opSpec.aliases ?? []) {
-                writeHeader(alias);
+                writeHeader(alias, true);
                 w.indent();
                 if (isBinary) {
                     if (hasAlpha) {
@@ -301,6 +302,52 @@ import { shapeSize } from "./shape";`);
 }
 writeFunctionsCode();
 
+function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: CodeWriter): void {
+    const isBinary = opSpec.type === "binary";
+    const hasAlpha = opSpec.alpha ?? false;
+    w.writeLine(`/**`);
+    if (isAlias) {
+        w.writeLine(`* Alias for \`${opSpec.name}\`.`);
+        w.writeLine(`*`);
+    }
+    w.writeLine(`* Calculates:`);
+    w.writeLine(`* \`\`\`js`);
+    w.writeLine(`* ${opSpec.forward}`);
+    w.writeLine(`* \`\`\``);
+    w.writeLine(`*`);
+    if (opSpec.type === "reduction") {
+        w.writeLine(`* with an initial value of \`${(opSpec as ReductionOpSpec).init}\`.`);
+        w.writeLine(`*`);
+    }
+    if (opSpec.backward) {
+        w.writeLine(`* Gradient:`);
+        w.writeLine(`* \`\`\`js`);
+        w.writeLine(`* ${opSpec.backward}`);
+        w.writeLine(`* \`\`\``);
+        w.writeLine(`*`);
+    }
+    if (inputName !== "this") {
+        w.writeLine(`* @param ${inputName} the input tensor of any shape`);
+    }
+    if (isBinary) {
+        w.writeLine(`* @param other the other tensor whose shape is broadcastable with the input tensor`);
+        if (hasAlpha) {
+            w.writeLine(`* @param alpha the alpha value to multiply \`other\` with`);
+        }
+        else {
+        }
+    }
+    else {
+        if (hasAlpha) {
+            w.writeLine(`* @param alpha the alpha value`);
+        }
+        else {
+        }
+    }
+    w.writeLine(`* @returns the output tensor`);
+    w.writeLine(`*/`);
+}
+
 // Write global ops
 function writeOpsCode(): void {
     const w = new CodeWriter();
@@ -317,7 +364,8 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
-        const writeHeader = (name: string) => {
+        const writeHeader = (name: string, isAlias: boolean) => {
+            writeOpDocs(opSpec, "input", isAlias, w);
             if (isBinary) {
                 if (hasAlpha) {
                     w.writeLine(`export function ${name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
@@ -335,7 +383,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
                 }
             }
         };
-        writeHeader(kernelSpec.name);
+        writeHeader(kernelSpec.name, false);
         w.indent();
         if (isBinary) {
             if (hasAlpha) {
@@ -356,7 +404,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
         w.dedent();
         w.writeLine(`}`);
         for (const alias of opSpec.aliases ?? []) {
-            writeHeader(alias);
+            writeHeader(alias, true);
             w.indent();
             if (isBinary) {
                 if (hasAlpha) {
