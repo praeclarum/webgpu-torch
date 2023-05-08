@@ -1140,43 +1140,6 @@ export class Tensor {
     /**
     * Calculates:
     * ```js
-    * output = floor(input / other)
-    * ```
-    *
-    * Gradient:
-    * ```js
-    * inputGrad = outputGrad / other; otherGrad = -outputGrad * floor(input / other) / other
-    * ```
-    *
-    * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @returns the output tensor
-    */
-    floor_divide(other: Tensor): Tensor {
-        return ops.floor_divide(this, other);
-    }
-    /**
-    * Calculates:
-    * ```js
-    * output = floor(input / other)
-    * ```
-    *
-    * Gradient:
-    * ```js
-    * inputGrad = outputGrad / other; otherGrad = -outputGrad * floor(input / other) / other
-    * ```
-    *
-    * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @returns the output tensor
-    */
-    floor_divide_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("floor_divide_", { dtype: this.dtype }, params, other);
-    }
-    /**
-    * Calculates:
-    * ```js
     * output = input >= 0.0 ? fract(input) : -fract(-input)
     * ```
     *

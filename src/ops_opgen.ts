@@ -471,24 +471,6 @@ export function floor(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = floor(input / other)
-* ```
-*
-* Gradient:
-* ```js
-* inputGrad = outputGrad / other; otherGrad = -outputGrad * floor(input / other) / other
-* ```
-*
-* @param input the input tensor of any shape
-* @param other the other tensor whose shape is broadcastable with the input tensor
-* @returns the output tensor
-*/
-export function floor_divide(input: Tensor, other: Tensor): Tensor {
-    return binary(functions.Floor_divideFunction, input, other);
-}
-/**
-* Calculates:
-* ```js
 * output = input >= 0.0 ? fract(input) : -fract(-input)
 * ```
 *

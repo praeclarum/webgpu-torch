@@ -466,32 +466,6 @@ export class FloorFunction extends AutoFunction {
         return input.runKernel("floorGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
-export class Floor_divideFunction extends AutoFunction {
-    static forward(inputs: FunctionInput[]): Tensor {
-        const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("floor_divide", {"dtype":"float32"}, params, [input.shape], other)[0];
-    }
-    static setupContext(
-        ctx: GradientContext,
-        inputs: FunctionInput[],
-        output: Tensor
-    ): void {
-        const [input, other] = inputs as [Tensor, Tensor];
-        ctx.saveForBackward(input, other);
-    }
-    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("floor_divideGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
-    }
-}
 export class FracFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
