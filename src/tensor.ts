@@ -1935,7 +1935,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input == 0.0 ? 0.0 : cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))
+    * inputGrad = input == 0.0 ? 0.0 : outputGrad * (cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))
     * ```
     *
     * @returns the output tensor
@@ -1951,7 +1951,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input == 0.0 ? 0.0 : cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))
+    * inputGrad = input == 0.0 ? 0.0 : outputGrad * (cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))
     * ```
     *
     * @returns the output tensor

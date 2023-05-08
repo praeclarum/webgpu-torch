@@ -298,7 +298,7 @@ export const registry: AnOpSpec[] = [
         name: "sinc",
         type: "unary",
         forward: "output = input == 0.0 ? 1.0 : sin(input * 3.141592653589793) / (input * 3.141592653589793)",
-        backward: "inputGrad = outputGrad * (input == 0.0 ? 0.0 : cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))",
+        backward: "inputGrad = input == 0.0 ? 0.0 : outputGrad * (cos(input * 3.141592653589793) / (input * 3.141592653589793) - sin(input * 3.141592653589793) / (input * input * 3.141592653589793))",
     },
     {
         name: "sinh",
