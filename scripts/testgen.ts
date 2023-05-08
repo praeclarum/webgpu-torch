@@ -12,6 +12,9 @@ console.log("Running test code generator...");
 const unaryTestValues = [
     -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0
 ];
+const binaryTestValues = [
+    -0.5, 0.0, 0.3
+];
 
 const absSrcDir = fs.realpathSync(__dirname + "/../src");
 console.log("src dir:", absSrcDir);
@@ -58,6 +61,8 @@ function writePythonTests() {
         const isGrad = kernelName.endsWith("Grad");
         if (isGrad) return false;
         if (kernelName == "positive_") return false;
+        if (kernelName == "logaddexp_") return false;
+        if (kernelName == "logaddexp2_") return false;
         return true;
     }
     for (var [opSpec, kernelSpec] of opKernelSpecs) {
@@ -70,43 +75,73 @@ function writePythonTests() {
         const isReduction = opSpec.type == "reduction";
         const isInplace = kernelName.endsWith("_");
         const hasAlpha = opSpec.alpha ?? false;
-        if (isUnary) {
-            w.writeLine(`def test_${kernelName}_value(value):`);
-            w.indent();
-            w.writeLine(`grads = []`);
-            w.writeLine(`gradError = False`);
-            if (isInplace) {
-                w.writeLine(`input = torch.tensor([value], dtype=torch.float32)`);
-                w.writeLine(`output = input.clone()`);
-                w.writeLine(`output.${kernelName}()`);
+        const params = ["input"];
+        if (isBinary) {
+            params.push("other");
+        }
+        // if (hasAlpha) {
+        //     params.push("alpha");
+        // }
+        const paramsS = params.join(", ");
+        w.writeLine(`def test_${kernelName}_value(${paramsS}):`);
+        w.indent();
+        w.writeLine(`grads = []`);
+        w.writeLine(`gradError = False`);
+        if (isInplace) {
+            w.writeLine(`input = torch.tensor(input, dtype=torch.float32)`);
+            w.writeLine(`output = input.clone()`);
+            if (isBinary) {
+                w.writeLine(`other = torch.tensor(other, dtype=torch.float32)`);
+                w.writeLine(`output.${kernelName}(other)`);
             }
             else {
-                w.writeLine(`input = torch.tensor([value], dtype=torch.float32, requires_grad=True)`);
-                w.writeLine(`output = torch.${kernelName}(input)`);
-                if (opSpec.backward) {
-                    w.writeLine(`try:`);
-                    w.indent();
-                    w.writeLine(`output.backward()`);
-                    w.writeLine(`assert input.grad is not None`);
-                    w.writeLine(`grads = [input.grad]`);
-                    w.dedent();
-                    w.writeLine(`except:`);
-                    w.indent();
-                    w.writeLine(`gradError = True`);
-                    w.dedent();
+                w.writeLine(`output.${kernelName}()`);
+            }
+        }
+        else {
+            w.writeLine(`input = torch.tensor(input, dtype=torch.float32, requires_grad=True)`);
+            if (isBinary) {
+                w.writeLine(`other = torch.tensor(other, dtype=torch.float32, requires_grad=True)`);
+            }
+            w.writeLine(`output = torch.${kernelName}(${paramsS})`);
+            if (opSpec.backward) {
+                w.writeLine(`try:`);
+                w.indent();
+                w.writeLine(`output.backward()`);
+                w.writeLine(`assert input.grad is not None`);
+                if (isBinary) {
+                    w.writeLine(`grads = [input.grad, other.grad]`);
                 }
+                else {
+                    w.writeLine(`grads = [input.grad]`);
+                }
+                w.dedent();
+                w.writeLine(`except:`);
+                w.indent();
+                w.writeLine(`gradError = True`);
+                w.dedent();
             }
-            w.writeLine(`add_results("${opName}", "${kernelName}", [input], [output], grads, gradError)`);
-            w.dedent();
-            w.writeLine(`def test_${kernelName}():`);
-            w.indent();
+        }
+        w.writeLine(`add_results("${opName}", "${kernelName}", [${params}], [output], grads, gradError)`);
+        w.dedent();
+        w.writeLine(`def test_${kernelName}():`);
+        w.indent();
+        if (isUnary) {
             for (const v of unaryTestValues) {
-                w.writeLine(`test_${kernelName}_value(${v})`);
+                w.writeLine(`test_${kernelName}_value([${v}])`);
             }
-            w.dedent();
         }
         else if (isBinary) {
+            for (const v1 of binaryTestValues) {
+                for (const v2 of binaryTestValues) {
+                    w.writeLine(`test_${kernelName}_value([${v1}], [${v2}])`);
+                }
+            }
         }
+        else {
+            w.writeLine(`pass`);
+        }
+        w.dedent();
     }
     w.writeLine(`if __name__ == "__main__":`);
     w.indent();
@@ -114,17 +149,13 @@ function writePythonTests() {
         if (!shouldOutputKernelSpec(kernelSpec))
             continue;        
         const kernelName = kernelSpec.name;
-        if (opSpec.type !== "unary")
-            continue;
         w.writeLine(`test_${kernelName}()`);
-        // Use json module to print results with indent
-        
-        w.writeLine(`results_json = json.dumps(results, indent=2)`);
-        w.writeLine(`with open("${pythonTestResultsPath}", "w") as f:`);
-        w.indent();
-        w.writeLine(`f.write(results_json)`);
-        w.dedent();
     }
+    w.writeLine(`with open("${pythonTestResultsPath}", "w") as f:`);
+    w.indent();
+    w.writeLine(`results_json = json.dumps(results, indent=2)`);
+    w.writeLine(`f.write(results_json)`);
+    w.dedent();
     w.dedent();
     fs.writeFileSync(pythonTestsPath, w.toString(), "utf-8");
 }

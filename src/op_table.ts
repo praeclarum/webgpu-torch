@@ -140,12 +140,7 @@ export const registry: AnOpSpec[] = [
         forward: "output = floor(input)",
         backward: "inputGrad = 0",
     },
-    {
-        name: "floor_divide",
-        type: "binary",
-        forward: "output = floor(input / other)",
-        backward: "inputGrad = outputGrad / other; otherGrad = -outputGrad * floor(input / other) / other",
-    },
+    // floor_divide: deprecated
     // fmod: meh
     {
         name: "frac",
