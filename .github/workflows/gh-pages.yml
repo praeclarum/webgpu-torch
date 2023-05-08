@@ -40,7 +40,7 @@ jobs:
       - name: Patch dist location
         run: sed -i 's/..\/dist/dist/g' web/index.html
       - name: Install pytorch
-        run: pip install "torch>=2.0.0+cpu" -f https://download.pytorch.org/whl/torch_stable.html
+        run: pip install numpy "torch>=2.0.0+cpu" -f https://download.pytorch.org/whl/torch_stable.html
       - name: Build Tests
         run: npm run build-tests
       - name: Setup Pages
