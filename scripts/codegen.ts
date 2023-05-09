@@ -1,6 +1,7 @@
 import { CodeWriter } from "../src/opgen";
 import { OpSpec, ReductionOpSpec } from "../src/op_spec";
 import { opKernelSpecs } from "../src/kernels_opgen";
+import { registry as opRegistry } from "../src/op_table";
 
 // import fs
 import * as fs from "fs";
@@ -290,7 +291,7 @@ import { shapeSize } from "./shape";`);
 }
 writeFunctionsCode();
 
-function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: CodeWriter): void {
+function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: CodeWriter, includeParamsAndReturn: boolean = true): void {
     const isBinary = opSpec.type === "binary";
     const hasAlpha = opSpec.alpha ?? false;
     w.writeLine(`/**`);
@@ -314,25 +315,27 @@ function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: Cod
         w.writeLine(`* \`\`\``);
         w.writeLine(`*`);
     }
-    if (inputName !== "this") {
-        w.writeLine(`* @param ${inputName} the input tensor of any shape`);
-    }
-    if (isBinary) {
-        w.writeLine(`* @param other the other tensor whose shape is broadcastable with the input tensor`);
-        if (hasAlpha) {
-            w.writeLine(`* @param alpha the alpha value to multiply \`other\` with`);
+    if (includeParamsAndReturn) {
+        if (inputName !== "this") {
+            w.writeLine(`* @param ${inputName} the input tensor of any shape`);
+        }
+        if (isBinary) {
+            w.writeLine(`* @param other the other tensor whose shape is broadcastable with the input tensor`);
+            if (hasAlpha) {
+                w.writeLine(`* @param alpha the alpha value to multiply \`other\` with`);
+            }
+            else {
+            }
         }
         else {
+            if (hasAlpha) {
+                w.writeLine(`* @param alpha the alpha value`);
+            }
+            else {
+            }
         }
+        w.writeLine(`* @returns the output tensor`);
     }
-    else {
-        if (hasAlpha) {
-            w.writeLine(`* @param alpha the alpha value`);
-        }
-        else {
-        }
-    }
-    w.writeLine(`* @returns the output tensor`);
     w.writeLine(`*/`);
 }
 
@@ -422,3 +425,53 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
     fs.writeFileSync(path, code);
 }
 writeOpsCode();
+
+// Write autograd functions
+function writeNNModulesCode(): void {
+    const w = new CodeWriter();
+    w.writeLine(`import { Tensor } from "./tensor";
+import { Module } from "./nn_module";`);
+    for (const opSpec of opRegistry) {
+        if (!opSpec.nnOp)
+            continue;
+        const name = opSpec.name;
+        const isBinary = opSpec.type === "binary";
+        const isReduction = opSpec.type === "reduction";
+        const hasAlpha = opSpec.alpha ?? false;
+        const nnName = opSpec.nnName ?? (name[0].toUpperCase() + name.slice(1));
+        const params: string[] = ["input: Tensor"];
+        const args: string[] = [];
+        if (isBinary) {
+            params.push("other: Tensor");
+            args.push("other");
+        }
+        if (hasAlpha) {
+            params.push("alpha?: number");
+            args.push("alpha");
+        }
+        const paramsStr = params.join(", ");
+        const argsStr = args.join(", ");
+        writeOpDocs(opSpec, "input", false, w, false);
+        w.writeLine(`export class ${nnName} extends Module {`);
+        w.indent();
+
+        // Forward
+        w.writeLine(`forward(${paramsStr}): Tensor {`);
+        w.indent();
+        w.writeLine(`return input.${opSpec.name}(${argsStr});`);
+        w.dedent();
+        w.writeLine(`}`);
+
+        // End Module
+        w.dedent();
+        w.writeLine(`}`);
+    }
+    w.writeLine("");
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/nn_opgen.ts";
+    console.log("Writing", path);
+    fs.writeFileSync(path, code);
+}
+writeNNModulesCode();
+

@@ -258,6 +258,8 @@ export const registry: AnOpSpec[] = [
     },
     {
         name: "relu",
+        nnName: "ReLU",
+        nnOp: true,
         type: "unary",
         forward: "output = max(input, 0.0)",
         backward: "inputGrad = input > 0.0 ? outputGrad : 0.0",
