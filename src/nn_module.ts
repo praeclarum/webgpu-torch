@@ -14,11 +14,11 @@ export type StateDict = { [key: string]: Tensor };
  * To add a parameter to a module, assign it as a property of the module in the constructor.
  */
 export class Module {
-    private _children: [string, Module][] | null = null;
+    private _children: [string|number, Module][] | null = null;
     /**
      * Returns the immediate children (submodules) of this module along with their names.
      */
-    get namedChildren(): [string, Module][] {
+    get namedChildren(): [string|number, Module][] {
         if (this._children === null) {
             this._children = [];
             for (const key in this) {
@@ -98,11 +98,11 @@ export class Module {
      * @param name name of the child module
      * @param module child module to be added
      */
-    addModule(name: string, module: Module): void {
+    addModule(name: string|number, module: Module): void {
         if ((this as any)[name] !== undefined) {
             throw new Error(`Module already has a child named ${name}`);
         }
-        if (name.indexOf(".") !== -1) {
+        if (typeof name === "string" && name.indexOf(".") !== -1) {
             throw new Error(`Module name cannot contain "."`);
         }
         (this as any)[name] = module;
@@ -119,7 +119,7 @@ export class Module {
         memo?: Set<Module>,
         prefix: string = "",
         removeDuplicate: boolean = true
-    ): Generator<[string, Module]> {
+    ): Generator<[string|number, Module]> {
         memo = memo || new Set<Module>();
         if (!memo.has(this)) {
             if (removeDuplicate) {
@@ -130,7 +130,7 @@ export class Module {
                 if (!module) {
                     continue;
                 }
-                const submodulePrefix = prefix ? `${prefix}.${name}` : name;
+                const submodulePrefix = prefix ? `${prefix}.${name}` : `${name}`;
                 yield* module.namedModules(
                     memo,
                     submodulePrefix,
@@ -156,7 +156,7 @@ export class Module {
         remove_duplicate: boolean = true
     ): Generator<[string, T]> {
         const memo = new Set<T>();
-        const modules: Generator<[string, Module]> | [string, Module][] =
+        const modules: Generator<[string|number, Module]> | [string|number, Module][] =
             recurse
                 ? this.namedModules(undefined, prefix, remove_duplicate)
                 : [[prefix, this]];
@@ -379,15 +379,33 @@ export class Parameter extends Tensor {
     }
 }
 
-export class Container extends Module {
-    constructor(modules?: { [name: string]: Module }) {
+/**
+ * An abstraction for modules that accept child modules as arguments.
+ */
+export abstract class Container extends Module {
+}
+
+/**
+ * A sequential container.
+ * 
+ * Modules will be added to it in the order they are passed in the constructor.
+ * 
+ * The `forward()` method of Sequential accepts any input and forwards it to the first module.
+ * It then forwards the output of that module to the second module, and so on,
+ * finally returning the output of the last module.
+ */
+export class Sequential extends Module {
+    get length() {
+        return this.children.length;
+    }
+    [index: number]: Module;
+    [Symbol.iterator]() {
+        return this.children[Symbol.iterator]();
+    }
+    constructor(modules: Module[]) {
         super();
-        if (modules) {
-            for (const [name, module] of Object.entries(modules)) {
-                this.addModule(name, module);
-            }
+        for (const [i, module] of modules.entries()) {
+            this.addModule(i, module);
         }
     }
 }
-
-export class Sequential extends Module {}

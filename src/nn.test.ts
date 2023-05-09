@@ -151,18 +151,30 @@ test("save dict has buffers and parameters", () => {
     expect(stateDict["d.p2"]).toBe(m.d.p2);
 });
 
-test("Container adds named modules", () => {
-    const a = new A();
-    const b = new B();
-    const container = new nn.Container({a: a, b: b});
-    expect((container as any).a).toBe(a);
-    expect((container as any).b).toBe(b);
-});
-
 test("AddModule duplicate names not allowed", () => {
     const a = new A();
     const b = new B();
     expect(() => a.addModule("b", b)).toThrow();
+});
+
+test("Sequential adds modules from array", () => {
+    const a = new A();
+    const b = new B();
+    const seq = new nn.Sequential([a, b]);
+    expect(seq.length).toBe(2);
+    expect(seq[0]).toBe(a);
+    expect(seq[1]).toBe(b);
+});
+
+test("iterate over sequential", () => {
+    const a = new A();
+    const b = new B();
+    const seq = new nn.Sequential([a, b]);
+    let i = 0;
+    for (const m of seq) {
+        expect(m).toBe(seq[i]);
+        i++;
+    }
 });
 
 test("Conv2d can set inChannels and outChannels", () => {
