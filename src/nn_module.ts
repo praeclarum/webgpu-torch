@@ -13,6 +13,27 @@ export type StateDict = { [key: string]: Tensor };
  * Modules can also contain `Parameter` objects, which are tensors that are automatically
  * updated by optimizers and are saved when calling `saveDict()`.
  * To add a parameter to a module, assign it as a property of the module in the constructor.
+ * 
+ * Module subtypes implement a `forward` function in order to define the computation of the module.
+ * 
+ * ```
+ * class Model extends torch.nn.Module {
+ *     conv1: torch.nn.Conv2d;
+ *     conv2: torch.nn.Conv2d;
+ *     constructor() {
+ *         super();
+ *         this.conv1 = torch.nn.Conv2d(1, 20, 5);
+ *         this.conv2 = torch.nn.Conv2d(20, 20, 5);
+ *     }
+ *     forward(input: torch.Tensor): torch.Tensor {
+ *         let output = this.conv1.forward(input);
+ *         output = output.tanh();
+ *         output = this.conv2.forward(output);
+ *         output = output.sigmoid();
+ *         return output;
+ *     }
+ * }
+ * ```
  */
 export class Module {
     private _children: [string|number, Module][] | null = null;
