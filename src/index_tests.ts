@@ -3,6 +3,7 @@ export { hasWebGPU, initWebGPUAsync } from "./webgpu";
 export { tensor } from "./ops_artisanal";
 export * from "./autograd.test";
 export * from "./device.test";
+export * from "./dtype.test";
 export * from "./expr.test";
 export * from "./kernel.test";
 export * from "./nn.test";
