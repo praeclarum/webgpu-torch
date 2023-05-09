@@ -1,3 +1,4 @@
+import { FunctionInput } from "./autograd";
 import { Tensor } from "./tensor";
 
 export type StateDict = { [key: string]: Tensor };
@@ -382,7 +383,7 @@ export class Parameter extends Tensor {
 /**
  * An abstraction for modules that accept child modules as arguments.
  */
-export abstract class Container extends Module {
+export class Container extends Module {
 }
 
 /**
@@ -407,5 +408,11 @@ export class Sequential extends Module {
         for (const [i, module] of modules.entries()) {
             this.addModule(i, module);
         }
+    }
+    forward(input: Tensor): Tensor {
+        for (const module of this.children) {
+            input = (module as any).forward(input);
+        }
+        return input;
     }
 }

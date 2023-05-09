@@ -1,10 +1,12 @@
 import { zeros } from './factories';
 import * as nn from './nn';
+import { Tensor } from './tensor';
 
 class A extends nn.Module {
     b: B;
     d: D;
     p1: nn.Parameter;
+    forwardCount = 0;
     constructor() {
         super();
         this.b = new B();
@@ -12,15 +14,26 @@ class A extends nn.Module {
         this.p1 = new nn.Parameter(zeros([1, 2, 3]));
         this.registerBuffer("buf1", zeros([100, 200, 300]));
     }
+    forward(input: Tensor): Tensor {
+        this.forwardCount++;
+        let output = this.b.forward(input);
+        output = this.d.forward(output);
+        return output;
+    }
 }
 
 class B extends nn.Module {
     x1: X;
     p2: nn.Parameter;
+    forwardCount = 0;
     constructor() {
         super();
         this.x1 = new X();
         this.p2 = new nn.Parameter(zeros([4, 5, 6]));
+    }
+    forward(input: Tensor): Tensor {
+        this.forwardCount++;
+        return input;
     }
 }
 
@@ -32,7 +45,19 @@ class D extends B {
     }
 }
 
-class X extends nn.Module {    
+class X extends nn.Module {
+    forward(input: Tensor): Tensor {
+        return input;
+    }
+}
+
+class NoForward extends nn.Module {
+}
+
+class Abs extends nn.Module {
+    forward(input: Tensor): Tensor {
+        return input.abs();
+    }
 }
 
 test("derived module has parent immediate children", () => {
@@ -175,6 +200,21 @@ test("iterate over sequential", () => {
         expect(m).toBe(seq[i]);
         i++;
     }
+});
+
+test("Sequential forward works", async () => {
+    const abs = new Abs();
+    const x = new X();
+    const seq = new nn.Sequential([x, abs]);
+    const output = seq.forward(new Tensor([-1, 2, -3]));
+    expect(await output.toArrayAsync()).toEqual([1, 2, 3]);
+});
+
+test("Sequential forward fails with missing child forward", async () => {
+    const abs = new Abs();
+    const no = new NoForward();
+    const seq = new nn.Sequential([no, abs]);
+    expect(() => seq.forward(new Tensor([-1, 2, -3]))).toThrow();
 });
 
 test("Conv2d can set inChannels and outChannels", () => {
