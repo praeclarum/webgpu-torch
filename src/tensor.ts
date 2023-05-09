@@ -1720,7 +1720,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+    * inputGrad = input > 0.0 ? outputGrad : 0.0
     * ```
     *
     * @returns the output tensor
@@ -1736,7 +1736,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+    * inputGrad = input > 0.0 ? outputGrad : 0.0
     * ```
     *
     * @returns the output tensor

@@ -778,7 +778,7 @@ export function reciprocal(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+* inputGrad = input > 0.0 ? outputGrad : 0.0
 * ```
 *
 * @param input the input tensor of any shape

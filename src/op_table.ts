@@ -260,7 +260,7 @@ export const registry: AnOpSpec[] = [
         name: "relu",
         type: "unary",
         forward: "output = max(input, 0.0)",
-        backward: "inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)",
+        backward: "inputGrad = input > 0.0 ? outputGrad : 0.0",
     },
     // remainder: meh
     {
