@@ -182,6 +182,26 @@ test("AddModule duplicate names not allowed", () => {
     expect(() => a.addModule("b", b)).toThrow();
 });
 
+test("ModuleList adds modules from array", () => {
+    const a = new A();
+    const b = new B();
+    const seq = new nn.ModuleList([a, b]);
+    expect(seq.length).toBe(2);
+    expect(seq[0]).toBe(a);
+    expect(seq[1]).toBe(b);
+});
+
+test("iterate over ModuleList", () => {
+    const a = new A();
+    const b = new B();
+    const seq = new nn.ModuleList([a, b]);
+    let i = 0;
+    for (const m of seq) {
+        expect(m).toBe(seq[i]);
+        i++;
+    }
+});
+
 test("Sequential adds modules from array", () => {
     const a = new A();
     const b = new B();
@@ -218,7 +238,7 @@ test("Sequential forward fails with missing child forward", async () => {
 });
 
 test("Conv2d can set inChannels and outChannels", () => {
-    const conv2d = new nn.Conv2d(3, 4);
+    const conv2d = new nn.Conv2d(3, 256, 3, 1, 0, "float32");
     expect(conv2d.inChannels).toBe(3);
-    expect(conv2d.outChannels).toBe(4);
+    expect(conv2d.outChannels).toBe(256);
 });

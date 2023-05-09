@@ -1,24 +1,32 @@
 import { Module } from "./nn_module";
 
+export class AvgPooling2d extends Module {}
+
 export class Conv2d extends Module {
-    private _inChannels: number;
-    private _outChannels: number;
-    get inChannels(): number {
-        return this._inChannels;
+    inChannels: number;
+    outChannels: number;
+    constructor(
+        inChannels: number,
+        outChannels: number,
+        kernelSize: number | [number, number],
+        stride: number | [number, number],
+        padding: number | [number, number] | "valid" | "same",
+        dtype: string
+    ) {
+        super();
+        this.inChannels = inChannels;
+        this.outChannels = outChannels;
     }
-    get outChannels(): number {
-        return this._outChannels;
-    }
+}
+
+export class ConvTranspose2d extends Module {}
+
+export class Linear extends Module {
+    inChannels: number;
+    outChannels: number;
     constructor(inChannels: number, outChannels: number) {
         super();
-        // Set properties directly on 'this'
-        this._inChannels = inChannels;
-        this._outChannels = outChannels;
+        this.inChannels = inChannels;
+        this.outChannels = outChannels;
     }
-}
-
-export class ConvTranspose2d extends Module {
-}
-
-export class AvgPooling2d extends Module {
 }

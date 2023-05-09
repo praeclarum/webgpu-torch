@@ -408,6 +408,25 @@ export class Container extends Module {
 }
 
 /**
+ * Hold submodules in a list.
+ */
+export class ModuleList extends Module {
+    get length() {
+        return this.children.length;
+    }
+    [index: number]: Module;
+    [Symbol.iterator]() {
+        return this.children[Symbol.iterator]();
+    }
+    constructor(modules: Module[] = []) {
+        super();
+        for (const [i, module] of modules.entries()) {
+            this.addModule(i, module);
+        }
+    }
+}
+
+/**
  * A sequential container.
  * 
  * Modules will be added to it in the order they are passed in the constructor.
