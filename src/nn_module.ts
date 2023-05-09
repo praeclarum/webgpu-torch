@@ -416,7 +416,7 @@ export class Container extends Module {
  * It then forwards the output of that module to the second module, and so on,
  * finally returning the output of the last module.
  */
-export class Sequential extends Module {
+export class Sequential extends Container {
     get length() {
         return this.children.length;
     }
