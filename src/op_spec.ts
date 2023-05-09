@@ -5,6 +5,9 @@ export type OpType = "unary" | "binary" | "reduction";
 
 export type OpSpec = {
     name: string;
+    nnName?: string;
+    torchName?: string;
+    nnOp?: boolean;
     aliases?: string[];
     alpha?: boolean;
     type: OpType;

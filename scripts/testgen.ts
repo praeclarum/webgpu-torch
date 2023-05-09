@@ -91,12 +91,23 @@ function writePythonTests() {
         if (isInplace) {
             w.writeLine(`input = torch.tensor(input, dtype=torch.float32)`);
             w.writeLine(`output = input.clone()`);
-            if (isBinary) {
-                w.writeLine(`other = torch.tensor(other, dtype=torch.float32)`);
-                w.writeLine(`output.${kernelName}(other)`);
+            if (opSpec.torchName && opSpec.torchName.startsWith("torch.nn.functional")) {
+                if (isBinary) {
+                    w.writeLine(`other = torch.tensor(other, dtype=torch.float32)`);
+                    w.writeLine(`${opSpec.torchName}(output, other, inplace=True)`);
+                }
+                else {
+                    w.writeLine(`${opSpec.torchName}(output, inplace=True)`);
+                }
             }
             else {
-                w.writeLine(`output.${kernelName}()`);
+                if (isBinary) {
+                    w.writeLine(`other = torch.tensor(other, dtype=torch.float32)`);
+                    w.writeLine(`output.${kernelName}(other)`);
+                }
+                else {
+                    w.writeLine(`output.${kernelName}()`);
+                }
             }
         }
         else {
@@ -104,7 +115,8 @@ function writePythonTests() {
             if (isBinary) {
                 w.writeLine(`other = torch.tensor(other, dtype=torch.float32, requires_grad=True)`);
             }
-            w.writeLine(`output = torch.${kernelName}(${paramsS})`);
+            const functionName = opSpec.torchName ?? `torch.${kernelName}`;
+            w.writeLine(`output = ${functionName}(${paramsS})`);
             if (opSpec.backward) {
                 w.writeLine(`try:`);
                 w.indent();

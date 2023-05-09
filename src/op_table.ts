@@ -275,6 +275,7 @@ export const registry: AnOpSpec[] = [
         forward: "output = 1.0 / sqrt(input)",
         backward: "inputGrad = -outputGrad / (2.0 * sqrt(input) * input)",
     },
+    // sgn: complex
     {
         name: "sigmoid",
         type: "unary",
@@ -287,7 +288,15 @@ export const registry: AnOpSpec[] = [
         forward: "output = sign(input)",
         backward: "inputGrad = 0",
     },
-    // sgn: complex
+    {
+        name: "silu",
+        nnName: "SiLU",
+        torchName: "torch.nn.functional.silu",
+        nnOp: true,
+        type: "unary",
+        forward: "output = input / (1.0 + exp(-input))",
+        backward: "var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * (out + input * out * (1.0 - out))",
+    },
     // signbit: integer
     {
         name: "sin",

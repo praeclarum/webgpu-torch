@@ -2498,6 +2498,69 @@ test("sign_([1])", async () => {
 test("sign_([2])", async () => {
     await f("sign_", [[2]], [[1]]);
 });
+test("silu([-2])", async () => {
+    await f("silu", [[-2]], [[-0.23840583860874176]]);
+});
+test("silu([-2]) gradient", async () => {
+    await b("silu", [[-2]], [[-0.09078425168991089]], false);
+});
+test("silu([-1])", async () => {
+    await f("silu", [[-1]], [[-0.2689414322376251]]);
+});
+test("silu([-1]) gradient", async () => {
+    await b("silu", [[-1]], [[0.07232948392629623]], false);
+});
+test("silu([-0.5])", async () => {
+    await f("silu", [[-0.5]], [[-0.1887703388929367]]);
+});
+test("silu([-0.5]) gradient", async () => {
+    await b("silu", [[-0.5]], [[0.260038822889328]], false);
+});
+test("silu([0])", async () => {
+    await f("silu", [[0]], [[0]]);
+});
+test("silu([0]) gradient", async () => {
+    await b("silu", [[0]], [[0.5]], false);
+});
+test("silu([0.5])", async () => {
+    await f("silu", [[0.5]], [[0.3112296760082245]]);
+});
+test("silu([0.5]) gradient", async () => {
+    await b("silu", [[0.5]], [[0.7399612069129944]], false);
+});
+test("silu([1])", async () => {
+    await f("silu", [[1]], [[0.7310585975646973]]);
+});
+test("silu([1]) gradient", async () => {
+    await b("silu", [[1]], [[0.9276705384254456]], false);
+});
+test("silu([2])", async () => {
+    await f("silu", [[2]], [[1.7615940570831299]]);
+});
+test("silu([2]) gradient", async () => {
+    await b("silu", [[2]], [[1.0907843112945557]], false);
+});
+test("silu_([-2])", async () => {
+    await f("silu_", [[-2]], [[-0.23840583860874176]]);
+});
+test("silu_([-1])", async () => {
+    await f("silu_", [[-1]], [[-0.2689414322376251]]);
+});
+test("silu_([-0.5])", async () => {
+    await f("silu_", [[-0.5]], [[-0.1887703388929367]]);
+});
+test("silu_([0])", async () => {
+    await f("silu_", [[0]], [[0]]);
+});
+test("silu_([0.5])", async () => {
+    await f("silu_", [[0.5]], [[0.3112296760082245]]);
+});
+test("silu_([1])", async () => {
+    await f("silu_", [[1]], [[0.7310585975646973]]);
+});
+test("silu_([2])", async () => {
+    await f("silu_", [[2]], [[1.7615940570831299]]);
+});
 test("sin([-2])", async () => {
     await f("sin", [[-2]], [[-0.9092974066734314]]);
 });

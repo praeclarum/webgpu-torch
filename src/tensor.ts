@@ -1890,6 +1890,41 @@ export class Tensor {
     /**
     * Calculates:
     * ```js
+    * output = input / (1.0 + exp(-input))
+    * ```
+    *
+    * Gradient:
+    * ```js
+    * var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * (out + input * out * (1.0 - out))
+    * ```
+    *
+    * @returns the output tensor
+    */
+    silu(): Tensor {
+        return ops.silu(this);
+    }
+    /**
+    * Calculates:
+    * ```js
+    * output = input / (1.0 + exp(-input))
+    * ```
+    *
+    * Gradient:
+    * ```js
+    * var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * (out + input * out * (1.0 - out))
+    * ```
+    *
+    * @returns the output tensor
+    */
+    silu_(): Tensor {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernelInplace("silu_", { dtype: this.dtype }, params);
+    }
+    /**
+    * Calculates:
+    * ```js
     * output = sin(input)
     * ```
     *

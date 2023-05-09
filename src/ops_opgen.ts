@@ -858,6 +858,23 @@ export function sign(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
+* output = input / (1.0 + exp(-input))
+* ```
+*
+* Gradient:
+* ```js
+* var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * (out + input * out * (1.0 - out))
+* ```
+*
+* @param input the input tensor of any shape
+* @returns the output tensor
+*/
+export function silu(input: Tensor): Tensor {
+    return unary(functions.SiluFunction, input);
+}
+/**
+* Calculates:
+* ```js
 * output = sin(input)
 * ```
 *
