@@ -23,6 +23,7 @@ export {
     ShaderType,
 } from "./kernel";
 export * from "./ops";
+export * as nn from "./nn";
 export * from "./shape";
 export { TensorArrayData, UntypedStorage } from "./storage";
 export * from "./tensor";
