@@ -27,9 +27,9 @@ export type StateDict = { [key: string]: Tensor };
  *     }
  *     forward(input: torch.Tensor): torch.Tensor {
  *         let output = this.conv1.forward(input);
- *         output = output.tanh();
+ *         output = output.relu();
  *         output = this.conv2.forward(output);
- *         output = output.sigmoid();
+ *         output = output.relu();
  *         return output;
  *     }
  * }

@@ -1715,6 +1715,41 @@ export class Tensor {
     /**
     * Calculates:
     * ```js
+    * output = max(input, 0.0)
+    * ```
+    *
+    * Gradient:
+    * ```js
+    * inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+    * ```
+    *
+    * @returns the output tensor
+    */
+    relu(): Tensor {
+        return ops.relu(this);
+    }
+    /**
+    * Calculates:
+    * ```js
+    * output = max(input, 0.0)
+    * ```
+    *
+    * Gradient:
+    * ```js
+    * inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+    * ```
+    *
+    * @returns the output tensor
+    */
+    relu_(): Tensor {
+        const params = {
+            size: shapeSize(this.shape),
+        };
+        return this.runKernelInplace("relu_", { dtype: this.dtype }, params);
+    }
+    /**
+    * Calculates:
+    * ```js
     * output = round(input)
     * ```
     *

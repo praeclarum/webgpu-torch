@@ -2183,6 +2183,69 @@ test("reciprocal_([1])", async () => {
 test("reciprocal_([2])", async () => {
     await f("reciprocal_", [[2]], [[0.5]]);
 });
+test("relu([-2])", async () => {
+    await f("relu", [[-2]], [[0]]);
+});
+test("relu([-2]) gradient", async () => {
+    await b("relu", [[-2]], [[0]], false);
+});
+test("relu([-1])", async () => {
+    await f("relu", [[-1]], [[0]]);
+});
+test("relu([-1]) gradient", async () => {
+    await b("relu", [[-1]], [[0]], false);
+});
+test("relu([-0.5])", async () => {
+    await f("relu", [[-0.5]], [[0]]);
+});
+test("relu([-0.5]) gradient", async () => {
+    await b("relu", [[-0.5]], [[0]], false);
+});
+test("relu([0])", async () => {
+    await f("relu", [[0]], [[0]]);
+});
+test("relu([0]) gradient", async () => {
+    await b("relu", [[0]], [[0]], false);
+});
+test("relu([0.5])", async () => {
+    await f("relu", [[0.5]], [[0.5]]);
+});
+test("relu([0.5]) gradient", async () => {
+    await b("relu", [[0.5]], [[1]], false);
+});
+test("relu([1])", async () => {
+    await f("relu", [[1]], [[1]]);
+});
+test("relu([1]) gradient", async () => {
+    await b("relu", [[1]], [[1]], false);
+});
+test("relu([2])", async () => {
+    await f("relu", [[2]], [[2]]);
+});
+test("relu([2]) gradient", async () => {
+    await b("relu", [[2]], [[1]], false);
+});
+test("relu_([-2])", async () => {
+    await f("relu_", [[-2]], [[0]]);
+});
+test("relu_([-1])", async () => {
+    await f("relu_", [[-1]], [[0]]);
+});
+test("relu_([-0.5])", async () => {
+    await f("relu_", [[-0.5]], [[0]]);
+});
+test("relu_([0])", async () => {
+    await f("relu_", [[0]], [[0]]);
+});
+test("relu_([0.5])", async () => {
+    await f("relu_", [[0.5]], [[0.5]]);
+});
+test("relu_([1])", async () => {
+    await f("relu_", [[1]], [[1]]);
+});
+test("relu_([2])", async () => {
+    await f("relu_", [[2]], [[2]]);
+});
 test("round([-2])", async () => {
     await f("round", [[-2]], [[-2]]);
 });

@@ -773,6 +773,23 @@ export function reciprocal(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
+* output = max(input, 0.0)
+* ```
+*
+* Gradient:
+* ```js
+* inputGrad = outputGrad * (input > 0.0 ? 1.0 : 0.0)
+* ```
+*
+* @param input the input tensor of any shape
+* @returns the output tensor
+*/
+export function relu(input: Tensor): Tensor {
+    return unary(functions.ReluFunction, input);
+}
+/**
+* Calculates:
+* ```js
 * output = round(input)
 * ```
 *

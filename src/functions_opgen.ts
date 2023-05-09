@@ -850,6 +850,31 @@ export class ReciprocalFunction extends AutoFunction {
         return input.runKernel("reciprocalGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
+export class ReluFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input] = inputs as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
+        return input.runKernel("relu", {"dtype":"float32"}, params, [input.shape])[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ): void {
+        const [input] = inputs as [Tensor];
+        ctx.saveForBackward(input);
+    }
+    static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
+        const [input] = ctx.savedTensors as [Tensor];
+        const params = {
+            size: shapeSize(input.shape),
+        };
+        return input.runKernel("reluGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+    }
+}
 export class RoundFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
