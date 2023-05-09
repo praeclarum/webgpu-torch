@@ -141,6 +141,16 @@ test("zero grad with no grads", () => {
     expect(m.d.p2.grad).toBe(null);
 });
 
+test("save dict has buffers and parameters", () => {
+    const m = new A();
+    const stateDict = m.stateDict();
+    const keys = Object.keys(stateDict);
+    expect(keys).toEqual(["p1", "b.p2", "d.p2", "buf1"]);
+    expect(stateDict["p1"]).toBe(m.p1);
+    expect(stateDict["b.p2"]).toBe(m.b.p2);
+    expect(stateDict["d.p2"]).toBe(m.d.p2);
+});
+
 test("Conv2d can set inChannels and outChannels", () => {
     const conv2d = new nn.Conv2d(3, 4);
     expect(conv2d.inChannels).toBe(3);

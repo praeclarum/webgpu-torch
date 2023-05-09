@@ -1,6 +1,6 @@
 import { Tensor } from "./tensor";
 
-type ModuleMember = Buffer | Module | Parameter;
+export type StateDict = { [key: string]: Tensor };
 
 export class Module {
     private _children: [string, Module][] | null = null;
@@ -47,6 +47,30 @@ export class Module {
     }
 
     constructor() {}
+
+    toString(): string {
+        const childLines: string[] = [];
+        for (const [name, module] of this.namedChildren) {
+            const modLines = module.toString().split("\n");
+            const modStr =
+                modLines.length === 1
+                    ? modLines[0]
+                    : modLines[0] +
+                      "\n" +
+                      modLines
+                          .splice(1)
+                          .map((line) => `  ${line}`)
+                          .join("\n");
+            childLines.push(`(${name}): ${modStr}`);
+        }
+        const lines = childLines;
+        let mainStr = this.constructor.name + "(";
+        if (lines.length > 0) {
+            mainStr += `\n  ${lines.join("\n  ")}\n`;
+        }
+        mainStr += ")";
+        return mainStr;
+    }
 
     *namedModules(
         memo?: Set<Module>,
@@ -194,28 +218,47 @@ export class Module {
         return this;
     }
 
-    toString(): string {
-        const childLines: string[] = [];
+    private _saveToStateDict(destination: StateDict, prefix: string, keepVars: boolean): void {
+        for (const [name, parameter] of this.namedParameters()) {
+            if (parameter) {
+                destination[prefix + name] = keepVars ? parameter : parameter.detach();
+            }
+        }
+        for (const [name, buffer] of this.namedBuffers()) {
+            if (buffer && !this._nonPersistentBuffersSet.has(name)) {
+                destination[prefix + name] = keepVars ? buffer : buffer.detach();
+            }
+        }
+    }
+    stateDict(destination?: StateDict, prefix: string = "", keepVars: boolean = true): StateDict {
+        destination = destination || {};
+        this._saveToStateDict(destination, prefix, keepVars);
         for (const [name, module] of this.namedChildren) {
-            const modLines = module.toString().split("\n");
-            const modStr =
-                modLines.length === 1
-                    ? modLines[0]
-                    : modLines[0] +
-                      "\n" +
-                      modLines
-                          .splice(1)
-                          .map((line) => `  ${line}`)
-                          .join("\n");
-            childLines.push(`(${name}): ${modStr}`);
+            if (module) {
+                module.stateDict(destination, prefix + name + ".", keepVars);
+            }
         }
-        const lines = childLines;
-        let mainStr = this.constructor.name + "(";
-        if (lines.length > 0) {
-            mainStr += `\n  ${lines.join("\n  ")}\n`;
+        return destination;
+    }
+    private _loadFromStateDict(stateDict: StateDict, prefix: string): void {
+    }
+    loadStateDict(stateDict: StateDict): void {
+        function load(module: Module, localStateDict: StateDict, prefix: string) {
+            module._loadFromStateDict(localStateDict, prefix);
+            for (const [name, child] of module.namedChildren) {
+                if (child) {
+                    const childPrefix = prefix + name + ".";
+                    const childStateDict: StateDict = {};
+                    for (const [k, v] of Object.entries(localStateDict)) {
+                        if (k.startsWith(childPrefix)) {
+                            childStateDict[k] = v;
+                        }
+                    }
+                    load(child, childStateDict, childPrefix);
+                }
+            }
         }
-        mainStr += ")";
-        return mainStr;
+        load(this, stateDict, "");
     }
 }
 
