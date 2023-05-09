@@ -7,6 +7,7 @@ export * from "./dtype.test";
 export * from "./expr.test";
 export * from "./kernel.test";
 export * from "./nn.test";
+export * from "./nn_diffusers.test";
 export * from "./opgen.test";
 export * from "./ops_opgen.test";
 export * from "./shape.test";
