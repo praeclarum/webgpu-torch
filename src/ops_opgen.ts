@@ -294,12 +294,12 @@ export function ceil(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = other >= 0.0 ? abs(input) : -abs(input)
+* output = other >= 0 ? abs(input) : -abs(input)
 * ```
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * (other >= 0.0 ? 1.0 : -1.0)
+* var dir = other >= 0 ? (input >= 0 ? 1.0 : -1.0) : (input >= 0 ? -1.0 : 1.0); inputGrad = input == 0.0 ? 0.0 : outputGrad * dir; otherGrad = 0
 * ```
 *
 * @param input the input tensor of any shape
@@ -511,7 +511,7 @@ export function hypot(input: Tensor, other: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * pow(2.0, other); otherGrad = outputGrad * input * log(2.0)
+* var out = pow(2.0, other); inputGrad = outputGrad * out; otherGrad = outputGrad * input * out * 0.6931471805599453
 * ```
 *
 * @param input the input tensor of any shape
@@ -597,7 +597,7 @@ export function log2(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * exp(input) / (exp(input) + exp(other)); otherGrad = outputGrad * exp(other) / (exp(input) + exp(other))
+* var ein = exp(input); var eoth = exp(other); var addeinv = outputGrad/(ein + eoth); inputGrad = addeinv * ein; otherGrad = addeinv * eoth
 * ```
 *
 * @param input the input tensor of any shape
@@ -615,7 +615,7 @@ export function logaddexp(input: Tensor, other: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad * exp2(input) / (exp2(input) + exp2(other)) * 1.4426950408889634; otherGrad = outputGrad * exp2(other) / (exp2(input) + exp2(other)) * 1.4426950408889634
+* var ein = exp2(input); var eoth = exp2(other); var sum_ein_eoth = ein + eoth; inputGrad = outputGrad * (ein / sum_ein_eoth); otherGrad = outputGrad * (eoth / sum_ein_eoth );
 * ```
 *
 * @param input the input tensor of any shape
@@ -1041,7 +1041,7 @@ export function fix(input: Tensor): Tensor {
 *
 * Gradient:
 * ```js
-* inputGrad = input == 0.0 ? 0.0 : outputGrad * log(other)
+* inputGrad = (other > 0.0) ? outputGrad * log(other) : 0.0; otherGrad = (other > 0.0) ? outputGrad * (input / other) : 0.0;
 * ```
 *
 * @param input the input tensor of any shape
