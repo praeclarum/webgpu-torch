@@ -2221,7 +2221,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = (other > 0.0) ? outputGrad * log(other) : 0.0; otherGrad = (other > 0.0) ? outputGrad * (input / other) : 0.0;
+    * inputGrad = input == 0.0 ? 0.0 : outputGrad * log(other); otherGrad = input == 0.0 ? 0.0 : outputGrad * (input / other);
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
@@ -2238,7 +2238,7 @@ export class Tensor {
     *
     * Gradient:
     * ```js
-    * inputGrad = (other > 0.0) ? outputGrad * log(other) : 0.0; otherGrad = (other > 0.0) ? outputGrad * (input / other) : 0.0;
+    * inputGrad = input == 0.0 ? 0.0 : outputGrad * log(other); otherGrad = input == 0.0 ? 0.0 : outputGrad * (input / other);
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
