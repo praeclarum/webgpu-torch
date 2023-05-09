@@ -92,6 +92,23 @@ export class Module {
     }
 
     /**
+     * Adds a child module of the current module.
+     * 
+     * The module can be accessed as a property using the given name.
+     * @param name name of the child module
+     * @param module child module to be added
+     */
+    addModule(name: string, module: Module): void {
+        if ((this as any)[name] !== undefined) {
+            throw new Error(`Module already has a child named ${name}`);
+        }
+        if (name.indexOf(".") !== -1) {
+            throw new Error(`Module name cannot contain "."`);
+        }
+        (this as any)[name] = module;
+        this._children = null;
+    }
+    /**
      * Returns this module and its descendants' along with their prefixed names.
      * @param memo is a set of modules used to avoid double counting.
      * @param prefix is prependended to the names of the modules.
@@ -348,7 +365,6 @@ export class Module {
     }
 }
 
-
 export class Parameter extends Tensor {
     constructor(data: Tensor, requiresGrad: boolean = true) {
         data = data; // || empty(0);
@@ -360,6 +376,17 @@ export class Parameter extends Tensor {
             requiresGrad,
             device: data.device,
         });
+    }
+}
+
+export class Container extends Module {
+    constructor(modules?: { [name: string]: Module }) {
+        super();
+        if (modules) {
+            for (const [name, module] of Object.entries(modules)) {
+                this.addModule(name, module);
+            }
+        }
     }
 }
 
