@@ -5,6 +5,7 @@ export * from "./autograd.test";
 export * from "./device.test";
 export * from "./expr.test";
 export * from "./kernel.test";
+export * from "./nn.test";
 export * from "./opgen.test";
 export * from "./ops_opgen.test";
 export * from "./shape.test";

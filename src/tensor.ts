@@ -34,7 +34,7 @@ export class Tensor {
     private _requiresGrad: boolean = false;
     private _gradFunc: GradientFunction | null;
     private _gradCtx: GradientContext | null;
-    private _grad: Tensor | null = null;
+    public grad: Tensor | null = null;
 
     get storage(): UntypedStorage {
         return this._storage;
@@ -84,9 +84,6 @@ export class Tensor {
     get gradFunc(): GradientFunction | null {
         return this._gradFunc;
     }
-    get grad(): Tensor | null {
-        return this._grad;
-    }
 
     constructor(
         arrayOrSpec: TensorData | TensorSpec,
@@ -134,7 +131,7 @@ export class Tensor {
         this._requiresGrad = requiresGrad || false;
         this._gradFunc = null;
         this._gradCtx = null;
-        this._grad = null;
+        this.grad = null;
     }
     withShape(shape: Shape, strides: Strides): Tensor {
         if (shapeSize(shape) != shapeSize(this.shape)) {
@@ -289,10 +286,10 @@ export class Tensor {
             }
             grad = ones(1);
         }
-        if (this._grad) {
-            this._grad.add_(grad);
+        if (this.grad) {
+            this.grad.add_(grad);
         } else {
-            this._grad = grad;
+            this.grad = grad;
         }
         if (!this._gradFunc || !this._gradCtx) {
             return;

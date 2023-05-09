@@ -34,8 +34,13 @@ export class Module {
         return this._parameters;
     }
 
-    private _buffers: [string, Tensor|null][] = [];
+    private _buffers: [string, Tensor | null][] = [];
     private _nonPersistentBuffersSet: Set<string> = new Set<string>();
+
+    private _training: boolean = true;
+    get training(): boolean {
+        return this._training;
+    }
 
     get [Symbol.toStringTag]() {
         return "Module";
@@ -112,7 +117,11 @@ export class Module {
         }
     }
 
-    registerBuffer(name: string, tensor: Tensor|null, persistent: boolean = true): void {
+    registerBuffer(
+        name: string,
+        tensor: Tensor | null,
+        persistent: boolean = true
+    ): void {
         if (!name) {
             throw new Error("Buffer name must not be empty.");
         }
@@ -125,12 +134,15 @@ export class Module {
         this._buffers.push([name, tensor]);
         if (persistent) {
             this._nonPersistentBuffersSet.delete(name);
-        }
-        else {
+        } else {
             this._nonPersistentBuffersSet.add(name);
         }
     }
-    namedBuffers(prefix: string = "", recurse: boolean = true, removeDuplicate: boolean = true): Generator<[string, Tensor|null]> {
+    namedBuffers(
+        prefix: string = "",
+        recurse: boolean = true,
+        removeDuplicate: boolean = true
+    ): Generator<[string, Tensor | null]> {
         return this._named_members(
             (m) => m._buffers,
             prefix,
@@ -138,10 +150,72 @@ export class Module {
             removeDuplicate
         );
     }
-    *buffers(): Generator<Tensor|null> {
+    *buffers(): Generator<Tensor | null> {
         for (const [_, buffer] of this.namedBuffers()) {
             yield buffer;
         }
+    }
+
+    train(mode: boolean = true): ThisType<Module> {
+        this._training = mode;
+        for (const module of this.children) {
+            module.train(mode);
+        }
+        return this;
+    }
+    eval(): ThisType<Module> {
+        return this.train(false);
+    }
+
+    requiresGrad(requiresGrad = true): ThisType<Module> {
+        for (const parameter of this.parameters()) {
+            parameter.requiresGrad = requiresGrad;
+        }
+        return this;
+    }
+    zeroGrad(setToNull: boolean = true): ThisType<Module> {
+        for (const parameter of this.parameters()) {
+            if (parameter.grad) {
+                if (setToNull) {
+                    parameter.grad = null;
+                } else {
+                    if (parameter.grad.gradFunc) {
+                        parameter.grad.detach();
+                    } else {
+                        parameter.grad.requiresGrad = false;
+                    }
+                    // parameter.grad.zero_();
+                    throw new Error(
+                        "Not implemented: Cannot set gradients to 0. Use setToNull=true instead."
+                    );
+                }
+            }
+        }
+        return this;
+    }
+
+    toString(): string {
+        const childLines: string[] = [];
+        for (const [name, module] of this.namedChildren) {
+            const modLines = module.toString().split("\n");
+            const modStr =
+                modLines.length === 1
+                    ? modLines[0]
+                    : modLines[0] +
+                      "\n" +
+                      modLines
+                          .splice(1)
+                          .map((line) => `  ${line}`)
+                          .join("\n");
+            childLines.push(`(${name}): ${modStr}`);
+        }
+        const lines = childLines;
+        let mainStr = this.constructor.name + "(";
+        if (lines.length > 0) {
+            mainStr += `\n  ${lines.join("\n  ")}\n`;
+        }
+        mainStr += ")";
+        return mainStr;
     }
 }
 

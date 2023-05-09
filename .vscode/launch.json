@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Launch Chrome",
-            "url": "http://localhost:8080/web",
+            "url": "http://localhost:8080/web/tests",
             "webRoot": "${workspaceFolder}",
             "port": 9223,
             "runtimeExecutable": "/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
@@ -16,7 +16,7 @@
                 "--new-window",
                 "--remote-debugging-port=9223"
             ],
-            "preLaunchTask": "npm: build"
+            "preLaunchTask": "npm: build-tests"
         }
     ]
 }
