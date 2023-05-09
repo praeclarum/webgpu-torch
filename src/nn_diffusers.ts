@@ -1,5 +1,5 @@
 import { Dtype } from "./dtype";
-import { Module } from "./nn_module";
+import { Module, Sequential } from "./nn_module";
 
 /**
  * Full UNet model with attention and timestep embedding.
@@ -13,15 +13,14 @@ export class UNetModel extends Module {
     dropout: number;
     channelMult: number[];
     convResample: boolean;
-    // dims: number;
     numClasses: number | null;
     useCheckpoint: boolean;
     dtype: Dtype;
     numHeads: number;
     numHeadChannels: number;
     numHeadsUpSample: number;
-    // useScaleShiftNorm: boolean;
-    // resblockUpdown: boolean;
+
+    timeEmbed: Sequential;
 
     /**
      * Constructs a new UNet model with a given number of input and output channels along with
@@ -62,6 +61,18 @@ export class UNetModel extends Module {
         resblockUpdown: boolean = false
     ) {
         super();
+
+        if (numHeads === -1) {
+            if (numHeadChannels === -1) {
+                throw new Error(`Must specify either numHeads or numHeadChannels`);
+            }
+        }
+        if (numHeadChannels === -1) {
+            if (numHeads === -1) {
+                throw new Error(`Must specify either numHeads or numHeadChannels`);
+            }
+        }
+
         this.inChannels = inChannels;
         this.modelChannels = modelChannels;
         this.outChannels = outChannels;
@@ -76,5 +87,16 @@ export class UNetModel extends Module {
         this.numHeads = numHeads;
         this.numHeadChannels = numHeadChannels;
         this.numHeadsUpSample = numHeadsUpSample;
+
+        const timeEmbedDim = modelChannels * 4;
+        this.timeEmbed = new Sequential([
+            // linear(modelChannels, timeEmbedDim),
+            // SiLU(),
+            // linear(timeEmbedDim, timeEmbedDim),
+        ]);
     }
 }
+
+// function linear(inChannels: number, outChannels: number): Linear {
+//     return new Linear(inChannels, outChannels);
+// }
