@@ -63,7 +63,7 @@ function writePythonTests() {
         if (kernelName == "positive_") return false; // Not in torch
         if (kernelName == "logaddexp_") return false; // Not in torch
         if (kernelName == "logaddexp2_") return false; // Not in torch
-        if (kernelName == "xlogy") return false; // Test values create too much trouble
+        // if (kernelName == "xlogy") return false; // Test values create too much trouble
         return true;
     }
     for (var [opSpec, kernelSpec] of opKernelSpecs) {

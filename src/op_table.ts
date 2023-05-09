@@ -347,7 +347,7 @@ export const registry: AnOpSpec[] = [
         name: "xlogy",
         type: "binary",
         forward: "output = input == 0.0 ? 0.0 : input * log(other)",
-        backward: "inputGrad = (other > 0.0) ? outputGrad * log(other) : 0.0; otherGrad = (other > 0.0) ? outputGrad * (input / other) : 0.0;",
+        backward: "inputGrad = input == 0.0 ? 0.0 : outputGrad * log(other); otherGrad = input == 0.0 ? 0.0 : outputGrad * (input / other);",
     },
     // === Math operations / Reduction Ops ===
     // argmax: indices
