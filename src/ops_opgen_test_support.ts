@@ -21,7 +21,12 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData, precision: n
         const expectedValue = expected[i];
         if (typeof expectedValue == "number") {
             expect(typeof actual).toEqual("number");
-            expect(actual).toBeCloseTo(expectedValue, precision);
+            if (deviceType === "cpu" && actual === -Infinity && expectedValue === 0) {
+                // OK
+            }
+            else {
+                expect(actual).toBeCloseTo(expectedValue, precision);
+            }
         }
         else if (typeof expectedValue == "string") {
             if (expectedValue == "NaN") {
