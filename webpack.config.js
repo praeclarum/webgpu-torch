@@ -1,10 +1,17 @@
 const path = require("path");
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: "./src/index.ts", // Set the entry TypeScript file
   devtool: "source-map",
   optimization: {
-    minimize: false,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          keep_fnames: true, // Keep function names
+        },
+      }),
+    ],
   },
   module: {
     rules: [

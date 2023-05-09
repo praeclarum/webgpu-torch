@@ -1,7 +1,17 @@
 const path = require("path");
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-  mode: "development",
+  mode: "production",
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          keep_fnames: true, // Keep function names
+        },
+      }),
+    ],
+  },
   entry: {
     tests: "./src/index_tests.ts"
   },
