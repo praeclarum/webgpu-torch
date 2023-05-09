@@ -196,13 +196,13 @@ export const registry: AnOpSpec[] = [
         name: "logaddexp",
         type: "binary",
         forward: "output = log(exp(input) + exp(other))",
-        backward: "inputGrad = outputGrad * exp(input) / (exp(input) + exp(other)); otherGrad = outputGrad * exp(other) / (exp(input) + exp(other))",
+        backward: "var ein = exp(input); var eoth = exp(other); var addeinv = outputGrad/(ein + eoth); inputGrad = addeinv * ein; otherGrad = addeinv * eoth",
     },
     {
         name: "logaddexp2",
         type: "binary",
         forward: "output = log2(exp2(input) + exp2(other))",
-        backward: "inputGrad = outputGrad * exp2(input) / (exp2(input) + exp2(other)) * 1.4426950408889634; otherGrad = outputGrad * exp2(other) / (exp2(input) + exp2(other)) * 1.4426950408889634",
+        backward: "var ein = exp2(input); var eoth = exp2(other); var sum_ein_eoth = ein + eoth; inputGrad = outputGrad * (ein / sum_ein_eoth); otherGrad = outputGrad * (eoth / sum_ein_eoth );",
     },
     // logical_and: boolean
     // logical_not: boolean
