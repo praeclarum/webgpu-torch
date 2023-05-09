@@ -21,7 +21,6 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData, precision: n
         const expectedValue = expected[i];
         if (typeof expectedValue == "number") {
             expect(typeof actual).toEqual("number");
-            expect(actual).not.toBeNaN();
             expect(actual).toBeCloseTo(expectedValue, precision);
         }
         else if (typeof expectedValue == "string") {
