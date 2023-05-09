@@ -2,8 +2,22 @@ import { Tensor } from "./tensor";
 
 export type StateDict = { [key: string]: Tensor };
 
+/**
+ * Base class for implementing a module, which is a reusable portion of a neural network.
+ * Modules can contain other modules, allowing for a tree-like structure.
+ * 
+ * To add a submodule to a module, assign it as a property of the module in the constructor.
+ * Its name will be the name of the property.
+ * 
+ * Modules can also contain `Parameter` objects, which are tensors that are automatically
+ * updated by optimizers and are saved when calling `saveDict()`.
+ * To add a parameter to a module, assign it as a property of the module in the constructor.
+ */
 export class Module {
     private _children: [string, Module][] | null = null;
+    /**
+     * Returns the immediate children (submodules) of this module along with their names.
+     */
     get namedChildren(): [string, Module][] {
         if (this._children === null) {
             this._children = [];
@@ -16,6 +30,9 @@ export class Module {
         }
         return this._children;
     }
+    /**
+     * Returns the immediate children (submodules) of this module.
+     */
     get children(): Module[] {
         return this.namedChildren.map(([_, value]) => value);
     }
@@ -46,8 +63,10 @@ export class Module {
         return "Module";
     }
 
-    constructor() {}
-
+    /**
+     * Produces a multiline readable string of the module and its descendants.
+     * @returns A string representation of the module and its descendants.
+     */
     toString(): string {
         const childLines: string[] = [];
         for (const [name, module] of this.namedChildren) {
@@ -72,6 +91,13 @@ export class Module {
         return mainStr;
     }
 
+    /**
+     * Returns this module and its descendants' along with their prefixed names.
+     * @param memo is a set of modules used to avoid double counting.
+     * @param prefix is prependended to the names of the modules.
+     * @param removeDuplicate is a boolean indicating whether to remove duplicate modules.
+     * @returns a generator of [prefixed name, module] pairs.
+     */
     *namedModules(
         memo?: Set<Module>,
         prefix: string = "",
@@ -96,6 +122,10 @@ export class Module {
             }
         }
     }
+    /**
+     * Returns this module and its descendants.
+     * @returns a generator of modules
+     */
     *modules(): Generator<Module> {
         for (const [_, module] of this.namedModules()) {
             yield module;
@@ -123,6 +153,13 @@ export class Module {
             }
         }
     }
+    /**
+     * Gets this module and its descendants' (if `recurse = true`) parameters along with their prefixed names.
+     * @param prefix is prependended to the names of the parameters
+     * @param recurse whether to include submodule parameters
+     * @param removeDuplicate whether to remove duplicate parameters
+     * @returns a generator of [prefixed name, parameter] pairs
+     */
     namedParameters(
         prefix: string = "",
         recurse: boolean = true,
@@ -180,6 +217,11 @@ export class Module {
         }
     }
 
+    /**
+     * Sets the module in training mode.
+     * @param mode whether to set training mode (`true`) or evaluation mode (`false`).
+     * @returns this module
+     */
     train(mode: boolean = true): ThisType<Module> {
         this._training = mode;
         for (const module of this.children) {
@@ -187,16 +229,32 @@ export class Module {
         }
         return this;
     }
+    /**
+     * Sets the module in evaluation mode.
+     * @returns this module
+     */
     eval(): ThisType<Module> {
         return this.train(false);
     }
 
+    /**
+     * Change if autograd should record operations on parameters in this module.
+     * @param requiresGrad whether to enable gradient calculation for parameters in this module.
+     * @returns this module
+     */
     requiresGrad(requiresGrad = true): ThisType<Module> {
         for (const parameter of this.parameters()) {
             parameter.requiresGrad = requiresGrad;
         }
         return this;
     }
+    /**
+     * Zeros out the gradients of all parameters. That can be accomplished either by
+     * setting the `grad` property to `null` (`setToNull=true`) or
+     * by filling the gradient tensor with zeros (`setToNull=false`).
+     * @param setToNull whether to set gradients to `null` (`true`) or to zero tensors (`false`).
+     * @returns this module
+     */
     zeroGrad(setToNull: boolean = true): ThisType<Module> {
         for (const parameter of this.parameters()) {
             if (parameter.grad) {
@@ -218,19 +276,18 @@ export class Module {
         return this;
     }
 
-    private _saveToStateDict(destination: StateDict, prefix: string, keepVars: boolean): void {
-        for (const [name, parameter] of this.namedParameters()) {
-            if (parameter) {
-                destination[prefix + name] = keepVars ? parameter : parameter.detach();
-            }
-        }
-        for (const [name, buffer] of this.namedBuffers()) {
-            if (buffer && !this._nonPersistentBuffersSet.has(name)) {
-                destination[prefix + name] = keepVars ? buffer : buffer.detach();
-            }
-        }
-    }
-    stateDict(destination?: StateDict, prefix: string = "", keepVars: boolean = true): StateDict {
+    /**
+     * Returns the state dictionary of the module and its descendants.
+     * @param destination An optional state dictionary to update with the module's state.
+     * @param prefix A string to prepend to the names of the state entries (default is an empty string).
+     * @param keepVars A boolean flag, if true keeps the tensors attached to autograd (default is true).
+     * @returns The updated state dictionary containing the module's state.
+     */
+    stateDict(
+        destination?: StateDict,
+        prefix: string = "",
+        keepVars: boolean = true
+    ): StateDict {
         destination = destination || {};
         this._saveToStateDict(destination, prefix, keepVars);
         for (const [name, module] of this.namedChildren) {
@@ -240,10 +297,36 @@ export class Module {
         }
         return destination;
     }
-    private _loadFromStateDict(stateDict: StateDict, prefix: string): void {
+    private _saveToStateDict(
+        destination: StateDict,
+        prefix: string,
+        keepVars: boolean
+    ): void {
+        for (const [name, parameter] of this.namedParameters()) {
+            if (parameter) {
+                destination[prefix + name] = keepVars
+                    ? parameter
+                    : parameter.detach();
+            }
+        }
+        for (const [name, buffer] of this.namedBuffers()) {
+            if (buffer && !this._nonPersistentBuffersSet.has(name)) {
+                destination[prefix + name] = keepVars
+                    ? buffer
+                    : buffer.detach();
+            }
+        }
     }
+    /**
+     * Loads the state of the module and its descendants from the given state dictionary.
+     * @param stateDict The state dictionary containing the state of the module to load.
+     */
     loadStateDict(stateDict: StateDict): void {
-        function load(module: Module, localStateDict: StateDict, prefix: string) {
+        function load(
+            module: Module,
+            localStateDict: StateDict,
+            prefix: string
+        ) {
             module._loadFromStateDict(localStateDict, prefix);
             for (const [name, child] of module.namedChildren) {
                 if (child) {
@@ -259,6 +342,9 @@ export class Module {
             }
         }
         load(this, stateDict, "");
+    }
+    private _loadFromStateDict(stateDict: StateDict, prefix: string): void {
+        throw new Error("State dict loading not implemented");
     }
 }
 
