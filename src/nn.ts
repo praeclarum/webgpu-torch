@@ -1,12 +1,18 @@
 import { Tensor } from "./tensor";
 
-type ModuleMember = Module | Parameter;
+type ModuleMember = Buffer | Module | Parameter;
 
 export class Module {
     private _children: [string, Module][] | null = null;
     get namedChildren(): [string, Module][] {
         if (this._children === null) {
-            return this.findChildren();
+            this._children = [];
+            for (const key in this) {
+                const value = (this as any)[key];
+                if (value instanceof Module) {
+                    this._children.push([key, value]);
+                }
+            }
         }
         return this._children;
     }
@@ -28,22 +34,14 @@ export class Module {
         return this._parameters;
     }
 
+    private _buffers: [string, Tensor|null][] = [];
+    private _nonPersistentBuffersSet: Set<string> = new Set<string>();
+
     get [Symbol.toStringTag]() {
         return "Module";
     }
 
     constructor() {}
-
-    private findChildren(): [string, Module][] {
-        this._children = [];
-        for (const key in this) {
-            const value = (this as any)[key];
-            if (value instanceof Module) {
-                this._children.push([key, value]);
-            }
-        }
-        return this._children;
-    }
 
     *namedModules(
         memo?: Set<Module>,
@@ -96,22 +94,53 @@ export class Module {
             }
         }
     }
-    *namedParameters(
+    namedParameters(
         prefix: string = "",
         recurse: boolean = true,
         removeDuplicate: boolean = true
     ): Generator<[string, Parameter]> {
-        const gen = this._named_members(
+        return this._named_members(
             (m) => m.immediateParameters,
             prefix,
             recurse,
             removeDuplicate
         );
-        yield* gen;
     }
     *parameters(): Generator<Parameter> {
         for (const [_, parameter] of this.namedParameters()) {
             yield parameter;
+        }
+    }
+
+    registerBuffer(name: string, tensor: Tensor|null, persistent: boolean = true): void {
+        if (!name) {
+            throw new Error("Buffer name must not be empty.");
+        }
+        if (name.indexOf(".") !== -1) {
+            throw new Error("Buffer name must not contain a period.");
+        }
+        if (this._buffers.some(([n, _]) => n === name)) {
+            throw new Error(`Buffer ${name} already registered.`);
+        }
+        this._buffers.push([name, tensor]);
+        if (persistent) {
+            this._nonPersistentBuffersSet.delete(name);
+        }
+        else {
+            this._nonPersistentBuffersSet.add(name);
+        }
+    }
+    namedBuffers(prefix: string = "", recurse: boolean = true, removeDuplicate: boolean = true): Generator<[string, Tensor|null]> {
+        return this._named_members(
+            (m) => m._buffers,
+            prefix,
+            recurse,
+            removeDuplicate
+        );
+    }
+    *buffers(): Generator<Tensor|null> {
+        for (const [_, buffer] of this.namedBuffers()) {
+            yield buffer;
         }
     }
 }

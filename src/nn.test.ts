@@ -10,6 +10,7 @@ class A extends nn.Module {
         this.b = new B();
         this.d = new D();
         this.p1 = new nn.Parameter(zeros([1, 2, 3]));
+        this.registerBuffer("buf1", zeros([100, 200, 300]));
     }
 }
 
@@ -62,6 +63,13 @@ test("all parameters", () => {
     expect(parameters[0][0]).toBe("p1");
     expect(parameters[1][0]).toBe("b.p2");
     expect(parameters[2][0]).toBe("d.p2");
+});
+
+test("registered buffers exist", () => {
+    const m = new A();
+    const buffers = Array.from(m.namedBuffers());
+    expect(buffers.length).toBe(1);
+    expect(buffers[0][0]).toBe("buf1");
 });
 
 test("Conv2d can set inChannels and outChannels", () => {
