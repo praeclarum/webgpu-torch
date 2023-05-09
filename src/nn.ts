@@ -1,8 +1,9 @@
-export type ModuleAttribute = Module;
+import { Tensor } from "./tensor";
+
+type ModuleMember = Module | Parameter;
 
 export class Module {
     private _children: [string, Module][] | null = null;
-
     get namedChildren(): [string, Module][] {
         if (this._children === null) {
             return this.findChildren();
@@ -12,6 +13,21 @@ export class Module {
     get children(): Module[] {
         return this.namedChildren.map(([_, value]) => value);
     }
+
+    private _parameters: [string, Parameter][] | null = null;
+    private get immediateParameters(): [string, Parameter][] {
+        if (this._parameters === null) {
+            this._parameters = [];
+            for (const key in this) {
+                const value = (this as any)[key];
+                if (value instanceof Parameter) {
+                    this._parameters.push([key, value]);
+                }
+            }
+        }
+        return this._parameters;
+    }
+
     get [Symbol.toStringTag]() {
         return "Module";
     }
@@ -29,7 +45,11 @@ export class Module {
         return this._children;
     }
 
-    *namedModules(memo?: Set<Module>, prefix: string = "", removeDuplicate: boolean = true): Generator<[string, Module]> {
+    *namedModules(
+        memo?: Set<Module>,
+        prefix: string = "",
+        removeDuplicate: boolean = true
+    ): Generator<[string, Module]> {
         memo = memo || new Set<Module>();
         if (!memo.has(this)) {
             if (removeDuplicate) {
@@ -41,14 +61,74 @@ export class Module {
                     continue;
                 }
                 const submodulePrefix = prefix ? `${prefix}.${name}` : name;
-                yield* module.namedModules(memo, submodulePrefix, removeDuplicate);
+                yield* module.namedModules(
+                    memo,
+                    submodulePrefix,
+                    removeDuplicate
+                );
             }
-        }            
+        }
     }
     *modules(): Generator<Module> {
         for (const [_, module] of this.namedModules()) {
             yield module;
         }
+    }
+
+    private *_named_members<T>(
+        get_members_fn: (m: Module) => [string, T][],
+        prefix = "",
+        recurse = true,
+        remove_duplicate: boolean = true
+    ): Generator<[string, T]> {
+        const memo = new Set<T>();
+        const modules: Generator<[string, Module]> | [string, Module][] =
+            recurse
+                ? this.namedModules(undefined, prefix, remove_duplicate)
+                : [[prefix, this]];
+        for (var [module_prefix, module] of modules) {
+            const members = get_members_fn(module);
+            for (var [k, v] of members) {
+                if (v == null || memo.has(v)) continue;
+                if (remove_duplicate) memo.add(v);
+                const name = module_prefix ? `${module_prefix}.${k}` : k;
+                yield [name, v];
+            }
+        }
+    }
+    *namedParameters(
+        prefix: string = "",
+        recurse: boolean = true,
+        removeDuplicate: boolean = true
+    ): Generator<[string, Parameter]> {
+        const gen = this._named_members(
+            (m) => m.immediateParameters,
+            prefix,
+            recurse,
+            removeDuplicate
+        );
+        yield* gen;
+    }
+    *parameters(): Generator<Parameter> {
+        for (const [_, parameter] of this.namedParameters()) {
+            yield parameter;
+        }
+    }
+}
+
+export class Sequential extends Module {}
+
+export class Parameter extends Tensor {
+    constructor(data: Tensor, requiresGrad: boolean = true) {
+        data = data; // || empty(0);
+        super({
+            data: data.storage,
+            dtype: data.dtype,
+            shape: data.shape,
+            strides: data.strides,
+            requiresGrad,
+            device: data.device,
+        });
     }
 }
 

@@ -1,25 +1,30 @@
+import { zeros } from './factories';
 import * as nn from './nn';
 
 class A extends nn.Module {
-    b: B
-    d: D
+    b: B;
+    d: D;
+    p1: nn.Parameter;
     constructor() {
         super();
         this.b = new B();
         this.d = new D();
+        this.p1 = new nn.Parameter(zeros([1, 2, 3]));
     }
 }
 
 class B extends nn.Module {
-    x1: X
+    x1: X;
+    p2: nn.Parameter;
     constructor() {
         super();
         this.x1 = new X();
+        this.p2 = new nn.Parameter(zeros([4, 5, 6]));
     }
 }
 
 class D extends B {
-    x2: X
+    x2: X;
     constructor() {
         super();
         this.x2 = new X();
@@ -48,6 +53,15 @@ test("parent module can iterate over all children modules", () => {
     expect(children[4][0]).toBe("d.x1");
     expect(children[5][0]).toBe("d.x2");
     expect(children[5][1]).toBe(m.d.x2);
+});
+
+test("all parameters", () => {
+    const m = new A();
+    const parameters = Array.from(m.namedParameters());
+    expect(parameters.length).toBe(3);
+    expect(parameters[0][0]).toBe("p1");
+    expect(parameters[1][0]).toBe("b.p2");
+    expect(parameters[2][0]).toBe("d.p2");
 });
 
 test("Conv2d can set inChannels and outChannels", () => {
