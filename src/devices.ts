@@ -9,10 +9,10 @@ const devices: { [id: string]: Device } = {
     cpu: cpuDevice,
 };
 
-export async function discoverWebGPUDevicesAsync() {
+export async function discoverWebGPUDevicesAsync(): Promise<boolean> {
     if (!(navigator as any).gpu) {
-        console.warn("No WebGPU devices found");
-        return;
+        // console.warn("No WebGPU devices found");
+        return false;
     }
     const adapter = await (navigator as any).gpu.requestAdapter();
     const device = await adapter.requestDevice();
@@ -21,6 +21,7 @@ export async function discoverWebGPUDevicesAsync() {
     devices[id] = dev;
     webgpuDevice = dev;
     console.log("Found WebGPU device", device);
+    return true;
 }
 
 export function getDevice(device: Deviceish | null | undefined): Device {
@@ -41,7 +42,7 @@ export function getDevice(device: Deviceish | null | undefined): Device {
     }
 }
 
-export function findDeviceWithType(type: DeviceType): Device | null {
+function findDeviceWithType(type: DeviceType): Device | null {
     for (const id in devices) {
         if (devices[id].type === type) {
             return devices[id];

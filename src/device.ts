@@ -37,12 +37,6 @@ export abstract class Device {
         const byteSize = shapeSize(shape) * elementByteSize;
         return this.alloc(byteSize);
     }
-    allocTypedArray(size: number, dtype: Dtype): [UntypedStorage, ATypedArray] {
-        const elementByteSize = dtypeByteSize(dtype);
-        const byteSize = size * elementByteSize;
-        const storage = this.alloc(byteSize);
-        return [storage, storage.getTypedArray(dtype)];
-    }
     getKernel(name: string, config: KernelConfigInput): Kernel {
         const spec = kernelRegistry[name];
         if (spec === undefined) {
