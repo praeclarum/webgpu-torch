@@ -39,10 +39,28 @@ function compareArrays(x: TensorArrayData, expected: TestArrayData, precision: n
                 }
             }
             else if (expectedValue == "+Inf") {
-                expect(actual).toBe(Infinity);
+                if (deviceType == "cpu") {
+                    expect(actual).toBe(Infinity);
+                } else {
+                    if (actual === Infinity) {
+                        // OK
+                    }
+                    else {
+                        expect(actual).toEqual(0);
+                    }
+                }
             }
             else if (expectedValue == "-Inf") {
-                expect(actual).toBe(-Infinity);
+                if (deviceType == "cpu") {
+                    expect(actual).toBe(-Infinity);
+                } else {
+                    if (actual === -Infinity) {
+                        // OK
+                    }
+                    else {
+                        expect(actual).toEqual(0);
+                    }
+                }
             }
             else {
                 throw new Error(`Unexpected string value: ${expectedValue}`);

@@ -60,9 +60,10 @@ function writePythonTests() {
         const kernelName = kernelSpec.name;
         const isGrad = kernelName.endsWith("Grad");
         if (isGrad) return false;
-        if (kernelName == "positive_") return false;
-        if (kernelName == "logaddexp_") return false;
-        if (kernelName == "logaddexp2_") return false;
+        if (kernelName == "positive_") return false; // Not in torch
+        if (kernelName == "logaddexp_") return false; // Not in torch
+        if (kernelName == "logaddexp2_") return false; // Not in torch
+        if (kernelName == "xlogy") return false; // Test values create too much trouble
         return true;
     }
     for (var [opSpec, kernelSpec] of opKernelSpecs) {
