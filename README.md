@@ -11,7 +11,7 @@ Homepage: https://praeclarum.org/webgpu-torch
 Webgpu-torch has no dependencies so you can just include it in your web page.
 
 ```html
-<script src="scripts/torch.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/webgpu-torch@latest/dist/torch.js"></script>
 ```
 
 You can also include it using npm:
