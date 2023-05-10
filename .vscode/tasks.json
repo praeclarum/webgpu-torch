@@ -9,7 +9,7 @@
 				"isDefault": true
 			},
 			"problemMatcher": [],
-			"label": "npm: test",
+			"label": "test",
 		},
 		{
 			"type": "npm",
@@ -19,19 +19,19 @@
 				"isDefault": true
 			},
 			"problemMatcher": [],
-			"label": "npm: build",
+			"label": "build",
 		},
 		{
 			"type": "npm",
 			"script": "build-tests",
 			"problemMatcher": [],
-			"label": "npm: build-tests",
+			"label": "build-tests",
 		},
 		{
 			"type": "npm",
 			"script": "prepublishOnly",
 			"problemMatcher": [],
-			"label": "npm: prepublishOnly",
+			"label": "prepublishOnly",
 		}
 	]
 }

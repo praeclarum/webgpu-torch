@@ -1,10 +1,10 @@
-import { Dtype } from "./dtype";
+import type { Dtype } from "./dtype";
 import { Conv2d, GroupNorm, Linear } from "./nn_cnn";
 import { Module, ModuleList, Sequential } from "./nn_module";
 import { SiLU } from "./nn_opgen";
 import { cat } from "./ops_artisanal";
 import { cos, div, exp, mul, sin } from "./ops_opgen";
-import { Tensor } from ".";
+import type { Tensor } from ".";
 
 export interface UNetModelConfig {
     /** channels of input tensor */
@@ -519,7 +519,7 @@ class TimestepBlock extends Module {}
  * A sequential module that passes timestep embeddings to the children that
  * support it as an extra input.
  */
-class TimestepEmbedSequential extends TimestepBlock {
+export class TimestepEmbedSequential extends TimestepBlock {
     constructor(...modules: Module[]) {
         super();
         for (const [i, module] of modules.entries()) {
