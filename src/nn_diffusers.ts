@@ -47,6 +47,8 @@ export interface UNetModelConfig {
 
 /**
  * Full UNet model with attention and timestep embedding.
+ *
+ * ** This is still a work in progress **
  */
 export class UNetModel extends Module {
     inChannels: number;
@@ -60,14 +62,14 @@ export class UNetModel extends Module {
     numClasses: number | null;
     useCheckpoint: boolean;
     dtype: Dtype;
-    numHeads: number;
     numHeadChannels: number;
-    numHeadsUpSample: number;
 
     private _featureSize: number;
 
     timeEmbed: Sequential;
     inputBlocks: ModuleList;
+    middleBlock: TimestepEmbedSequential;
+    outputBlocks: ModuleList;
 
     /**
      * Constructs a new UNet model with a given number of input and output channels along with
@@ -103,13 +105,11 @@ export class UNetModel extends Module {
         this.numClasses = config.numClasses || null;
         this.useCheckpoint = config.useCheckpoint || false;
         this.dtype = config.dtype || "float32";
-        this.numHeads = config.numHeads || -1;
         this.numHeadChannels = config.numHeadChannels || -1;
-        this.numHeadsUpSample = config.numHeadsUpSample || -1;
 
         const contextDim = config.contextDim || null;
         const dims = config.dims || 2;
-        const numHeads = config.numHeads || -1;
+        const resblockDownup = config.resblockUpdown || false;
         const transformerDepth = config.transformerDepth || 1;
         const useCheckpoint = config.useCheckpoint || false;
         const useNewAttentionOrder = config.useNewAttentionOrder || false;
@@ -122,7 +122,7 @@ export class UNetModel extends Module {
         ]);
 
         this.inputBlocks = new ModuleList([
-            new TimestepEmbedSequential([
+            new TimestepEmbedSequential(
                 conv_nd(
                     dims,
                     this.inChannels,
@@ -130,10 +130,15 @@ export class UNetModel extends Module {
                     3,
                     1,
                     this.dtype
-                ),
-            ]),
+                )
+            ),
         ]);
         this._featureSize = this.modelChannels;
+        let numHeads = config.numHeads || -1;
+        const numHeadsUpSample = config.numHeadsUpSample || -1;
+        let dimHead: number = 0;
+
+        // Create the backbone
         const inputBlockChans = [this.modelChannels];
         let ch = this.modelChannels;
         let ds = 1;
@@ -143,28 +148,29 @@ export class UNetModel extends Module {
                     new ResBlock(
                         ch,
                         timeEmbedDim,
-                        this.dropout,
                         mult * this.modelChannels,
-                        undefined,
-                        config.useScaleShiftNorm,
                         dims,
-                        this.useCheckpoint
+                        false,
+                        false,
+                        this.dropout,
+                        this.useCheckpoint,
+                        undefined,
+                        config.useScaleShiftNorm
                     ),
                 ];
                 ch = mult * this.modelChannels;
                 if (this.attentionResolutions.includes(ds)) {
-                    let dimHead: number;
                     if (this.numHeadChannels === -1) {
-                        dimHead = ch / this.numHeads;
+                        dimHead = ch / numHeads;
                     } else {
-                        this.numHeads = ch / this.numHeadChannels;
+                        numHeads = ch / this.numHeadChannels;
                         dimHead = this.numHeadChannels;
                     }
                     if (config.useSpatialTransformer) {
                         layers.push(
                             new SpatialTransformer(
                                 ch,
-                                this.numHeads,
+                                numHeads,
                                 dimHead,
                                 transformerDepth,
                                 0.0,
@@ -186,9 +192,149 @@ export class UNetModel extends Module {
             }
             if (level != this.channelMult.length - 1) {
                 const outCh = ch;
+                this.inputBlocks.push(
+                    new TimestepEmbedSequential(
+                        resblockDownup
+                            ? new ResBlock(
+                                  ch,
+                                  timeEmbedDim,
+                                  outCh,
+                                  dims,
+                                  false,
+                                  true,
+                                  this.dropout,
+                                  useCheckpoint,
+                                  undefined,
+                                  config.useScaleShiftNorm
+                              )
+                            : new Downsample(ch, this.convResample, dims, outCh)
+                    )
+                );
                 ch = outCh;
                 inputBlockChans.push(ch);
                 ds *= 2;
+                this._featureSize += ch;
+            }
+        }
+
+        // Create the bottleneck
+        if (this.numHeadChannels === -1) {
+            dimHead = ch / numHeads;
+        } else {
+            numHeads = ch / this.numHeadChannels;
+            dimHead = this.numHeadChannels;
+        }
+        this.middleBlock = new TimestepEmbedSequential(
+            new ResBlock(
+                ch,
+                timeEmbedDim,
+                ch,
+                dims,
+                false,
+                false,
+                this.dropout,
+                this.useCheckpoint,
+                undefined,
+                config.useScaleShiftNorm
+            ),
+            config.useSpatialTransformer
+                ? new SpatialTransformer(
+                      ch,
+                      numHeads,
+                      dimHead,
+                      transformerDepth,
+                      0.0,
+                      contextDim
+                  )
+                : new AttentionBlock(
+                      ch,
+                      numHeads,
+                      dimHead,
+                      useCheckpoint,
+                      useNewAttentionOrder
+                  ),
+            new ResBlock(
+                ch,
+                timeEmbedDim,
+                ch,
+                dims,
+                false,
+                false,
+                this.dropout,
+                this.useCheckpoint,
+                undefined,
+                config.useScaleShiftNorm
+            )
+        );
+        this._featureSize += ch;
+
+        // Output blocks
+        this.outputBlocks = new ModuleList([]);
+        for (const [level, mult] of this.channelMult.entries()) {
+            for (let i = 0; i < this.numResBlocks + 1; i++) {
+                const ich = inputBlockChans.pop() ?? 0;
+                const layers = [
+                    new ResBlock(
+                        ch + ich,
+                        timeEmbedDim,
+                        this.modelChannels * mult,
+                        dims,
+                        false,
+                        false,
+                        this.dropout,
+                        this.useCheckpoint,
+                        undefined,
+                        config.useScaleShiftNorm
+                    ),
+                ];
+                ch = this.modelChannels * mult;
+                if (this.attentionResolutions.includes(ds)) {
+                    if (this.numHeadChannels === -1) {
+                        dimHead = ch / numHeads;
+                    } else {
+                        numHeads = ch / this.numHeadChannels;
+                        dimHead = this.numHeadChannels;
+                    }
+                    layers.push(
+                        config.useSpatialTransformer
+                            ? new SpatialTransformer(
+                                  ch,
+                                  numHeads,
+                                  dimHead,
+                                  transformerDepth,
+                                  0.0,
+                                  contextDim
+                              )
+                            : new AttentionBlock(
+                                  ch,
+                                  numHeadsUpSample,
+                                  dimHead,
+                                  useCheckpoint,
+                                  useNewAttentionOrder
+                              )
+                    );
+                }
+                if (level > 0 && i == this.numResBlocks) {
+                    const outCh = ch;
+                    layers.push(
+                        resblockDownup
+                            ? new ResBlock(
+                                  ch,
+                                  timeEmbedDim,
+                                  outCh,
+                                  dims,
+                                  true,
+                                  false,
+                                  this.dropout,
+                                  this.useCheckpoint,
+                                  undefined,
+                                  config.useScaleShiftNorm
+                              )
+                            : new Upsample(ch, this.convResample, dims, outCh)
+                    );
+                    ds /= 2;
+                }
+                this.outputBlocks.push(new TimestepEmbedSequential(...layers));
                 this._featureSize += ch;
             }
         }
@@ -233,6 +379,30 @@ class AttentionBlock extends Module {
     }
 }
 
+class Downsample extends Module {
+    constructor(
+        channels: number,
+        useConv: boolean,
+        dims: number = 2,
+        outChannels?: number,
+        padding: number = 1
+    ) {
+        super();
+    }
+}
+
+class Upsample extends Module {
+    constructor(
+        channels: number,
+        useConv: boolean,
+        dims: number = 2,
+        outChannels?: number,
+        padding: number = 1
+    ) {
+        super();
+    }
+}
+
 class SpatialTransformer extends Module {
     constructor(
         inChannels: number,
@@ -253,7 +423,7 @@ class TimestepBlock extends Module {}
  * support it as an extra input.
  */
 class TimestepEmbedSequential extends TimestepBlock {
-    constructor(modules: Module[]) {
+    constructor(...modules: Module[]) {
         super();
         for (const [i, module] of modules.entries()) {
             this.addModule(i, module);
@@ -279,14 +449,14 @@ class ResBlock extends TimestepBlock {
     constructor(
         channels: number,
         embChannels: number,
-        dropout: number,
-        outChannels?: number,
-        useConv = false,
-        useScaleShiftNorm = false,
+        outChannels: number,
         dims = 2,
-        useCheckpoint = false,
         up = false,
-        down = false
+        down = false,
+        dropout: number = 0.0,
+        useCheckpoint = false,
+        useConv = false,
+        useScaleShiftNorm = false
     ) {
         super();
     }

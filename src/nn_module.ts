@@ -424,6 +424,9 @@ export class ModuleList extends Module {
             this.addModule(i, module);
         }
     }
+    push(module: Module) {
+        this.addModule(this.children.length, module);
+    }
 }
 
 /**
