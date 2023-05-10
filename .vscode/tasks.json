@@ -26,6 +26,12 @@
 			"script": "build-tests",
 			"problemMatcher": [],
 			"label": "npm: build-tests",
+		},
+		{
+			"type": "npm",
+			"script": "prepublishOnly",
+			"problemMatcher": [],
+			"label": "npm: prepublishOnly",
 		}
 	]
 }

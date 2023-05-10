@@ -4,11 +4,11 @@
   "description": "Tensor computation and autograd with WebGPU acceleration",
   "main": "dist/torch.js",
   "scripts": {
-    "build": "ts-node ./scripts/codegen.ts && ts-node ./scripts/plotgen.ts && webpack --mode production && npx typedoc --out web/docs src/index.ts",
+    "build": "ts-node ./scripts/codegen.ts && ts-node ./scripts/plotgen.ts && webpack --config webpack.config.js --mode production && cp -a ./dist ./web/ && npx typedoc --out web/docs src/torch.ts",
     "test": "jest",
     "start": "webpack-dev-server --open",
     "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",
-    "prepublishOnly": "rm dist/* && npm run build"
+    "prepublishOnly": "rm -rf dist/* && npm run build"
   },
   "repository": {
     "type": "git",
