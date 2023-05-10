@@ -22,6 +22,18 @@ npm i webgpu-torch
 
 ## Usage
 
+If you want to use WebGPU tensors, you must first initialize the library with:
+    
+```js
+if (!await torch.initWebGPUAsync()) {
+    console.warn(`WebGPU is not supported.`);
+}
+```
+
+It's an async function and will really do want to await it before doing anything else.
+All it does is query the `navigator` object for a valid `GPUDevice`.
+Sadly, that's an async operation.
+
 ### GPU Accelerated Tensors
 
 ```js
