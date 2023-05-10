@@ -275,6 +275,9 @@ export class Tensor {
     }
 
     backward(gradient?: Tensor): void {
+        if (!this.requiresGrad) {
+            throw new Error(`Cannot call backward on a tensor that does not require gradients`);
+        }
         let grad: Tensor;
         if (gradient) {
             grad = gradient;

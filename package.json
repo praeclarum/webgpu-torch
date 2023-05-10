@@ -7,7 +7,8 @@
     "build": "ts-node ./scripts/codegen.ts && webpack --mode production && npx typedoc --out web/docs src/index.ts",
     "test": "jest",
     "start": "webpack-dev-server --open",
-    "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js"
+    "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",
+    "plotgen": "ts-node ./scripts/plotgen.ts"
   },
   "repository": {
     "type": "git",
