@@ -1,4 +1,4 @@
-import * as functions from "./functions";
+import * as functions from "./functions_opgen";
 import { Tensor } from "./tensor";
 import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";
 /**

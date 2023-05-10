@@ -10,7 +10,8 @@ import {
 } from "./storage";
 import { GradientFunction, GradientContext } from "./autograd";
 import { KernelConfigInput, KernelParamsInput } from "./kernel";
-import * as ops from "./ops";
+import * as ops from "./ops_opgen";
+import * as aops from "./ops_artisanal";
 
 export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
 
@@ -339,10 +340,10 @@ export class Tensor {
         return this.withShape(newShape, newStrides);
     }
     mm(other: Tensor): Tensor {
-        return ops.mm(this, other);
+        return aops.mm(this, other);
     }
     t(): Tensor {
-        return ops.t(this);
+        return aops.t(this);
     }
     zero_(): Tensor {
         throw new Error("Tensor zero_ is not implemented");
