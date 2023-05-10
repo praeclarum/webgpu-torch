@@ -22,6 +22,7 @@ export {
     KernelSpec,
     ShaderType,
 } from "./kernel";
+export { OpSpec, OpType } from "./op_spec";
 export * from "./ops";
 export * as nn from "./nn";
 export * from "./shape";
