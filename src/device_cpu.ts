@@ -1,7 +1,7 @@
 import { Device } from "./device";
-import { ATypedArray, Dtype } from "./dtype";
+import type { ATypedArray, Dtype } from "./dtype";
 import { ArrayBufferStorage, UntypedStorage } from "./storage";
-import { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelCPU } from "./kernel_cpu";
 
 export class DeviceCPU extends Device {

@@ -1,12 +1,8 @@
 import { Device } from "./device";
-import {
-    GPUBufferStorage,
-    UntypedStorage,
-    newTypedArrayFromArray,
-} from "./storage";
-import { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import type { ATypedArray, Dtype } from "./dtype";
+import { GPUBufferStorage, UntypedStorage } from "./storage";
+import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelWebGPU } from "./kernel_webgpu";
-import { ATypedArray, Dtype } from "./dtype";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;

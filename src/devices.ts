@@ -1,4 +1,4 @@
-import { Device, DeviceType, Deviceish } from "./device";
+import type { Device, DeviceType, Deviceish } from "./device";
 import { DeviceCPU } from "./device_cpu";
 import { DeviceWebGPU } from "./device_webgpu";
 

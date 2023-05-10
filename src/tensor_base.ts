@@ -1,10 +1,7 @@
-import { Deviceish } from "./device";
-import { Shape, Strides } from "./shape";
-import { ATypedArray, Dtype } from "./dtype";
-import {
-    TensorArrayData,
-    UntypedStorage,
-} from "./storage";
+import type { Deviceish } from "./device";
+import type { Shape, Strides } from "./shape";
+import type { ATypedArray, Dtype } from "./dtype";
+import type { TensorArrayData, UntypedStorage } from "./storage";
 
 export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
 
@@ -17,6 +14,7 @@ export type TensorSpec = {
     strides?: Strides;
 };
 
-export class TensorBase {
-
-}
+/**
+ * This is a little implementation detail that helps us avoid circular imports.
+ */
+export class TensorBase {}

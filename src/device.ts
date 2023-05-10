@@ -1,6 +1,6 @@
 import { Shape, shapeSize } from "./shape";
 import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
-import { UntypedStorage } from "./storage";
+import type { UntypedStorage } from "./storage";
 import {
     Kernel,
     KernelConfig,
