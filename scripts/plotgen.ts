@@ -25,43 +25,91 @@ function writePlotSvg(op: OpSpec, samples: OpSamples, bounds: PlotBounds): void 
     const plotWidth = bounds.h.max - bounds.h.min;
     const plotHeight = bounds.v.max - bounds.v.min;
     const plotAspect = plotWidth / plotHeight;
-    const imageHeight = 720;
+    const imageHeight = 480;
     const imageWidth = imageHeight * plotAspect;
-    const plotFrameWidth = imageWidth * 0.9;
-    const plotFrameHeight = imageHeight * 0.9;
+    const plotLineWidth = imageHeight * 0.01;
+    const fontSize = imageHeight * 0.04;
+    const plotFrameWidth = imageWidth - 4 * fontSize;
+    const plotFrameHeight = imageHeight - 4 * fontSize;
     const plotFrameX = (imageWidth - plotFrameWidth) / 2;
     const plotFrameY = (imageHeight - plotFrameHeight) / 2;
-    const w = new CodeWriter();
-    w.writeLine(`<?xml version="1.0" encoding="UTF-8" standalone="no"?>`);
-    w.writeLine(`<svg width="${imageWidth}" height="${imageHeight}" viewBox="0 0 ${imageWidth} ${imageHeight}" xmlns="http://www.w3.org/2000/svg">`);
-    w.writeLine(`<rect x="${plotFrameX}" y="${plotFrameY}" width="${plotFrameWidth}" height="${plotFrameHeight}" fill="white" stroke="black" stroke-width="1"/>`);
-    w.writeLine(`<path d="M ${plotFrameX} ${plotFrameY + plotFrameHeight} L ${plotFrameX + plotFrameWidth} ${plotFrameY + plotFrameHeight}" stroke="black" stroke-width="1"/>`);
-    w.writeLine(`<path d="M ${plotFrameX} ${plotFrameY} L ${plotFrameX} ${plotFrameY + plotFrameHeight}" stroke="black" stroke-width="1"/>`);
-    w.writeLine(`<text x="${plotFrameX + plotFrameWidth / 2}" y="${plotFrameY + plotFrameHeight + 20}" text-anchor="middle" font-family="Verdana" font-size="20">${op.name}</text>`);
-    w.writeLine(`<text x="${plotFrameX - 20}" y="${plotFrameY + plotFrameHeight / 2}" text-anchor="middle" font-family="Verdana" font-size="20" transform="rotate(-90, ${plotFrameX - 20}, ${plotFrameY + plotFrameHeight / 2})">${op.name}</text>`);
-    const dx = plotFrameWidth / (samples.input.length - 1);
+    const ds = plotFrameWidth / (samples.input.length - 1);
+    const dx = plotFrameWidth / (bounds.h.max - bounds.h.min);
     const dy = plotFrameHeight / (bounds.v.max - bounds.v.min);
-    function projectPoint(sampleIndex: number, value: number): [number, number] {
-        const x = plotFrameX + sampleIndex * dx;
-        const y = plotFrameY + plotFrameHeight - (value - bounds.v.min) * dy;
+    function projectSamplePoint(sampleIndex: number, value: number): [number, number] {
+        const x = plotFrameX + sampleIndex * ds;
+        let y = plotFrameY + plotFrameHeight - (value - bounds.v.min) * dy;
+        if (Number.isNaN(y))
+            y = 0.0;
         return [x, y];
     }
+    function projectPoint(x: number, y: number): [number, number] {
+        return [plotFrameX + (x - bounds.h.min) * dx, plotFrameY + plotFrameHeight - (y - bounds.v.min) * dy];
+    }
+    const w = new CodeWriter();
+    const plotFillColor = "rgba(128, 128, 128, 0.1)";
+    const textColor = "rgba(128, 128, 128, 0.75)";
+    const gridColor = "rgba(128, 128, 128, 0.25)";
+    w.writeLine(`<?xml version="1.0" encoding="UTF-8" standalone="no"?>`);
+    w.writeLine(`<svg width="${imageWidth}" height="${imageHeight}" viewBox="0 0 ${imageWidth} ${imageHeight}" xmlns="http://www.w3.org/2000/svg">`);
+    w.writeLine(`<rect x="${plotFrameX}" y="${plotFrameY}" width="${plotFrameWidth}" height="${plotFrameHeight}" fill="${plotFillColor}" stroke="${textColor}" stroke-width="${plotLineWidth/4}"/>`);
+    w.writeLine(`<text x="${plotFrameX + plotFrameWidth / 2}" y="${plotFrameY + plotFrameHeight + fontSize}" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" fill="${textColor}">input</text>`);
+    w.writeLine(`<text x="${plotFrameX - fontSize}" y="${plotFrameY + plotFrameHeight / 2}" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" transform="rotate(-90, ${plotFrameX - 20}, ${plotFrameY + plotFrameHeight / 2})" fill="${textColor}">${op.name}</text>`);
+    w.writeLine(`<clipPath id="plotClip">`);
+    w.writeLine(`<rect x="${plotFrameX}" y="${plotFrameY}" width="${plotFrameWidth}" height="${plotFrameHeight}"/>`);
+    w.writeLine(`</clipPath>`);
+    // Draw the grid
+    const gridStep = 10 ** Math.ceil(Math.log10(plotWidth / 10))/2;
+    const gridStepX = plotFrameWidth / plotWidth * gridStep;
+    const gridStepY = plotFrameHeight / plotHeight * gridStep;
+    w.writeLine(`<g clip-path=\"url(#plotClip)\" stroke="${gridColor}" stroke-width="${plotLineWidth / 4}" stroke-dasharray="${plotLineWidth / 2} ${plotLineWidth / 2}">`);
+    for (let y = Math.ceil(bounds.v.min / gridStep) * gridStep; y <= bounds.v.max; y += gridStep) {
+        const [x1, y1] = projectPoint(bounds.h.min, y);
+        const [x2, y2] = projectPoint(bounds.h.max, y);
+        const value = y.toFixed(2);
+        if (Math.abs(y) < 1e-6) {
+            w.writeLine(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${plotLineWidth / 2}" stroke-dasharray="none"/>`);
+        }
+        else {
+            w.writeLine(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`);
+        }
+        w.writeLine(`<text x="${plotFrameX + fontSize/6}" y="${y1 + fontSize/2}" text-anchor="left" font-family="sans-serif" font-size="${fontSize/2}" fill="${gridColor}" stroke-dasharray="none">${value}</text>`);
+    }
+    for (let x = Math.ceil(bounds.h.min / gridStep) * gridStep; x <= bounds.h.max; x += gridStep) {
+        const [x1, y1] = projectPoint(x, bounds.v.min);
+        const [x2, y2] = projectPoint(x, bounds.v.max);
+        const value = x.toFixed(2);
+        if (Math.abs(x) < 1e-6) {
+            w.writeLine(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${plotLineWidth / 2}" stroke-dasharray="none"/>`);
+        }
+        else {
+            w.writeLine(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`);
+        }
+        w.writeLine(`<text x="${x1 + fontSize/6}" y="${plotFrameY + plotFrameHeight - fontSize/6}" text-anchor="start" font-family="sans-serif" font-size="${fontSize/2}" fill="${gridColor}" stroke-dasharray="none">${value}</text>`);
+    }
+    w.writeLine(`</g>`);
+    // Draw the plots
+    w.writeLine(`<g>`);
     function makePath(samples: Samples, color: string): string {
-        let path = "<path d=\"";
+        let path = "<path clip-path=\"url(#plotClip)\" d=\"";
+        let needsMove = true;
+        let lastPoint = [0, 0];
         for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-            const [x, y] = projectPoint(sampleIndex, samples[sampleIndex]);
-            if (sampleIndex == 0) {
+            const [x, y] = projectSamplePoint(sampleIndex, samples[sampleIndex]);
+            if (needsMove) {
                 path += `M ${x} ${y}`;
+                needsMove = false;
             } else {
                 path += `L ${x} ${y}`;
             }
         }
-        path += `" stroke="${color}" stroke-width="1" fill="none"/>`;
+        path += `" stroke="${color}" stroke-width="${plotLineWidth}" fill="none"/>`;
         return path;
     }
-    w.writeLine(`${makePath(samples.input, "blue")}`);
-    w.writeLine(`${makePath(samples.output, "red")}`);
-    w.writeLine(`${makePath(samples.inputGrad, "green")}`);
+    // w.writeLine(`${makePath(samples.input, "blue")}`);
+    w.writeLine(`${makePath(samples.inputGrad, "red")}`);
+    w.writeLine(`${makePath(samples.output, "green")}`);
+    w.writeLine(`</g>`);
     w.writeLine(`</svg>`);
 
     const plotFileName = `${plotsDir}/${op.name}.svg`;
@@ -92,7 +140,9 @@ async function sampleUnaryOp(op: UnaryOpSpec, numSamples: number, bounds: PlotBo
 }
 
 async function writePlots() {
-    const bounds = { h: { min: -5, max: 5 }, v: { min: -5, max: 5 } };
+    const boundsVertical = 4.0;
+    const boundsHorizontal = boundsVertical * 4 / 3;
+    const bounds = { h: { min: -boundsHorizontal/2, max: boundsHorizontal/2 }, v: { min: -boundsVertical/2, max: boundsVertical/2 } };
     for (const op of opRegistry) {
         try {
             if (op.type === "unary") {
