@@ -1,7 +1,9 @@
 import { Dtype } from "./dtype";
-import { Conv2d, Linear } from "./nn_cnn";
+import { Conv2d, GroupNorm, Linear } from "./nn_cnn";
 import { Module, ModuleList, Sequential } from "./nn_module";
 import { SiLU } from "./nn_opgen";
+import { cat } from "./ops_artisanal";
+import { cos, div, exp, mul, sin } from "./ops_opgen";
 import { Tensor } from "./tensor";
 
 export interface UNetModelConfig {
@@ -70,6 +72,7 @@ export class UNetModel extends Module {
     inputBlocks: ModuleList;
     middleBlock: TimestepEmbedSequential;
     outputBlocks: ModuleList;
+    out: Sequential;
 
     /**
      * Constructs a new UNet model with a given number of input and output channels along with
@@ -128,6 +131,7 @@ export class UNetModel extends Module {
                     this.inChannels,
                     this.modelChannels,
                     3,
+                    1,
                     1,
                     this.dtype
                 )
@@ -338,6 +342,61 @@ export class UNetModel extends Module {
                 this._featureSize += ch;
             }
         }
+
+        this.out = new Sequential([
+            normalization(ch),
+            new SiLU(),
+            zeroModule(
+                conv_nd(
+                    dims,
+                    this.modelChannels,
+                    this.outChannels,
+                    3,
+                    1,
+                    1,
+                    this.dtype
+                )
+            ),
+        ]);
+    }
+
+    /**
+     * Apply the model to the input batch.
+     * @param x a [B, C, ...] Tensor of inputs.
+     * @param timesteps a 1-D batch of timesteps.
+     * @param context conditioning from cross-attention.
+     * @param y a [B] Tensor of labels, if cross-conditional.
+     * @returns a [B, C, ...] Tensor of outputs.
+     */
+    forward(x: Tensor, timesteps: Tensor, context?: Tensor, y?: Tensor) {
+        if ((y !== undefined) != (this.numClasses !== null)) {
+            throw new Error(
+                "Must specify y if and only if numClasses is set (the model is cross-conditional)"
+            );
+        }
+        const hs: Tensor[] = [];
+        const tEmb = timestepEmbedding(timesteps, this.modelChannels, this.dtype, false);
+        const emb = this.timeEmbed.forward(tEmb);
+
+        if (this.numClasses !== null) {
+            if (y?.shape.length != 1 || y!.shape[0] != x.shape[0]) {
+                throw new Error(
+                    "y must be a 1-D batch of labels whose batch size matches x"
+                );
+            }
+        }
+
+        let h: Tensor = x;
+        for (const module of this.inputBlocks) {
+            h = (module as any).forward(h, emb, context);
+            hs.push(h);
+        }
+        h = this.middleBlock.forward(h, emb, context);
+        for (const module of this.outputBlocks) {
+            h = cat([h, hs.pop()!], 1);
+            h = (module as any).forward(h, emb, context);
+        }
+        return this.out.forward(h);
     }
 }
 
@@ -347,6 +406,7 @@ function conv_nd(
     outChannels: number,
     kernelSize: number,
     stride: number,
+    padding: number | [number, number] | "valid" | "same",
     dtype: Dtype
 ): Conv2d {
     if (dims === 2) {
@@ -355,7 +415,7 @@ function conv_nd(
             outChannels,
             kernelSize,
             stride,
-            "same",
+            padding,
             dtype
         );
     } else {
@@ -365,6 +425,37 @@ function conv_nd(
 
 function linear(inChannels: number, outChannels: number): Linear {
     return new Linear(inChannels, outChannels);
+}
+
+function normalization(channels: number): GroupNorm32 {
+    return new GroupNorm32(32, channels);
+}
+
+function timestepEmbedding(timesteps: Tensor, dim: number, dtype: Dtype, repeatOnly: boolean = false, maxPeriod: number = 10000): Tensor {
+    let embedding: Tensor;
+    if (!repeatOnly) {
+        // const half = dim / 2;
+        // const freqs =
+        //     exp(div(mul(-Math.log(maxPeriod), arange(0, half, dtype)),
+        //             half));
+        // const args = timesteps[:, None].float() * freqs[None];
+        // embedding = cat([cos(args), sin(args)], -1);
+        // if (dim % 2 == 1) {
+        //     embedding = cat([embedding, zerosLike([embedding.shape[0], 1], dtype)], -1);
+        // }
+        throw new Error("Not implemented due to missing arange, zerosLike, slicing");
+    }
+    else {
+        // embedding = repeat(timesteps, "b -> b d", {d: dim});
+        throw new Error("Not implemented due to missing repeat");
+    }
+}
+
+function zeroModule<T extends Module>(module: T): T {
+    for (const p of module.parameters()) {
+        p.detach().zero_();
+    }
+    return module;
 }
 
 class AttentionBlock extends Module {
@@ -400,6 +491,12 @@ class Upsample extends Module {
         padding: number = 1
     ) {
         super();
+    }
+}
+
+class GroupNorm32 extends GroupNorm {
+    constructor(numGroups: number, channels: number) {
+        super(numGroups, channels);
     }
 }
 

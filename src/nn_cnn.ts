@@ -21,6 +21,16 @@ export class Conv2d extends Module {
 
 export class ConvTranspose2d extends Module {}
 
+export class GroupNorm extends Module {
+    numGroups: number;
+    numChannels: number;
+    constructor(numGroups: number, numChannels: number) {
+        super();
+        this.numGroups = numGroups;
+        this.numChannels = numChannels;
+    }
+}
+
 export class Linear extends Module {
     inChannels: number;
     outChannels: number;

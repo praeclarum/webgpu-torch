@@ -341,6 +341,9 @@ export class Tensor {
     t(): Tensor {
         return ops.t(this);
     }
+    zero_(): Tensor {
+        throw new Error("Tensor zero_ is not implemented");
+    }
 
     // Codegen marker
     /**

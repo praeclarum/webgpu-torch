@@ -3,6 +3,10 @@ import { Dtype } from "./dtype";
 import { Tensor, TensorData, TensorSpec } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
 
+export function cat(inputs: Tensor[], dim: number): Tensor {
+    throw new Error("cat not implemented yet");
+}
+
 /**
  * Applies a 2D convolution over an input image composed of several input planes.
  * 

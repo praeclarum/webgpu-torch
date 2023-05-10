@@ -305,7 +305,7 @@ export class Module {
                     } else {
                         parameter.grad.requiresGrad = false;
                     }
-                    // parameter.grad.zero_();
+                    parameter.grad.zero_();
                     throw new Error(
                         "Not implemented: Cannot set gradients to 0. Use setToNull=true instead."
                     );
