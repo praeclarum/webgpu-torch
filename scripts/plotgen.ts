@@ -54,7 +54,7 @@ function writePlotSvg(op: OpSpec, samples: OpSamples, bounds: PlotBounds): void 
     w.writeLine(`<svg width="${imageWidth}" height="${imageHeight}" viewBox="0 0 ${imageWidth} ${imageHeight}" xmlns="http://www.w3.org/2000/svg">`);
     w.writeLine(`<rect x="${plotFrameX}" y="${plotFrameY}" width="${plotFrameWidth}" height="${plotFrameHeight}" fill="${plotFillColor}" stroke="${textColor}" stroke-width="${plotLineWidth/4}"/>`);
     w.writeLine(`<text x="${plotFrameX + plotFrameWidth / 2}" y="${plotFrameY + plotFrameHeight + fontSize}" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" fill="${textColor}">input</text>`);
-    w.writeLine(`<text x="${plotFrameX - fontSize}" y="${plotFrameY + plotFrameHeight / 2}" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" transform="rotate(-90, ${plotFrameX - 20}, ${plotFrameY + plotFrameHeight / 2})" fill="${textColor}">${op.name}</text>`);
+    w.writeLine(`<text x="${plotFrameX - fontSize/2}" y="${plotFrameY + plotFrameHeight / 2}" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" transform="rotate(-90, ${plotFrameX - fontSize/2}, ${plotFrameY + plotFrameHeight / 2})" fill="${textColor}">${op.name}</text>`);
     w.writeLine(`<clipPath id="plotClip">`);
     w.writeLine(`<rect x="${plotFrameX}" y="${plotFrameY}" width="${plotFrameWidth}" height="${plotFrameHeight}"/>`);
     w.writeLine(`</clipPath>`);
