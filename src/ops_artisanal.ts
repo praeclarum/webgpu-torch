@@ -1,7 +1,8 @@
 import { Deviceish } from "./device";
 import { Dtype } from "./dtype";
-import { Tensor, TensorData, TensorSpec } from "./tensor";
+import { Tensor } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
+import { TensorData, TensorSpec } from "./tensor_base";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");

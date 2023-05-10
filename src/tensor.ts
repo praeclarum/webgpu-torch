@@ -1,4 +1,4 @@
-import { Device, Deviceish } from "./device";
+import type { Device, Deviceish } from "./device";
 import { getDevice } from "./devices";
 import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { ones } from "./factories";
@@ -8,23 +8,13 @@ import {
     UntypedStorage,
     newTypedArrayFromArray,
 } from "./storage";
-import { GradientFunction, GradientContext } from "./autograd";
-import { KernelConfigInput, KernelParamsInput } from "./kernel";
+import type { GradientFunction, GradientContext } from "./autograd";
+import type { KernelConfigInput, KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
+import { TensorBase, TensorData, TensorSpec } from "./tensor_base";
 
-export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
-
-export type TensorSpec = {
-    data: TensorData;
-    dtype?: Dtype;
-    requiresGrad?: boolean;
-    device?: Deviceish;
-    shape?: Shape;
-    strides?: Strides;
-};
-
-export class Tensor {
+export class Tensor extends TensorBase {
     private _device: Device;
 
     private _storage: UntypedStorage;
@@ -92,6 +82,7 @@ export class Tensor {
         device?: Deviceish,
         requiresGrad?: boolean
     ) {
+        super();
         let d = getDevice(device);
         let dt = getDtype(dtype);
         if (arrayOrSpec === null) {

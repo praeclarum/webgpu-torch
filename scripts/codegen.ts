@@ -27,6 +27,32 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
     fs.writeFileSync(path, newCode);
 }
 
+function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: string, w: CodeWriter) {
+    const hasAlpha = opSpec.alpha ?? false;
+    const isBinary = opSpec.type === "binary";
+    const isReduction = opSpec.type === "reduction";
+    writeOpDocs(opSpec, "this", isAlias, w);
+    if (isReduction) {
+        w.writeLine(`${name}(dim?: number, keepdim?: boolean): Tensor${suffix}`);
+    }
+    else if (isBinary) {
+        if (hasAlpha) {
+            w.writeLine(`${name}(other: Tensor, alpha?: number): Tensor${suffix}`);
+        }
+        else {
+            w.writeLine(`${name}(other: Tensor): Tensor${suffix}`);
+        }
+    }
+    else {
+        if (hasAlpha) {
+            w.writeLine(`${name}(alpha?: number): Tensor${suffix}`);
+        }
+        else {
+            w.writeLine(`${name}(): Tensor${suffix}`);
+        }
+    }
+};
+
 // Write the Tensor class
 function writeTensorCode(): void {
     const w = new CodeWriter();
@@ -37,30 +63,8 @@ function writeTensorCode(): void {
         if (isGrad) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
-        const isReduction = opSpec.type === "reduction";
-        const writeHeader = (name: string, isAlias: boolean) => {
-            writeOpDocs(opSpec, "this", isAlias, w);
-            if (isReduction) {
-                w.writeLine(`${name}(dim?: number, keepdim?: boolean): Tensor {`);
-            }
-            else if (isBinary) {
-                if (hasAlpha) {
-                    w.writeLine(`${name}(other: Tensor, alpha?: number): Tensor {`);
-                }
-                else {
-                    w.writeLine(`${name}(other: Tensor): Tensor {`);
-                }
-            }
-            else {
-                if (hasAlpha) {
-                    w.writeLine(`${name}(alpha?: number): Tensor {`);
-                }
-                else {
-                    w.writeLine(`${name}(): Tensor {`);
-                }
-            }
-        };
-        writeHeader(kernelSpec.name, false);
+        const isReduction = opSpec.type === "reduction";        
+        writeOpHeader(opSpec, kernelSpec.name, false, " {", w);
         w.indent();
         if (isInplace) {
             if (isBinary) {
@@ -132,7 +136,7 @@ function writeTensorCode(): void {
         w.writeLine(`}`);
         if (!isInplace) {
             for (const alias of opSpec.aliases ?? []) {
-                writeHeader(alias, true);
+                writeOpHeader(opSpec, alias, true, " {", w);
                 w.indent();
                 if (isBinary) {
                     if (hasAlpha) {
@@ -162,6 +166,28 @@ function writeTensorCode(): void {
 }
 writeTensorCode();
 
+// Write the Tensor class
+function writeTensorDeclCode(): void {
+    const w = new CodeWriter();
+    w.indent();
+    for (const [opSpec, kernelSpec] of opKernelSpecs) {
+        const isInplace = kernelSpec.name.endsWith("_");
+        const isGrad = kernelSpec.name.endsWith("Grad");
+        if (isGrad) continue;
+        writeOpHeader(opSpec, kernelSpec.name, false, ";", w);
+        if (!isInplace) {
+            for (const alias of opSpec.aliases ?? []) {
+                writeOpHeader(opSpec, alias, true, ";", w);
+            }
+        }
+    }
+    const code = w.toString();
+    // console.log(code);
+    const path = absSrcDir + "/tensor.d.ts";
+    // insertCodegenIntoFile(path, code);
+}
+writeTensorDeclCode();
+
 // Write autograd functions
 function writeFunctionsCode(): void {
     const w = new CodeWriter();
@@ -171,7 +197,7 @@ function writeFunctionsCode(): void {
     GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
-import { Tensor } from "./tensor";
+import type { Tensor } from "./tensor";
 import { shapeSize } from "./shape";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
@@ -347,7 +373,7 @@ function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: Cod
 // Write global ops
 function writeOpsCode(): void {
     const w = new CodeWriter();
-    w.writeLine(`import * as functions from "./functions";
+    w.writeLine(`import * as functions from "./functions_opgen";
 import { Tensor } from "./tensor";
 import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {

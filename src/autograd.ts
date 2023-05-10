@@ -1,7 +1,12 @@
-import { Tensor } from "./tensor";
+import type { Tensor } from "./tensor";
+import { TensorBase } from "./tensor_base";
 
 export type FunctionInput = Tensor | number | boolean | string | undefined;
 export type GradientFunctionOutput = Tensor | null;
+
+function isTensor(input: FunctionInput): input is Tensor {
+    return input instanceof TensorBase;
+}
 
 export class GradientContext {
     [key: string]: any;
@@ -10,10 +15,10 @@ export class GradientContext {
     savedTensors: Tensor[] = [];
     constructor(inputs: FunctionInput[]) {
         this.needsInputGradient = inputs.map(
-            (input) => input instanceof Tensor && input.requiresGrad
+            (input) => isTensor(input) && input.requiresGrad
         );
         this.inputsWithGradient = inputs.map((input) =>
-            input instanceof Tensor && input.requiresGrad ? input : null
+            isTensor(input) && input.requiresGrad ? input : null
         );
     }
     saveForBackward(...tensors: Tensor[]) {
@@ -52,7 +57,7 @@ export class AutoFunction {
     static apply(...inputs: FunctionInput[]): Tensor {
         const ctx = new GradientContext(inputs);
         const detachedInputs = inputs.map((input) =>
-            input instanceof Tensor ? input.detach() : input
+            isTensor(input) ? input.detach() : input
         );
         const output = this.forward(detachedInputs);
         this.setupContext(ctx, detachedInputs, output);

@@ -4,7 +4,7 @@ import {
     GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
-import { Tensor } from "./tensor";
+import type { Tensor } from "./tensor";
 import { shapeSize } from "./shape";
 export class AbsFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {

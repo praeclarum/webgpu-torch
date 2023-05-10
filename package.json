@@ -4,7 +4,7 @@
   "description": "Tensor computation and autograd with WebGPU acceleration",
   "main": "dist/index.js",
   "scripts": {
-    "build": "ts-node ./scripts/codegen.ts && ts-node ./scripts/plotgen.ts && webpack --config webpack.config.js --mode production && cp -a ./dist ./web/ && npx typedoc --out web/docs src/index.ts",
+    "build": "ts-node ./scripts/codegen.ts && ts-node ./scripts/plotgen.ts && webpack --config webpack.config.js --mode production && npx typedoc --out web/docs src/index.ts",
     "test": "jest",
     "start": "webpack-dev-server --open",
     "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",

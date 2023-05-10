@@ -13,10 +13,12 @@
         <a class="nav-item" href="./docs/">Docs</a>
         <a class="nav-item" href="./tests/">Tests</a>
     </nav>
-    <script src="dist/torch.js"></script>
+    <script src="../dist/torch.js"></script>
     <script>
         async function run() {
-            await torch.initWebGPUAsync();
+            if (!await torch.initWebGPUAsync()) {
+                console.warn(`WebGPU is not supported.`);
+            }
         }
         run();
     </script>

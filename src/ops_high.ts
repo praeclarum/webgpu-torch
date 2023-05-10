@@ -1,7 +1,7 @@
 // High level ops
 
 import { IAutoFunction, shouldCreateGradient } from "./autograd";
-import { Tensor } from "./tensor";
+import type { Tensor } from "./tensor";
 
 export function unary(func: IAutoFunction, input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {

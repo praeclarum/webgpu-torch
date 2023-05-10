@@ -4,7 +4,7 @@ import {
     GradientContext,
     GradientFunctionOutput,
 } from "./autograd";
-import { Tensor } from "./tensor";
+import type { Tensor } from "./tensor";
 
 export class LinearFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
