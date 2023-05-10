@@ -12,7 +12,18 @@ import type { GradientFunction, GradientContext } from "./autograd";
 import type { KernelConfigInput, KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
-import { TensorBase, TensorData, TensorSpec } from "./tensor_base";
+import { TensorBase } from "./tensor_base";
+
+export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
+
+export type TensorSpec = {
+    data: TensorData;
+    dtype?: Dtype;
+    requiresGrad?: boolean;
+    device?: Deviceish;
+    shape?: Shape;
+    strides?: Strides;
+};
 
 export class Tensor extends TensorBase {
     private _device: Device;
