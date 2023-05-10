@@ -1,6 +1,8 @@
 import { Tensor } from "./tensor";
 import { Module } from "./nn_module";
 /**
+* ![Plot of relu and its gradient](/plots/relu.svg)
+*
 * Calculates:
 * ```js
 * output = max(input, 0.0)
@@ -18,6 +20,8 @@ export class ReLU extends Module {
     }
 }
 /**
+* ![Plot of silu and its gradient](/plots/silu.svg)
+*
 * Calculates:
 * ```js
 * output = input / (1.0 + exp(-input))

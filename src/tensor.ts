@@ -350,6 +350,8 @@ export class Tensor {
 
     // Codegen marker
     /**
+    * ![Plot of abs and its gradient](/plots/abs.svg)
+    *
     * Calculates:
     * ```js
     * output = abs(input)
@@ -368,6 +370,8 @@ export class Tensor {
     /**
     * Alias for `abs`.
     *
+    * ![Plot of abs and its gradient](/plots/abs.svg)
+    *
     * Calculates:
     * ```js
     * output = abs(input)
@@ -384,6 +388,8 @@ export class Tensor {
         return ops.abs(this);
     }
     /**
+    * ![Plot of abs and its gradient](/plots/abs.svg)
+    *
     * Calculates:
     * ```js
     * output = abs(input)
@@ -403,6 +409,8 @@ export class Tensor {
         return this.runKernelInplace("abs_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of acos and its gradient](/plots/acos.svg)
+    *
     * Calculates:
     * ```js
     * output = acos(input)
@@ -421,6 +429,8 @@ export class Tensor {
     /**
     * Alias for `acos`.
     *
+    * ![Plot of acos and its gradient](/plots/acos.svg)
+    *
     * Calculates:
     * ```js
     * output = acos(input)
@@ -437,6 +447,8 @@ export class Tensor {
         return ops.acos(this);
     }
     /**
+    * ![Plot of acos and its gradient](/plots/acos.svg)
+    *
     * Calculates:
     * ```js
     * output = acos(input)
@@ -456,6 +468,8 @@ export class Tensor {
         return this.runKernelInplace("acos_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    *
     * Calculates:
     * ```js
     * output = acosh(input)
@@ -474,6 +488,8 @@ export class Tensor {
     /**
     * Alias for `acosh`.
     *
+    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    *
     * Calculates:
     * ```js
     * output = acosh(input)
@@ -490,6 +506,8 @@ export class Tensor {
         return ops.acosh(this);
     }
     /**
+    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    *
     * Calculates:
     * ```js
     * output = acosh(input)
@@ -549,6 +567,8 @@ export class Tensor {
         return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of asin and its gradient](/plots/asin.svg)
+    *
     * Calculates:
     * ```js
     * output = asin(input)
@@ -567,6 +587,8 @@ export class Tensor {
     /**
     * Alias for `asin`.
     *
+    * ![Plot of asin and its gradient](/plots/asin.svg)
+    *
     * Calculates:
     * ```js
     * output = asin(input)
@@ -583,6 +605,8 @@ export class Tensor {
         return ops.asin(this);
     }
     /**
+    * ![Plot of asin and its gradient](/plots/asin.svg)
+    *
     * Calculates:
     * ```js
     * output = asin(input)
@@ -602,6 +626,8 @@ export class Tensor {
         return this.runKernelInplace("asin_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    *
     * Calculates:
     * ```js
     * output = asinh(input)
@@ -620,6 +646,8 @@ export class Tensor {
     /**
     * Alias for `asinh`.
     *
+    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    *
     * Calculates:
     * ```js
     * output = asinh(input)
@@ -636,6 +664,8 @@ export class Tensor {
         return ops.asinh(this);
     }
     /**
+    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    *
     * Calculates:
     * ```js
     * output = asinh(input)
@@ -655,6 +685,8 @@ export class Tensor {
         return this.runKernelInplace("asinh_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of atan and its gradient](/plots/atan.svg)
+    *
     * Calculates:
     * ```js
     * output = atan(input)
@@ -673,6 +705,8 @@ export class Tensor {
     /**
     * Alias for `atan`.
     *
+    * ![Plot of atan and its gradient](/plots/atan.svg)
+    *
     * Calculates:
     * ```js
     * output = atan(input)
@@ -689,6 +723,8 @@ export class Tensor {
         return ops.atan(this);
     }
     /**
+    * ![Plot of atan and its gradient](/plots/atan.svg)
+    *
     * Calculates:
     * ```js
     * output = atan(input)
@@ -764,6 +800,8 @@ export class Tensor {
         return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of ceil and its gradient](/plots/ceil.svg)
+    *
     * Calculates:
     * ```js
     * output = ceil(input)
@@ -780,6 +818,8 @@ export class Tensor {
         return ops.ceil(this);
     }
     /**
+    * ![Plot of ceil and its gradient](/plots/ceil.svg)
+    *
     * Calculates:
     * ```js
     * output = ceil(input)
@@ -836,6 +876,8 @@ export class Tensor {
         return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of cos and its gradient](/plots/cos.svg)
+    *
     * Calculates:
     * ```js
     * output = cos(input)
@@ -852,6 +894,8 @@ export class Tensor {
         return ops.cos(this);
     }
     /**
+    * ![Plot of cos and its gradient](/plots/cos.svg)
+    *
     * Calculates:
     * ```js
     * output = cos(input)
@@ -871,6 +915,8 @@ export class Tensor {
         return this.runKernelInplace("cos_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of cosh and its gradient](/plots/cosh.svg)
+    *
     * Calculates:
     * ```js
     * output = cosh(input)
@@ -887,6 +933,8 @@ export class Tensor {
         return ops.cosh(this);
     }
     /**
+    * ![Plot of cosh and its gradient](/plots/cosh.svg)
+    *
     * Calculates:
     * ```js
     * output = cosh(input)
@@ -906,6 +954,8 @@ export class Tensor {
         return this.runKernelInplace("cosh_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of deg2rad and its gradient](/plots/deg2rad.svg)
+    *
     * Calculates:
     * ```js
     * output = input * 0.017453292519943295
@@ -922,6 +972,8 @@ export class Tensor {
         return ops.deg2rad(this);
     }
     /**
+    * ![Plot of deg2rad and its gradient](/plots/deg2rad.svg)
+    *
     * Calculates:
     * ```js
     * output = input * 0.017453292519943295
@@ -1001,6 +1053,8 @@ export class Tensor {
         return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of exp and its gradient](/plots/exp.svg)
+    *
     * Calculates:
     * ```js
     * output = exp(input)
@@ -1017,6 +1071,8 @@ export class Tensor {
         return ops.exp(this);
     }
     /**
+    * ![Plot of exp and its gradient](/plots/exp.svg)
+    *
     * Calculates:
     * ```js
     * output = exp(input)
@@ -1036,6 +1092,8 @@ export class Tensor {
         return this.runKernelInplace("exp_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of exp2 and its gradient](/plots/exp2.svg)
+    *
     * Calculates:
     * ```js
     * output = exp2(input)
@@ -1052,6 +1110,8 @@ export class Tensor {
         return ops.exp2(this);
     }
     /**
+    * ![Plot of exp2 and its gradient](/plots/exp2.svg)
+    *
     * Calculates:
     * ```js
     * output = exp2(input)
@@ -1071,6 +1131,8 @@ export class Tensor {
         return this.runKernelInplace("exp2_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of expm1 and its gradient](/plots/expm1.svg)
+    *
     * Calculates:
     * ```js
     * output = exp(input) - 1.0
@@ -1087,6 +1149,8 @@ export class Tensor {
         return ops.expm1(this);
     }
     /**
+    * ![Plot of expm1 and its gradient](/plots/expm1.svg)
+    *
     * Calculates:
     * ```js
     * output = exp(input) - 1.0
@@ -1106,6 +1170,8 @@ export class Tensor {
         return this.runKernelInplace("expm1_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of floor and its gradient](/plots/floor.svg)
+    *
     * Calculates:
     * ```js
     * output = floor(input)
@@ -1122,6 +1188,8 @@ export class Tensor {
         return ops.floor(this);
     }
     /**
+    * ![Plot of floor and its gradient](/plots/floor.svg)
+    *
     * Calculates:
     * ```js
     * output = floor(input)
@@ -1141,6 +1209,8 @@ export class Tensor {
         return this.runKernelInplace("floor_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of frac and its gradient](/plots/frac.svg)
+    *
     * Calculates:
     * ```js
     * output = input >= 0.0 ? fract(input) : -fract(-input)
@@ -1157,6 +1227,8 @@ export class Tensor {
         return ops.frac(this);
     }
     /**
+    * ![Plot of frac and its gradient](/plots/frac.svg)
+    *
     * Calculates:
     * ```js
     * output = input >= 0.0 ? fract(input) : -fract(-input)
@@ -1250,6 +1322,8 @@ export class Tensor {
         return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of log and its gradient](/plots/log.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input)
@@ -1266,6 +1340,8 @@ export class Tensor {
         return ops.log(this);
     }
     /**
+    * ![Plot of log and its gradient](/plots/log.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input)
@@ -1285,6 +1361,8 @@ export class Tensor {
         return this.runKernelInplace("log_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of log10 and its gradient](/plots/log10.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input) * 0.4342944819032518
@@ -1301,6 +1379,8 @@ export class Tensor {
         return ops.log10(this);
     }
     /**
+    * ![Plot of log10 and its gradient](/plots/log10.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input) * 0.4342944819032518
@@ -1320,6 +1400,8 @@ export class Tensor {
         return this.runKernelInplace("log10_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of log1p and its gradient](/plots/log1p.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input + 1.0)
@@ -1336,6 +1418,8 @@ export class Tensor {
         return ops.log1p(this);
     }
     /**
+    * ![Plot of log1p and its gradient](/plots/log1p.svg)
+    *
     * Calculates:
     * ```js
     * output = log(input + 1.0)
@@ -1355,6 +1439,8 @@ export class Tensor {
         return this.runKernelInplace("log1p_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of log2 and its gradient](/plots/log2.svg)
+    *
     * Calculates:
     * ```js
     * output = log2(input)
@@ -1371,6 +1457,8 @@ export class Tensor {
         return ops.log2(this);
     }
     /**
+    * ![Plot of log2 and its gradient](/plots/log2.svg)
+    *
     * Calculates:
     * ```js
     * output = log2(input)
@@ -1524,6 +1612,8 @@ export class Tensor {
         return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of neg and its gradient](/plots/neg.svg)
+    *
     * Calculates:
     * ```js
     * output = -input
@@ -1542,6 +1632,8 @@ export class Tensor {
     /**
     * Alias for `neg`.
     *
+    * ![Plot of neg and its gradient](/plots/neg.svg)
+    *
     * Calculates:
     * ```js
     * output = -input
@@ -1558,6 +1650,8 @@ export class Tensor {
         return ops.neg(this);
     }
     /**
+    * ![Plot of neg and its gradient](/plots/neg.svg)
+    *
     * Calculates:
     * ```js
     * output = -input
@@ -1577,6 +1671,8 @@ export class Tensor {
         return this.runKernelInplace("neg_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of positive and its gradient](/plots/positive.svg)
+    *
     * Calculates:
     * ```js
     * output = input
@@ -1593,6 +1689,8 @@ export class Tensor {
         return ops.positive(this);
     }
     /**
+    * ![Plot of positive and its gradient](/plots/positive.svg)
+    *
     * Calculates:
     * ```js
     * output = input
@@ -1649,6 +1747,8 @@ export class Tensor {
         return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of rad2deg and its gradient](/plots/rad2deg.svg)
+    *
     * Calculates:
     * ```js
     * output = input * 57.29577951308232
@@ -1665,6 +1765,8 @@ export class Tensor {
         return ops.rad2deg(this);
     }
     /**
+    * ![Plot of rad2deg and its gradient](/plots/rad2deg.svg)
+    *
     * Calculates:
     * ```js
     * output = input * 57.29577951308232
@@ -1684,6 +1786,8 @@ export class Tensor {
         return this.runKernelInplace("rad2deg_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of reciprocal and its gradient](/plots/reciprocal.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / input
@@ -1700,6 +1804,8 @@ export class Tensor {
         return ops.reciprocal(this);
     }
     /**
+    * ![Plot of reciprocal and its gradient](/plots/reciprocal.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / input
@@ -1719,6 +1825,8 @@ export class Tensor {
         return this.runKernelInplace("reciprocal_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of relu and its gradient](/plots/relu.svg)
+    *
     * Calculates:
     * ```js
     * output = max(input, 0.0)
@@ -1735,6 +1843,8 @@ export class Tensor {
         return ops.relu(this);
     }
     /**
+    * ![Plot of relu and its gradient](/plots/relu.svg)
+    *
     * Calculates:
     * ```js
     * output = max(input, 0.0)
@@ -1754,6 +1864,8 @@ export class Tensor {
         return this.runKernelInplace("relu_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of round and its gradient](/plots/round.svg)
+    *
     * Calculates:
     * ```js
     * output = round(input)
@@ -1770,6 +1882,8 @@ export class Tensor {
         return ops.round(this);
     }
     /**
+    * ![Plot of round and its gradient](/plots/round.svg)
+    *
     * Calculates:
     * ```js
     * output = round(input)
@@ -1789,6 +1903,8 @@ export class Tensor {
         return this.runKernelInplace("round_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of rsqrt and its gradient](/plots/rsqrt.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / sqrt(input)
@@ -1805,6 +1921,8 @@ export class Tensor {
         return ops.rsqrt(this);
     }
     /**
+    * ![Plot of rsqrt and its gradient](/plots/rsqrt.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / sqrt(input)
@@ -1824,6 +1942,8 @@ export class Tensor {
         return this.runKernelInplace("rsqrt_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sigmoid and its gradient](/plots/sigmoid.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / (1.0 + exp(-input))
@@ -1840,6 +1960,8 @@ export class Tensor {
         return ops.sigmoid(this);
     }
     /**
+    * ![Plot of sigmoid and its gradient](/plots/sigmoid.svg)
+    *
     * Calculates:
     * ```js
     * output = 1.0 / (1.0 + exp(-input))
@@ -1859,6 +1981,8 @@ export class Tensor {
         return this.runKernelInplace("sigmoid_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sign and its gradient](/plots/sign.svg)
+    *
     * Calculates:
     * ```js
     * output = sign(input)
@@ -1875,6 +1999,8 @@ export class Tensor {
         return ops.sign(this);
     }
     /**
+    * ![Plot of sign and its gradient](/plots/sign.svg)
+    *
     * Calculates:
     * ```js
     * output = sign(input)
@@ -1894,6 +2020,8 @@ export class Tensor {
         return this.runKernelInplace("sign_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of silu and its gradient](/plots/silu.svg)
+    *
     * Calculates:
     * ```js
     * output = input / (1.0 + exp(-input))
@@ -1910,6 +2038,8 @@ export class Tensor {
         return ops.silu(this);
     }
     /**
+    * ![Plot of silu and its gradient](/plots/silu.svg)
+    *
     * Calculates:
     * ```js
     * output = input / (1.0 + exp(-input))
@@ -1929,6 +2059,8 @@ export class Tensor {
         return this.runKernelInplace("silu_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sin and its gradient](/plots/sin.svg)
+    *
     * Calculates:
     * ```js
     * output = sin(input)
@@ -1945,6 +2077,8 @@ export class Tensor {
         return ops.sin(this);
     }
     /**
+    * ![Plot of sin and its gradient](/plots/sin.svg)
+    *
     * Calculates:
     * ```js
     * output = sin(input)
@@ -1964,6 +2098,8 @@ export class Tensor {
         return this.runKernelInplace("sin_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sinc and its gradient](/plots/sinc.svg)
+    *
     * Calculates:
     * ```js
     * var inpi = input * 3.141592653589793; output = input == 0.0 ? 1.0 : sin(inpi) / inpi
@@ -1980,6 +2116,8 @@ export class Tensor {
         return ops.sinc(this);
     }
     /**
+    * ![Plot of sinc and its gradient](/plots/sinc.svg)
+    *
     * Calculates:
     * ```js
     * var inpi = input * 3.141592653589793; output = input == 0.0 ? 1.0 : sin(inpi) / inpi
@@ -1999,6 +2137,8 @@ export class Tensor {
         return this.runKernelInplace("sinc_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sinh and its gradient](/plots/sinh.svg)
+    *
     * Calculates:
     * ```js
     * output = sinh(input)
@@ -2015,6 +2155,8 @@ export class Tensor {
         return ops.sinh(this);
     }
     /**
+    * ![Plot of sinh and its gradient](/plots/sinh.svg)
+    *
     * Calculates:
     * ```js
     * output = sinh(input)
@@ -2034,6 +2176,8 @@ export class Tensor {
         return this.runKernelInplace("sinh_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of sqrt and its gradient](/plots/sqrt.svg)
+    *
     * Calculates:
     * ```js
     * output = sqrt(input)
@@ -2050,6 +2194,8 @@ export class Tensor {
         return ops.sqrt(this);
     }
     /**
+    * ![Plot of sqrt and its gradient](/plots/sqrt.svg)
+    *
     * Calculates:
     * ```js
     * output = sqrt(input)
@@ -2069,6 +2215,8 @@ export class Tensor {
         return this.runKernelInplace("sqrt_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of square and its gradient](/plots/square.svg)
+    *
     * Calculates:
     * ```js
     * output = input * input
@@ -2085,6 +2233,8 @@ export class Tensor {
         return ops.square(this);
     }
     /**
+    * ![Plot of square and its gradient](/plots/square.svg)
+    *
     * Calculates:
     * ```js
     * output = input * input
@@ -2164,6 +2314,8 @@ export class Tensor {
         return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
     }
     /**
+    * ![Plot of tan and its gradient](/plots/tan.svg)
+    *
     * Calculates:
     * ```js
     * output = tan(input)
@@ -2180,6 +2332,8 @@ export class Tensor {
         return ops.tan(this);
     }
     /**
+    * ![Plot of tan and its gradient](/plots/tan.svg)
+    *
     * Calculates:
     * ```js
     * output = tan(input)
@@ -2199,6 +2353,8 @@ export class Tensor {
         return this.runKernelInplace("tan_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of tanh and its gradient](/plots/tanh.svg)
+    *
     * Calculates:
     * ```js
     * output = tanh(input)
@@ -2215,6 +2371,8 @@ export class Tensor {
         return ops.tanh(this);
     }
     /**
+    * ![Plot of tanh and its gradient](/plots/tanh.svg)
+    *
     * Calculates:
     * ```js
     * output = tanh(input)
@@ -2234,6 +2392,8 @@ export class Tensor {
         return this.runKernelInplace("tanh_", { dtype: this.dtype }, params);
     }
     /**
+    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    *
     * Calculates:
     * ```js
     * output = trunc(input)
@@ -2252,6 +2412,8 @@ export class Tensor {
     /**
     * Alias for `trunc`.
     *
+    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    *
     * Calculates:
     * ```js
     * output = trunc(input)
@@ -2268,6 +2430,8 @@ export class Tensor {
         return ops.trunc(this);
     }
     /**
+    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    *
     * Calculates:
     * ```js
     * output = trunc(input)

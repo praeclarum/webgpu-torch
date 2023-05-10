@@ -146,7 +146,7 @@ async function writePlots() {
     for (const op of opRegistry) {
         try {
             if (op.type === "unary") {
-                const samples = await sampleUnaryOp(op as UnaryOpSpec, 100, bounds);
+                const samples = await sampleUnaryOp(op as UnaryOpSpec, 128, bounds);
                 writePlotSvg(op, samples, bounds);
             }
         } catch (e) {

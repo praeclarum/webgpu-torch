@@ -293,10 +293,15 @@ writeFunctionsCode();
 
 function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: CodeWriter, includeParamsAndReturn: boolean = true): void {
     const isBinary = opSpec.type === "binary";
+    const isUnary = opSpec.type === "unary";
     const hasAlpha = opSpec.alpha ?? false;
     w.writeLine(`/**`);
     if (isAlias) {
         w.writeLine(`* Alias for \`${opSpec.name}\`.`);
+        w.writeLine(`*`);
+    }
+    if (isUnary) {
+        w.writeLine(`* ![Plot of ${opSpec.name} and its gradient](/plots/${opSpec.name}.svg)`);
         w.writeLine(`*`);
     }
     w.writeLine(`* Calculates:`);

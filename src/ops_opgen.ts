@@ -2,6 +2,8 @@ import * as functions from "./functions";
 import { Tensor } from "./tensor";
 import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";
 /**
+* ![Plot of abs and its gradient](/plots/abs.svg)
+*
 * Calculates:
 * ```js
 * output = abs(input)
@@ -21,6 +23,8 @@ export function abs(input: Tensor): Tensor {
 /**
 * Alias for `abs`.
 *
+* ![Plot of abs and its gradient](/plots/abs.svg)
+*
 * Calculates:
 * ```js
 * output = abs(input)
@@ -38,6 +42,8 @@ export function absolute(input: Tensor): Tensor {
     return abs(input);
 }
 /**
+* ![Plot of acos and its gradient](/plots/acos.svg)
+*
 * Calculates:
 * ```js
 * output = acos(input)
@@ -57,6 +63,8 @@ export function acos(input: Tensor): Tensor {
 /**
 * Alias for `acos`.
 *
+* ![Plot of acos and its gradient](/plots/acos.svg)
+*
 * Calculates:
 * ```js
 * output = acos(input)
@@ -74,6 +82,8 @@ export function arccos(input: Tensor): Tensor {
     return acos(input);
 }
 /**
+* ![Plot of acosh and its gradient](/plots/acosh.svg)
+*
 * Calculates:
 * ```js
 * output = acosh(input)
@@ -92,6 +102,8 @@ export function acosh(input: Tensor): Tensor {
 }
 /**
 * Alias for `acosh`.
+*
+* ![Plot of acosh and its gradient](/plots/acosh.svg)
 *
 * Calculates:
 * ```js
@@ -129,6 +141,8 @@ export function add(input: Tensor, other: Tensor, alpha?: number): Tensor {
     return binaryWithAlpha(functions.AddFunction, input, other, alpha);
 }
 /**
+* ![Plot of asin and its gradient](/plots/asin.svg)
+*
 * Calculates:
 * ```js
 * output = asin(input)
@@ -148,6 +162,8 @@ export function asin(input: Tensor): Tensor {
 /**
 * Alias for `asin`.
 *
+* ![Plot of asin and its gradient](/plots/asin.svg)
+*
 * Calculates:
 * ```js
 * output = asin(input)
@@ -165,6 +181,8 @@ export function arcsin(input: Tensor): Tensor {
     return asin(input);
 }
 /**
+* ![Plot of asinh and its gradient](/plots/asinh.svg)
+*
 * Calculates:
 * ```js
 * output = asinh(input)
@@ -184,6 +202,8 @@ export function asinh(input: Tensor): Tensor {
 /**
 * Alias for `asinh`.
 *
+* ![Plot of asinh and its gradient](/plots/asinh.svg)
+*
 * Calculates:
 * ```js
 * output = asinh(input)
@@ -201,6 +221,8 @@ export function arcsinh(input: Tensor): Tensor {
     return asinh(input);
 }
 /**
+* ![Plot of atan and its gradient](/plots/atan.svg)
+*
 * Calculates:
 * ```js
 * output = atan(input)
@@ -219,6 +241,8 @@ export function atan(input: Tensor): Tensor {
 }
 /**
 * Alias for `atan`.
+*
+* ![Plot of atan and its gradient](/plots/atan.svg)
 *
 * Calculates:
 * ```js
@@ -275,6 +299,8 @@ export function arctan2(input: Tensor, other: Tensor): Tensor {
     return atan2(input, other);
 }
 /**
+* ![Plot of ceil and its gradient](/plots/ceil.svg)
+*
 * Calculates:
 * ```js
 * output = ceil(input)
@@ -310,6 +336,8 @@ export function copysign(input: Tensor, other: Tensor): Tensor {
     return binary(functions.CopysignFunction, input, other);
 }
 /**
+* ![Plot of cos and its gradient](/plots/cos.svg)
+*
 * Calculates:
 * ```js
 * output = cos(input)
@@ -327,6 +355,8 @@ export function cos(input: Tensor): Tensor {
     return unary(functions.CosFunction, input);
 }
 /**
+* ![Plot of cosh and its gradient](/plots/cosh.svg)
+*
 * Calculates:
 * ```js
 * output = cosh(input)
@@ -344,6 +374,8 @@ export function cosh(input: Tensor): Tensor {
     return unary(functions.CoshFunction, input);
 }
 /**
+* ![Plot of deg2rad and its gradient](/plots/deg2rad.svg)
+*
 * Calculates:
 * ```js
 * output = input * 0.017453292519943295
@@ -401,6 +433,8 @@ export function divide(input: Tensor, other: Tensor, alpha?: number): Tensor {
     return div(input, other, alpha);
 }
 /**
+* ![Plot of exp and its gradient](/plots/exp.svg)
+*
 * Calculates:
 * ```js
 * output = exp(input)
@@ -418,6 +452,8 @@ export function exp(input: Tensor): Tensor {
     return unary(functions.ExpFunction, input);
 }
 /**
+* ![Plot of exp2 and its gradient](/plots/exp2.svg)
+*
 * Calculates:
 * ```js
 * output = exp2(input)
@@ -435,6 +471,8 @@ export function exp2(input: Tensor): Tensor {
     return unary(functions.Exp2Function, input);
 }
 /**
+* ![Plot of expm1 and its gradient](/plots/expm1.svg)
+*
 * Calculates:
 * ```js
 * output = exp(input) - 1.0
@@ -452,6 +490,8 @@ export function expm1(input: Tensor): Tensor {
     return unary(functions.Expm1Function, input);
 }
 /**
+* ![Plot of floor and its gradient](/plots/floor.svg)
+*
 * Calculates:
 * ```js
 * output = floor(input)
@@ -469,6 +509,8 @@ export function floor(input: Tensor): Tensor {
     return unary(functions.FloorFunction, input);
 }
 /**
+* ![Plot of frac and its gradient](/plots/frac.svg)
+*
 * Calculates:
 * ```js
 * output = input >= 0.0 ? fract(input) : -fract(-input)
@@ -522,6 +564,8 @@ export function ldexp(input: Tensor, other: Tensor): Tensor {
     return binary(functions.LdexpFunction, input, other);
 }
 /**
+* ![Plot of log and its gradient](/plots/log.svg)
+*
 * Calculates:
 * ```js
 * output = log(input)
@@ -539,6 +583,8 @@ export function log(input: Tensor): Tensor {
     return unary(functions.LogFunction, input);
 }
 /**
+* ![Plot of log10 and its gradient](/plots/log10.svg)
+*
 * Calculates:
 * ```js
 * output = log(input) * 0.4342944819032518
@@ -556,6 +602,8 @@ export function log10(input: Tensor): Tensor {
     return unary(functions.Log10Function, input);
 }
 /**
+* ![Plot of log1p and its gradient](/plots/log1p.svg)
+*
 * Calculates:
 * ```js
 * output = log(input + 1.0)
@@ -573,6 +621,8 @@ export function log1p(input: Tensor): Tensor {
     return unary(functions.Log1pFunction, input);
 }
 /**
+* ![Plot of log2 and its gradient](/plots/log2.svg)
+*
 * Calculates:
 * ```js
 * output = log2(input)
@@ -666,6 +716,8 @@ export function multiply(input: Tensor, other: Tensor, alpha?: number): Tensor {
     return mul(input, other, alpha);
 }
 /**
+* ![Plot of neg and its gradient](/plots/neg.svg)
+*
 * Calculates:
 * ```js
 * output = -input
@@ -685,6 +737,8 @@ export function neg(input: Tensor): Tensor {
 /**
 * Alias for `neg`.
 *
+* ![Plot of neg and its gradient](/plots/neg.svg)
+*
 * Calculates:
 * ```js
 * output = -input
@@ -702,6 +756,8 @@ export function negative(input: Tensor): Tensor {
     return neg(input);
 }
 /**
+* ![Plot of positive and its gradient](/plots/positive.svg)
+*
 * Calculates:
 * ```js
 * output = input
@@ -737,6 +793,8 @@ export function pow(input: Tensor, other: Tensor): Tensor {
     return binary(functions.PowFunction, input, other);
 }
 /**
+* ![Plot of rad2deg and its gradient](/plots/rad2deg.svg)
+*
 * Calculates:
 * ```js
 * output = input * 57.29577951308232
@@ -754,6 +812,8 @@ export function rad2deg(input: Tensor): Tensor {
     return unary(functions.Rad2degFunction, input);
 }
 /**
+* ![Plot of reciprocal and its gradient](/plots/reciprocal.svg)
+*
 * Calculates:
 * ```js
 * output = 1.0 / input
@@ -771,6 +831,8 @@ export function reciprocal(input: Tensor): Tensor {
     return unary(functions.ReciprocalFunction, input);
 }
 /**
+* ![Plot of relu and its gradient](/plots/relu.svg)
+*
 * Calculates:
 * ```js
 * output = max(input, 0.0)
@@ -788,6 +850,8 @@ export function relu(input: Tensor): Tensor {
     return unary(functions.ReluFunction, input);
 }
 /**
+* ![Plot of round and its gradient](/plots/round.svg)
+*
 * Calculates:
 * ```js
 * output = round(input)
@@ -805,6 +869,8 @@ export function round(input: Tensor): Tensor {
     return unary(functions.RoundFunction, input);
 }
 /**
+* ![Plot of rsqrt and its gradient](/plots/rsqrt.svg)
+*
 * Calculates:
 * ```js
 * output = 1.0 / sqrt(input)
@@ -822,6 +888,8 @@ export function rsqrt(input: Tensor): Tensor {
     return unary(functions.RsqrtFunction, input);
 }
 /**
+* ![Plot of sigmoid and its gradient](/plots/sigmoid.svg)
+*
 * Calculates:
 * ```js
 * output = 1.0 / (1.0 + exp(-input))
@@ -839,6 +907,8 @@ export function sigmoid(input: Tensor): Tensor {
     return unary(functions.SigmoidFunction, input);
 }
 /**
+* ![Plot of sign and its gradient](/plots/sign.svg)
+*
 * Calculates:
 * ```js
 * output = sign(input)
@@ -856,6 +926,8 @@ export function sign(input: Tensor): Tensor {
     return unary(functions.SignFunction, input);
 }
 /**
+* ![Plot of silu and its gradient](/plots/silu.svg)
+*
 * Calculates:
 * ```js
 * output = input / (1.0 + exp(-input))
@@ -873,6 +945,8 @@ export function silu(input: Tensor): Tensor {
     return unary(functions.SiluFunction, input);
 }
 /**
+* ![Plot of sin and its gradient](/plots/sin.svg)
+*
 * Calculates:
 * ```js
 * output = sin(input)
@@ -890,6 +964,8 @@ export function sin(input: Tensor): Tensor {
     return unary(functions.SinFunction, input);
 }
 /**
+* ![Plot of sinc and its gradient](/plots/sinc.svg)
+*
 * Calculates:
 * ```js
 * var inpi = input * 3.141592653589793; output = input == 0.0 ? 1.0 : sin(inpi) / inpi
@@ -907,6 +983,8 @@ export function sinc(input: Tensor): Tensor {
     return unary(functions.SincFunction, input);
 }
 /**
+* ![Plot of sinh and its gradient](/plots/sinh.svg)
+*
 * Calculates:
 * ```js
 * output = sinh(input)
@@ -924,6 +1002,8 @@ export function sinh(input: Tensor): Tensor {
     return unary(functions.SinhFunction, input);
 }
 /**
+* ![Plot of sqrt and its gradient](/plots/sqrt.svg)
+*
 * Calculates:
 * ```js
 * output = sqrt(input)
@@ -941,6 +1021,8 @@ export function sqrt(input: Tensor): Tensor {
     return unary(functions.SqrtFunction, input);
 }
 /**
+* ![Plot of square and its gradient](/plots/square.svg)
+*
 * Calculates:
 * ```js
 * output = input * input
@@ -998,6 +1080,8 @@ export function subtract(input: Tensor, other: Tensor, alpha?: number): Tensor {
     return sub(input, other, alpha);
 }
 /**
+* ![Plot of tan and its gradient](/plots/tan.svg)
+*
 * Calculates:
 * ```js
 * output = tan(input)
@@ -1015,6 +1099,8 @@ export function tan(input: Tensor): Tensor {
     return unary(functions.TanFunction, input);
 }
 /**
+* ![Plot of tanh and its gradient](/plots/tanh.svg)
+*
 * Calculates:
 * ```js
 * output = tanh(input)
@@ -1032,6 +1118,8 @@ export function tanh(input: Tensor): Tensor {
     return unary(functions.TanhFunction, input);
 }
 /**
+* ![Plot of trunc and its gradient](/plots/trunc.svg)
+*
 * Calculates:
 * ```js
 * output = trunc(input)
@@ -1050,6 +1138,8 @@ export function trunc(input: Tensor): Tensor {
 }
 /**
 * Alias for `trunc`.
+*
+* ![Plot of trunc and its gradient](/plots/trunc.svg)
 *
 * Calculates:
 * ```js
