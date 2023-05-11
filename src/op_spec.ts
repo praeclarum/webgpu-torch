@@ -1,5 +1,4 @@
-import { KernelParamSpec, KernelSpec } from "./kernel";
-import { ExprCode, exprNodeToString, parseCode, substituteIdentifiers } from "./expr";
+import type { ExprCode } from "./expr";
 
 export type OpType = "unary" | "binary" | "reduction";
 
