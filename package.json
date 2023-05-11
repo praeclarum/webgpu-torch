@@ -7,8 +7,7 @@
     "build": "rm -rf dist/* && rm -rf web/dist && ts-node ./scripts/codegen.ts && ts-node ./scripts/plotgen.ts && tsc && webpack --config webpack.config.js --mode production && cp -a dist ./web/ && cp package.json ./dist/ && npx typedoc --out web/docs src/index.ts",
     "test": "jest",
     "start": "webpack-dev-server --open",
-    "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",
-    "prepublishOnly": "npm run build"
+    "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js"
   },
   "repository": {
     "type": "git",
