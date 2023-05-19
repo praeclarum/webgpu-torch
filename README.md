@@ -126,16 +126,16 @@ Here are the big components of the library:
 - [x] Autograd Functions
 - [ ] Datatypes beyond float32
 - [ ] Optimizers (SGD and Adam)
-- [ ] Modules
+- [x] Modules
 - [ ] Save and restore (ONNX, safetensors)
 
 In terms of supported operations, there's still a bit of work to be done:
 
 - [x] Basic math
-- [ ] Convolution
+- [x] Convolution
 - [ ] Indexing
 - [ ] Broadcasting
-- [ ] Reductions
+- [x] Reductions
 - [ ] Imaging
 
 
