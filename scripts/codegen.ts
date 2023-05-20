@@ -327,7 +327,7 @@ function writeOpDocs(opSpec: OpSpec, inputName: string, isAlias: boolean, w: Cod
         w.writeLine(`*`);
     }
     if (isUnary) {
-        w.writeLine(`* ![Plot of ${opSpec.name} and its gradient](/plots/${opSpec.name}.svg)`);
+        w.writeLine(`* ![Plot of ${opSpec.name} and its gradient](../../plots/${opSpec.name}.svg)`);
         w.writeLine(`*`);
     }
     w.writeLine(`* Calculates:`);
