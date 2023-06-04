@@ -1,0 +1,86 @@
+import torch
+from itertools import product
+import time
+import json
+
+
+machine_id = "iMac Pro 2017"
+
+has_cuda = torch.cuda.is_available()
+
+# Get machine CPU info
+import cpuinfo
+cpu_info = cpuinfo.get_cpu_info()
+device_name = torch.cuda.get_device_name(0) if has_cuda else cpu_info["brand_raw"]
+
+def get_input_permutations(benchmark_inputs):
+    return list(product(*[inp["values"] for inp in benchmark_inputs]))
+
+
+def run_unary_benchmark(benchmark, inputs):
+    shape = inputs[0]
+    operation = getattr(torch, inputs[1])
+
+    def run_iteration():
+        x = torch.ones(shape)
+        if has_cuda:
+            x = x.cuda()
+        start = time.perf_counter()
+        y = operation(x)
+        yar = y.cpu().numpy()
+        end = time.perf_counter()
+        return (end - start)*1000
+
+    for _ in range(benchmark["warmupIterations"]):
+        run_iteration()
+
+    ms = []
+    for _ in range(benchmark["iterations"]):
+        ms.append(run_iteration())
+
+    return ms
+
+
+def run_benchmark(benchmark, inputs):
+    if benchmark["type"] == "unary":
+        return run_unary_benchmark(benchmark, inputs)
+    else:
+        raise ValueError(f"Unknown benchmark type '{benchmark['type']}'")
+
+
+def run_benchmarks():
+    # Load the test JSON
+    json_file = "../web/benchmarks/benchmarks.json"
+    with open(json_file) as f:
+        benchmarks = json.load(f)
+
+    # Run the benchmarks
+    benchmark_results = []
+    for b in benchmarks["benchmarks"]:
+        input_perms = get_input_permutations(b["inputs"])
+
+        for ip in input_perms:
+            input_str = ", ".join([str(i) for i in ip])
+            result = {"benchmark_key": f"{b['name']}({input_str})", "meanTime": 0.0}
+            try:
+                times = run_benchmark(b, ip)
+                mean_time = sum(times) / len(times)
+                result["meanTime"] = mean_time
+            except Exception as e:
+                result["error"] = e
+                print(e)
+            benchmark_results.append(result)
+
+    return benchmark_results
+
+results = run_benchmarks()
+
+results_obj = {
+    machine_id: {
+        "device_name": device_name,
+        "results": results,
+    }
+}
+
+with open("../web/benchmarks/results.json", "w") as f:
+    json.dump(results_obj, f, indent=2)
