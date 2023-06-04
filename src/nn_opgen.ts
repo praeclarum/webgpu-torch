@@ -1,7 +1,7 @@
 import { Tensor } from "./tensor";
 import { Module } from "./nn_module";
 /**
-* ![Plot of relu and its gradient](/plots/relu.svg)
+* ![Plot of relu and its gradient](../../plots/relu.svg)
 *
 * Calculates:
 * ```js
@@ -20,7 +20,7 @@ export class ReLU extends Module {
     }
 }
 /**
-* ![Plot of silu and its gradient](/plots/silu.svg)
+* ![Plot of silu and its gradient](../../plots/silu.svg)
 *
 * Calculates:
 * ```js

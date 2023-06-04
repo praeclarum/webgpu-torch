@@ -353,7 +353,7 @@ export class Tensor extends TensorBase {
 
     // Codegen marker
     /**
-    * ![Plot of abs and its gradient](/plots/abs.svg)
+    * ![Plot of abs and its gradient](../../plots/abs.svg)
     *
     * Calculates:
     * ```js
@@ -373,7 +373,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `abs`.
     *
-    * ![Plot of abs and its gradient](/plots/abs.svg)
+    * ![Plot of abs and its gradient](../../plots/abs.svg)
     *
     * Calculates:
     * ```js
@@ -391,7 +391,7 @@ export class Tensor extends TensorBase {
         return ops.abs(this);
     }
     /**
-    * ![Plot of abs and its gradient](/plots/abs.svg)
+    * ![Plot of abs and its gradient](../../plots/abs.svg)
     *
     * Calculates:
     * ```js
@@ -412,7 +412,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("abs_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of acos and its gradient](/plots/acos.svg)
+    * ![Plot of acos and its gradient](../../plots/acos.svg)
     *
     * Calculates:
     * ```js
@@ -432,7 +432,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `acos`.
     *
-    * ![Plot of acos and its gradient](/plots/acos.svg)
+    * ![Plot of acos and its gradient](../../plots/acos.svg)
     *
     * Calculates:
     * ```js
@@ -450,7 +450,7 @@ export class Tensor extends TensorBase {
         return ops.acos(this);
     }
     /**
-    * ![Plot of acos and its gradient](/plots/acos.svg)
+    * ![Plot of acos and its gradient](../../plots/acos.svg)
     *
     * Calculates:
     * ```js
@@ -471,7 +471,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("acos_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    * ![Plot of acosh and its gradient](../../plots/acosh.svg)
     *
     * Calculates:
     * ```js
@@ -491,7 +491,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `acosh`.
     *
-    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    * ![Plot of acosh and its gradient](../../plots/acosh.svg)
     *
     * Calculates:
     * ```js
@@ -509,7 +509,7 @@ export class Tensor extends TensorBase {
         return ops.acosh(this);
     }
     /**
-    * ![Plot of acosh and its gradient](/plots/acosh.svg)
+    * ![Plot of acosh and its gradient](../../plots/acosh.svg)
     *
     * Calculates:
     * ```js
@@ -570,7 +570,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of asin and its gradient](/plots/asin.svg)
+    * ![Plot of asin and its gradient](../../plots/asin.svg)
     *
     * Calculates:
     * ```js
@@ -590,7 +590,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `asin`.
     *
-    * ![Plot of asin and its gradient](/plots/asin.svg)
+    * ![Plot of asin and its gradient](../../plots/asin.svg)
     *
     * Calculates:
     * ```js
@@ -608,7 +608,7 @@ export class Tensor extends TensorBase {
         return ops.asin(this);
     }
     /**
-    * ![Plot of asin and its gradient](/plots/asin.svg)
+    * ![Plot of asin and its gradient](../../plots/asin.svg)
     *
     * Calculates:
     * ```js
@@ -629,7 +629,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("asin_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    * ![Plot of asinh and its gradient](../../plots/asinh.svg)
     *
     * Calculates:
     * ```js
@@ -649,7 +649,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `asinh`.
     *
-    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    * ![Plot of asinh and its gradient](../../plots/asinh.svg)
     *
     * Calculates:
     * ```js
@@ -667,7 +667,7 @@ export class Tensor extends TensorBase {
         return ops.asinh(this);
     }
     /**
-    * ![Plot of asinh and its gradient](/plots/asinh.svg)
+    * ![Plot of asinh and its gradient](../../plots/asinh.svg)
     *
     * Calculates:
     * ```js
@@ -688,7 +688,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("asinh_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of atan and its gradient](/plots/atan.svg)
+    * ![Plot of atan and its gradient](../../plots/atan.svg)
     *
     * Calculates:
     * ```js
@@ -708,7 +708,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `atan`.
     *
-    * ![Plot of atan and its gradient](/plots/atan.svg)
+    * ![Plot of atan and its gradient](../../plots/atan.svg)
     *
     * Calculates:
     * ```js
@@ -726,7 +726,7 @@ export class Tensor extends TensorBase {
         return ops.atan(this);
     }
     /**
-    * ![Plot of atan and its gradient](/plots/atan.svg)
+    * ![Plot of atan and its gradient](../../plots/atan.svg)
     *
     * Calculates:
     * ```js
@@ -803,7 +803,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of ceil and its gradient](/plots/ceil.svg)
+    * ![Plot of ceil and its gradient](../../plots/ceil.svg)
     *
     * Calculates:
     * ```js
@@ -821,7 +821,7 @@ export class Tensor extends TensorBase {
         return ops.ceil(this);
     }
     /**
-    * ![Plot of ceil and its gradient](/plots/ceil.svg)
+    * ![Plot of ceil and its gradient](../../plots/ceil.svg)
     *
     * Calculates:
     * ```js
@@ -879,7 +879,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of cos and its gradient](/plots/cos.svg)
+    * ![Plot of cos and its gradient](../../plots/cos.svg)
     *
     * Calculates:
     * ```js
@@ -897,7 +897,7 @@ export class Tensor extends TensorBase {
         return ops.cos(this);
     }
     /**
-    * ![Plot of cos and its gradient](/plots/cos.svg)
+    * ![Plot of cos and its gradient](../../plots/cos.svg)
     *
     * Calculates:
     * ```js
@@ -918,7 +918,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("cos_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of cosh and its gradient](/plots/cosh.svg)
+    * ![Plot of cosh and its gradient](../../plots/cosh.svg)
     *
     * Calculates:
     * ```js
@@ -936,7 +936,7 @@ export class Tensor extends TensorBase {
         return ops.cosh(this);
     }
     /**
-    * ![Plot of cosh and its gradient](/plots/cosh.svg)
+    * ![Plot of cosh and its gradient](../../plots/cosh.svg)
     *
     * Calculates:
     * ```js
@@ -957,7 +957,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("cosh_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of deg2rad and its gradient](/plots/deg2rad.svg)
+    * ![Plot of deg2rad and its gradient](../../plots/deg2rad.svg)
     *
     * Calculates:
     * ```js
@@ -975,7 +975,7 @@ export class Tensor extends TensorBase {
         return ops.deg2rad(this);
     }
     /**
-    * ![Plot of deg2rad and its gradient](/plots/deg2rad.svg)
+    * ![Plot of deg2rad and its gradient](../../plots/deg2rad.svg)
     *
     * Calculates:
     * ```js
@@ -1056,7 +1056,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of exp and its gradient](/plots/exp.svg)
+    * ![Plot of exp and its gradient](../../plots/exp.svg)
     *
     * Calculates:
     * ```js
@@ -1074,7 +1074,7 @@ export class Tensor extends TensorBase {
         return ops.exp(this);
     }
     /**
-    * ![Plot of exp and its gradient](/plots/exp.svg)
+    * ![Plot of exp and its gradient](../../plots/exp.svg)
     *
     * Calculates:
     * ```js
@@ -1095,7 +1095,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("exp_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of exp2 and its gradient](/plots/exp2.svg)
+    * ![Plot of exp2 and its gradient](../../plots/exp2.svg)
     *
     * Calculates:
     * ```js
@@ -1113,7 +1113,7 @@ export class Tensor extends TensorBase {
         return ops.exp2(this);
     }
     /**
-    * ![Plot of exp2 and its gradient](/plots/exp2.svg)
+    * ![Plot of exp2 and its gradient](../../plots/exp2.svg)
     *
     * Calculates:
     * ```js
@@ -1134,7 +1134,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("exp2_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of expm1 and its gradient](/plots/expm1.svg)
+    * ![Plot of expm1 and its gradient](../../plots/expm1.svg)
     *
     * Calculates:
     * ```js
@@ -1152,7 +1152,7 @@ export class Tensor extends TensorBase {
         return ops.expm1(this);
     }
     /**
-    * ![Plot of expm1 and its gradient](/plots/expm1.svg)
+    * ![Plot of expm1 and its gradient](../../plots/expm1.svg)
     *
     * Calculates:
     * ```js
@@ -1173,7 +1173,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("expm1_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of floor and its gradient](/plots/floor.svg)
+    * ![Plot of floor and its gradient](../../plots/floor.svg)
     *
     * Calculates:
     * ```js
@@ -1191,7 +1191,7 @@ export class Tensor extends TensorBase {
         return ops.floor(this);
     }
     /**
-    * ![Plot of floor and its gradient](/plots/floor.svg)
+    * ![Plot of floor and its gradient](../../plots/floor.svg)
     *
     * Calculates:
     * ```js
@@ -1212,7 +1212,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("floor_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of frac and its gradient](/plots/frac.svg)
+    * ![Plot of frac and its gradient](../../plots/frac.svg)
     *
     * Calculates:
     * ```js
@@ -1230,7 +1230,7 @@ export class Tensor extends TensorBase {
         return ops.frac(this);
     }
     /**
-    * ![Plot of frac and its gradient](/plots/frac.svg)
+    * ![Plot of frac and its gradient](../../plots/frac.svg)
     *
     * Calculates:
     * ```js
@@ -1325,7 +1325,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of log and its gradient](/plots/log.svg)
+    * ![Plot of log and its gradient](../../plots/log.svg)
     *
     * Calculates:
     * ```js
@@ -1343,7 +1343,7 @@ export class Tensor extends TensorBase {
         return ops.log(this);
     }
     /**
-    * ![Plot of log and its gradient](/plots/log.svg)
+    * ![Plot of log and its gradient](../../plots/log.svg)
     *
     * Calculates:
     * ```js
@@ -1364,7 +1364,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("log_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of log10 and its gradient](/plots/log10.svg)
+    * ![Plot of log10 and its gradient](../../plots/log10.svg)
     *
     * Calculates:
     * ```js
@@ -1382,7 +1382,7 @@ export class Tensor extends TensorBase {
         return ops.log10(this);
     }
     /**
-    * ![Plot of log10 and its gradient](/plots/log10.svg)
+    * ![Plot of log10 and its gradient](../../plots/log10.svg)
     *
     * Calculates:
     * ```js
@@ -1403,7 +1403,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("log10_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of log1p and its gradient](/plots/log1p.svg)
+    * ![Plot of log1p and its gradient](../../plots/log1p.svg)
     *
     * Calculates:
     * ```js
@@ -1421,7 +1421,7 @@ export class Tensor extends TensorBase {
         return ops.log1p(this);
     }
     /**
-    * ![Plot of log1p and its gradient](/plots/log1p.svg)
+    * ![Plot of log1p and its gradient](../../plots/log1p.svg)
     *
     * Calculates:
     * ```js
@@ -1442,7 +1442,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("log1p_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of log2 and its gradient](/plots/log2.svg)
+    * ![Plot of log2 and its gradient](../../plots/log2.svg)
     *
     * Calculates:
     * ```js
@@ -1460,7 +1460,7 @@ export class Tensor extends TensorBase {
         return ops.log2(this);
     }
     /**
-    * ![Plot of log2 and its gradient](/plots/log2.svg)
+    * ![Plot of log2 and its gradient](../../plots/log2.svg)
     *
     * Calculates:
     * ```js
@@ -1615,7 +1615,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of neg and its gradient](/plots/neg.svg)
+    * ![Plot of neg and its gradient](../../plots/neg.svg)
     *
     * Calculates:
     * ```js
@@ -1635,7 +1635,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `neg`.
     *
-    * ![Plot of neg and its gradient](/plots/neg.svg)
+    * ![Plot of neg and its gradient](../../plots/neg.svg)
     *
     * Calculates:
     * ```js
@@ -1653,7 +1653,7 @@ export class Tensor extends TensorBase {
         return ops.neg(this);
     }
     /**
-    * ![Plot of neg and its gradient](/plots/neg.svg)
+    * ![Plot of neg and its gradient](../../plots/neg.svg)
     *
     * Calculates:
     * ```js
@@ -1674,7 +1674,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("neg_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of positive and its gradient](/plots/positive.svg)
+    * ![Plot of positive and its gradient](../../plots/positive.svg)
     *
     * Calculates:
     * ```js
@@ -1692,7 +1692,7 @@ export class Tensor extends TensorBase {
         return ops.positive(this);
     }
     /**
-    * ![Plot of positive and its gradient](/plots/positive.svg)
+    * ![Plot of positive and its gradient](../../plots/positive.svg)
     *
     * Calculates:
     * ```js
@@ -1750,7 +1750,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of rad2deg and its gradient](/plots/rad2deg.svg)
+    * ![Plot of rad2deg and its gradient](../../plots/rad2deg.svg)
     *
     * Calculates:
     * ```js
@@ -1768,7 +1768,7 @@ export class Tensor extends TensorBase {
         return ops.rad2deg(this);
     }
     /**
-    * ![Plot of rad2deg and its gradient](/plots/rad2deg.svg)
+    * ![Plot of rad2deg and its gradient](../../plots/rad2deg.svg)
     *
     * Calculates:
     * ```js
@@ -1789,7 +1789,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("rad2deg_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of reciprocal and its gradient](/plots/reciprocal.svg)
+    * ![Plot of reciprocal and its gradient](../../plots/reciprocal.svg)
     *
     * Calculates:
     * ```js
@@ -1807,7 +1807,7 @@ export class Tensor extends TensorBase {
         return ops.reciprocal(this);
     }
     /**
-    * ![Plot of reciprocal and its gradient](/plots/reciprocal.svg)
+    * ![Plot of reciprocal and its gradient](../../plots/reciprocal.svg)
     *
     * Calculates:
     * ```js
@@ -1828,7 +1828,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("reciprocal_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of relu and its gradient](/plots/relu.svg)
+    * ![Plot of relu and its gradient](../../plots/relu.svg)
     *
     * Calculates:
     * ```js
@@ -1846,7 +1846,7 @@ export class Tensor extends TensorBase {
         return ops.relu(this);
     }
     /**
-    * ![Plot of relu and its gradient](/plots/relu.svg)
+    * ![Plot of relu and its gradient](../../plots/relu.svg)
     *
     * Calculates:
     * ```js
@@ -1867,7 +1867,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("relu_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of round and its gradient](/plots/round.svg)
+    * ![Plot of round and its gradient](../../plots/round.svg)
     *
     * Calculates:
     * ```js
@@ -1885,7 +1885,7 @@ export class Tensor extends TensorBase {
         return ops.round(this);
     }
     /**
-    * ![Plot of round and its gradient](/plots/round.svg)
+    * ![Plot of round and its gradient](../../plots/round.svg)
     *
     * Calculates:
     * ```js
@@ -1906,7 +1906,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("round_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of rsqrt and its gradient](/plots/rsqrt.svg)
+    * ![Plot of rsqrt and its gradient](../../plots/rsqrt.svg)
     *
     * Calculates:
     * ```js
@@ -1924,7 +1924,7 @@ export class Tensor extends TensorBase {
         return ops.rsqrt(this);
     }
     /**
-    * ![Plot of rsqrt and its gradient](/plots/rsqrt.svg)
+    * ![Plot of rsqrt and its gradient](../../plots/rsqrt.svg)
     *
     * Calculates:
     * ```js
@@ -1945,7 +1945,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("rsqrt_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sigmoid and its gradient](/plots/sigmoid.svg)
+    * ![Plot of sigmoid and its gradient](../../plots/sigmoid.svg)
     *
     * Calculates:
     * ```js
@@ -1963,7 +1963,7 @@ export class Tensor extends TensorBase {
         return ops.sigmoid(this);
     }
     /**
-    * ![Plot of sigmoid and its gradient](/plots/sigmoid.svg)
+    * ![Plot of sigmoid and its gradient](../../plots/sigmoid.svg)
     *
     * Calculates:
     * ```js
@@ -1984,7 +1984,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sigmoid_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sign and its gradient](/plots/sign.svg)
+    * ![Plot of sign and its gradient](../../plots/sign.svg)
     *
     * Calculates:
     * ```js
@@ -2002,7 +2002,7 @@ export class Tensor extends TensorBase {
         return ops.sign(this);
     }
     /**
-    * ![Plot of sign and its gradient](/plots/sign.svg)
+    * ![Plot of sign and its gradient](../../plots/sign.svg)
     *
     * Calculates:
     * ```js
@@ -2023,7 +2023,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sign_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of silu and its gradient](/plots/silu.svg)
+    * ![Plot of silu and its gradient](../../plots/silu.svg)
     *
     * Calculates:
     * ```js
@@ -2041,7 +2041,7 @@ export class Tensor extends TensorBase {
         return ops.silu(this);
     }
     /**
-    * ![Plot of silu and its gradient](/plots/silu.svg)
+    * ![Plot of silu and its gradient](../../plots/silu.svg)
     *
     * Calculates:
     * ```js
@@ -2062,7 +2062,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("silu_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sin and its gradient](/plots/sin.svg)
+    * ![Plot of sin and its gradient](../../plots/sin.svg)
     *
     * Calculates:
     * ```js
@@ -2080,7 +2080,7 @@ export class Tensor extends TensorBase {
         return ops.sin(this);
     }
     /**
-    * ![Plot of sin and its gradient](/plots/sin.svg)
+    * ![Plot of sin and its gradient](../../plots/sin.svg)
     *
     * Calculates:
     * ```js
@@ -2101,7 +2101,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sin_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sinc and its gradient](/plots/sinc.svg)
+    * ![Plot of sinc and its gradient](../../plots/sinc.svg)
     *
     * Calculates:
     * ```js
@@ -2119,7 +2119,7 @@ export class Tensor extends TensorBase {
         return ops.sinc(this);
     }
     /**
-    * ![Plot of sinc and its gradient](/plots/sinc.svg)
+    * ![Plot of sinc and its gradient](../../plots/sinc.svg)
     *
     * Calculates:
     * ```js
@@ -2140,7 +2140,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sinc_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sinh and its gradient](/plots/sinh.svg)
+    * ![Plot of sinh and its gradient](../../plots/sinh.svg)
     *
     * Calculates:
     * ```js
@@ -2158,7 +2158,7 @@ export class Tensor extends TensorBase {
         return ops.sinh(this);
     }
     /**
-    * ![Plot of sinh and its gradient](/plots/sinh.svg)
+    * ![Plot of sinh and its gradient](../../plots/sinh.svg)
     *
     * Calculates:
     * ```js
@@ -2179,7 +2179,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sinh_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of sqrt and its gradient](/plots/sqrt.svg)
+    * ![Plot of sqrt and its gradient](../../plots/sqrt.svg)
     *
     * Calculates:
     * ```js
@@ -2197,7 +2197,7 @@ export class Tensor extends TensorBase {
         return ops.sqrt(this);
     }
     /**
-    * ![Plot of sqrt and its gradient](/plots/sqrt.svg)
+    * ![Plot of sqrt and its gradient](../../plots/sqrt.svg)
     *
     * Calculates:
     * ```js
@@ -2218,7 +2218,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sqrt_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of square and its gradient](/plots/square.svg)
+    * ![Plot of square and its gradient](../../plots/square.svg)
     *
     * Calculates:
     * ```js
@@ -2236,7 +2236,7 @@ export class Tensor extends TensorBase {
         return ops.square(this);
     }
     /**
-    * ![Plot of square and its gradient](/plots/square.svg)
+    * ![Plot of square and its gradient](../../plots/square.svg)
     *
     * Calculates:
     * ```js
@@ -2317,7 +2317,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
     }
     /**
-    * ![Plot of tan and its gradient](/plots/tan.svg)
+    * ![Plot of tan and its gradient](../../plots/tan.svg)
     *
     * Calculates:
     * ```js
@@ -2335,7 +2335,7 @@ export class Tensor extends TensorBase {
         return ops.tan(this);
     }
     /**
-    * ![Plot of tan and its gradient](/plots/tan.svg)
+    * ![Plot of tan and its gradient](../../plots/tan.svg)
     *
     * Calculates:
     * ```js
@@ -2356,7 +2356,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("tan_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of tanh and its gradient](/plots/tanh.svg)
+    * ![Plot of tanh and its gradient](../../plots/tanh.svg)
     *
     * Calculates:
     * ```js
@@ -2374,7 +2374,7 @@ export class Tensor extends TensorBase {
         return ops.tanh(this);
     }
     /**
-    * ![Plot of tanh and its gradient](/plots/tanh.svg)
+    * ![Plot of tanh and its gradient](../../plots/tanh.svg)
     *
     * Calculates:
     * ```js
@@ -2395,7 +2395,7 @@ export class Tensor extends TensorBase {
         return this.runKernelInplace("tanh_", { dtype: this.dtype }, params);
     }
     /**
-    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    * ![Plot of trunc and its gradient](../../plots/trunc.svg)
     *
     * Calculates:
     * ```js
@@ -2415,7 +2415,7 @@ export class Tensor extends TensorBase {
     /**
     * Alias for `trunc`.
     *
-    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    * ![Plot of trunc and its gradient](../../plots/trunc.svg)
     *
     * Calculates:
     * ```js
@@ -2433,7 +2433,7 @@ export class Tensor extends TensorBase {
         return ops.trunc(this);
     }
     /**
-    * ![Plot of trunc and its gradient](/plots/trunc.svg)
+    * ![Plot of trunc and its gradient](../../plots/trunc.svg)
     *
     * Calculates:
     * ```js

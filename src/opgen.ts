@@ -332,8 +332,8 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
                 size: "size",
             },
         ],
-        workgroupSize: [64, 1, 1],
-        workgroupCount: ["size/8", 1, 1],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["size/256", 1, 1],
         shader: shader,
     };
 }
