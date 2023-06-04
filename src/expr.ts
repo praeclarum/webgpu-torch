@@ -604,11 +604,14 @@ export function exprCodeToWebGLShader(code: ExprCode, identifierSubs?: {[ident: 
 /*== COMPILER ==*/
 
 const OP_CONSTANT = 0;
-const OP_READ = 1;
-const OP_ADD = 2;
-const OP_SUBTRACT = 3;
-const OP_MULTIPLY = 4;
-const OP_DIVIDE = 5;
+const OP_POP = 1;
+const OP_READ = 2;
+const OP_WRITE = 3;
+const OP_ADD = 4;
+const OP_APPLY = 5;
+const OP_SUBTRACT = 6;
+const OP_MULTIPLY = 7;
+const OP_DIVIDE = 8;
 
 export type CompiledExpr = (env: { [name: string]: any }) => number;
 
@@ -626,33 +629,55 @@ export function compileCode(code: ExprCode): CompiledExpr {
         }
         if (typeof node === "string") {
             instructions.push([OP_READ, node]);
-            return;
         }
-        if (node[0] === "+") {
+        else if (node[0] === "+") {
             emit(node[1][0]);
             emit(node[1][1]);
             instructions.push([OP_ADD, null]);
-            return;
         }
-        if (node[0] === "-") {
+        else if (node[0] === "-") {
             emit(node[1][0]);
             emit(node[1][1]);
             instructions.push([OP_SUBTRACT, null]);
-            return;
         }
-        if (node[0] === "*") {
+        else if (node[0] === "*") {
             emit(node[1][0]);
             emit(node[1][1]);
             instructions.push([OP_MULTIPLY, null]);
-            return;
         }
-        if (node[0] === "/") {
+        else if (node[0] === "/") {
             emit(node[1][0]);
             emit(node[1][1]);
             instructions.push([OP_DIVIDE, null]);
-            return;
         }
-        throw new Error(`Unknown node type ${node}`);
+        else if (node[0] === "apply") {
+            const f = node[1][0];
+            const args = node[1].slice(1);
+            for (const arg of args) {
+                emit(arg);
+            }
+            instructions.push([OP_APPLY, exprNodeToString(f)]);
+        }
+        else if (node[0] === "statements") {
+            const children = node[1];
+            let i = 0;
+            for (const child of children) {
+                emit(child);
+                if (i < children.length - 1) {
+                    instructions.push([OP_POP, null]);
+                }
+                i++;
+            }
+        }
+        else if (node[0] === "var") {
+            const name = node[1][0];
+            const value = node[1][1];
+            emit(value);
+            instructions.push([OP_WRITE, exprNodeToString(name)]);
+        }
+        else {
+            throw new Error(`Unknown compile node type ${node}`);
+        }
     }
     emit(expr);
     // console.log("ops", ops);
@@ -661,28 +686,50 @@ export function compileCode(code: ExprCode): CompiledExpr {
         const stack: number[] = [];
         for (const ins of instructions) {
             const op = ins[0];
-            if (op === 0) {
+            if (op === OP_CONSTANT) {
                 stack.push(ins[1] as number);
             }
-            else if (op == 1) {
+            else if (op === OP_POP) {
+                stack.pop();
+            }
+            else if (op == OP_READ) {
                 stack.push(env[ins[1] as string]);
+            }
+            else if (op == OP_WRITE) {
+                const v = stack.pop() as number;
+                env[ins[1] as string] = v;
+                stack.push(v);
+            }
+            else if (op == OP_APPLY) {
+                const f = env[ins[1] as string];
+                if (typeof f !== "function") {
+                    throw new Error(`Expected function for "${ins[1]}", got ${f}`);
+                }
+                const args = [];
+                for (let i = 0; i < f.length; i++) {
+                    args.push(stack.pop());
+                }
+                args.reverse();
+                stack.push(f(...args));
             }
             else {
                 const b = stack.pop() as number;
                 const a = stack.pop() as number;
                 switch (op) {
-                    case 2:
+                    case OP_ADD:
                         stack.push(a + b);
                         break;
-                    case 3:
+                    case OP_SUBTRACT:
                         stack.push(a - b);
                         break;
-                    case 4:
+                    case OP_MULTIPLY:
                         stack.push(a * b);
                         break;
-                    case 5:
+                    case OP_DIVIDE:
                         stack.push(a / b);
                         break;
+                    default:
+                        throw new Error(`Unknown op ${op}`);
                 }
             }
         }
