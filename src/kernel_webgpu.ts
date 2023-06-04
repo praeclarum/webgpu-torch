@@ -54,7 +54,7 @@ export class KernelWebGPU extends Kernel {
         this._bindGroupLayout = gpuDevice.createBindGroupLayout({
             entries: bindGroupLayoutEntries,
         });
-        this._shaderCode = getKernelShaderCode(spec, config);
+        this._shaderCode = getKernelShaderCode(spec, config, device);
         const shaderModule = gpuDevice.createShaderModule({
             code: this._shaderCode,
         });

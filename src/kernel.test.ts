@@ -1,3 +1,4 @@
+import { getDevice } from "./devices";
 import { getKernelConfig, getKernelShaderCode } from "./kernel";
 import { registry } from "./kernels";
 import { tensor } from "./ops_artisanal";
@@ -5,7 +6,7 @@ import { tensor } from "./ops_artisanal";
 test("mm shader code", () => {
     const spec = registry["mm"];
     const config = getKernelConfig(spec, { resultDtype: "f32" });
-    const shaderCode = getKernelShaderCode(spec, config);
+    const shaderCode = getKernelShaderCode(spec, config, getDevice(null));
     expect(shaderCode).toEqual(`// mm kernel
 struct mmParameters {
     resultRows: u32,

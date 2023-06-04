@@ -114,11 +114,25 @@ export abstract class Kernel {
     }
 
     getWorkgroupCounts(env: EvalEnv): [number, number, number] {
-        return [
-            Math.ceil(this._workgroupCountXFunc(env)),
-            Math.ceil(this._workgroupCountYFunc(env)),
-            Math.ceil(this._workgroupCountZFunc(env)),
-        ];
+        const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
+        const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
+        const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
+        if (workgroupCountX > this.device.workgroupMaxCount) {
+            throw new Error(
+                `Workgroup count X (${workgroupCountX}) exceeds the maximum allowed value (${this.device.workgroupMaxCount})`
+            );
+        }
+        if (workgroupCountY > this.device.workgroupMaxCount) {
+            throw new Error(
+                `Workgroup count Y (${workgroupCountY}) exceeds the maximum allowed value (${this.device.workgroupMaxCount})`
+            );
+        }
+        if (workgroupCountZ > this.device.workgroupMaxCount) {
+            throw new Error(
+                `Workgroup count Z (${workgroupCountZ}) exceeds the maximum allowed value (${this.device.workgroupMaxCount})`
+            );
+        }
+        return [workgroupCountX, workgroupCountY, workgroupCountZ];
     }
 }
 
@@ -220,7 +234,8 @@ function configShader(
 
 export function getKernelShaderCode(
     spec: KernelSpec,
-    config: KernelConfig
+    config: KernelConfig,
+    device: Device
 ): string {
     const [configdShader, env] = configShader(spec, config);
 
@@ -247,9 +262,10 @@ export function getKernelShaderCode(
     shaderCodeParts.push(
         `@group(0) @binding(${bindingIndex}) var<storage, read> parameters: ${spec.name}Parameters;`
     );
-    const workgroupSizeX = Math.ceil(evalCode(spec.workgroupSize[0], env));
-    const workgroupSizeY = Math.ceil(evalCode(spec.workgroupSize[1], env));
-    const workgroupSizeZ = Math.ceil(evalCode(spec.workgroupSize[2], env));
+    const [workgroupMaxSizeX, workgroupMaxSizeY, workgroupMaxSizeZ] = device.workgroupMaxSize;
+    const workgroupSizeX = Math.min(workgroupMaxSizeX, Math.ceil(evalCode(spec.workgroupSize[0], env)));
+    const workgroupSizeY = Math.min(workgroupMaxSizeY, Math.ceil(evalCode(spec.workgroupSize[1], env)));
+    const workgroupSizeZ = Math.min(workgroupMaxSizeZ, Math.ceil(evalCode(spec.workgroupSize[2], env)));
     shaderCodeParts.push(
         `@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`
     );

@@ -9,6 +9,15 @@ export class DeviceWebGPU extends Device {
     get gpuDevice(): GPUDevice {
         return this._device;
     }
+    get workgroupMaxSize(): [number, number, number] {
+        return [
+            this._device.limits.maxComputeWorkgroupSizeX,
+            this._device.limits.maxComputeWorkgroupSizeY,
+            this._device.limits.maxComputeWorkgroupSizeZ];
+    }
+    get workgroupMaxCount(): number {
+        return this._device.limits.maxComputeWorkgroupsPerDimension;
+    }
     constructor(id: string, adapter: GPUAdapter, device: GPUDevice) {
         super(id, "webgpu");
         this._device = device;

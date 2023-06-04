@@ -27,6 +27,8 @@ export abstract class Device {
     get type(): DeviceType {
         return this._type;
     }
+    abstract get workgroupMaxSize(): [number, number, number];
+    abstract get workgroupMaxCount(): number;
     constructor(id: DeviceId, type: DeviceType) {
         this._id = id;
         this._type = type;

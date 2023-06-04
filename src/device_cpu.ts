@@ -5,6 +5,15 @@ import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelCPU } from "./kernel_cpu";
 
 export class DeviceCPU extends Device {
+    get workgroupMaxSize(): [number, number, number] {
+        return [
+            256,
+            256,
+            64];
+    }
+    get workgroupMaxCount(): number {
+        return 65535;
+    }
     constructor() {
         super("cpu", "cpu");
     }

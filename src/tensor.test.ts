@@ -257,3 +257,9 @@ test("batched conv2d", async () => {
         ],
     ]);
 });
+
+test("can perform pointwise unary on bigger than workgroup count", async () => {
+    const input = ones(1594323);
+    const output = input.relu();
+    expect(output.shape).toEqual([1594323]);
+});
