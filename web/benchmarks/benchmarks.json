@@ -1,0 +1,30 @@
+{
+    "benchmarks": [
+        {
+            "name": "unary 1d",
+            "type": "unary",
+            "warmupIterations": 10,
+            "iterations": 100,
+            "inputs": [
+                {
+                    "name": "input_shape",
+                    "values": [
+                        1,
+                        3,
+                        729,
+                        2187
+                    ]
+                },
+                {
+                    "name": "operation",
+                    "values": [
+                        "exp",
+                        "relu",
+                        "sigmoid",
+                        "tanh"
+                    ]
+                }
+            ]
+        }
+    ]
+}

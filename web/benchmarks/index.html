@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>webgpu-torch benchmarks</title>
+    <link rel="stylesheet" href="../docs/assets/style.css">
+</head>
+<body>
+    <h1><a href="../">webgpu-torch</a> benchmarks</h1>
+    <div id="benchmarks"></div>
+    <script src="../../dist/torch.js"></script>
+    <script src="benchmarkfw.js"></script>
+    <script>
+        async function run() {
+            await torch.initWebGPUAsync();
+            await runBenchmarksAsync(document.getElementById("benchmarks"));
+        }
+        run();
+    </script>
+</body>
+</html>
