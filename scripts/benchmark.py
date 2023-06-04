@@ -2,9 +2,10 @@ import torch
 from itertools import product
 import time
 import json
+import sys
 
 
-machine_id = "iMac Pro 2017"
+machine_id = sys.argv[1]
 
 has_cuda = torch.cuda.is_available()
 
@@ -27,7 +28,7 @@ def run_unary_benchmark(benchmark, inputs):
             x = x.cuda()
         start = time.perf_counter()
         y = operation(x)
-        yar = y.cpu().numpy()
+        yar = y.cpu().tolist()
         end = time.perf_counter()
         return (end - start)*1000
 
@@ -55,31 +56,33 @@ def run_benchmarks():
         benchmarks = json.load(f)
 
     # Run the benchmarks
-    benchmark_results = []
+    benchmark_results = {}
     for b in benchmarks["benchmarks"]:
         input_perms = get_input_permutations(b["inputs"])
 
         for ip in input_perms:
-            input_str = ", ".join([str(i) for i in ip])
-            result = {"benchmark_key": f"{b['name']}({input_str})", "meanTime": 0.0}
+            input_str = ", ".join([repr(i) for i in ip])
+            benchmark_key = f"{b['name']}({input_str})"
+            result = {"mean_ms": 0.0}
             try:
                 times = run_benchmark(b, ip)
                 mean_time = sum(times) / len(times)
-                result["meanTime"] = mean_time
+                result["mean_ms"] = mean_time
             except Exception as e:
                 result["error"] = e
                 print(e)
-            benchmark_results.append(result)
+            benchmark_results[benchmark_key] = result
 
     return benchmark_results
 
 results = run_benchmarks()
 
-results_obj = {
-    machine_id: {
-        "device_name": device_name,
-        "results": results,
-    }
+with open("../web/benchmarks/results.json", "r") as f:
+    results_obj = json.load(f)
+
+results_obj[machine_id] = {
+    "device_name": device_name,
+    "results": results,
 }
 
 with open("../web/benchmarks/results.json", "w") as f:

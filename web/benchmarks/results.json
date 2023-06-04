@@ -67,5 +67,58 @@
         "meanTime": 0.009016200000360186
       }
     ]
+  },
+  "Ubuntu": {
+    "device_name": "NVIDIA GeForce RTX 3090",
+    "results": {
+      "unary 1d(1, 'exp')": {
+        "mean_ms": 0.017110529988713097
+      },
+      "unary 1d(1, 'relu')": {
+        "mean_ms": 0.017600499850232154
+      },
+      "unary 1d(1, 'sigmoid')": {
+        "mean_ms": 0.01686108993453672
+      },
+      "unary 1d(1, 'tanh')": {
+        "mean_ms": 0.01689378997980384
+      },
+      "unary 1d(3, 'exp')": {
+        "mean_ms": 0.017210979931405745
+      },
+      "unary 1d(3, 'relu')": {
+        "mean_ms": 0.01767719999406836
+      },
+      "unary 1d(3, 'sigmoid')": {
+        "mean_ms": 0.01700001999779488
+      },
+      "unary 1d(3, 'tanh')": {
+        "mean_ms": 0.0172072899658815
+      },
+      "unary 1d(729, 'exp')": {
+        "mean_ms": 0.023132390015234705
+      },
+      "unary 1d(729, 'relu')": {
+        "mean_ms": 0.023627639948244905
+      },
+      "unary 1d(729, 'sigmoid')": {
+        "mean_ms": 0.022888829935254762
+      },
+      "unary 1d(729, 'tanh')": {
+        "mean_ms": 0.024038310075411573
+      },
+      "unary 1d(2187, 'exp')": {
+        "mean_ms": 0.03500055005133618
+      },
+      "unary 1d(2187, 'relu')": {
+        "mean_ms": 0.0356301800457004
+      },
+      "unary 1d(2187, 'sigmoid')": {
+        "mean_ms": 0.03487970996502554
+      },
+      "unary 1d(2187, 'tanh')": {
+        "mean_ms": 0.03500367000015103
+      }
+    }
   }
 }
