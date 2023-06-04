@@ -37,8 +37,10 @@ jobs:
         run: npm run build
       - name: Copy the build to web
         run: cp -a dist web/
-      - name: Patch dist location
+      - name: Patch index dist location
         run: sed -i 's/..\/dist/dist/g' web/index.html
+      - name: Patch benchmarks dist location
+        run: sed -i 's/..\/dist/dist/g' web/benchmarks/index.html
       - name: Install pytorch
         run: pip install numpy "torch>=2.0.0+cpu" -f https://download.pytorch.org/whl/torch_stable.html
       - name: Build Tests

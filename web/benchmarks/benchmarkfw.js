@@ -134,7 +134,7 @@ async function runBenchmarksAsync($benchmarksDiv) {
             const $benchmarksTableRowOther = document.createElement('td');
             if (otherResults[ok].results[b.key]) {
                 const ms = otherResults[ok].results[b.key].mean_ms;
-                $benchmarksTableRowOther.innerText = `${ms.toFixed(6)}`;
+                $benchmarksTableRowOther.innerText = `${ms.toFixed(4)}`;
             }
             $benchmarksTableRow.appendChild($benchmarksTableRowOther);
         }
