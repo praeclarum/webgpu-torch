@@ -1,72 +1,56 @@
 {
   "iMac Pro 2017": {
     "device_name": "Intel(R) Xeon(R) W-2150B CPU @ 3.00GHz",
-    "results": [
-      {
-        "benchmark_key": "unary 1d(1, exp)",
-        "meanTime": 0.0020739200010666536
+    "results": {
+      "unary 1d(1, 'exp')": {
+        "mean_ms": 0.001744029999997121
       },
-      {
-        "benchmark_key": "unary 1d(1, relu)",
-        "meanTime": 0.0024403600002642634
+      "unary 1d(1, 'relu')": {
+        "mean_ms": 0.002185660000004752
       },
-      {
-        "benchmark_key": "unary 1d(1, sigmoid)",
-        "meanTime": 0.0021530899948629667
+      "unary 1d(1, 'sigmoid')": {
+        "mean_ms": 0.0018796799999853953
       },
-      {
-        "benchmark_key": "unary 1d(1, tanh)",
-        "meanTime": 0.002431239995530632
+      "unary 1d(1, 'tanh')": {
+        "mean_ms": 0.0020209100000068148
       },
-      {
-        "benchmark_key": "unary 1d(3, exp)",
-        "meanTime": 0.002301919995488788
+      "unary 1d(3, 'exp')": {
+        "mean_ms": 0.0019426199999927896
       },
-      {
-        "benchmark_key": "unary 1d(3, relu)",
-        "meanTime": 0.002385320000257707
+      "unary 1d(3, 'relu')": {
+        "mean_ms": 0.002074270000007594
       },
-      {
-        "benchmark_key": "unary 1d(3, sigmoid)",
-        "meanTime": 0.002270439996436835
+      "unary 1d(3, 'sigmoid')": {
+        "mean_ms": 0.0018029699999999593
       },
-      {
-        "benchmark_key": "unary 1d(3, tanh)",
-        "meanTime": 0.0027393399966513243
+      "unary 1d(3, 'tanh')": {
+        "mean_ms": 0.0020025499999998253
       },
-      {
-        "benchmark_key": "unary 1d(729, exp)",
-        "meanTime": 0.0026921599908291682
+      "unary 1d(729, 'exp')": {
+        "mean_ms": 0.011913379999988205
       },
-      {
-        "benchmark_key": "unary 1d(729, relu)",
-        "meanTime": 0.002305990008153458
+      "unary 1d(729, 'relu')": {
+        "mean_ms": 0.01181569999999299
       },
-      {
-        "benchmark_key": "unary 1d(729, sigmoid)",
-        "meanTime": 0.003147259989191298
+      "unary 1d(729, 'sigmoid')": {
+        "mean_ms": 0.012979090000002635
       },
-      {
-        "benchmark_key": "unary 1d(729, tanh)",
-        "meanTime": 0.005081529991457501
+      "unary 1d(729, 'tanh')": {
+        "mean_ms": 0.014844180000002094
       },
-      {
-        "benchmark_key": "unary 1d(2187, exp)",
-        "meanTime": 0.003907749994596088
+      "unary 1d(2187, 'exp')": {
+        "mean_ms": 0.034686270000003905
       },
-      {
-        "benchmark_key": "unary 1d(2187, relu)",
-        "meanTime": 0.0025014200070927473
+      "unary 1d(2187, 'relu')": {
+        "mean_ms": 0.03194373999999778
       },
-      {
-        "benchmark_key": "unary 1d(2187, sigmoid)",
-        "meanTime": 0.0044644500019330735
+      "unary 1d(2187, 'sigmoid')": {
+        "mean_ms": 0.036297229999997516
       },
-      {
-        "benchmark_key": "unary 1d(2187, tanh)",
-        "meanTime": 0.009016200000360186
+      "unary 1d(2187, 'tanh')": {
+        "mean_ms": 0.039017879999994065
       }
-    ]
+    }
   },
   "Ubuntu": {
     "device_name": "NVIDIA GeForce RTX 3090",
