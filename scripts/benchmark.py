@@ -23,7 +23,7 @@ def run_unary_benchmark(benchmark, inputs):
     operation = getattr(torch, inputs[1])
 
     def run_iteration():
-        x = torch.ones(shape)
+        x = torch.ones(shape, dtype=torch.float32)
         if has_cuda:
             x = x.cuda()
         start = time.perf_counter()
