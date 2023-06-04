@@ -49,11 +49,18 @@ async function runBenchmarkAsync(benchmark, inputs) {
     }
 }
 
+async function loadJsonAsync(url) {
+    const response = await fetch(url);
+    const o = await response.json();
+    return o;
+}
+
 async function runBenchmarksAsync($benchmarksDiv) {
     // Load the test JSON
-    const jsonUrl = "./benchmarks.json";
-    const response = await fetch(jsonUrl);
-    const benchmarks = await response.json();
+    const benchmarks = await loadJsonAsync("./benchmarks.json");
+    const otherResults = await loadJsonAsync("./results.json");
+
+    const otherKeys = Object.keys(otherResults);
 
     // Create the UI
     const $benchmarksTable = document.createElement('table');
@@ -63,13 +70,28 @@ async function runBenchmarksAsync($benchmarksDiv) {
     $benchmarksTable.appendChild($benchmarksTableHead);
     const $benchmarksTableHeadRow = document.createElement('tr');
     $benchmarksTableHead.appendChild($benchmarksTableHeadRow);
-    for (let h of ['Benchmark', 'Time (ms)', 'Error']) {
+    const hs = ['Benchmark', 'Time (ms)'];
+    for (let ok of otherKeys) {
+        hs.push(otherResults[ok].device_name);
+    }
+    hs.push('Error');
+    for (let h of hs) {
         const $benchmarksTableHeadCell = document.createElement('th');
         $benchmarksTableHeadCell.innerText = h;
         $benchmarksTableHeadRow.appendChild($benchmarksTableHeadCell);
     }
     const $benchmarksTableBody = document.createElement('tbody');
     $benchmarksTable.appendChild($benchmarksTableBody);
+
+    const repr = (v) => {
+        if (typeof v === 'string') {
+            return `'${v}'`;
+        }
+        else if (typeof v === 'number') {
+            return `${v}`;
+        }
+        throw `Unknown type '${typeof v}'`;
+    };
 
     // Run the benchmarks
     const benchmarkResults = [];
@@ -78,7 +100,13 @@ async function runBenchmarksAsync($benchmarksDiv) {
         const inputPerms = getInputPermutations(b.inputs);
 
         for (let ip of inputPerms) {
-            const result = { benchmark: b, inputs: ip, meanTime: 0.0 };
+            const benchmarkKey = `${b.name}(${ip.map(v => repr(v)).join(', ')})`;
+            const result = { key: benchmarkKey, inputs: ip, meanTime: 0.0 };
+            for (let ok of otherKeys) {
+                if (otherResults[ok].results[benchmarkKey]) {
+                    result[ok] = otherResults[ok].results[benchmarkKey].mean_ms;
+                }
+            }
             try {
                 let times = await runBenchmarkAsync(b, ip);
                 const meanTime = times.reduce((a, b) => a + b, 0) / times.length;
@@ -97,11 +125,19 @@ async function runBenchmarksAsync($benchmarksDiv) {
         const $benchmarksTableRow = document.createElement('tr');
         $benchmarksTableBody.appendChild($benchmarksTableRow);
         const $benchmarksTableRowName = document.createElement('td');
-        $benchmarksTableRowName.innerText = `${b.benchmark.name}(${b.inputs.join(', ')}))`;
+        $benchmarksTableRowName.innerText = b.key;
         $benchmarksTableRow.appendChild($benchmarksTableRowName);
         const $benchmarksTableRowTime = document.createElement('td');
         $benchmarksTableRowTime.innerText = `${b.meanTime.toFixed(2)}`;
         $benchmarksTableRow.appendChild($benchmarksTableRowTime);
+        for (let ok of otherKeys) {
+            const $benchmarksTableRowOther = document.createElement('td');
+            if (otherResults[ok].results[b.key]) {
+                const ms = otherResults[ok].results[b.key].mean_ms;
+                $benchmarksTableRowOther.innerText = `${ms.toFixed(6)}`;
+            }
+            $benchmarksTableRow.appendChild($benchmarksTableRowOther);
+        }
         const $benchmarksTableRowError = document.createElement('td');
         $benchmarksTableRowError.innerText = b.error ? `${b.error}` : '';
         $benchmarksTableRow.appendChild($benchmarksTableRowError);
