@@ -53,6 +53,18 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
     }
 };
 
+function writeParams(inputName: string, hasAlpha: Boolean, alphaName: string, w: CodeWriter) {
+    w.writeLine(`const params = {`);
+    w.indent();
+    w.writeLine(`size: shapeSize(${inputName}.shape),`);
+    // w.writeLine(`strideX: 1,`);
+    if (hasAlpha) {
+        w.writeLine(`alpha: ${alphaName} || 1.0,`);
+    }
+    w.dedent();
+    w.writeLine(`};`);
+}
+
 // Write the Tensor class
 function writeTensorCode(): void {
     const w = new CodeWriter();
@@ -68,25 +80,11 @@ function writeTensorCode(): void {
         w.indent();
         if (isInplace) {
             if (isBinary) {
-                w.writeLine(`const params = {`);
-                w.indent();
-                w.writeLine(`size: shapeSize(this.shape),`);
-                if (hasAlpha) {
-                    w.writeLine(`alpha: alpha || 1.0,`);
-                }
-                w.dedent();
-                w.writeLine(`};`);
+                writeParams("this", hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
             }
             else {
-                w.writeLine(`const params = {`);
-                w.indent();
-                w.writeLine(`size: shapeSize(this.shape),`);
-                if (hasAlpha) {
-                    w.writeLine(`alpha: alpha || 1.0,`);
-                }
-                w.dedent();
-                w.writeLine(`};`);
+                writeParams("this", hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params);`);
             }
         }
@@ -238,16 +236,6 @@ import { shapeSize } from "./shape";`);
                 }
             }
         }
-        const writeParams = (alphaName: string) => {
-            w.writeLine(`const params = {`);
-            w.indent();
-            w.writeLine(`size: shapeSize(input.shape),`);
-            if (hasAlpha) {
-                w.writeLine(`alpha: ${alphaName} || 1.0,`);
-            }
-            w.dedent();
-            w.writeLine(`};`);
-        };
         w.writeLine(`export class ${className} extends AutoFunction {`);
         w.indent();
 
@@ -255,7 +243,7 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
         w.indent();
         writeUnpackInputs("inputs", true);
-        writeParams("alpha");
+        writeParams("input", hasAlpha, "alpha", w);
         w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isBinary) {
             w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
@@ -293,7 +281,7 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
-        writeParams("ctx.alpha");
+        writeParams("input", hasAlpha, "ctx.alpha", w);
         if (isReduction) {
             w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape], outputGrad);`);
         }

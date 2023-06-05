@@ -3,18 +3,19 @@ import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 import { CodeWriter } from "./opgen";
 
+export type ShaderDynamicArrayType = "array<u8>" | "array<i32>" | "array<u32>" | "array<f32>";
+
+export type ShaderArrayType = ShaderDynamicArrayType | [ShaderDynamicArrayType, number];
+
 export type ShaderType =
     | "u8"
-    | "array<u8>"
     | "i32"
-    | "array<i32>"
     | "u32"
-    | "array<u32>"
     | "f32"
-    | "array<f32>"
     | "vec3<i32>"
     | "vec3<u32>"
-    | "vec3<f32>";
+    | "vec3<f32>"
+    | ShaderArrayType;
 
 export interface KernelSpec {
     name: string;
@@ -22,6 +23,7 @@ export interface KernelSpec {
     workgroupSize: [ExprCode, ExprCode, ExprCode];
     parameters: KernelParamSpec[];
     workgroupCount: [ExprCode, ExprCode, ExprCode];
+    workgroupVariables?: KernelInputSpec[];
     inputs: KernelInputSpec[];
     outputs: KernelOutputSpec[];
     shader: string;
@@ -97,6 +99,12 @@ export abstract class Kernel {
 
     protected getRunEnv(parameters: KernelParamsInput): EvalEnv {
         const env: EvalEnv = {};
+        for (const name of Object.getOwnPropertyNames(Math)) {
+            const f = (Math as any)[name];
+            if (typeof f === "function") {
+                env[name] = f;
+            }
+        }
         for (let i = 0; i < this._spec.config.length; i++) {
             const configSpec = this._spec.config[i];
             const configValue = this._config[i];
@@ -132,6 +140,7 @@ export abstract class Kernel {
                 `Workgroup count Z (${workgroupCountZ}) exceeds the maximum allowed value (${this.device.workgroupMaxCount})`
             );
         }
+        // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
         return [workgroupCountX, workgroupCountY, workgroupCountZ];
     }
 }
@@ -232,6 +241,17 @@ function configShader(
     return [result, env];
 }
 
+export function shaderTypeToCode(shaderType: ShaderType): string {
+    if (typeof shaderType === "string") {
+        return shaderType;
+    } if (shaderType instanceof Array) {
+        return shaderType[0].replace(">", ", " + shaderType[1] + ">");
+    } else {
+        throw new Error(`Unknown shader type ${shaderType}`);
+    }
+}
+
+
 export function getKernelShaderCode(
     spec: KernelSpec,
     config: KernelConfig,
@@ -262,6 +282,13 @@ export function getKernelShaderCode(
     shaderCodeParts.push(
         `@group(0) @binding(${bindingIndex}) var<storage, read> parameters: ${spec.name}Parameters;`
     );
+    if (spec.workgroupVariables !== undefined) {
+        for (let v of spec.workgroupVariables) {
+            shaderCodeParts.push(
+                `var<workgroup> ${v.name}: ${shaderTypeToCode(v.shaderType)};`
+            );
+        }
+    }
     const [workgroupMaxSizeX, workgroupMaxSizeY, workgroupMaxSizeZ] = device.workgroupMaxSize;
     const workgroupSizeX = Math.min(workgroupMaxSizeX, Math.ceil(evalCode(spec.workgroupSize[0], env)));
     const workgroupSizeY = Math.min(workgroupMaxSizeY, Math.ceil(evalCode(spec.workgroupSize[1], env)));
@@ -287,7 +314,7 @@ export function getKernelShaderCode(
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     const shaderCode = shaderCodeParts.join("\n");
-    // console.log(shaderCode);
+    console.log(shaderCode);
     return shaderCode;
 }
 

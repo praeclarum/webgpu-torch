@@ -5,6 +5,7 @@
             "type": "unary",
             "warmupIterations": 10,
             "iterations": 100,
+            "depth": 100,
             "inputs": [
                 {
                     "name": "input_shape",

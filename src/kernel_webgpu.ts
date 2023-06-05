@@ -16,6 +16,7 @@ export class KernelWebGPU extends Kernel {
     private _bindGroupLayout: GPUBindGroupLayout;
     private _computePipeline: GPUComputePipeline;
     private _shaderCode: string;
+    private _runId: number = 0;
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
@@ -73,7 +74,10 @@ export class KernelWebGPU extends Kernel {
         parameters: KernelParamsInput,
         outputs?: GPUBuffer[]
     ): GPUBuffer[] {
+        const runId = this._runId++;
         // console.log("run gpu kernel", this.key);
+
+        const timeIt = false;
 
         // Build the parameter environment
         const env: EvalEnv = this.getRunEnv(parameters);
@@ -150,7 +154,17 @@ export class KernelWebGPU extends Kernel {
 
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
+        // Start performance measurement
+        if (timeIt) {
+            console.time("kernel " + this.key + " (run #" + runId + ")");
+        }
         this._gpuDevice.queue.submit([gpuCommands]);
+        if (timeIt) {
+            this._gpuDevice.queue.onSubmittedWorkDone().then(() => {
+                // End performance measurement
+                console.timeEnd("kernel " + this.key + " (run #" + runId + ")");
+            });
+        }
 
         // Return the storage output buffers
         return storageOutputs;

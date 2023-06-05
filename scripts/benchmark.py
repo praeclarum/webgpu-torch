@@ -27,10 +27,12 @@ def run_unary_benchmark(benchmark, inputs):
         if has_cuda:
             x = x.cuda()
         start = time.perf_counter()
-        y = operation(x)
+        y = x
+        for i in range(benchmark["depth"]):
+            y = operation(y)
         yar = y.cpu().tolist()
         end = time.perf_counter()
-        return (end - start)*1000
+        return (end - start)*1000 / benchmark["depth"]
 
     for _ in range(benchmark["warmupIterations"]):
         run_iteration()

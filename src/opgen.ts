@@ -298,16 +298,21 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
             name: "size",
             shaderType: "u32",
         },
+        // {
+        //     name: "strideX",
+        //     shaderType: "u32",
+        // },
     ];
     const ast = parseCode(op.forward);
     const subs = {
-        input: "input[global_id.x]",
-        output: "output[global_id.x]",
+        input: "input[index]",
+        output: "output[index]",
     };
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
-        if (global_id.x >= parameters.size) {
+        var index = global_id.x;
+        if (index >= parameters.size) {
             return;
         }
         ${shaderSnippet};`;
@@ -334,6 +339,9 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
         ],
         workgroupSize: [256, 1, 1],
         workgroupCount: ["size/256", 1, 1],
+        // workgroupCount: ["var sizeX = ceil(pow(size, 0.5));sizeX / 16", "var sizeX = ceil(pow(size, 0.5));ceil(size/sizeX) / 16", 1],
+        // workgroupCount: [1, 1, 1],
+        // workgroupVariables: [{name:"local_input", shaderType:["array<f32>", 256*8]}],
         shader: shader,
     };
 }
