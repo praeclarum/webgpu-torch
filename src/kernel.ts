@@ -98,13 +98,7 @@ export abstract class Kernel {
     ): (GPUBuffer | ATypedArray)[];
 
     protected getRunEnv(parameters: KernelParamsInput): EvalEnv {
-        const env: EvalEnv = {};
-        for (const name of Object.getOwnPropertyNames(Math)) {
-            const f = (Math as any)[name];
-            if (typeof f === "function") {
-                env[name] = f;
-            }
-        }
+        const env: EvalEnv = Object.assign({}, jsMathEnv);
         for (let i = 0; i < this._spec.config.length; i++) {
             const configSpec = this._spec.config[i];
             const configValue = this._config[i];
@@ -142,6 +136,14 @@ export abstract class Kernel {
         }
         // console.log("workgroup counts", workgroupCountX, workgroupCountY, workgroupCountZ);
         return [workgroupCountX, workgroupCountY, workgroupCountZ];
+    }
+}
+
+const jsMathEnv: EvalEnv = {};
+for (const name of Object.getOwnPropertyNames(Math)) {
+    const f = (Math as any)[name];
+    if (typeof f === "function") {
+        jsMathEnv[name] = f;
     }
 }
 
@@ -314,7 +316,7 @@ export function getKernelShaderCode(
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     const shaderCode = shaderCodeParts.join("\n");
-    console.log(shaderCode);
+    // console.log(shaderCode);
     return shaderCode;
 }
 
