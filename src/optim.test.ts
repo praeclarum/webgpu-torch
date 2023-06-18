@@ -51,11 +51,13 @@ test("sgd step with params with grads", async () => {
     const lossValues = await loss.toArrayAsync();
     // console.log("lossValues", lossValues);
     loss.backward();
+    expect(params[0].grad).not.toBeNull();
+    expect((await params[0].grad!.toArrayAsync())[0]).toBeCloseTo(0.14914645);
     const optimizer = new SGD(params, 0.1);
-    // NEED ALPHA
+    // TODO: Alpha, Scalar, Inplace with grads
     // optimizer.step();
     // const paramValue = await params[0].toArrayAsync();
-    // expect(paramValue).toEqual([1.5 - 0.1 * 0.25]);
+    // expect(paramValue[0]).toBeCloseTo(1.5 - 0.1 * 0.14914645);
 });
 
 

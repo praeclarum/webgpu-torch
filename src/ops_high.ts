@@ -21,7 +21,7 @@ export function binary(func: IAutoFunction, input: Tensor, other: Tensor): Tenso
     if (input.shape.length !== other.shape.length) {
         throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
     }
-    if (shouldCreateGradient(input)) {
+    if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
         return func.apply(input, other);
     }
     return func.forward([input, other]);
@@ -31,7 +31,7 @@ export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: Tenso
     if (input.shape.length !== other.shape.length) {
         throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
     }
-    if (shouldCreateGradient(input)) {
+    if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
         return func.apply(input, other, alpha);
     }
     return func.forward([input, other, alpha]);
