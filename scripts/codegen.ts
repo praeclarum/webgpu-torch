@@ -261,13 +261,24 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
         w.indent();
         writeUnpackInputs("inputs", true);
-        writeParams("input", isOtherScalar, hasAlpha, "alpha", w);
+        
         w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isBinary) {
+            w.writeLine(`if (typeof other === "number") {`);
+            w.indent();
+            writeParams("input", true, hasAlpha, "alpha", w);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_scalar", ${configS}, params, ${outputShapesS})[0];`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
             w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
+            writeParams("input", false, hasAlpha, "alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.dedent();
+            w.writeLine(`}`);
         }
         else {
+            writeParams("input", false, hasAlpha, "alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS})[0];`);
         }
         w.dedent();

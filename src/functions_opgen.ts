@@ -9,10 +9,10 @@ import { shapeSize } from "./shape";
 export class AbsFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("abs", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -34,10 +34,10 @@ export class AbsFunction extends AutoFunction {
 export class AcosFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("acos", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -59,10 +59,10 @@ export class AcosFunction extends AutoFunction {
 export class AcoshFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("acosh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -84,13 +84,22 @@ export class AcoshFunction extends AutoFunction {
 export class AddFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        const params = {
-            size: shapeSize(input.shape),
-            alpha: alpha || 1.0,
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+                alpha: alpha || 1.0,
+            };
+            return input.runKernel("add_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+                alpha: alpha || 1.0,
+            };
+            return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -113,10 +122,10 @@ export class AddFunction extends AutoFunction {
 export class AsinFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("asin", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -138,10 +147,10 @@ export class AsinFunction extends AutoFunction {
 export class AsinhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("asinh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -163,10 +172,10 @@ export class AsinhFunction extends AutoFunction {
 export class AtanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("atan", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -188,12 +197,20 @@ export class AtanFunction extends AutoFunction {
 export class Atan2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("atan2_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -214,10 +231,10 @@ export class Atan2Function extends AutoFunction {
 export class CeilFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("ceil", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -239,12 +256,20 @@ export class CeilFunction extends AutoFunction {
 export class CopysignFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("copysign_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -265,10 +290,10 @@ export class CopysignFunction extends AutoFunction {
 export class CosFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("cos", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -290,10 +315,10 @@ export class CosFunction extends AutoFunction {
 export class CoshFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("cosh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -315,10 +340,10 @@ export class CoshFunction extends AutoFunction {
 export class Deg2radFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("deg2rad", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -340,12 +365,20 @@ export class Deg2radFunction extends AutoFunction {
 export class DivFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("div_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -366,10 +399,10 @@ export class DivFunction extends AutoFunction {
 export class ExpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("exp", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -391,10 +424,10 @@ export class ExpFunction extends AutoFunction {
 export class Exp2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("exp2", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -416,10 +449,10 @@ export class Exp2Function extends AutoFunction {
 export class Expm1Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("expm1", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -441,10 +474,10 @@ export class Expm1Function extends AutoFunction {
 export class FloorFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("floor", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -466,10 +499,10 @@ export class FloorFunction extends AutoFunction {
 export class FracFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("frac", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -491,12 +524,20 @@ export class FracFunction extends AutoFunction {
 export class HypotFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("hypot_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -517,12 +558,20 @@ export class HypotFunction extends AutoFunction {
 export class LdexpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("ldexp_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -543,10 +592,10 @@ export class LdexpFunction extends AutoFunction {
 export class LogFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("log", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -568,10 +617,10 @@ export class LogFunction extends AutoFunction {
 export class Log10Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("log10", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -593,10 +642,10 @@ export class Log10Function extends AutoFunction {
 export class Log1pFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("log1p", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -618,10 +667,10 @@ export class Log1pFunction extends AutoFunction {
 export class Log2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("log2", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -643,12 +692,20 @@ export class Log2Function extends AutoFunction {
 export class LogaddexpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("logaddexp_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -669,12 +726,20 @@ export class LogaddexpFunction extends AutoFunction {
 export class Logaddexp2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("logaddexp2_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -695,12 +760,20 @@ export class Logaddexp2Function extends AutoFunction {
 export class MulFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("mul_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -721,10 +794,10 @@ export class MulFunction extends AutoFunction {
 export class NegFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("neg", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -746,10 +819,10 @@ export class NegFunction extends AutoFunction {
 export class PositiveFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("positive", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -771,12 +844,20 @@ export class PositiveFunction extends AutoFunction {
 export class PowFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("pow_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -797,10 +878,10 @@ export class PowFunction extends AutoFunction {
 export class Rad2degFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("rad2deg", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -822,10 +903,10 @@ export class Rad2degFunction extends AutoFunction {
 export class ReciprocalFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("reciprocal", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -847,10 +928,10 @@ export class ReciprocalFunction extends AutoFunction {
 export class ReluFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("relu", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -872,10 +953,10 @@ export class ReluFunction extends AutoFunction {
 export class RoundFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("round", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -897,10 +978,10 @@ export class RoundFunction extends AutoFunction {
 export class RsqrtFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("rsqrt", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -922,10 +1003,10 @@ export class RsqrtFunction extends AutoFunction {
 export class SigmoidFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sigmoid", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -947,10 +1028,10 @@ export class SigmoidFunction extends AutoFunction {
 export class SignFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sign", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -972,10 +1053,10 @@ export class SignFunction extends AutoFunction {
 export class SiluFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("silu", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -997,10 +1078,10 @@ export class SiluFunction extends AutoFunction {
 export class SinFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sin", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1022,10 +1103,10 @@ export class SinFunction extends AutoFunction {
 export class SincFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sinc", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1047,10 +1128,10 @@ export class SincFunction extends AutoFunction {
 export class SinhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sinh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1072,10 +1153,10 @@ export class SinhFunction extends AutoFunction {
 export class SqrtFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sqrt", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1097,10 +1178,10 @@ export class SqrtFunction extends AutoFunction {
 export class SquareFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("square", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1122,13 +1203,22 @@ export class SquareFunction extends AutoFunction {
 export class SubFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        const params = {
-            size: shapeSize(input.shape),
-            alpha: alpha || 1.0,
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+                alpha: alpha || 1.0,
+            };
+            return input.runKernel("sub_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+                alpha: alpha || 1.0,
+            };
+            return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -1151,10 +1241,10 @@ export class SubFunction extends AutoFunction {
 export class TanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("tan", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1176,10 +1266,10 @@ export class TanFunction extends AutoFunction {
 export class TanhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("tanh", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1201,10 +1291,10 @@ export class TanhFunction extends AutoFunction {
 export class TruncFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("trunc", {"dtype":"float32"}, params, [input.shape])[0];
     }
     static setupContext(
@@ -1226,12 +1316,20 @@ export class TruncFunction extends AutoFunction {
 export class XlogyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-        return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("xlogy_scalar", {"dtype":"float32"}, params, [input.shape])[0];
+        } else {
+            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
@@ -1252,10 +1350,10 @@ export class XlogyFunction extends AutoFunction {
 export class AllFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("all", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1277,10 +1375,10 @@ export class AllFunction extends AutoFunction {
 export class AnyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("any", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1302,10 +1400,10 @@ export class AnyFunction extends AutoFunction {
 export class MeanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("mean", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1327,10 +1425,10 @@ export class MeanFunction extends AutoFunction {
 export class NormFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("norm", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1352,10 +1450,10 @@ export class NormFunction extends AutoFunction {
 export class ProdFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("prod", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1377,10 +1475,10 @@ export class ProdFunction extends AutoFunction {
 export class SumFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("sum", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(
@@ -1402,10 +1500,10 @@ export class SumFunction extends AutoFunction {
 export class CountNonzeroFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
+        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         return input.runKernel("countNonzero", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
     }
     static setupContext(

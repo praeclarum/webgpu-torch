@@ -108,7 +108,7 @@ export abstract class Kernel {
             const param = this.spec.parameters[i];
             const paramValue = parameters[param.name];
             if (paramValue === undefined) {
-                throw new Error(`Missing parameter ${param.name}`);
+                throw new Error(`Missing parameter \"${param.name}\" for kernel \"${this.spec.name}\"`);
             }
             env[param.name] = paramValue;
         }
