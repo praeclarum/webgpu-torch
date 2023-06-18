@@ -23,7 +23,8 @@ export {
     ShaderType,
 } from "./kernel";
 export { OpSpec, OpType } from "./op_spec";
-export * from "./ops";
+export * from "./ops_opgen";
+export * from "./ops_artisanal";
 export * as nn from "./nn";
 export * from "./shape";
 export { TensorArrayData, UntypedStorage } from "./storage";
