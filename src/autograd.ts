@@ -34,7 +34,10 @@ export type GradientFunction = (
 export interface IAutoFunction {
     forward(inputs: FunctionInput[]): Tensor;
     apply(...inputs: FunctionInput[]): Tensor;
-    backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[];
+    backward(
+        ctx: GradientContext,
+        outputGrad: Tensor
+    ): GradientFunctionOutput[];
 }
 
 export class AutoFunction {
@@ -66,7 +69,20 @@ export class AutoFunction {
     }
 }
 
+let _gradEnabled = true;
+
+export function isGradEnabled(): boolean {
+    return _gradEnabled;
+}
+
+export function setGradEnabled(mode: boolean): void {
+    _gradEnabled = mode;
+}
+
 export function shouldCreateGradient(...inputs: Tensor[]): boolean {
+    if (!_gradEnabled) {
+        return false;
+    }
     for (const input of inputs) {
         if (input.requiresGrad) {
             return true;
@@ -75,6 +91,22 @@ export function shouldCreateGradient(...inputs: Tensor[]): boolean {
     return false;
 }
 
-export function withEnableGrad(closure: () => void): void {
-    closure();
+export function enableGrad<T>(closure: () => T): T {
+    const prev = isGradEnabled();
+    setGradEnabled(true);
+    try {
+        return closure();
+    } finally {
+        setGradEnabled(prev);
+    }
+}
+
+export function noGrad<T>(closure: () => T): T {
+    const prev = isGradEnabled();
+    setGradEnabled(false);
+    try {
+        return closure();
+    } finally {
+        setGradEnabled(prev);
+    }
 }

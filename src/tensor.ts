@@ -8,7 +8,7 @@ import {
     UntypedStorage,
     newTypedArrayFromArray,
 } from "./storage";
-import type { GradientFunction, GradientContext } from "./autograd";
+import { type GradientFunction, type GradientContext, isGradEnabled } from "./autograd";
 import type { KernelConfigInput, KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
@@ -206,7 +206,7 @@ export class Tensor extends TensorBase {
         params: KernelParamsInput,
         ...additionalInputs: Tensor[]
     ): Tensor {
-        if (this.requiresGrad) {
+        if (this.requiresGrad && isGradEnabled()) {
             throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
         }
         const d = this.device;

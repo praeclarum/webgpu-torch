@@ -55,9 +55,9 @@ test("sgd step with params with grads", async () => {
     expect((await params[0].grad!.toArrayAsync())[0]).toBeCloseTo(0.14914645);
     const optimizer = new SGD(params, 0.1);
     // TODO: Alpha, Scalar, Inplace with grads
-    // optimizer.step();
-    // const paramValue = await params[0].toArrayAsync();
-    // expect(paramValue[0]).toBeCloseTo(1.5 - 0.1 * 0.14914645);
+    optimizer.step();
+    const paramValue = await params[0].toArrayAsync();
+    expect(paramValue[0]).toBeCloseTo(1.5 - 0.1 * 0.14914645);
 });
 
 

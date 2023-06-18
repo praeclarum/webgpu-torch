@@ -1,5 +1,5 @@
 import { Tensor } from "./tensor";
-import { withEnableGrad } from "./autograd";
+import { enableGrad, noGrad } from "./autograd";
 
 export class RequiredParameter {}
 export const required = new RequiredParameter();
@@ -73,53 +73,55 @@ export class SGD extends Optimizer {
         });
     }
     step(closure?: (() => Tensor) | undefined): Tensor | null {
-        let loss: Tensor | null = null;
-        if (closure !== undefined) {
-            withEnableGrad(() => {
-                loss = closure();
-            });
-        }
-        for (let group of this.paramGroups) {
-            const params_with_grad: Tensor[] = [];
-            const d_p_list: Tensor[] = [];
-            const momentum_buffer_list: (Tensor|null)[] = [];
+        return noGrad(() => {
+            let loss: Tensor | null = null;
+            if (closure !== undefined) {
+                enableGrad(() => {
+                    loss = closure();
+                });
+            }
+            for (let group of this.paramGroups) {
+                const params_with_grad: Tensor[] = [];
+                const d_p_list: Tensor[] = [];
+                const momentum_buffer_list: (Tensor|null)[] = [];
 
-            const has_sparse_grad = this.initGroup(
-                group,
-                params_with_grad,
-                d_p_list,
-                momentum_buffer_list
-            );
+                const has_sparse_grad = this.initGroup(
+                    group,
+                    params_with_grad,
+                    d_p_list,
+                    momentum_buffer_list
+                );
 
-            sgd(
-                params_with_grad,
-                d_p_list,
-                momentum_buffer_list,
-                has_sparse_grad,
-                group["foreach"] as Boolean | null,
-                group["weight_decay"] as number,
-                group["momentum"] as number,
-                group["lr"] as number,
-                group["dampening"] as number,
-                group["nesterov"] as Boolean,
-                group["maximize"] as Boolean
-            );
+                sgd(
+                    params_with_grad,
+                    d_p_list,
+                    momentum_buffer_list,
+                    has_sparse_grad,
+                    group["foreach"] as Boolean | null,
+                    group["weight_decay"] as number,
+                    group["momentum"] as number,
+                    group["lr"] as number,
+                    group["dampening"] as number,
+                    group["nesterov"] as Boolean,
+                    group["maximize"] as Boolean
+                );
 
-            // Update state['momentum_buffer']
-            for (let i in params_with_grad) {
-                const p = params_with_grad[i];
-                const momentum_buffer = momentum_buffer_list[i];
-                if (momentum_buffer === null) continue;
-                const state = this.state.get(p);
-                if (state === undefined) {
-                    this.state.set(p, { "momentum_buffer": momentum_buffer });
-                }
-                else {
-                    state["momentum_buffer"] = momentum_buffer;
+                // Update state['momentum_buffer']
+                for (let i in params_with_grad) {
+                    const p = params_with_grad[i];
+                    const momentum_buffer = momentum_buffer_list[i];
+                    if (momentum_buffer === null) continue;
+                    const state = this.state.get(p);
+                    if (state === undefined) {
+                        this.state.set(p, { "momentum_buffer": momentum_buffer });
+                    }
+                    else {
+                        state["momentum_buffer"] = momentum_buffer;
+                    }
                 }
             }
-        }
-        return loss;
+            return loss;
+        });
     }
     initGroup(
         group: ParameterGroup,
