@@ -74,3 +74,7 @@ export function shouldCreateGradient(...inputs: Tensor[]): boolean {
     }
     return false;
 }
+
+export function withEnableGrad(closure: () => void): void {
+    closure();
+}
