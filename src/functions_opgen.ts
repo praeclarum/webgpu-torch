@@ -339,10 +339,9 @@ export class Deg2radFunction extends AutoFunction {
 }
 export class DivFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other] = inputs as [Tensor, Tensor];
         const params = {
             size: shapeSize(input.shape),
-            alpha: alpha || 1.0,
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
@@ -353,15 +352,13 @@ export class DivFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        ctx.alpha = alpha;
+        const [input, other] = inputs as [Tensor, Tensor];
         ctx.saveForBackward(input, other);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
         const params = {
             size: shapeSize(input.shape),
-            alpha: ctx.alpha || 1.0,
         };
         return input.runKernel("divGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
@@ -697,10 +694,9 @@ export class Logaddexp2Function extends AutoFunction {
 }
 export class MulFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other] = inputs as [Tensor, Tensor];
         const params = {
             size: shapeSize(input.shape),
-            alpha: alpha || 1.0,
         };
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
@@ -711,15 +707,13 @@ export class MulFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
-        ctx.alpha = alpha;
+        const [input, other] = inputs as [Tensor, Tensor];
         ctx.saveForBackward(input, other);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
         const params = {
             size: shapeSize(input.shape),
-            alpha: ctx.alpha || 1.0,
         };
         return input.runKernel("mulGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }

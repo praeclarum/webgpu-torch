@@ -124,7 +124,7 @@ export function arccosh(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = input + other
+* output = input + other * alpha
 * ```
 *
 * Gradient:
@@ -405,11 +405,10 @@ export function deg2rad(input: Tensor): Tensor {
 *
 * @param input the input tensor of any shape
 * @param other the other tensor whose shape is broadcastable with the input tensor
-* @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function div(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    return binaryWithAlpha(functions.DivFunction, input, other, alpha);
+export function div(input: Tensor, other: Tensor): Tensor {
+    return binary(functions.DivFunction, input, other);
 }
 /**
 * Alias for `div`.
@@ -426,11 +425,10 @@ export function div(input: Tensor, other: Tensor, alpha?: number): Tensor {
 *
 * @param input the input tensor of any shape
 * @param other the other tensor whose shape is broadcastable with the input tensor
-* @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function divide(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    return div(input, other, alpha);
+export function divide(input: Tensor, other: Tensor): Tensor {
+    return div(input, other);
 }
 /**
 * ![Plot of exp and its gradient](../../plots/exp.svg)
@@ -688,11 +686,10 @@ export function logaddexp2(input: Tensor, other: Tensor): Tensor {
 *
 * @param input the input tensor of any shape
 * @param other the other tensor whose shape is broadcastable with the input tensor
-* @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function mul(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    return binaryWithAlpha(functions.MulFunction, input, other, alpha);
+export function mul(input: Tensor, other: Tensor): Tensor {
+    return binary(functions.MulFunction, input, other);
 }
 /**
 * Alias for `mul`.
@@ -709,11 +706,10 @@ export function mul(input: Tensor, other: Tensor, alpha?: number): Tensor {
 *
 * @param input the input tensor of any shape
 * @param other the other tensor whose shape is broadcastable with the input tensor
-* @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function multiply(input: Tensor, other: Tensor, alpha?: number): Tensor {
-    return mul(input, other, alpha);
+export function multiply(input: Tensor, other: Tensor): Tensor {
+    return mul(input, other);
 }
 /**
 * ![Plot of neg and its gradient](../../plots/neg.svg)
@@ -1042,7 +1038,7 @@ export function square(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = input - other
+* output = input - other * alpha
 * ```
 *
 * Gradient:
@@ -1063,7 +1059,7 @@ export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
 *
 * Calculates:
 * ```js
-* output = input - other
+* output = input - other * alpha
 * ```
 *
 * Gradient:

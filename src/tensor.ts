@@ -532,7 +532,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input + other
+    * output = input + other * alpha
     * ```
     *
     * Gradient:
@@ -550,7 +550,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input + other
+    * output = input + other * alpha
     * ```
     *
     * Gradient:
@@ -1007,11 +1007,10 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    div(other: Tensor, alpha?: number): Tensor {
-        return ops.div(this, other, alpha);
+    div(other: Tensor): Tensor {
+        return ops.div(this, other);
     }
     /**
     * Alias for `div`.
@@ -1027,11 +1026,10 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    divide(other: Tensor, alpha?: number): Tensor {
-        return ops.div(this, other, alpha);
+    divide(other: Tensor): Tensor {
+        return ops.div(this, other);
     }
     /**
     * Calculates:
@@ -1045,13 +1043,11 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    div_(other: Tensor, alpha?: number): Tensor {
+    div_(other: Tensor): Tensor {
         const params = {
             size: shapeSize(this.shape),
-            alpha: alpha || 1.0,
         };
         return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
     }
@@ -1566,11 +1562,10 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    mul(other: Tensor, alpha?: number): Tensor {
-        return ops.mul(this, other, alpha);
+    mul(other: Tensor): Tensor {
+        return ops.mul(this, other);
     }
     /**
     * Alias for `mul`.
@@ -1586,11 +1581,10 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    multiply(other: Tensor, alpha?: number): Tensor {
-        return ops.mul(this, other, alpha);
+    multiply(other: Tensor): Tensor {
+        return ops.mul(this, other);
     }
     /**
     * Calculates:
@@ -1604,13 +1598,11 @@ export class Tensor extends TensorBase {
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
-    * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    mul_(other: Tensor, alpha?: number): Tensor {
+    mul_(other: Tensor): Tensor {
         const params = {
             size: shapeSize(this.shape),
-            alpha: alpha || 1.0,
         };
         return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
     }
@@ -2259,7 +2251,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input - other
+    * output = input - other * alpha
     * ```
     *
     * Gradient:
@@ -2279,7 +2271,7 @@ export class Tensor extends TensorBase {
     *
     * Calculates:
     * ```js
-    * output = input - other
+    * output = input - other * alpha
     * ```
     *
     * Gradient:
@@ -2297,7 +2289,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input - other
+    * output = input - other * alpha
     * ```
     *
     * Gradient:

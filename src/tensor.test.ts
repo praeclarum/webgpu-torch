@@ -263,3 +263,10 @@ test("can perform pointwise unary on bigger than workgroup count", async () => {
     const output = input.relu();
     expect(output.shape).toEqual([1594323]);
 });
+
+test("add inplace with alpha", async () => {
+    const a = tensor([1, 2, 3]);
+    const b = tensor([100, 200, 300]);
+    a.add_(b, 5);
+    expect(await a.toArrayAsync()).toEqual([501, 1002, 1503]);
+});
