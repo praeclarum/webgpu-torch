@@ -1,5 +1,5 @@
 // Generate code from op_spec.ts and op_table.ts
-import { KernelParamSpec, KernelSpec } from "./kernel";
+import { KernelInputSpec, KernelParamSpec, KernelSpec } from "./kernel";
 import {
     ExprCode,
     exprCodeToWebGLShader,
@@ -45,7 +45,7 @@ function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
 }
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
-    const specs = [getBinaryKernelSpec(op), getBinaryInplaceKernelSpec(op)];
+    const specs = [getBinaryKernelSpec(op, false), getBinaryKernelSpec(op, true)];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
     }
@@ -130,7 +130,7 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     };
 }
 
-function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
+function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
@@ -142,6 +142,9 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
         other: "other[global_id.x]",
         output: "output[global_id.x]",
     };
+    if (inplace) {
+        subs.output = "input[global_id.x]";
+    }
     if (op.alpha !== undefined && op.alpha) {
         parameters.push({
             name: "alpha",
@@ -155,81 +158,32 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
             return;
         }
         ${shaderSnippet};`;
-    return {
-        name: op.name,
-        config: [
-            {
-                name: "dtype",
-            },
-        ],
-        parameters: parameters,
-        inputs: [
-            {
-                name: "input",
-                shaderType: "array<f32>",
-            },
-            {
-                name: "other",
-                shaderType: "array<f32>",
-            },
-        ],
-        outputs: [
-            {
-                name: "output",
-                shaderType: "array<f32>",
-                size: "size",
-            },
-        ],
-        workgroupSize: [256, 1, 1],
-        workgroupCount: ["size/256", 1, 1],
-        shader: shader,
-    };
-}
-
-function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
-    const parameters: KernelParamSpec[] = [
+    const inputs: KernelInputSpec[] = [
         {
-            name: "size",
-            shaderType: "u32",
+            name: "other",
+            shaderType: "array<f32>",
         },
     ];
-    const ast = parseCode(op.forward);
-    const subs: any = {
-        input: "input[global_id.x]",
-        other: "other[global_id.x]",
-        output: "input[global_id.x]",
-    };
-    if (op.alpha !== undefined && op.alpha) {
-        parameters.push({
-            name: "alpha",
-            shaderType: "f32",
+    let outputName = "input";
+    if (!inplace) {
+        inputs.splice(0, 0, {
+            name: "input",
+            shaderType: "array<f32>",
         });
-        subs["alpha"] = "parameters.alpha";
+        outputName = "output";
     }
-    const shaderAst = substituteIdentifiers(ast, subs);
-    const shaderSnippet = exprNodeToWebGLShader(shaderAst);
-    const shader = `
-        if (global_id.x >= parameters.size) {
-            return;
-        }
-        ${shaderSnippet};`;
     return {
-        name: op.name + "_",
+        name: op.name + (inplace ? "_" : ""),
         config: [
             {
                 name: "dtype",
             },
         ],
         parameters: parameters,
-        inputs: [
-            {
-                name: "other",
-                shaderType: "array<f32>",
-            },
-        ],
+        inputs: inputs,
         outputs: [
             {
-                name: "input",
+                name: outputName,
                 shaderType: "array<f32>",
                 size: "size",
             },
