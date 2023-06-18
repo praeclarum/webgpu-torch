@@ -544,7 +544,7 @@ export class Tensor extends TensorBase {
     * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    add(other: Tensor, alpha?: number): Tensor {
+    add(other: number | Tensor, alpha?: number): Tensor {
         return ops.add(this, other, alpha);
     }
     /**
@@ -562,12 +562,16 @@ export class Tensor extends TensorBase {
     * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    add_(other: Tensor, alpha?: number): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-            alpha: alpha || 1.0,
-        };
-        return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
+    add_(other: number | Tensor, alpha?: number): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+                alpha: alpha || 1.0,
+            };
+            return this.runKernelInplace("add_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of asin and its gradient](../../plots/asin.svg)
@@ -760,7 +764,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    atan2(other: Tensor): Tensor {
+    atan2(other: number | Tensor): Tensor {
         return ops.atan2(this, other);
     }
     /**
@@ -779,7 +783,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    arctan2(other: Tensor): Tensor {
+    arctan2(other: number | Tensor): Tensor {
         return ops.atan2(this, other);
     }
     /**
@@ -796,11 +800,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    atan2_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
+    atan2_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("atan2_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of ceil and its gradient](../../plots/ceil.svg)
@@ -855,7 +863,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    copysign(other: Tensor): Tensor {
+    copysign(other: number | Tensor): Tensor {
         return ops.copysign(this, other);
     }
     /**
@@ -872,11 +880,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    copysign_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
+    copysign_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("copysign_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of cos and its gradient](../../plots/cos.svg)
@@ -1009,7 +1021,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    div(other: Tensor): Tensor {
+    div(other: number | Tensor): Tensor {
         return ops.div(this, other);
     }
     /**
@@ -1028,7 +1040,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    divide(other: Tensor): Tensor {
+    divide(other: number | Tensor): Tensor {
         return ops.div(this, other);
     }
     /**
@@ -1045,11 +1057,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    div_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
+    div_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("div_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of exp and its gradient](../../plots/exp.svg)
@@ -1260,7 +1276,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    hypot(other: Tensor): Tensor {
+    hypot(other: number | Tensor): Tensor {
         return ops.hypot(this, other);
     }
     /**
@@ -1277,11 +1293,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    hypot_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("hypot_", { dtype: this.dtype }, params, other);
+    hypot_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("hypot_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * Calculates:
@@ -1297,7 +1317,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    ldexp(other: Tensor): Tensor {
+    ldexp(other: number | Tensor): Tensor {
         return ops.ldexp(this, other);
     }
     /**
@@ -1314,11 +1334,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    ldexp_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
+    ldexp_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("ldexp_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of log and its gradient](../../plots/log.svg)
@@ -1490,7 +1514,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    logaddexp(other: Tensor): Tensor {
+    logaddexp(other: number | Tensor): Tensor {
         return ops.logaddexp(this, other);
     }
     /**
@@ -1507,11 +1531,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    logaddexp_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("logaddexp_", { dtype: this.dtype }, params, other);
+    logaddexp_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("logaddexp_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * Calculates:
@@ -1527,7 +1555,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    logaddexp2(other: Tensor): Tensor {
+    logaddexp2(other: number | Tensor): Tensor {
         return ops.logaddexp2(this, other);
     }
     /**
@@ -1544,11 +1572,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    logaddexp2_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("logaddexp2_", { dtype: this.dtype }, params, other);
+    logaddexp2_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("logaddexp2_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * Calculates:
@@ -1564,7 +1596,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    mul(other: Tensor): Tensor {
+    mul(other: number | Tensor): Tensor {
         return ops.mul(this, other);
     }
     /**
@@ -1583,7 +1615,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    multiply(other: Tensor): Tensor {
+    multiply(other: number | Tensor): Tensor {
         return ops.mul(this, other);
     }
     /**
@@ -1600,11 +1632,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    mul_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
+    mul_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("mul_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of neg and its gradient](../../plots/neg.svg)
@@ -1718,7 +1754,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    pow(other: Tensor): Tensor {
+    pow(other: number | Tensor): Tensor {
         return ops.pow(this, other);
     }
     /**
@@ -1735,11 +1771,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    pow_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
+    pow_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("pow_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of rad2deg and its gradient](../../plots/rad2deg.svg)
@@ -2263,7 +2303,7 @@ export class Tensor extends TensorBase {
     * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    sub(other: Tensor, alpha?: number): Tensor {
+    sub(other: number | Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
     /**
@@ -2283,7 +2323,7 @@ export class Tensor extends TensorBase {
     * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    subtract(other: Tensor, alpha?: number): Tensor {
+    subtract(other: number | Tensor, alpha?: number): Tensor {
         return ops.sub(this, other, alpha);
     }
     /**
@@ -2301,12 +2341,16 @@ export class Tensor extends TensorBase {
     * @param alpha the alpha value to multiply `other` with
     * @returns the output tensor
     */
-    sub_(other: Tensor, alpha?: number): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-            alpha: alpha || 1.0,
-        };
-        return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
+    sub_(other: number | Tensor, alpha?: number): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+                alpha: alpha || 1.0,
+            };
+            return this.runKernelInplace("sub_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * ![Plot of tan and its gradient](../../plots/tan.svg)
@@ -2459,7 +2503,7 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    xlogy(other: Tensor): Tensor {
+    xlogy(other: number | Tensor): Tensor {
         return ops.xlogy(this, other);
     }
     /**
@@ -2476,11 +2520,15 @@ export class Tensor extends TensorBase {
     * @param other the other tensor whose shape is broadcastable with the input tensor
     * @returns the output tensor
     */
-    xlogy_(other: Tensor): Tensor {
-        const params = {
-            size: shapeSize(this.shape),
-        };
-        return this.runKernelInplace("xlogy_", { dtype: this.dtype }, params, other);
+    xlogy_(other: number | Tensor): Tensor {
+        if (typeof other === "number") {
+            throw new Error("Inplace binary ops with a scalar are not supported");
+        } else {
+            const params = {
+                size: shapeSize(this.shape),
+            };
+            return this.runKernelInplace("xlogy_", { dtype: this.dtype }, params, other);
+        }
     }
     /**
     * Calculates:

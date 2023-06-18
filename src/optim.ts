@@ -179,9 +179,7 @@ function sgd(
                 momentum_buffer_list[i] = buf;
             }
             else {
-                // TODO: Implement mul with number
-                const momentumTensor = new Tensor([momentum]);
-                buf.mul_(momentumTensor).add_(d_p, 1 - dampening);
+                buf.mul_(momentum).add_(d_p, 1 - dampening);
             }
             if (nesterov) {
                 d_p = d_p.add(buf, momentum);

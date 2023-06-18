@@ -17,22 +17,36 @@ export function unaryWithAlpha(func: IAutoFunction, input: Tensor, alpha?: numbe
     return func.forward([input, alpha]);
 }
 
-export function binary(func: IAutoFunction, input: Tensor, other: Tensor): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+export function binary(func: IAutoFunction, input: Tensor, other: number | Tensor): Tensor {
+    if (typeof other === "number") {
+        if (shouldCreateGradient(input)) {
+            return func.apply(input, other);
+        }
     }
-    if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
-        return func.apply(input, other);
+    else {
+        if (input.shape.length !== other.shape.length) {
+            throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+        }
+        if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
+            return func.apply(input, other);
+        }
     }
     return func.forward([input, other]);
 }
 
-export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: Tensor, alpha?: number): Tensor {
-    if (input.shape.length !== other.shape.length) {
-        throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: number | Tensor, alpha?: number): Tensor {
+    if (typeof other === "number") {
+        if (shouldCreateGradient(input)) {
+            return func.apply(input, other, alpha);
+        }
     }
-    if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
-        return func.apply(input, other, alpha);
+    else {
+        if (input.shape.length !== other.shape.length) {
+            throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+        }
+        if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
+            return func.apply(input, other, alpha);
+        }
     }
     return func.forward([input, other, alpha]);
 }

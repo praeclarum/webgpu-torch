@@ -137,7 +137,7 @@ export function arccosh(input: Tensor): Tensor {
 * @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function add(input: Tensor, other: Tensor, alpha?: number): Tensor {
+export function add(input: Tensor, other: number | Tensor, alpha?: number): Tensor {
     return binaryWithAlpha(functions.AddFunction, input, other, alpha);
 }
 /**
@@ -275,7 +275,7 @@ export function arctan(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function atan2(input: Tensor, other: Tensor): Tensor {
+export function atan2(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.Atan2Function, input, other);
 }
 /**
@@ -295,7 +295,7 @@ export function atan2(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function arctan2(input: Tensor, other: Tensor): Tensor {
+export function arctan2(input: Tensor, other: number | Tensor): Tensor {
     return atan2(input, other);
 }
 /**
@@ -332,7 +332,7 @@ export function ceil(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function copysign(input: Tensor, other: Tensor): Tensor {
+export function copysign(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.CopysignFunction, input, other);
 }
 /**
@@ -407,7 +407,7 @@ export function deg2rad(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function div(input: Tensor, other: Tensor): Tensor {
+export function div(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.DivFunction, input, other);
 }
 /**
@@ -427,7 +427,7 @@ export function div(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function divide(input: Tensor, other: Tensor): Tensor {
+export function divide(input: Tensor, other: number | Tensor): Tensor {
     return div(input, other);
 }
 /**
@@ -540,7 +540,7 @@ export function frac(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function hypot(input: Tensor, other: Tensor): Tensor {
+export function hypot(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.HypotFunction, input, other);
 }
 /**
@@ -558,7 +558,7 @@ export function hypot(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function ldexp(input: Tensor, other: Tensor): Tensor {
+export function ldexp(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.LdexpFunction, input, other);
 }
 /**
@@ -652,7 +652,7 @@ export function log2(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function logaddexp(input: Tensor, other: Tensor): Tensor {
+export function logaddexp(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.LogaddexpFunction, input, other);
 }
 /**
@@ -670,7 +670,7 @@ export function logaddexp(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function logaddexp2(input: Tensor, other: Tensor): Tensor {
+export function logaddexp2(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.Logaddexp2Function, input, other);
 }
 /**
@@ -688,7 +688,7 @@ export function logaddexp2(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function mul(input: Tensor, other: Tensor): Tensor {
+export function mul(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.MulFunction, input, other);
 }
 /**
@@ -708,7 +708,7 @@ export function mul(input: Tensor, other: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function multiply(input: Tensor, other: Tensor): Tensor {
+export function multiply(input: Tensor, other: number | Tensor): Tensor {
     return mul(input, other);
 }
 /**
@@ -785,7 +785,7 @@ export function positive(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function pow(input: Tensor, other: Tensor): Tensor {
+export function pow(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.PowFunction, input, other);
 }
 /**
@@ -1051,7 +1051,7 @@ export function square(input: Tensor): Tensor {
 * @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
+export function sub(input: Tensor, other: number | Tensor, alpha?: number): Tensor {
     return binaryWithAlpha(functions.SubFunction, input, other, alpha);
 }
 /**
@@ -1072,7 +1072,7 @@ export function sub(input: Tensor, other: Tensor, alpha?: number): Tensor {
 * @param alpha the alpha value to multiply `other` with
 * @returns the output tensor
 */
-export function subtract(input: Tensor, other: Tensor, alpha?: number): Tensor {
+export function subtract(input: Tensor, other: number | Tensor, alpha?: number): Tensor {
     return sub(input, other, alpha);
 }
 /**
@@ -1168,7 +1168,7 @@ export function fix(input: Tensor): Tensor {
 * @param other the other tensor whose shape is broadcastable with the input tensor
 * @returns the output tensor
 */
-export function xlogy(input: Tensor, other: Tensor): Tensor {
+export function xlogy(input: Tensor, other: number | Tensor): Tensor {
     return binary(functions.XlogyFunction, input, other);
 }
 /**

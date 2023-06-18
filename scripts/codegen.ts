@@ -37,10 +37,10 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
     }
     else if (isBinary) {
         if (hasAlpha) {
-            w.writeLine(`${name}(other: Tensor, alpha?: number): Tensor${suffix}`);
+            w.writeLine(`${name}(other: number | Tensor, alpha?: number): Tensor${suffix}`);
         }
         else {
-            w.writeLine(`${name}(other: Tensor): Tensor${suffix}`);
+            w.writeLine(`${name}(other: number | Tensor): Tensor${suffix}`);
         }
     }
     else {
@@ -80,8 +80,16 @@ function writeTensorCode(): void {
         w.indent();
         if (isInplace) {
             if (isBinary) {
+                w.writeLine(`if (typeof other === "number") {`);
+                w.indent();
+                w.writeLine(`throw new Error("Inplace binary ops with a scalar are not supported");`);
+                w.dedent();
+                w.writeLine(`} else {`);
+                w.indent();
                 writeParams("this", hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
+                w.dedent();
+                w.writeLine(`}`);
             }
             else {
                 writeParams("this", hasAlpha, "alpha", w);
@@ -378,10 +386,10 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
             writeOpDocs(opSpec, "input", isAlias, w);
             if (isBinary) {
                 if (hasAlpha) {
-                    w.writeLine(`export function ${name}(input: Tensor, other: Tensor, alpha?: number): Tensor {`);
+                    w.writeLine(`export function ${name}(input: Tensor, other: number | Tensor, alpha?: number): Tensor {`);
                 }
                 else {
-                    w.writeLine(`export function ${name}(input: Tensor, other: Tensor): Tensor {`);
+                    w.writeLine(`export function ${name}(input: Tensor, other: number | Tensor): Tensor {`);
                 }
             }
             else {
