@@ -45,7 +45,12 @@ function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
 }
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
-    const specs = [getBinaryKernelSpec(op, false), getBinaryKernelSpec(op, true)];
+    const specs = [
+        getBinaryKernelSpec(op, false, false),
+        getBinaryKernelSpec(op, true, false),
+        getBinaryKernelSpec(op, false, true),
+        getBinaryKernelSpec(op, true, true),
+    ];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
     }
@@ -130,7 +135,7 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     };
 }
 
-function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean): KernelSpec {
+function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean, isOtherScalar: boolean): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
@@ -145,6 +150,13 @@ function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean): KernelSpec {
     if (inplace) {
         subs.output = "input[global_id.x]";
     }
+    if (isOtherScalar) {
+        subs.other = "parameters.other";
+        parameters.push({
+            name: "other",
+            shaderType: "f32",
+        });
+    }
     if (op.alpha !== undefined && op.alpha) {
         parameters.push({
             name: "alpha",
@@ -158,12 +170,13 @@ function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean): KernelSpec {
             return;
         }
         ${shaderSnippet};`;
-    const inputs: KernelInputSpec[] = [
-        {
+    const inputs: KernelInputSpec[] = [];
+    if (!isOtherScalar) {
+        inputs.push({
             name: "other",
             shaderType: "array<f32>",
-        },
-    ];
+        });
+    }
     let outputName = "input";
     if (!inplace) {
         inputs.splice(0, 0, {
@@ -172,8 +185,15 @@ function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean): KernelSpec {
         });
         outputName = "output";
     }
+    let name = op.name;
+    if (isOtherScalar) {
+        name += "_scalar";
+    }
+    if (inplace) {
+        name += "_";
+    }
     return {
-        name: op.name + (inplace ? "_" : ""),
+        name: name,
         config: [
             {
                 name: "dtype",
@@ -228,7 +248,7 @@ function getBinaryGradKernelSpec(
         }
         ${shaderSnippet};`;
     return {
-        name: op.name + "Grad",
+        name: op.name + "_grad",
         config: [
             {
                 name: "dtype",
@@ -408,7 +428,7 @@ function getUnaryGradKernelSpec(
         }
         ${shaderSnippet};`;
     return {
-        name: op.name + "Grad",
+        name: op.name + "_grad",
         config: [
             {
                 name: "dtype",

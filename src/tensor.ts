@@ -564,7 +564,12 @@ export class Tensor extends TensorBase {
     */
     add_(other: number | Tensor, alpha?: number): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+                alpha: alpha || 1.0,
+            };
+            return this.runKernelInplace("add_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -802,7 +807,11 @@ export class Tensor extends TensorBase {
     */
     atan2_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("atan2_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -882,7 +891,11 @@ export class Tensor extends TensorBase {
     */
     copysign_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("copysign_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1059,7 +1072,11 @@ export class Tensor extends TensorBase {
     */
     div_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("div_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1295,7 +1312,11 @@ export class Tensor extends TensorBase {
     */
     hypot_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("hypot_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1336,7 +1357,11 @@ export class Tensor extends TensorBase {
     */
     ldexp_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("ldexp_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1533,7 +1558,11 @@ export class Tensor extends TensorBase {
     */
     logaddexp_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("logaddexp_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1574,7 +1603,11 @@ export class Tensor extends TensorBase {
     */
     logaddexp2_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("logaddexp2_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1634,7 +1667,11 @@ export class Tensor extends TensorBase {
     */
     mul_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("mul_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -1773,7 +1810,11 @@ export class Tensor extends TensorBase {
     */
     pow_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("pow_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -2343,7 +2384,12 @@ export class Tensor extends TensorBase {
     */
     sub_(other: number | Tensor, alpha?: number): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+                alpha: alpha || 1.0,
+            };
+            return this.runKernelInplace("sub_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),
@@ -2522,7 +2568,11 @@ export class Tensor extends TensorBase {
     */
     xlogy_(other: number | Tensor): Tensor {
         if (typeof other === "number") {
-            throw new Error("Inplace binary ops with a scalar are not supported");
+            const params = {
+                size: shapeSize(this.shape),
+                other: other,
+            };
+            return this.runKernelInplace("xlogy_scalar_", { dtype: this.dtype }, params);
         } else {
             const params = {
                 size: shapeSize(this.shape),

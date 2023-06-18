@@ -270,3 +270,9 @@ test("add inplace with alpha", async () => {
     a.add_(b, 5);
     expect(await a.toArrayAsync()).toEqual([501, 1002, 1503]);
 });
+
+test("add scalar inplace with alpha", async () => {
+    const a = tensor([1, 2, 3]);
+    a.add_(5, 7);
+    expect(await a.toArrayAsync()).toEqual([36, 37, 38]);
+});

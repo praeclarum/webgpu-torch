@@ -58,7 +58,7 @@ function writePythonTests() {
     w.dedent();
     function shouldOutputKernelSpec(kernelSpec: KernelSpec): boolean {
         const kernelName = kernelSpec.name;
-        const isGrad = kernelName.endsWith("Grad");
+        const isGrad = kernelName.endsWith("_grad");
         if (isGrad) return false;
         if (kernelName == "positive_") return false; // Not in torch
         if (kernelName == "logaddexp_") return false; // Not in torch

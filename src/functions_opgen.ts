@@ -28,7 +28,7 @@ export class AbsFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("absGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("abs_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AcosFunction extends AutoFunction {
@@ -53,7 +53,7 @@ export class AcosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acosGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("acos_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AcoshFunction extends AutoFunction {
@@ -78,7 +78,7 @@ export class AcoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("acoshGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("acosh_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AddFunction extends AutoFunction {
@@ -107,7 +107,7 @@ export class AddFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("addGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("add_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class AsinFunction extends AutoFunction {
@@ -132,7 +132,7 @@ export class AsinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asinGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("asin_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AsinhFunction extends AutoFunction {
@@ -157,7 +157,7 @@ export class AsinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("asinhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("asinh_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class AtanFunction extends AutoFunction {
@@ -182,7 +182,7 @@ export class AtanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atanGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("atan_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Atan2Function extends AutoFunction {
@@ -208,7 +208,7 @@ export class Atan2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("atan2Grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("atan2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class CeilFunction extends AutoFunction {
@@ -233,7 +233,7 @@ export class CeilFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("ceilGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("ceil_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class CopysignFunction extends AutoFunction {
@@ -259,7 +259,7 @@ export class CopysignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("copysignGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("copysign_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class CosFunction extends AutoFunction {
@@ -284,7 +284,7 @@ export class CosFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("cosGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("cos_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class CoshFunction extends AutoFunction {
@@ -309,7 +309,7 @@ export class CoshFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("coshGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("cosh_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Deg2radFunction extends AutoFunction {
@@ -334,7 +334,7 @@ export class Deg2radFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("deg2radGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("deg2rad_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class DivFunction extends AutoFunction {
@@ -360,7 +360,7 @@ export class DivFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("divGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("div_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class ExpFunction extends AutoFunction {
@@ -385,7 +385,7 @@ export class ExpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("expGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("exp_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Exp2Function extends AutoFunction {
@@ -410,7 +410,7 @@ export class Exp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("exp2Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("exp2_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Expm1Function extends AutoFunction {
@@ -435,7 +435,7 @@ export class Expm1Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("expm1Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("expm1_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class FloorFunction extends AutoFunction {
@@ -460,7 +460,7 @@ export class FloorFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("floorGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("floor_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class FracFunction extends AutoFunction {
@@ -485,7 +485,7 @@ export class FracFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("fracGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("frac_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class HypotFunction extends AutoFunction {
@@ -511,7 +511,7 @@ export class HypotFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("hypotGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("hypot_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class LdexpFunction extends AutoFunction {
@@ -537,7 +537,7 @@ export class LdexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("ldexpGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("ldexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class LogFunction extends AutoFunction {
@@ -562,7 +562,7 @@ export class LogFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("log_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log10Function extends AutoFunction {
@@ -587,7 +587,7 @@ export class Log10Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log10Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("log10_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log1pFunction extends AutoFunction {
@@ -612,7 +612,7 @@ export class Log1pFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log1pGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("log1p_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class Log2Function extends AutoFunction {
@@ -637,7 +637,7 @@ export class Log2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("log2Grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("log2_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class LogaddexpFunction extends AutoFunction {
@@ -663,7 +663,7 @@ export class LogaddexpFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logaddexpGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("logaddexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class Logaddexp2Function extends AutoFunction {
@@ -689,7 +689,7 @@ export class Logaddexp2Function extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("logaddexp2Grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("logaddexp2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class MulFunction extends AutoFunction {
@@ -715,7 +715,7 @@ export class MulFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("mulGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("mul_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class NegFunction extends AutoFunction {
@@ -740,7 +740,7 @@ export class NegFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("negGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("neg_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class PositiveFunction extends AutoFunction {
@@ -765,7 +765,7 @@ export class PositiveFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("positiveGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("positive_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class PowFunction extends AutoFunction {
@@ -791,7 +791,7 @@ export class PowFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("powGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("pow_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class Rad2degFunction extends AutoFunction {
@@ -816,7 +816,7 @@ export class Rad2degFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("rad2degGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("rad2deg_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class ReciprocalFunction extends AutoFunction {
@@ -841,7 +841,7 @@ export class ReciprocalFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("reciprocalGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("reciprocal_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class ReluFunction extends AutoFunction {
@@ -866,7 +866,7 @@ export class ReluFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("reluGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("relu_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class RoundFunction extends AutoFunction {
@@ -891,7 +891,7 @@ export class RoundFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("roundGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("round_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class RsqrtFunction extends AutoFunction {
@@ -916,7 +916,7 @@ export class RsqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("rsqrtGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("rsqrt_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SigmoidFunction extends AutoFunction {
@@ -941,7 +941,7 @@ export class SigmoidFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sigmoidGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sigmoid_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SignFunction extends AutoFunction {
@@ -966,7 +966,7 @@ export class SignFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("signGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sign_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SiluFunction extends AutoFunction {
@@ -991,7 +991,7 @@ export class SiluFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("siluGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("silu_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SinFunction extends AutoFunction {
@@ -1016,7 +1016,7 @@ export class SinFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sinGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sin_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SincFunction extends AutoFunction {
@@ -1041,7 +1041,7 @@ export class SincFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sincGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sinc_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SinhFunction extends AutoFunction {
@@ -1066,7 +1066,7 @@ export class SinhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sinhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sinh_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SqrtFunction extends AutoFunction {
@@ -1091,7 +1091,7 @@ export class SqrtFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sqrtGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("sqrt_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SquareFunction extends AutoFunction {
@@ -1116,7 +1116,7 @@ export class SquareFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("squareGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("square_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class SubFunction extends AutoFunction {
@@ -1145,7 +1145,7 @@ export class SubFunction extends AutoFunction {
             size: shapeSize(input.shape),
             alpha: ctx.alpha || 1.0,
         };
-        return input.runKernel("subGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("sub_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class TanFunction extends AutoFunction {
@@ -1170,7 +1170,7 @@ export class TanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("tanGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("tan_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class TanhFunction extends AutoFunction {
@@ -1195,7 +1195,7 @@ export class TanhFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("tanhGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("tanh_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class TruncFunction extends AutoFunction {
@@ -1220,7 +1220,7 @@ export class TruncFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("truncGrad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        return input.runKernel("trunc_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
     }
 }
 export class XlogyFunction extends AutoFunction {
@@ -1246,7 +1246,7 @@ export class XlogyFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("xlogyGrad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        return input.runKernel("xlogy_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
     }
 }
 export class AllFunction extends AutoFunction {
@@ -1271,7 +1271,7 @@ export class AllFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("allGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("all_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class AnyFunction extends AutoFunction {
@@ -1296,7 +1296,7 @@ export class AnyFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("anyGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("any_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class MeanFunction extends AutoFunction {
@@ -1321,7 +1321,7 @@ export class MeanFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("meanGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("mean_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class NormFunction extends AutoFunction {
@@ -1346,7 +1346,7 @@ export class NormFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("normGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("norm_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class ProdFunction extends AutoFunction {
@@ -1371,7 +1371,7 @@ export class ProdFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("prodGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("prod_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class SumFunction extends AutoFunction {
@@ -1396,7 +1396,7 @@ export class SumFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("sumGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("sum_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }
 export class CountNonzeroFunction extends AutoFunction {
@@ -1421,6 +1421,6 @@ export class CountNonzeroFunction extends AutoFunction {
         const params = {
             size: shapeSize(input.shape),
         };
-        return input.runKernel("countNonzeroGrad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        return input.runKernel("countNonzero_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
     }
 }

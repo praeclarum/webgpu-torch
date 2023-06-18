@@ -53,11 +53,14 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
     }
 };
 
-function writeParams(inputName: string, hasAlpha: Boolean, alphaName: string, w: CodeWriter) {
+function writeParams(inputName: string, otherIsScalar: boolean, hasAlpha: boolean, alphaName: string, w: CodeWriter) {
     w.writeLine(`const params = {`);
     w.indent();
     w.writeLine(`size: shapeSize(${inputName}.shape),`);
     // w.writeLine(`strideX: 1,`);
+    if (otherIsScalar) {
+        w.writeLine(`other: other,`);
+    }
     if (hasAlpha) {
         w.writeLine(`alpha: ${alphaName} || 1.0,`);
     }
@@ -71,8 +74,10 @@ function writeTensorCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
+        const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isOtherScalar = kernelSpec.name.includes("_scalar");
+        if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const isReduction = opSpec.type === "reduction";        
@@ -82,17 +87,18 @@ function writeTensorCode(): void {
             if (isBinary) {
                 w.writeLine(`if (typeof other === "number") {`);
                 w.indent();
-                w.writeLine(`throw new Error("Inplace binary ops with a scalar are not supported");`);
+                writeParams("this", true, hasAlpha, "alpha", w);
+                w.writeLine(`return this.runKernelInplace("${kernelSpec.name.replace('_', '_scalar_')}", { dtype: this.dtype }, params);`);
                 w.dedent();
                 w.writeLine(`} else {`);
                 w.indent();
-                writeParams("this", hasAlpha, "alpha", w);
+                writeParams("this", false, hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
                 w.dedent();
                 w.writeLine(`}`);
             }
             else {
-                writeParams("this", hasAlpha, "alpha", w);
+                writeParams("this", isOtherScalar, hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params);`);
             }
         }
@@ -178,8 +184,10 @@ function writeTensorDeclCode(): void {
     w.indent();
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
-        const isGrad = kernelSpec.name.endsWith("Grad");
+        const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isOtherScalar = kernelSpec.name.includes("_scalar");
+        if (isOtherScalar) continue;
         writeOpHeader(opSpec, kernelSpec.name, false, ";", w);
         if (!isInplace) {
             for (const alias of opSpec.aliases ?? []) {
@@ -210,8 +218,10 @@ import { shapeSize } from "./shape";`);
         if (isInplace) {
             continue;
         }
-        const isGrad = kernelSpec.name.endsWith("Grad");
+        const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isOtherScalar = kernelSpec.name.includes("_scalar");
+        if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
         const isReduction = opSpec.type === "reduction";
         const hasAlpha = opSpec.alpha ?? false;
@@ -251,7 +261,7 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
         w.indent();
         writeUnpackInputs("inputs", true);
-        writeParams("input", hasAlpha, "alpha", w);
+        writeParams("input", isOtherScalar, hasAlpha, "alpha", w);
         w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isBinary) {
             w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
@@ -289,15 +299,15 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
-        writeParams("input", hasAlpha, "ctx.alpha", w);
+        writeParams("input", isOtherScalar, hasAlpha, "ctx.alpha", w);
         if (isReduction) {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], outputGrad);`);
         }
         else if (isBinary) {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape, other.shape], other, outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape, other.shape], other, outputGrad);`);
         }
         else {
-            w.writeLine(`return input.runKernel("${kernelSpec.name}Grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], outputGrad);`);
         }
         w.dedent();
         w.writeLine(`}`);
@@ -377,8 +387,10 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
         if (isInplace) {
             continue;
         }
-        const isGrad = kernelSpec.name.endsWith("Grad");
+        const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isOtherScalar = kernelSpec.name.includes("_scalar");
+        if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
