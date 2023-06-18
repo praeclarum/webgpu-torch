@@ -137,11 +137,18 @@ function getBinaryKernelSpec(op: BinaryOpSpec): KernelSpec {
             shaderType: "u32",
         },
     ];
-    const subs = {
+    const subs: any = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
         output: "output[global_id.x]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
     const shaderSnippet = exprCodeToWebGLShader(op.forward, subs);
     const shader = `
         if (global_id.x >= parameters.size) {
@@ -187,11 +194,18 @@ function getBinaryInplaceKernelSpec(op: BinaryOpSpec): KernelSpec {
         },
     ];
     const ast = parseCode(op.forward);
-    const subs = {
+    const subs: any = {
         input: "input[global_id.x]",
         other: "other[global_id.x]",
         output: "input[global_id.x]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
@@ -236,8 +250,7 @@ function getBinaryGradKernelSpec(
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(backward);
-    const subs = {
+    const subs: any = {
         input: "input[global_id.x]",
         inputGrad: "inputGrad[global_id.x]",
         output: "output[global_id.x]",
@@ -245,6 +258,14 @@ function getBinaryGradKernelSpec(
         other: "other[global_id.x]",
         otherGrad: "otherGrad[global_id.x]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
+    const ast = parseCode(backward);
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
@@ -303,11 +324,18 @@ function getUnaryKernelSpec(op: UnaryOpSpec): KernelSpec {
         //     shaderType: "u32",
         // },
     ];
-    const ast = parseCode(op.forward);
-    const subs = {
+    const subs: any = {
         input: "input[index]",
         output: "output[index]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
+    const ast = parseCode(op.forward);
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
@@ -354,10 +382,17 @@ function getUnaryInplaceKernelSpec(op: UnaryOpSpec): KernelSpec {
         },
     ];
     const ast = parseCode(op.forward);
-    const subs = {
+    const subs: any = {
         input: "input[global_id.x]",
         output: "input[global_id.x]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
@@ -397,13 +432,20 @@ function getUnaryGradKernelSpec(
             shaderType: "u32",
         },
     ];
-    const ast = parseCode(backward);
-    const subs = {
+    const subs: any = {
         input: "input[global_id.x]",
         inputGrad: "inputGrad[global_id.x]",
         output: "output[global_id.x]",
         outputGrad: "outputGrad[global_id.x]",
     };
+    if (op.alpha !== undefined && op.alpha) {
+        parameters.push({
+            name: "alpha",
+            shaderType: "f32",
+        });
+        subs["alpha"] = "parameters.alpha";
+    }
+    const ast = parseCode(backward);
     const shaderAst = substituteIdentifiers(ast, subs);
     const shaderSnippet = exprNodeToWebGLShader(shaderAst);
     const shader = `
