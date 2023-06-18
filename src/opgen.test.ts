@@ -21,7 +21,7 @@ test("binary sub op generate kernel spec", () => {
         if (global_id.x >= parameters.size) {
             return;
         }
-        output[global_id.x] = (input[global_id.x] - other[global_id.x]);`);
+        output[global_id.x] = (input[global_id.x] - (other[global_id.x] * parameters.alpha));`);
 });
 
 test("atan2 forward shader", () => {

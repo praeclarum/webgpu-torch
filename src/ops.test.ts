@@ -12,3 +12,17 @@ test("sigmoid(1).size == 307", async () => {
         expect(a[i]).toBeCloseTo(0.7310585786300049);
     }
 });
+
+test("add with alpha", async () => {
+    const x = ones(3);
+    const y = x.add(ones(3), 5);
+    const a = await y.toArrayAsync();
+    expect(a).toEqual([6, 6, 6]);
+});
+
+test("sub with alpha", async () => {
+    const x = ones(3);
+    const y = x.sub(ones(3), 7);
+    const a = await y.toArrayAsync();
+    expect(a).toEqual([-6, -6, -6]);
+});

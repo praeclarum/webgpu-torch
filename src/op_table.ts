@@ -28,7 +28,7 @@ export const registry: AnOpSpec[] = [
         name: "add",
         type: "binary",
         alpha: true,
-        forward: "output = input + other",
+        forward: "output = input + other * alpha",
         backward: "inputGrad = outputGrad; otherGrad = outputGrad",
     },
     // addcdiv: trinary
@@ -105,7 +105,6 @@ export const registry: AnOpSpec[] = [
         name: "div",
         aliases: ["divide"],
         type: "binary",
-        alpha: true,
         forward: "output = input / other",
         backward: "inputGrad = outputGrad / other; otherGrad = -outputGrad * input / (other * other)",
     },
@@ -213,7 +212,6 @@ export const registry: AnOpSpec[] = [
         name: "mul",
         aliases: ["multiply"],
         type: "binary",
-        alpha: true,
         forward: "output = input * other",
         backward: "inputGrad = outputGrad * other; otherGrad = outputGrad * input",
     },
@@ -336,7 +334,7 @@ export const registry: AnOpSpec[] = [
         aliases: ["subtract"],
         type: "binary",
         alpha: true,
-        forward: "output = input - other",
+        forward: "output = input - other * alpha",
         backward: "inputGrad = outputGrad; otherGrad = -outputGrad",
     },
     {
