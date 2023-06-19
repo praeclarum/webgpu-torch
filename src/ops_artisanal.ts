@@ -2,10 +2,20 @@ import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
 import { Tensor } from "./tensor";
 import { shouldCreateGradient } from "./autograd";
-import type { TensorData, TensorSpec } from "./tensor";
+import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
+}
+
+export function clone(input: Tensor, memoryFormat: MemoryFormat = "preserveFormat"): Tensor {
+    if (shouldCreateGradient(input)) {
+        throw new Error("clone gradient not supported yet");
+        // return CloneFunction.apply(input);
+    } else {
+        const newStorage = input.storage.clone();
+        return new Tensor({data: newStorage, shape: input.shape, dtype: input.dtype, requiresGrad: input.requiresGrad});
+    }
 }
 
 /**

@@ -14,6 +14,8 @@ import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
 
+export type MemoryFormat = "contiguousFormat" | "preserveFormat";
+
 export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
 
 export type TensorSpec = {

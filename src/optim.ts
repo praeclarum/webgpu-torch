@@ -1,5 +1,6 @@
 import { Tensor } from "./tensor";
 import { enableGrad, noGrad } from "./autograd";
+import { clone } from "./ops_artisanal";
 
 export class RequiredParameter {}
 export const required = new RequiredParameter();
@@ -146,11 +147,6 @@ export class SGD extends Optimizer {
         }
         return has_sparse_grad;
     }
-}
-
-function clone(tensor: Tensor): Tensor {
-    // This is a bad clone, it's shallow, should be deep
-    return new Tensor({data: tensor.storage, shape: tensor.shape, dtype: tensor.dtype, requiresGrad: tensor.requiresGrad});
 }
 
 function sgd(

@@ -11,6 +11,7 @@ export abstract class UntypedStorage {
     abstract mapReadAsync(): Promise<void>;
     abstract unmap(): void;
     abstract destroy(): void;
+    abstract clone(): UntypedStorage;
     getTypedArray(dtype: Dtype): ATypedArray {
         const buffer = this.mappedArrayBuffer;
         if (buffer === null) {
@@ -66,6 +67,9 @@ export class ArrayBufferStorage extends UntypedStorage {
     }
     destroy(): void {
         // Do nothing
+    }
+    clone(): UntypedStorage {
+        return new ArrayBufferStorage(this._buffer.slice(0));
     }
 }
 
@@ -171,6 +175,26 @@ export class GPUBufferStorage extends UntypedStorage {
         const gpuCommands = commandEncoder.finish();
         this._device.queue.submit([gpuCommands]);
         return readBuffer;
+    }
+    clone(): UntypedStorage {
+        const usage = GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE;
+        const cloneBuffer = this._device.createBuffer({
+            mappedAtCreation: false,
+            size: this._buffer.size,
+            usage: usage,
+        });
+        const commandEncoder = this._device.createCommandEncoder();
+        commandEncoder.copyBufferToBuffer(
+            this._buffer /* source buffer */,
+            0 /* source offset */,
+            cloneBuffer /* destination buffer */,
+            0 /* destination offset */,
+            this._buffer.size /* size */
+        );
+        // Submit GPU commands
+        const gpuCommands = commandEncoder.finish();
+        this._device.queue.submit([gpuCommands]);
+        return new GPUBufferStorage(cloneBuffer, this._device);
     }
 }
 
