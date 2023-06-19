@@ -169,27 +169,22 @@ export class Tensor extends TensorBase {
         const data = this.storage.getTypedArray(this.dtype);
         const shape = this.shape;
         const strides = this.strides;
+    
         if (shape.length == 0 || (shape.length == 1 && shape[0] == 1)) {
             return [data[0]];
         }
+    
         const index: number[] = [];
         return readArray(index);
+    
         function readArray(index: number[]): TensorArrayData {
             const dim = index.length;
-            // console.log("Read array: ", index, "dim=", dim);
+    
             if (dim == shape.length - 1) {
-                const offset = index.reduce(
-                    (acc, cur, i) => acc + cur * strides[i],
-                    0
-                );
-                // console.log("offset=", offset);
+                const offset = calculateOffset(index);
                 const length = shape[dim];
-                // console.log("length=", length);
                 const subarray = data.subarray(offset, offset + length);
-                // console.log("subarray=", subarray);
-                const ar = Array.from(subarray);
-                // console.log("ar=", ar);
-                return ar;
+                return Array.from(subarray);
             } else {
                 const result: TensorArrayData = [];
                 for (let i = 0; i < shape[dim]; i++) {
@@ -199,6 +194,14 @@ export class Tensor extends TensorBase {
                 }
                 return result;
             }
+        }
+    
+        function calculateOffset(index: number[]): number {
+            let offset = 0;
+            for (let i = 0; i < index.length; i++) {
+                offset += index[i] * strides[i];
+            }
+            return offset;
         }
     }
 

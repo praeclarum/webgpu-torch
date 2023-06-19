@@ -123,6 +123,11 @@ async function runBenchmarksAsync($benchmarksDiv) {
             }
             benchmarkResults.push(result);
             appendBenchmarkResult(result);
+            await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve();
+                }, 10);
+            });
         }
     }
 
@@ -133,7 +138,7 @@ async function runBenchmarksAsync($benchmarksDiv) {
         $benchmarksTableRowName.innerText = b.key;
         $benchmarksTableRow.appendChild($benchmarksTableRowName);
         const $benchmarksTableRowTime = document.createElement('td');
-        $benchmarksTableRowTime.innerText = `${b.meanTime.toFixed(2)}`;
+        $benchmarksTableRowTime.innerText = `${b.meanTime.toFixed(4)}`;
         $benchmarksTableRow.appendChild($benchmarksTableRowTime);
         for (let ok of otherKeys) {
             const $benchmarksTableRowOther = document.createElement('td');
