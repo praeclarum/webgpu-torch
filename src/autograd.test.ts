@@ -1,7 +1,7 @@
 import { Tensor } from "./tensor";
 import { AutoFunction, GradientContext } from "./autograd";
 import { zeros } from "./factories";
-import * as functions from "./functions";
+import { LinearFunction } from "./functions_artisanal";
 
 test("auto function forward fails", () => {
     expect(() => AutoFunction.forward([])).toThrow();
@@ -17,7 +17,7 @@ test("linear backwards", () => {
     const input = new Tensor({data:[[3]], requiresGrad: false});
     const weight = new Tensor({data:[[10], [11]], requiresGrad:  true});
     const bias = new Tensor({data:[[1000, 10000]], requiresGrad:  true});
-    const output = functions.LinearFunction.apply(input, weight, bias);
+    const output = LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
     expect(output.shape).toEqual([1, 2]);
     const loss = output.sum();

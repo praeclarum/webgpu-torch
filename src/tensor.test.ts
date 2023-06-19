@@ -1,5 +1,5 @@
 import { ones } from "./factories";
-import { LinearFunction } from "./functions";
+import { LinearFunction } from "./functions_artisanal";
 import { tensor, conv2d } from "./ops_artisanal";
 import { Tensor } from "./tensor";
 
