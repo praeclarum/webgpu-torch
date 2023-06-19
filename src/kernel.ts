@@ -97,8 +97,9 @@ export abstract class Kernel {
         outputs?: (GPUBuffer | ATypedArray)[]
     ): (GPUBuffer | ATypedArray)[];
 
-    protected getRunEnv(parameters: KernelParamsInput): EvalEnv {
+    protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
         const env: EvalEnv = Object.assign({}, jsMathEnv);
+        const paramValues: number[] = [];
         for (let i = 0; i < this._spec.config.length; i++) {
             const configSpec = this._spec.config[i];
             const configValue = this._config[i];
@@ -110,9 +111,10 @@ export abstract class Kernel {
             if (paramValue === undefined) {
                 throw new Error(`Missing parameter \"${param.name}\" for kernel \"${this.spec.name}\"`);
             }
+            paramValues.push(paramValue);
             env[param.name] = paramValue;
         }
-        return env;
+        return [env, paramValues];
     }
 
     getWorkgroupCounts(env: EvalEnv): [number, number, number] {

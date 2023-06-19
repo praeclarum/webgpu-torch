@@ -80,12 +80,7 @@ export class KernelWebGPU extends Kernel {
         const timeIt = false;
 
         // Build the parameter environment
-        const env: EvalEnv = this.getRunEnv(parameters);
-        let paramsBufferSize = 0;
-        for (let i = 0; i < this.spec.parameters.length; i++) {
-            const param = this.spec.parameters[i];
-            paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
-        }
+        const [env, paramValues] = this.getRunEnv(parameters);
 
         // Get input buffers with storage usage
         const storageInputs = this.spec.inputs.map((input, i) =>
@@ -107,30 +102,10 @@ export class KernelWebGPU extends Kernel {
             )
         );
 
-        // Build the params buffer
-        const paramsBuffer = this._gpuDevice.createBuffer({
-            mappedAtCreation: true,
-            size: paramsBufferSize,
-            usage: GPUBufferUsage.STORAGE,
-        });
-        const paramsArrayBuffer = paramsBuffer.getMappedRange();
-        for (let paramDtype of ["u32", "f32"]) {
-            let paramsArray = new (
-                paramDtype === "u32" ? Uint32Array : Float32Array
-            )(paramsArrayBuffer);
-            for (let i = 0; i < this.spec.parameters.length; i++) {
-                const param = this.spec.parameters[i];
-                if (param.shaderType === paramDtype) {
-                    paramsArray[i] = +env[param.name];
-                }
-            }
-        }
-        paramsBuffer.unmap();
-
         // Bind the buffers
         const bindGroup = this.createBindGroup(
             storageInputs,
-            paramsBuffer,
+            this.getParamsBuffer(paramValues),
             storageOutputs
         );
 
@@ -168,6 +143,40 @@ export class KernelWebGPU extends Kernel {
 
         // Return the storage output buffers
         return storageOutputs;
+    }
+    cachedParamBuffers: { [paramsId: string]: GPUBuffer } = {};
+    private getParamsBuffer(paramValues: number[]) {
+        // Check if the params buffer is already cached
+        const paramsId = paramValues.join(",");
+        if (this.cachedParamBuffers[paramsId]) {
+            return this.cachedParamBuffers[paramsId];
+        }
+
+        // Build the params buffer
+        let paramsBufferSize = 0;
+        for (let i = 0; i < this.spec.parameters.length; i++) {
+            const param = this.spec.parameters[i];
+            paramsBufferSize += getShaderTypeElementByteSize(param.shaderType);
+        }
+        const paramsBuffer = this._gpuDevice.createBuffer({
+            mappedAtCreation: true,
+            size: paramsBufferSize,
+            usage: GPUBufferUsage.STORAGE,
+        });
+        const paramsArrayBuffer = paramsBuffer.getMappedRange();
+        for (let paramDtype of ["u32", "f32"]) {
+            let paramsArray = new (
+                paramDtype === "u32" ? Uint32Array : Float32Array
+            )(paramsArrayBuffer);
+            for (let i = 0; i < this.spec.parameters.length; i++) {
+                const param = this.spec.parameters[i];
+                paramsArray[i] = +paramValues[i];
+            }
+        }
+        paramsBuffer.unmap();
+        // Cache the params buffer
+        this.cachedParamBuffers[paramsId] = paramsBuffer;
+        return paramsBuffer;
     }
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
