@@ -99,7 +99,7 @@ export class SGD extends Optimizer {
                     momentum_buffer_list,
                     has_sparse_grad,
                     group["foreach"] as Boolean | null,
-                    group["weight_decay"] as number,
+                    group["weightDecay"] as number,
                     group["momentum"] as number,
                     group["lr"] as number,
                     group["dampening"] as number,
@@ -155,7 +155,7 @@ function sgd(
     momentum_buffer_list: (Tensor | null)[],
     has_sparse_grad: Boolean | null = null,
     foreach: Boolean | null = null,
-    weight_decay: number,
+    weightDecay: number,
     momentum: number,
     lr: number,
     dampening: number,
@@ -167,8 +167,8 @@ function sgd(
         let d_p = maximize ?
             d_p_list[i].neg() :
             d_p_list[i];
-        if (weight_decay !== 0) {
-            d_p = d_p.add(param, weight_decay);
+        if (weightDecay !== 0) {
+            d_p = d_p.add(param, weightDecay);
         }
         if (momentum !== 0) {
             let buf = momentum_buffer_list[i];

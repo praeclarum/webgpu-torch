@@ -2,6 +2,7 @@
 import { SGD, required } from "./optim";
 import { Tensor } from "./tensor";
 import { sigmoid } from "./ops_opgen";
+import { noGrad } from "./autograd";
 
 test("optimizer ctor with empty param list", () => {
     expect(() => new SGD([], 0.1)).toThrow();
@@ -49,15 +50,13 @@ test("sgd step with params with grads", async () => {
     const params = [new Tensor({data: paramInitialValue, requiresGrad: true})];
     const loss = sigmoid(params[0]);
     const lossValues = await loss.toArrayAsync();
-    // console.log("lossValues", lossValues);
+    expect(lossValues[0]).toBeCloseTo(0.81757448);
     loss.backward();
     expect(params[0].grad).not.toBeNull();
-    expect((await params[0].grad!.toArrayAsync())[0]).toBeCloseTo(0.14914645);
+    const paramGradValues = await params[0].grad!.toArrayAsync();
+    expect(paramGradValues[0]).toBeCloseTo(0.14914645);
     const optimizer = new SGD(params, 0.1);
-    // TODO: Alpha, Scalar, Inplace with grads
     optimizer.step();
     const paramValue = await params[0].toArrayAsync();
     expect(paramValue[0]).toBeCloseTo(1.5 - 0.1 * 0.14914645);
 });
-
-
