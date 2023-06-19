@@ -38,7 +38,7 @@ export class LinearFunction extends AutoFunction {
             weightGrad = input.t().mm(gradOutput);
         }
         if (ctx.needsInputGradient[2]) {
-            biasGrad = gradOutput.sum(0);
+            biasGrad = gradOutput.sum(0); // _grad_sum_to_size(bias.size())
         }
         return [inputGrad, weightGrad, biasGrad];
     }

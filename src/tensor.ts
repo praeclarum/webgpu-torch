@@ -2598,7 +2598,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     all(dim?: number, keepdim?: boolean): Tensor {
-        return ops.all(this);
+        return ops.all(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2616,7 +2616,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     any(dim?: number, keepdim?: boolean): Tensor {
-        return ops.any(this);
+        return ops.any(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2634,7 +2634,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     mean(dim?: number, keepdim?: boolean): Tensor {
-        return ops.mean(this);
+        return ops.mean(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2652,7 +2652,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     norm(dim?: number, keepdim?: boolean): Tensor {
-        return ops.norm(this);
+        return ops.norm(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2670,7 +2670,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     prod(dim?: number, keepdim?: boolean): Tensor {
-        return ops.prod(this);
+        return ops.prod(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2688,7 +2688,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     sum(dim?: number, keepdim?: boolean): Tensor {
-        return ops.sum(this);
+        return ops.sum(this, dim, keepdim);
     }
     /**
     * Calculates:
@@ -2701,7 +2701,7 @@ export class Tensor extends TensorBase {
     * @returns the output tensor
     */
     countNonzero(dim?: number, keepdim?: boolean): Tensor {
-        return ops.countNonzero(this);
+        return ops.countNonzero(this, dim, keepdim);
     }
     // End codegen marker
 }

@@ -83,7 +83,7 @@ export class AcoshFunction extends AutoFunction {
 }
 export class AddFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
@@ -106,7 +106,7 @@ export class AddFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
         ctx.alpha = alpha;
         ctx.saveForBackward(input, other);
     }
@@ -1202,7 +1202,7 @@ export class SquareFunction extends AutoFunction {
 }
 export class SubFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
@@ -1225,7 +1225,7 @@ export class SubFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, other, alpha] = inputs as [Tensor, Tensor, number|undefined];
+        const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
         ctx.alpha = alpha;
         ctx.saveForBackward(input, other);
     }
@@ -1349,176 +1349,344 @@ export class XlogyFunction extends AutoFunction {
 }
 export class AllFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("all", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("all_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("all", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("all_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("all_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("all_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class AnyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("any", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("any_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("any", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("any_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("any_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("any_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class MeanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("mean", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("mean_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("mean", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("mean_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("mean_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("mean_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class NormFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("norm", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("norm_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("norm", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("norm_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("norm_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("norm_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class ProdFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("prod", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("prod_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("prod", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("prod_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("prod_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("prod_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class SumFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("sum", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("sum_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("sum", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("sum_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("sum_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("sum_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }
 export class CountNonzeroFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("countNonzero", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("countNonzero_dim", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+            } else {
+                throw new Error("Multi-dimension reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("countNonzero", {"dtype":"float32","workgroupSize":64}, params, [[]])[0];
+        }
     }
     static setupContext(
         ctx: GradientContext,
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input] = inputs as [Tensor];
+        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.saveForBackward(input);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input] = ctx.savedTensors as [Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("countNonzero_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        if (dim !== undefined) {
+            if (typeof dim === "number") {
+                const params = {
+                    size: shapeSize(input.shape),
+                    dim: dim,
+                };
+                return input.runKernel("countNonzero_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            } else {
+                throw new Error("Multi-dimension backward reduction not supported");
+            }
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("countNonzero_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+        }
     }
 }

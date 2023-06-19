@@ -1,6 +1,6 @@
 import * as functions from "./functions_opgen";
 import { Tensor } from "./tensor";
-import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";
+import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops_high";
 /**
 * ![Plot of abs and its gradient](../../plots/abs.svg)
 *
@@ -1187,8 +1187,8 @@ export function xlogy(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function all(input: Tensor): Tensor {
-    return unary(functions.AllFunction, input);
+export function all(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.AllFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1206,8 +1206,8 @@ export function all(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function any(input: Tensor): Tensor {
-    return unary(functions.AnyFunction, input);
+export function any(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.AnyFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1225,8 +1225,8 @@ export function any(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function mean(input: Tensor): Tensor {
-    return unary(functions.MeanFunction, input);
+export function mean(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.MeanFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1244,8 +1244,8 @@ export function mean(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function norm(input: Tensor): Tensor {
-    return unary(functions.NormFunction, input);
+export function norm(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.NormFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1263,8 +1263,8 @@ export function norm(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function prod(input: Tensor): Tensor {
-    return unary(functions.ProdFunction, input);
+export function prod(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.ProdFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1282,8 +1282,8 @@ export function prod(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sum(input: Tensor): Tensor {
-    return unary(functions.SumFunction, input);
+export function sum(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.SumFunction, input, dim, keepdim);
 }
 /**
 * Calculates:
@@ -1296,6 +1296,6 @@ export function sum(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function countNonzero(input: Tensor): Tensor {
-    return unary(functions.CountNonzeroFunction, input);
+export function countNonzero(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+    return reduction(functions.CountNonzeroFunction, input, dim, keepdim);
 }

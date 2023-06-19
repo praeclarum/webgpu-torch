@@ -20,11 +20,10 @@ test("linear backwards", () => {
     const output = functions.LinearFunction.apply(input, weight, bias);
     expect(output).toBeInstanceOf(Tensor);
     expect(output.shape).toEqual([1, 2]);
-    // const loss = output.sum();
-    // expect(loss.gradFunc).not.toBeNull();
-    // expect(loss.requiresGrad).toBe(true);
+    const loss = output.sum();
+    expect(loss.gradFunc).not.toBeNull();
+    expect(loss.requiresGrad).toBe(true);
     // loss.backward();
     // expect(weight.grad).not.toBeNull();
     // expect(bias.grad).not.toBeNull();
-    // expect(output.grad).not.toBeNull();
 });

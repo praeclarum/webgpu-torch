@@ -1,7 +1,7 @@
 import type { Tensor } from "./tensor";
 import { TensorBase } from "./tensor_base";
 
-export type FunctionInput = Tensor | number | boolean | string | undefined;
+export type FunctionInput = Tensor | number | number[] | boolean | string | undefined;
 export type GradientFunctionOutput = Tensor | null;
 
 function isTensor(input: FunctionInput): input is Tensor {

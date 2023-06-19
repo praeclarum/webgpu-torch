@@ -68,6 +68,17 @@ function writeParams(inputName: string, otherIsScalar: boolean, hasAlpha: boolea
     w.writeLine(`};`);
 }
 
+function writeReductionParams(inputName: string, dimName: string | null, w: CodeWriter) {
+    w.writeLine(`const params = {`);
+    w.indent();
+    w.writeLine(`size: shapeSize(${inputName}.shape),`);
+    if (dimName) {
+        w.writeLine(`dim: ${dimName},`);
+    }
+    w.dedent();
+    w.writeLine(`};`);
+}
+
 // Write the Tensor class
 function writeTensorCode(): void {
     const w = new CodeWriter();
@@ -103,44 +114,23 @@ function writeTensorCode(): void {
             }
         }
         else {
-            if (isBinary) {
+            if (isReduction) {
+                w.writeLine(`return ops.${kernelSpec.name}(this, dim, keepdim);`);
+            }
+            else if (isBinary) {
                 if (hasAlpha) {
-                    if (isInplace) {
-                        w.writeLine(`this._impl.${kernelSpec.name}(other._impl, alpha);`);
-                        w.writeLine(`return this;`);
-                    }
-                    else {
-                        w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
-                    }
+                    w.writeLine(`return ops.${kernelSpec.name}(this, other, alpha);`);
                 }
                 else {
-                    if (isInplace) {
-                        w.writeLine(`this._impl.${kernelSpec.name}(other._impl);`);
-                        w.writeLine(`return this;`);
-                    }
-                    else {
-                        w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
-                    }
+                    w.writeLine(`return ops.${kernelSpec.name}(this, other);`);
                 }
             }
             else {
                 if (hasAlpha) {
-                    if (isInplace) {
-                        w.writeLine(`this._impl.${kernelSpec.name}(alpha);`);
-                        w.writeLine(`return this;`);
-                    }
-                    else {
-                        w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
-                    }
+                    w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
                 }
                 else {
-                    if (isInplace) {
-                        w.writeLine(`this._impl.${kernelSpec.name}();`);
-                        w.writeLine(`return this;`);
-                    }
-                    else {
-                        w.writeLine(`return ops.${kernelSpec.name}(this);`);
-                    }
+                    w.writeLine(`return ops.${kernelSpec.name}(this);`);
                 }
             }
         }
@@ -235,11 +225,11 @@ import { shapeSize } from "./shape";`);
         const configS = JSON.stringify(config);
         const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
             if (isReduction) {
-                w.writeLine(`const [input] = ${inputsName} as [Tensor];`);
+                w.writeLine(`const [input, dim, keepdim] = ${inputsName} as [Tensor, number | number[] | undefined, boolean | undefined];`);
             }
             else if (isBinary) {
                 if (hasAlpha && includeAlpha) {
-                    w.writeLine(`const [input, other, alpha] = ${inputsName} as [Tensor, Tensor, number|undefined];`);
+                    w.writeLine(`const [input, other, alpha] = ${inputsName} as [Tensor, Tensor, number | undefined];`);
                 }
                 else {
                     w.writeLine(`const [input, other] = ${inputsName} as [Tensor, Tensor];`);
@@ -263,7 +253,28 @@ import { shapeSize } from "./shape";`);
         writeUnpackInputs("inputs", true);
         
         w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
-        if (isBinary) {
+        if (isReduction) {
+            w.writeLine(`if (dim !== undefined) {`);
+            w.indent();
+            w.writeLine(`if (typeof dim === "number") {`);
+            w.indent();
+            writeReductionParams("input", "dim", w);
+            w.writeLine(`return input.runKernel(\"${kernelSpec.name}_dim\", ${configS}, params, ${outputShapesS})[0];`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            w.writeLine(`throw new Error("Multi-dimension reduction not supported");`);
+            w.dedent();
+            w.writeLine(`}`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            writeReductionParams("input", null, w);
+            w.writeLine(`return input.runKernel(\"${kernelSpec.name}\", ${configS}, params, ${outputShapesS})[0];`);
+            w.dedent();
+            w.writeLine(`}`);
+        }
+        else if (isBinary) {
             w.writeLine(`if (typeof other === "number") {`);
             w.indent();
             writeParams("input", true, hasAlpha, "alpha", w);
@@ -310,14 +321,33 @@ import { shapeSize } from "./shape";`);
         w.writeLine(`static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {`);
         w.indent();
         writeUnpackInputs("ctx.savedTensors", false);
-        writeParams("input", isOtherScalar, hasAlpha, "ctx.alpha", w);
         if (isReduction) {
+            w.writeLine(`if (dim !== undefined) {`);
+            w.indent();
+            w.writeLine(`if (typeof dim === "number") {`);
+            w.indent();
+            writeReductionParams("input", "dim", w);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_dim_grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            w.writeLine(`throw new Error("Multi-dimension backward reduction not supported");`);
+            w.dedent();
+            w.writeLine(`}`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            writeReductionParams("input", null, w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.dedent();
+            w.writeLine(`}`);
         }
         else if (isBinary) {
+            writeParams("input", isOtherScalar, hasAlpha, "ctx.alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape, other.shape], other, outputGrad);`);
         }
         else {
+            writeParams("input", false, hasAlpha, "ctx.alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], outputGrad);`);
         }
         w.dedent();
@@ -392,7 +422,7 @@ function writeOpsCode(): void {
     const w = new CodeWriter();
     w.writeLine(`import * as functions from "./functions_opgen";
 import { Tensor } from "./tensor";
-import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
+import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops_high";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -403,6 +433,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
+        const isReduction = opSpec.type === "reduction";
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
         const writeHeader = (name: string, isAlias: boolean) => {
@@ -415,6 +446,9 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
                     w.writeLine(`export function ${name}(input: Tensor, other: number | Tensor): Tensor {`);
                 }
             }
+            else if (isReduction) {
+                w.writeLine(`export function ${name}(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {`);
+            }                
             else {
                 if (hasAlpha) {
                     w.writeLine(`export function ${name}(input: Tensor, alpha?: number): Tensor {`);
@@ -433,6 +467,9 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha } from "./ops_high";`);
             else {
                 w.writeLine(`return binary(functions.${funcName}, input, other);`);
             }
+        }
+        else if (isReduction) {
+            w.writeLine(`return reduction(functions.${funcName}, input, dim, keepdim);`);
         }
         else {
             if (hasAlpha) {
