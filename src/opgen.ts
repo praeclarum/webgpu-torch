@@ -39,7 +39,7 @@ export function opSpecToKernelSpecs(op: OpSpec): KernelSpec[] {
 function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
     const specs = [getReductionKernelSpec(op)];
     if (op.backward) {
-        // specs.push(getReductionGradKernelSpec(op, op.backward));
+        specs.push(getReductionGradKernelSpec(op));
     }
     return specs;
 }
@@ -77,6 +77,7 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     const reduceCode = op.reduce === undefined ? "" : exprCodeToWebGLShader(op.reduce, {
         input: "input[i]",
         output: "accumulator",
+        inputSize: "parameters.size",
     });
     const shader = `
     var ${initCode};
@@ -102,6 +103,76 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
 `;
     return {
         name: op.name,
+        config: [
+            {
+                name: "dtype",
+            },
+            {
+                name: "workgroupSize",
+            },
+        ],
+        parameters: [
+            {
+                name: "size",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "workgroupSize",
+            },
+        ],
+        workgroupSize: ["workgroupSize", 1, 1],
+        workgroupCount: ["size/workgroupSize", 1, 1],
+        shader: shader,
+    };
+}
+
+function getReductionGradKernelSpec(op: ReductionOpSpec): KernelSpec {
+    const initCode = exprCodeToWebGLShader(op.init, {
+        input: "input[global_id.x]",
+        output: "accumulator",
+    });
+    const forwardCode = exprCodeToWebGLShader(op.forward, {
+        input: "input[i]",
+        output: "accumulator",
+    });
+    const reduceCode = op.reduce === undefined ? "" : exprCodeToWebGLShader(op.reduce, {
+        input: "input[i]",
+        output: "accumulator",
+    });
+    const shader = `
+    var ${initCode};
+    // Load inputData into local memory
+    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {
+        ${forwardCode};
+    }
+    // Write partial group sum to outputData
+    output[local_id.x] = accumulator;
+
+    workgroupBarrier(); // Make sure all threads have completed summation
+
+    // First thread sums up results from all other threads
+    if (local_id.x == 0u) {
+        var numToSum = min(parameters.size, $$workgroupSize$$u);
+        for (var i = 1u; i < numToSum; i++) {
+            accumulator ${op.combineOp}= output[i];
+        }
+        // Store final reduction in the first element of result array
+        ${reduceCode};
+        output[0] = accumulator;
+    }
+`;
+    return {
+        name: op.name + "_grad",
         config: [
             {
                 name: "dtype",

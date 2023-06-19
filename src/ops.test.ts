@@ -1,4 +1,5 @@
 import { ones } from "./factories";
+import { tensor } from "./ops_artisanal";
 
 test("sigmoid(1).size == 307", async () => {
     // prime number > 300
@@ -25,4 +26,18 @@ test("sub with alpha", async () => {
     const y = x.sub(ones(3), 7);
     const a = await y.toArrayAsync();
     expect(a).toEqual([-6, -6, -6]);
+});
+
+test("sum vector", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.sum();
+    const a = await y.toArrayAsync();
+    expect(a).toEqual([6]);
+});
+
+test("mean vector", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.mean();
+    const a = await y.toArrayAsync();
+    expect(a).toEqual([2]);
 });
