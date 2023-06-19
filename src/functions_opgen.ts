@@ -1374,17 +1374,21 @@ export class AllFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("all_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("all_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1392,7 +1396,7 @@ export class AllFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("all_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("all_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1423,17 +1427,21 @@ export class AnyFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("any_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("any_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1441,7 +1449,7 @@ export class AnyFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("any_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("any_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1472,17 +1480,21 @@ export class MeanFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("mean_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("mean_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1490,7 +1502,7 @@ export class MeanFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("mean_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("mean_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1521,17 +1533,21 @@ export class NormFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("norm_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("norm_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1539,7 +1555,7 @@ export class NormFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("norm_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("norm_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1570,17 +1586,21 @@ export class ProdFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("prod_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("prod_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1588,7 +1608,7 @@ export class ProdFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("prod_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("prod_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1619,17 +1639,21 @@ export class SumFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("sum_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("sum_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1637,7 +1661,7 @@ export class SumFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("sum_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("sum_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }
@@ -1668,17 +1692,21 @@ export class CountNonzeroFunction extends AutoFunction {
         output: Tensor
     ): void {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        ctx.saveForBackward(input);
+        ctx.dim = dim;
+        ctx.keepdim = keepdim;
+        ctx.saveForBackward(input, output);
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
-        const [input, dim, keepdim] = ctx.savedTensors as [Tensor, number | number[] | undefined, boolean | undefined];
+        const [input, output] = ctx.savedTensors as [Tensor, Tensor];
+        const dim: number | number[] | undefined = ctx.dim;
+        const keepdim: boolean | undefined = ctx.keepdim;
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
                     dim: dim,
                 };
-                return input.runKernel("countNonzero_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+                return input.runKernel("countNonzero_dim_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
             } else {
                 throw new Error("Multi-dimension backward reduction not supported");
             }
@@ -1686,7 +1714,7 @@ export class CountNonzeroFunction extends AutoFunction {
             const params = {
                 size: shapeSize(input.shape),
             };
-            return input.runKernel("countNonzero_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], outputGrad);
+            return input.runKernel("countNonzero_grad", {"dtype":"float32","workgroupSize":64}, params, [input.shape], output, outputGrad);
         }
     }
 }

@@ -35,9 +35,25 @@ test("sum vector", async () => {
     expect(a).toEqual([6]);
 });
 
+test("sum vector grad", async () => {
+    const x = tensor({data:[1, 2, 3, 4, 5, 6], requiresGrad: true});
+    const y = x.sum();
+    y.backward();
+    const a = await x.grad!.toArrayAsync();
+    expect(a).toEqual([1, 1, 1, 1, 1, 1]);
+});
+
 test("mean vector", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.mean();
     const a = await y.toArrayAsync();
     expect(a).toEqual([2]);
+});
+
+test("mean vector grad", async () => {
+    const x = tensor({data:[1, 2, 3, 4], requiresGrad: true});
+    const y = x.mean();
+    y.backward();
+    const a = await x.grad!.toArrayAsync();
+    expect(a).toEqual([0.25, 0.25, 0.25, 0.25]);
 });

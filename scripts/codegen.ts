@@ -244,6 +244,25 @@ import { shapeSize } from "./shape";`);
                 }
             }
         }
+        const writeUnpackContext = (inputsName: string, includeAlpha: boolean) => {
+            if (isReduction) {
+                w.writeLine(`const [input, output] = ${inputsName}.savedTensors as [Tensor, Tensor];`);
+                w.writeLine(`const dim: number | number[] | undefined = ${inputsName}.dim;`);
+                w.writeLine(`const keepdim: boolean | undefined = ${inputsName}.keepdim;`);
+            }
+            else if (isBinary) {
+                w.writeLine(`const [input, other] = ${inputsName}.savedTensors as [Tensor, Tensor];`);
+                if (hasAlpha && includeAlpha) {
+                    w.writeLine(`const alpha: number | undefined = ${inputsName}.alpha;`);
+                }
+            }
+            else {
+                w.writeLine(`const [input] = ${inputsName}.savedTensors as [Tensor];`);
+                if (hasAlpha && includeAlpha) {
+                    w.writeLine(`const alpha: number | undefined = ${inputsName}.alpha;`);
+                }
+            }
+        }
         w.writeLine(`export class ${className} extends AutoFunction {`);
         w.indent();
 
@@ -302,7 +321,12 @@ import { shapeSize } from "./shape";`);
     ): void {`);
         w.indent();
         writeUnpackInputs("inputs", true);
-        if (isBinary) {
+        if (isReduction) {
+            w.writeLine(`ctx.dim = dim;`);
+            w.writeLine(`ctx.keepdim = keepdim;`);
+            w.writeLine(`ctx.saveForBackward(input, output);`);
+        }
+        else if (isBinary) {
             if (hasAlpha) {
                 w.writeLine(`ctx.alpha = alpha;`);
             }
@@ -320,14 +344,14 @@ import { shapeSize } from "./shape";`);
         // Backward
         w.writeLine(`static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {`);
         w.indent();
-        writeUnpackInputs("ctx.savedTensors", false);
+        writeUnpackContext("ctx", false);
         if (isReduction) {
             w.writeLine(`if (dim !== undefined) {`);
             w.indent();
             w.writeLine(`if (typeof dim === "number") {`);
             w.indent();
             writeReductionParams("input", "dim", w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}_dim_grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_dim_grad", ${configS}, params, [input.shape], output, outputGrad);`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
@@ -338,7 +362,7 @@ import { shapeSize } from "./shape";`);
             w.writeLine(`} else {`);
             w.indent();
             writeReductionParams("input", null, w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], output, outputGrad);`);
             w.dedent();
             w.writeLine(`}`);
         }

@@ -509,6 +509,8 @@ export function getKernelJavaScriptCode(
     w.dedent();
     w.writeLine(`})`);
     const code = w.toString();
-    // console.log(code);
+    // if (spec.name == "sum_grad" || spec.name == "mean_grad") {
+    //     console.log(code);
+    // }
     return code;
 }
