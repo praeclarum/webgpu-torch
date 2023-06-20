@@ -22,7 +22,7 @@
                 {
                     "name": "operation",
                     "values": [
-                        "relu",
+                        "neg",
                         "sigmoid"
                     ]
                 }

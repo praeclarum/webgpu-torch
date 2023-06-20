@@ -23,17 +23,21 @@ async function runUnaryBenchmarkAsync(benchmark, inputs) {
     const shape = inputs[0];
     const operation = torch[inputs[1]];
     const x = torch.ones(shape);
+    const y = torch.zeros(shape);
     async function runIterationAsync() {
         // console.time('ones');
         // console.timeEnd('ones');
         const start = performance.now();
-        let y = x;
+        // let y = x;
         for (let i = 0; i < benchmark.depth; i++) {
-            y = operation(y);
+            operation(x, y);
         }
         // console.log();
-        // const yar = await y.toTypedArrayAsync();
-        await y.device._device.queue.onSubmittedWorkDone();
+        const yar = await y.toTypedArrayAsync();
+        // if (yar.length < 1000) {
+        //     console.log("y1", yar);
+        // }
+        // await y.device._device.queue.onSubmittedWorkDone();
         const end = performance.now();
         return (end - start) / benchmark.depth;
     }
