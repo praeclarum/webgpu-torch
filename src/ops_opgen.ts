@@ -1219,7 +1219,7 @@ export function any(input: Tensor, dim?: number | number[], keepdim?: boolean): 
 *
 * Gradient:
 * ```js
-* inputGrad = outputGrad / inputSize
+* inputGrad = outputGrad / f32(inputSize)
 * ```
 *
 * @param input the input tensor of any shape

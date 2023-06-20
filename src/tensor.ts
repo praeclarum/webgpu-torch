@@ -2636,7 +2636,7 @@ export class Tensor extends TensorBase {
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad / inputSize
+    * inputGrad = outputGrad / f32(inputSize)
     * ```
     *
     * @returns the output tensor

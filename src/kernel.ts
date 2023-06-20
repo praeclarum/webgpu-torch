@@ -347,6 +347,8 @@ const javaScriptGlobalFunctions: { [name: string]: string } = {
     exp2: "function exp2(x) { return Math.pow(2, x); }",
     fract: "function fract(x) { return x - Math.floor(x); }",
     select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
+    f32: "function f32(x) { return x; }",
+    i32: "function i32(x) { return x; }",
 };
 
 export function getKernelJavaScriptCode(

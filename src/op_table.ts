@@ -395,8 +395,8 @@ export const registry: AnOpSpec[] = [
         combineOp: "+",
         init: "output = 0.0",
         forward: "output = output + input",
-        reduce: "output = output / inputSize",
-        backward: "inputGrad = outputGrad / inputSize",
+        reduce: "output = output / f32(inputSize)",
+        backward: "inputGrad = outputGrad / f32(inputSize)",
     },
     // median: artisanal
     // min: init is input
