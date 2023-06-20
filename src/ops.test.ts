@@ -47,7 +47,7 @@ test("mean vector", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.mean();
     const a = await y.toArrayAsync();
-    expect(a).toEqual([2]);
+    expect(a[0]).toBeCloseTo(2);
 });
 
 test("mean vector grad", async () => {

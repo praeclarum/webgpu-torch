@@ -67,7 +67,7 @@ function getUnaryKernelSpecs(op: UnaryOpSpec): KernelSpec[] {
 
 function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     const initCode = exprCodeToWebGLShader(op.init, {
-        input: "input[global_id.x]",
+        input: "input[local_id.x]",
         output: "accumulator",
     });
     const forwardCode = exprCodeToWebGLShader(op.forward, {
@@ -131,7 +131,7 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
             },
         ],
         workgroupSize: ["workgroupSize", 1, 1],
-        workgroupCount: ["size/workgroupSize", 1, 1],
+        workgroupCount: [1, 1, 1],
         shader: shader,
     };
 }
