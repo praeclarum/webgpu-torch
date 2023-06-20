@@ -175,7 +175,7 @@ export class KernelWebGPU extends Kernel {
         }
         paramsBuffer.unmap();
         // Cache the params buffer
-        this.cachedParamBuffers[paramsId] = paramsBuffer;
+        // this.cachedParamBuffers[paramsId] = paramsBuffer;
         return paramsBuffer;
     }
     private getStorageInputBuffer(

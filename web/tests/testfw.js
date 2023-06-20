@@ -59,24 +59,50 @@ function makeTable(name, $testDiv) {
     return $testTableBody;
 }
 
+function makeStatus($testDiv) {
+    const $status = document.createElement('div');
+    $status.innerHTML = `<span class="success">0</span> succeeded / <span class="failure">0</span> failed of ${testreg.length} tests: <span class="status-text">Starting...</span>`;
+    $testDiv.appendChild($status);
+    const $success = $status.querySelector('.success');
+    const $failure = $status.querySelector('.failure');
+    const $statusText = $status.querySelector('.status-text');
+    let numSuccess = 0;
+    let numFailure = 0;
+    const updateStatus = () => {
+        const numRun = Math.max(1, numSuccess + numFailure);
+        $success.innerText = `${numSuccess} (${(numSuccess/numRun*100).toFixed(1)}%)`;
+        $failure.innerText = `${numFailure} (${(numFailure/numRun*100).toFixed(1)}%)`;
+    };
+    const setStatusText = text => { $statusText.innerText = text; };
+    const setSucceeded = () => { numSuccess++; updateStatus(); };
+    const setFailed = () => { numFailure++; updateStatus(); };
+    return [setSucceeded, setFailed, setStatusText];
+}
+
 async function runTestsAsync($testDiv) {
+    const [setSucceeded, setFailed, setStatusText] = makeStatus($testDiv);
     const $failureBody = makeTable('Failures', $testDiv);
     const $successBody = makeTable('Success', $testDiv);
     // Run the tests
     for (let t of testreg) {
         let error = undefined;
         try {
+            setStatusText(t.description);
             let result = t.callback();
             if (result instanceof Promise) {
                 await result;
             }
             appendTestResult($successBody, t);
+            setSucceeded();
         } catch (e) {
             error = e;
             console.error(e);
             appendTestResult($failureBody, t, error);
+            setFailed();
         }
+        await new Promise(resolve => setTimeout(resolve, 10));
     }
+    setStatusText('Done');
 }
 
 function appendTestResult($testTableBody, t, error) {

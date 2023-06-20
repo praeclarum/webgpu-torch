@@ -20,7 +20,8 @@ const absSrcDir = fs.realpathSync(__dirname + "/../src");
 console.log("src dir:", absSrcDir);
 const pythonTestsPath = `${absSrcDir}/../scripts/testgen_tests.py`;
 const pythonTestResultsPath = `${absSrcDir}/../scripts/testgen_tests_results.json`;
-const typeScriptTestsPath = `${absSrcDir}/ops_opgen.test.ts`;
+const typeScriptTestsName = `ops_opgen.test.ts`;
+const typeScriptTestsPath = `${absSrcDir}/${typeScriptTestsName}`;
 const indexTestsPath = `${absSrcDir}/index_tests.ts`;
 
 function writePythonTests() {
@@ -240,8 +241,10 @@ export { tensor } from "./ops_artisanal";`);
     // Get all file names from ${absSrcDir}/*.test.ts
     const testFiles = fs.readdirSync(absSrcDir).filter(x => x.endsWith(".test.ts"));
     for (const testFile of testFiles) {
+        if (typeScriptTestsPath.endsWith(testFile)) continue;
         w.writeLine(`export * from "./${testFile.slice(0, -3)}";`);
     }
+    w.writeLine(`export * from "./${typeScriptTestsName.slice(0, -3)}";`);
     w.writeLine(``);
     fs.writeFileSync(indexTestsPath, w.toString(), "utf-8");
 }
