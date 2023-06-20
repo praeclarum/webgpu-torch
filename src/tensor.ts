@@ -108,6 +108,7 @@ export class Tensor extends TensorBase {
             this._strides = array.strides;
         } else if (arrayOrSpec.hasOwnProperty("data")) {
             const jdata = arrayOrSpec as TensorSpec;
+            d = jdata.device ? getDevice(jdata.device) : d;
             dt = jdata.dtype ? getDtype(jdata.dtype) : dt;
             requiresGrad = requiresGrad || jdata.requiresGrad;
             if (jdata.data instanceof Array) {
