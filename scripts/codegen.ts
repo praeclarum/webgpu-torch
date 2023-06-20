@@ -48,7 +48,7 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
             w.writeLine(`${name}(alpha?: number): Tensor${suffix}`);
         }
         else {
-            w.writeLine(`${name}(): Tensor${suffix}`);
+            w.writeLine(`${name}(output?: Tensor): Tensor${suffix}`);
         }
     }
 };
@@ -130,7 +130,7 @@ function writeTensorCode(): void {
                     w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
                 }
                 else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this);`);
+                    w.writeLine(`return ops.${kernelSpec.name}(this, output);`);
                 }
             }
         }
@@ -220,7 +220,7 @@ import { shapeSize } from "./shape";`);
         let outputShapesS: string = "[input.shape]";
         if (isReduction) {
             outputShapesS = "[[]]";
-            config["workgroupSize"] = 64;
+            config["workgroupSize"] = 256;
         }
         const configS = JSON.stringify(config);
         const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
@@ -267,7 +267,7 @@ import { shapeSize } from "./shape";`);
         w.indent();
 
         // Forward
-        w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
+        w.writeLine(`static forward(inputs: FunctionInput[], output?: Tensor): Tensor {`);
         w.indent();
         writeUnpackInputs("inputs", true);
         
@@ -309,7 +309,7 @@ import { shapeSize } from "./shape";`);
         }
         else {
             writeParams("input", false, hasAlpha, "alpha", w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS})[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, output ? [output] : ${outputShapesS})[0];`);
         }
         w.dedent();
         w.writeLine(`}`);
@@ -462,7 +462,9 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
         const writeHeader = (name: string, isAlias: boolean) => {
             writeOpDocs(opSpec, "input", isAlias, w);
-            if (isBinary) {
+            if (isReduction) {
+                w.writeLine(`export function ${name}(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {`);
+            } else if (isBinary) {
                 if (hasAlpha) {
                     w.writeLine(`export function ${name}(input: Tensor, other: number | Tensor, alpha?: number): Tensor {`);
                 }
@@ -470,21 +472,21 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
                     w.writeLine(`export function ${name}(input: Tensor, other: number | Tensor): Tensor {`);
                 }
             }
-            else if (isReduction) {
-                w.writeLine(`export function ${name}(input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {`);
-            }                
             else {
                 if (hasAlpha) {
                     w.writeLine(`export function ${name}(input: Tensor, alpha?: number): Tensor {`);
                 }
                 else {
-                    w.writeLine(`export function ${name}(input: Tensor): Tensor {`);
+                    w.writeLine(`export function ${name}(input: Tensor, output?: Tensor): Tensor {`);
                 }
             }
         };
         writeHeader(kernelSpec.name, false);
         w.indent();
-        if (isBinary) {
+        if (isReduction) {
+            w.writeLine(`return reduction(functions.${funcName}, input, dim, keepdim);`);
+        }
+        else if (isBinary) {
             if (hasAlpha) {
                 w.writeLine(`return binaryWithAlpha(functions.${funcName}, input, other, alpha);`);
             }
@@ -492,15 +494,12 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
                 w.writeLine(`return binary(functions.${funcName}, input, other);`);
             }
         }
-        else if (isReduction) {
-            w.writeLine(`return reduction(functions.${funcName}, input, dim, keepdim);`);
-        }
         else {
             if (hasAlpha) {
                 w.writeLine(`return unaryWithAlpha(functions.${funcName}, input, alpha);`);
             }
             else {
-                w.writeLine(`return unary(functions.${funcName}, input);`);
+                w.writeLine(`return unary(functions.${funcName}, input, output);`);
             }
         }
         w.dedent();

@@ -57,3 +57,12 @@ test("mean vector grad", async () => {
     const a = await x.grad!.toArrayAsync();
     expect(a).toEqual([0.25, 0.25, 0.25, 0.25]);
 });
+
+test("unary with output", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = tensor([0, 0, 0]);
+    const yy = x.neg(y);
+    const a = await y.toArrayAsync();
+    expect(a).toEqual([-1, -2, -3]);
+    expect(yy).toBe(y);
+});

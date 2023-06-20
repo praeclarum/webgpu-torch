@@ -17,8 +17,8 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function abs(input: Tensor): Tensor {
-    return unary(functions.AbsFunction, input);
+export function abs(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AbsFunction, input, output);
 }
 /**
 * Alias for `abs`.
@@ -38,7 +38,7 @@ export function abs(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function absolute(input: Tensor): Tensor {
+export function absolute(input: Tensor, output?: Tensor): Tensor {
     return abs(input);
 }
 /**
@@ -57,8 +57,8 @@ export function absolute(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function acos(input: Tensor): Tensor {
-    return unary(functions.AcosFunction, input);
+export function acos(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AcosFunction, input, output);
 }
 /**
 * Alias for `acos`.
@@ -78,7 +78,7 @@ export function acos(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function arccos(input: Tensor): Tensor {
+export function arccos(input: Tensor, output?: Tensor): Tensor {
     return acos(input);
 }
 /**
@@ -97,8 +97,8 @@ export function arccos(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function acosh(input: Tensor): Tensor {
-    return unary(functions.AcoshFunction, input);
+export function acosh(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AcoshFunction, input, output);
 }
 /**
 * Alias for `acosh`.
@@ -118,7 +118,7 @@ export function acosh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function arccosh(input: Tensor): Tensor {
+export function arccosh(input: Tensor, output?: Tensor): Tensor {
     return acosh(input);
 }
 /**
@@ -156,8 +156,8 @@ export function add(input: Tensor, other: number | Tensor, alpha?: number): Tens
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function asin(input: Tensor): Tensor {
-    return unary(functions.AsinFunction, input);
+export function asin(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AsinFunction, input, output);
 }
 /**
 * Alias for `asin`.
@@ -177,7 +177,7 @@ export function asin(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function arcsin(input: Tensor): Tensor {
+export function arcsin(input: Tensor, output?: Tensor): Tensor {
     return asin(input);
 }
 /**
@@ -196,8 +196,8 @@ export function arcsin(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function asinh(input: Tensor): Tensor {
-    return unary(functions.AsinhFunction, input);
+export function asinh(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AsinhFunction, input, output);
 }
 /**
 * Alias for `asinh`.
@@ -217,7 +217,7 @@ export function asinh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function arcsinh(input: Tensor): Tensor {
+export function arcsinh(input: Tensor, output?: Tensor): Tensor {
     return asinh(input);
 }
 /**
@@ -236,8 +236,8 @@ export function arcsinh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function atan(input: Tensor): Tensor {
-    return unary(functions.AtanFunction, input);
+export function atan(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.AtanFunction, input, output);
 }
 /**
 * Alias for `atan`.
@@ -257,7 +257,7 @@ export function atan(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function arctan(input: Tensor): Tensor {
+export function arctan(input: Tensor, output?: Tensor): Tensor {
     return atan(input);
 }
 /**
@@ -314,8 +314,8 @@ export function arctan2(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function ceil(input: Tensor): Tensor {
-    return unary(functions.CeilFunction, input);
+export function ceil(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.CeilFunction, input, output);
 }
 /**
 * Calculates:
@@ -351,8 +351,8 @@ export function copysign(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function cos(input: Tensor): Tensor {
-    return unary(functions.CosFunction, input);
+export function cos(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.CosFunction, input, output);
 }
 /**
 * ![Plot of cosh and its gradient](../../plots/cosh.svg)
@@ -370,8 +370,8 @@ export function cos(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function cosh(input: Tensor): Tensor {
-    return unary(functions.CoshFunction, input);
+export function cosh(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.CoshFunction, input, output);
 }
 /**
 * ![Plot of deg2rad and its gradient](../../plots/deg2rad.svg)
@@ -389,8 +389,8 @@ export function cosh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function deg2rad(input: Tensor): Tensor {
-    return unary(functions.Deg2radFunction, input);
+export function deg2rad(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Deg2radFunction, input, output);
 }
 /**
 * Calculates:
@@ -446,8 +446,8 @@ export function divide(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function exp(input: Tensor): Tensor {
-    return unary(functions.ExpFunction, input);
+export function exp(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.ExpFunction, input, output);
 }
 /**
 * ![Plot of exp2 and its gradient](../../plots/exp2.svg)
@@ -465,8 +465,8 @@ export function exp(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function exp2(input: Tensor): Tensor {
-    return unary(functions.Exp2Function, input);
+export function exp2(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Exp2Function, input, output);
 }
 /**
 * ![Plot of expm1 and its gradient](../../plots/expm1.svg)
@@ -484,8 +484,8 @@ export function exp2(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function expm1(input: Tensor): Tensor {
-    return unary(functions.Expm1Function, input);
+export function expm1(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Expm1Function, input, output);
 }
 /**
 * ![Plot of floor and its gradient](../../plots/floor.svg)
@@ -503,8 +503,8 @@ export function expm1(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function floor(input: Tensor): Tensor {
-    return unary(functions.FloorFunction, input);
+export function floor(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.FloorFunction, input, output);
 }
 /**
 * ![Plot of frac and its gradient](../../plots/frac.svg)
@@ -522,8 +522,8 @@ export function floor(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function frac(input: Tensor): Tensor {
-    return unary(functions.FracFunction, input);
+export function frac(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.FracFunction, input, output);
 }
 /**
 * Calculates:
@@ -577,8 +577,8 @@ export function ldexp(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function log(input: Tensor): Tensor {
-    return unary(functions.LogFunction, input);
+export function log(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.LogFunction, input, output);
 }
 /**
 * ![Plot of log10 and its gradient](../../plots/log10.svg)
@@ -596,8 +596,8 @@ export function log(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function log10(input: Tensor): Tensor {
-    return unary(functions.Log10Function, input);
+export function log10(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Log10Function, input, output);
 }
 /**
 * ![Plot of log1p and its gradient](../../plots/log1p.svg)
@@ -615,8 +615,8 @@ export function log10(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function log1p(input: Tensor): Tensor {
-    return unary(functions.Log1pFunction, input);
+export function log1p(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Log1pFunction, input, output);
 }
 /**
 * ![Plot of log2 and its gradient](../../plots/log2.svg)
@@ -634,8 +634,8 @@ export function log1p(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function log2(input: Tensor): Tensor {
-    return unary(functions.Log2Function, input);
+export function log2(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Log2Function, input, output);
 }
 /**
 * Calculates:
@@ -727,8 +727,8 @@ export function multiply(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function neg(input: Tensor): Tensor {
-    return unary(functions.NegFunction, input);
+export function neg(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.NegFunction, input, output);
 }
 /**
 * Alias for `neg`.
@@ -748,7 +748,7 @@ export function neg(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function negative(input: Tensor): Tensor {
+export function negative(input: Tensor, output?: Tensor): Tensor {
     return neg(input);
 }
 /**
@@ -767,8 +767,8 @@ export function negative(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function positive(input: Tensor): Tensor {
-    return unary(functions.PositiveFunction, input);
+export function positive(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.PositiveFunction, input, output);
 }
 /**
 * Calculates:
@@ -804,8 +804,8 @@ export function pow(input: Tensor, other: number | Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function rad2deg(input: Tensor): Tensor {
-    return unary(functions.Rad2degFunction, input);
+export function rad2deg(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.Rad2degFunction, input, output);
 }
 /**
 * ![Plot of reciprocal and its gradient](../../plots/reciprocal.svg)
@@ -823,8 +823,8 @@ export function rad2deg(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function reciprocal(input: Tensor): Tensor {
-    return unary(functions.ReciprocalFunction, input);
+export function reciprocal(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.ReciprocalFunction, input, output);
 }
 /**
 * ![Plot of relu and its gradient](../../plots/relu.svg)
@@ -842,8 +842,8 @@ export function reciprocal(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function relu(input: Tensor): Tensor {
-    return unary(functions.ReluFunction, input);
+export function relu(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.ReluFunction, input, output);
 }
 /**
 * ![Plot of round and its gradient](../../plots/round.svg)
@@ -861,8 +861,8 @@ export function relu(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function round(input: Tensor): Tensor {
-    return unary(functions.RoundFunction, input);
+export function round(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.RoundFunction, input, output);
 }
 /**
 * ![Plot of rsqrt and its gradient](../../plots/rsqrt.svg)
@@ -880,8 +880,8 @@ export function round(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function rsqrt(input: Tensor): Tensor {
-    return unary(functions.RsqrtFunction, input);
+export function rsqrt(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.RsqrtFunction, input, output);
 }
 /**
 * ![Plot of sigmoid and its gradient](../../plots/sigmoid.svg)
@@ -899,8 +899,8 @@ export function rsqrt(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sigmoid(input: Tensor): Tensor {
-    return unary(functions.SigmoidFunction, input);
+export function sigmoid(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SigmoidFunction, input, output);
 }
 /**
 * ![Plot of sign and its gradient](../../plots/sign.svg)
@@ -918,8 +918,8 @@ export function sigmoid(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sign(input: Tensor): Tensor {
-    return unary(functions.SignFunction, input);
+export function sign(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SignFunction, input, output);
 }
 /**
 * ![Plot of silu and its gradient](../../plots/silu.svg)
@@ -937,8 +937,8 @@ export function sign(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function silu(input: Tensor): Tensor {
-    return unary(functions.SiluFunction, input);
+export function silu(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SiluFunction, input, output);
 }
 /**
 * ![Plot of sin and its gradient](../../plots/sin.svg)
@@ -956,8 +956,8 @@ export function silu(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sin(input: Tensor): Tensor {
-    return unary(functions.SinFunction, input);
+export function sin(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SinFunction, input, output);
 }
 /**
 * ![Plot of sinc and its gradient](../../plots/sinc.svg)
@@ -975,8 +975,8 @@ export function sin(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sinc(input: Tensor): Tensor {
-    return unary(functions.SincFunction, input);
+export function sinc(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SincFunction, input, output);
 }
 /**
 * ![Plot of sinh and its gradient](../../plots/sinh.svg)
@@ -994,8 +994,8 @@ export function sinc(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sinh(input: Tensor): Tensor {
-    return unary(functions.SinhFunction, input);
+export function sinh(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SinhFunction, input, output);
 }
 /**
 * ![Plot of sqrt and its gradient](../../plots/sqrt.svg)
@@ -1013,8 +1013,8 @@ export function sinh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function sqrt(input: Tensor): Tensor {
-    return unary(functions.SqrtFunction, input);
+export function sqrt(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SqrtFunction, input, output);
 }
 /**
 * ![Plot of square and its gradient](../../plots/square.svg)
@@ -1032,8 +1032,8 @@ export function sqrt(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function square(input: Tensor): Tensor {
-    return unary(functions.SquareFunction, input);
+export function square(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.SquareFunction, input, output);
 }
 /**
 * Calculates:
@@ -1091,8 +1091,8 @@ export function subtract(input: Tensor, other: number | Tensor, alpha?: number):
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function tan(input: Tensor): Tensor {
-    return unary(functions.TanFunction, input);
+export function tan(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.TanFunction, input, output);
 }
 /**
 * ![Plot of tanh and its gradient](../../plots/tanh.svg)
@@ -1110,8 +1110,8 @@ export function tan(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function tanh(input: Tensor): Tensor {
-    return unary(functions.TanhFunction, input);
+export function tanh(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.TanhFunction, input, output);
 }
 /**
 * ![Plot of trunc and its gradient](../../plots/trunc.svg)
@@ -1129,8 +1129,8 @@ export function tanh(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function trunc(input: Tensor): Tensor {
-    return unary(functions.TruncFunction, input);
+export function trunc(input: Tensor, output?: Tensor): Tensor {
+    return unary(functions.TruncFunction, input, output);
 }
 /**
 * Alias for `trunc`.
@@ -1150,7 +1150,7 @@ export function trunc(input: Tensor): Tensor {
 * @param input the input tensor of any shape
 * @returns the output tensor
 */
-export function fix(input: Tensor): Tensor {
+export function fix(input: Tensor, output?: Tensor): Tensor {
     return trunc(input);
 }
 /**
