@@ -192,7 +192,9 @@ export class KernelWebGPU extends Kernel {
             );
         }
         if (providedInput.usage & GPUBufferUsage.STORAGE) {
-            providedInput.unmap();
+            if (providedInput.mapState === "mapped") {
+                providedInput.unmap();
+            }
             return providedInput;
         } else {
             throw new Error("Provided input buffer is not a storage buffer");

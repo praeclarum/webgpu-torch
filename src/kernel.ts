@@ -63,6 +63,7 @@ export abstract class Kernel {
     private _workgroupCountYFunc: CompiledExpr;
     private _workgroupCountZFunc: CompiledExpr;
     protected _outputSizeFuncs: CompiledExpr[];
+    private _configEnv: EvalEnv;
     get key(): KernelKey {
         return this._key;
     }
@@ -89,6 +90,12 @@ export abstract class Kernel {
             const outputElementCount = compileCode(outputSpec.size);
             this._outputSizeFuncs.push(outputElementCount);
         }
+        this._configEnv = Object.assign({}, jsMathEnv);
+        for (let i = 0; i < this._spec.config.length; i++) {
+            const configSpec = this._spec.config[i];
+            const configValue = this._config[i];
+            this._configEnv[configSpec.name] = configValue;
+        }
     }
 
     abstract run(
@@ -98,13 +105,8 @@ export abstract class Kernel {
     ): (GPUBuffer | ATypedArray)[];
 
     protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
-        const env: EvalEnv = Object.assign({}, jsMathEnv);
+        const env: EvalEnv = Object.assign({}, this._configEnv);
         const paramValues: number[] = [];
-        for (let i = 0; i < this._spec.config.length; i++) {
-            const configSpec = this._spec.config[i];
-            const configValue = this._config[i];
-            env[configSpec.name] = configValue;
-        }
         for (let i = 0; i < this.spec.parameters.length; i++) {
             const param = this.spec.parameters[i];
             const paramValue = parameters[param.name];
