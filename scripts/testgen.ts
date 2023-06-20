@@ -60,6 +60,8 @@ function writePythonTests() {
         const kernelName = kernelSpec.name;
         const isGrad = kernelName.endsWith("_grad");
         if (isGrad) return false;
+        const isScalar = kernelName.includes("_scalar");
+        if (isScalar) return false;
         if (kernelName == "positive_") return false; // Not in torch
         if (kernelName == "logaddexp_") return false; // Not in torch
         if (kernelName == "logaddexp2_") return false; // Not in torch

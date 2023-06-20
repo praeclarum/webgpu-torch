@@ -22,25 +22,27 @@ function getInputPermutations(benchmarkInputs) {
 async function runUnaryBenchmarkAsync(benchmark, inputs) {
     const shape = inputs[0];
     const operation = torch[inputs[1]];
-    async function runIteration() {
+    const x = torch.ones(shape);
+    async function runIterationAsync() {
         // console.time('ones');
-        const x = torch.ones(shape);
         // console.timeEnd('ones');
         const start = performance.now();
         let y = x;
         for (let i = 0; i < benchmark.depth; i++) {
             y = operation(y);
         }
-        const yar = await y.toArrayAsync();
+        // console.log();
+        // const yar = await y.toTypedArrayAsync();
+        await y.device._device.queue.onSubmittedWorkDone();
         const end = performance.now();
         return (end - start) / benchmark.depth;
     }
     for (let i = 0; i < benchmark.warmupIterations; i++) {
-        await runIteration();
+        await runIterationAsync();
     }
     const ms = [];
     for (let i = 0; i < benchmark.iterations; i++) {
-        ms.push(await runIteration());
+        ms.push(await runIterationAsync());
     }
     return ms;
 }
