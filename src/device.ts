@@ -59,6 +59,7 @@ export abstract class Device {
         dtype: Dtype
     ): ATypedArray | GPUBuffer;
     abstract getStorageFromKernel(
-        buffer: ATypedArray | GPUBuffer
+        buffer: ATypedArray | GPUBuffer,
+        pooled: boolean
     ): UntypedStorage;
 }

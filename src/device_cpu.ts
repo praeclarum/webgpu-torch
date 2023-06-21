@@ -23,7 +23,7 @@ export class DeviceCPU extends Device {
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);
     }
-    getStorageFromKernel(storage: ATypedArray | GPUBuffer): UntypedStorage {
+    getStorageFromKernel(storage: ATypedArray | GPUBuffer, pooled: boolean): UntypedStorage {
         if (
             storage instanceof Uint8Array ||
             storage instanceof Uint32Array ||

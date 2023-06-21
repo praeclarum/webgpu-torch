@@ -1,4 +1,5 @@
 import { Device } from "./device";
+import { DeviceWebGPU } from "./device_webgpu";
 import { EvalEnv } from "./expr";
 import {
     Kernel,
@@ -20,7 +21,7 @@ export class KernelWebGPU extends Kernel {
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
-        const gpuDevice = (device as any).gpuDevice;
+        const gpuDevice = (device as DeviceWebGPU).gpuDevice;
         if (!gpuDevice) {
             throw new Error("Cannot create a GPU kernel without a GPU device");
         }
@@ -224,8 +225,8 @@ export class KernelWebGPU extends Kernel {
             );
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
-            const outputBuffer = this._gpuDevice.createBuffer({
-                mappedAtCreation: false,
+            const device = this.device as DeviceWebGPU;
+            const outputBuffer = device.getPooledBuffer({
                 size: outputBufferSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
             });

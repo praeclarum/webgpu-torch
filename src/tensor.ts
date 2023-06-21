@@ -267,7 +267,7 @@ export class Tensor extends TensorBase {
             return outputBuffers.map(
                 (outputBuffer, i) =>
                     new Tensor({
-                        data: this.device.getStorageFromKernel(outputBuffer),
+                        data: this.device.getStorageFromKernel(outputBuffer, true),
                         dtype: this.dtype,
                         shape: (outputs as Shape[])[i],
                         strides: defaultStrides((outputs as Shape[])[i]),

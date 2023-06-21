@@ -23,14 +23,18 @@ async function runUnaryBenchmarkAsync(benchmark, inputs) {
     const shape = inputs[0];
     const operation = torch[inputs[1]];
     const x = torch.ones(shape);
-    const y = torch.zeros(shape);
+    // const y = torch.zeros(shape);
     async function runIterationAsync() {
         // console.time('ones');
         // console.timeEnd('ones');
         const start = performance.now();
-        // let y = x;
-        for (let i = 0; i < benchmark.depth; i++) {
-            operation(x, y);
+        let y = x;
+        // const y = torch.zeros(shape);
+        {
+            for (let i = 0; i < benchmark.depth; i++) {
+                // operation(x, y);
+                y = operation(y);
+            }
         }
         // console.log();
         const yar = await y.toTypedArrayAsync();
@@ -43,6 +47,7 @@ async function runUnaryBenchmarkAsync(benchmark, inputs) {
     }
     for (let i = 0; i < benchmark.warmupIterations; i++) {
         await runIterationAsync();
+        await new Promise(resolve => setTimeout(resolve, 20));
     }
     const ms = [];
     for (let i = 0; i < benchmark.iterations; i++) {
