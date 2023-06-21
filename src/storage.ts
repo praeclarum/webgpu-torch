@@ -19,7 +19,10 @@ export abstract class UntypedStorage {
             throw new Error("Storage is not mapped");
         }
         if (dtype in dtypeArrayCtors) {
-            return new dtypeArrayCtors[dtype](buffer);
+            const byteOffset = this.byteOffset;
+            const ctor = dtypeArrayCtors[dtype];
+            const length = this.byteSize / ctor.BYTES_PER_ELEMENT;
+            return new ctor(buffer, byteOffset, length);
         }
         throw new Error(`Unsupported dtype: ${dtype}`);
     }

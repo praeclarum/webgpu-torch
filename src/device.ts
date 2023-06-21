@@ -48,18 +48,21 @@ export abstract class Device {
             const buffer = heap.alloc(byteSize);
             if (buffer !== null) {
                 resultBuffer = buffer;
+                // console.log("Allocated heap buffer of size", resultBuffer.byteSize);
             }
         }
         if (resultBuffer === null) {
             const heap = this.allocBufferHeap();
-            // console.log("Allocated GPU buffer heap of size", heap.size);
+            // console.log("Allocated buffer heap of size", heap.size);
             this.heaps.push(heap);
             resultBuffer = heap.alloc(byteSize);
             if (resultBuffer === null) {
                 throw new Error(`Out of memory when trying to allocate buffer of size ${byteSize}. Heap size is ${heap.size}.`);
             }
+            // console.log("Allocated heap buffer from fresh heap of size", resultBuffer.byteSize);
         }
-        return this.createStorage(resultBuffer);
+        const storage = this.createStorage(resultBuffer);
+        return storage;
     }
     getKernel(name: string, config: KernelConfigInput): Kernel {
         const spec = kernelRegistry[name];

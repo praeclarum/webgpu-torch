@@ -112,9 +112,10 @@ export class KernelCPU extends Kernel {
             );
             const outputBufferSize = outputElementByteSize * outputElementCount;
             // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
-            const outputBuffer = this.device.alloc(outputBufferSize);
             const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
-            return outputBuffer;
+            return outputHeapBuffer;
+            // const outputBuffer = this.device.alloc(outputBufferSize);
+            // return outputBuffer;
         }
     }
 }
