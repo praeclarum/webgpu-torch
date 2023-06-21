@@ -11,6 +11,7 @@ export * from "./nn_diffusers.test";
 export * from "./ops.test";
 export * from "./optim.test";
 export * from "./shape.test";
+export * from "./storage.test";
 export * from "./tensor.test";
 export * from "./webgpu.test";
 export * from "./ops_opgen.test";

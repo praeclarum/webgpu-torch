@@ -21,6 +21,8 @@ export abstract class Device {
     private _id: DeviceId;
     private _type: DeviceType;
     private _kernels: { [key: KernelKey]: Kernel } = {};
+    private _heaps: BufferHeap<GPUBuffer | ArrayBuffer>[] = [];
+    private _heapFinalizers: FinalizationRegistry<HeapBuffer<GPUBuffer | ArrayBuffer>>;
     get id(): DeviceId {
         return this._id;
     }
@@ -32,6 +34,12 @@ export abstract class Device {
     constructor(id: DeviceId, type: DeviceType) {
         this._id = id;
         this._type = type;
+        this._heapFinalizers = new FinalizationRegistry<HeapBuffer<GPUBuffer | ArrayBuffer>>(
+            (buffer) => {
+                // console.log("Finalizing heap buffer", buffer);
+                buffer.free();
+            }
+        );
     }
     abstract alloc(byteSize: number): UntypedStorage;
     allocFor(shape: Shape, dtype: Dtype): UntypedStorage {
@@ -39,29 +47,28 @@ export abstract class Device {
         const byteSize = shapeSize(shape) * elementByteSize;
         return this.alloc(byteSize);
     }
-    heaps: BufferHeap<GPUBuffer | ArrayBuffer>[] = [];
     abstract allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer>;
-    abstract createStorage(buffer: HeapBuffer<GPUBuffer | ArrayBuffer>): UntypedStorage;
+    abstract createHeapStorage(buffer: HeapBuffer<GPUBuffer | ArrayBuffer>): UntypedStorage;
     heapAlloc(byteSize: number): UntypedStorage {
         let resultBuffer: HeapBuffer<GPUBuffer | ArrayBuffer> | null = null;
-        for (let heap of this.heaps) {
+        for (let heap of this._heaps) {
             const buffer = heap.alloc(byteSize);
             if (buffer !== null) {
                 resultBuffer = buffer;
-                // console.log("Allocated heap buffer of size", resultBuffer.byteSize);
             }
         }
         if (resultBuffer === null) {
             const heap = this.allocBufferHeap();
             // console.log("Allocated buffer heap of size", heap.size);
-            this.heaps.push(heap);
+            this._heaps.push(heap);
             resultBuffer = heap.alloc(byteSize);
             if (resultBuffer === null) {
                 throw new Error(`Out of memory when trying to allocate buffer of size ${byteSize}. Heap size is ${heap.size}.`);
             }
-            // console.log("Allocated heap buffer from fresh heap of size", resultBuffer.byteSize);
         }
-        const storage = this.createStorage(resultBuffer);
+        const storage = this.createHeapStorage(resultBuffer);
+        this._heapFinalizers.register(storage, resultBuffer);
+        // console.log("Allocated heap buffer of size", resultBuffer.byteSize);
         return storage;
     }
     getKernel(name: string, config: KernelConfigInput): Kernel {

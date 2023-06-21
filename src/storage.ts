@@ -316,6 +316,9 @@ export class HeapBuffer<T> {
         this.offset = offset;
         this.order = order;
     }
+    free(): void {
+        this.heap.free(this);
+    }
 }
 
 export class BufferHeap<T> {

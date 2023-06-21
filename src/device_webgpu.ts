@@ -85,7 +85,7 @@ export class DeviceWebGPU extends Device {
         const minOrder = Math.ceil(Math.log2(this.gpuDevice.limits.minStorageBufferOffsetAlignment));
         return new BufferHeap<GPUBuffer>(buffer, byteSize, minOrder);
     }
-    createStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
+    createHeapStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
         // return new GPUBufferStorage(buffer, this.gpuDevice);
         throw new Error("Method not implemented.");
     }

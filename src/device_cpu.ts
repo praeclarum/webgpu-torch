@@ -26,7 +26,7 @@ export class DeviceCPU extends Device {
         const minOrder = 8; // Align to 256 bytes
         return new BufferHeap<ArrayBuffer>(array, size, minOrder);
     }
-    createStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
+    createHeapStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
         return new ArrayBufferStorage(buffer);
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
