@@ -225,8 +225,8 @@ export class Tensor extends TensorBase {
         const inputBuffers = additionalInputs.map((t) =>
             d.getBufferForKernel(t.storage, t.dtype)
         );
-        const outputBuffers = [d.getBufferForKernel(this.storage, this.dtype)];
-        kernel.run(inputBuffers, params, outputBuffers);
+        // const outputBuffers = [d.getBufferForKernel(this.storage, this.dtype)];
+        kernel.run(inputBuffers, params, [this.storage]);
         return this;
     }
     runKernel(
@@ -250,11 +250,8 @@ export class Tensor extends TensorBase {
         const output0 = outputs[0];
         const outputsAreTensors = output0 instanceof Tensor;
         const providedOutputTensors = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
-            d.getBufferForKernel(t.storage, t.dtype)) : undefined;
-        const outputBuffers = kernel.run(inputBuffers, params, providedOutputTensors) as (
-            | GPUBuffer
-            | ATypedArray
-        )[];
+            t.storage) : undefined;
+        const outputBuffers = kernel.run(inputBuffers, params, providedOutputTensors);
         if (outputsAreTensors) {
             return outputs as Tensor[];
         }
@@ -267,7 +264,7 @@ export class Tensor extends TensorBase {
             return outputBuffers.map(
                 (outputBuffer, i) =>
                     new Tensor({
-                        data: this.device.getStorageFromKernel(outputBuffer, true),
+                        data: outputBuffer as UntypedStorage,
                         dtype: this.dtype,
                         shape: (outputs as Shape[])[i],
                         strides: defaultStrides((outputs as Shape[])[i]),

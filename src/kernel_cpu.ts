@@ -12,6 +12,7 @@ import {
     getShaderTypeElementByteSize,
     shaderTypeToDtype,
 } from "./kernel";
+import { UntypedStorage } from "./storage";
 
 export class KernelCPU extends Kernel {
     private _javaScriptCode: string;
@@ -26,8 +27,8 @@ export class KernelCPU extends Kernel {
     run(
         inputs: ATypedArray[],
         parameters: KernelParamsInput,
-        outputs?: ATypedArray[]
-    ): ATypedArray[] {
+        outputs?: UntypedStorage[]
+    ): UntypedStorage[] {
         // console.log("run cpu kernel", this.key);
 
         // Build the parameter environment
@@ -35,7 +36,7 @@ export class KernelCPU extends Kernel {
 
         // Build up the args
         const args: any[] = [];
-        const outputsToReturn: ATypedArray[] = [];
+        const outputsToReturn: UntypedStorage[] = [];
 
         // Get input buffers with storage usage
         this.spec.inputs.forEach((input, i) =>
@@ -57,7 +58,10 @@ export class KernelCPU extends Kernel {
                 i,
                 env
             );
-            args.push(o);
+            const arg = o.getTypedArray(
+                shaderTypeToDtype(output.shaderType)
+            );
+            args.push(arg);
             outputsToReturn.push(o);
         });
 
@@ -93,10 +97,10 @@ export class KernelCPU extends Kernel {
 
     private getStorageOutputBuffer(
         outputSpec: KernelOutputSpec,
-        providedOutput: ATypedArray | null,
+        providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
-    ): ATypedArray {
+    ): UntypedStorage {
         if (providedOutput !== null) {
             return providedOutput;
         } else {
@@ -109,10 +113,11 @@ export class KernelCPU extends Kernel {
             const outputBufferSize = outputElementByteSize * outputElementCount;
             // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
             const outputBuffer = this.device.alloc(outputBufferSize);
-            const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
-            return outputBuffer.getTypedArray(
-                shaderTypeToDtype(outputSpec.shaderType)
-            );
+            // const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
+            // return outputBuffer.getTypedArray(
+            //     shaderTypeToDtype(outputSpec.shaderType)
+            // );
+            return outputBuffer;
         }
     }
 }
