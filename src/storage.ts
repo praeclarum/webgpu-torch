@@ -282,6 +282,9 @@ export class HeapBuffer<T> {
     readonly heap: BufferHeap<T>;
     readonly offset: number;
     readonly order: number;
+    get byteSize(): number {
+        return 1 << this.order;
+    }
     constructor(heap: BufferHeap<T>, offset: number, order: number) {
         this.heap = heap;
         this.offset = offset;
@@ -340,9 +343,9 @@ export class BufferHeap<T> {
             this._minOrder,
             Math.log2(getNearestPowerOfTwo(size))
         );
-        console.log(
-            `Allocating ${size} bytes (order ${order}) for request of ${size} bytes`
-        );
+        // console.log(
+        //     `Allocating ${1 << order} bytes (order ${order}) for request of ${size} bytes`
+        // );
         let allocOrder = order;
         while (
             allocOrder < this.orderFreeLists.length &&
@@ -351,15 +354,11 @@ export class BufferHeap<T> {
             allocOrder++;
         }
         if (allocOrder === this.orderFreeLists.length) {
-            console.error(`No available memory block found.`);
+            // console.error(`No available memory block found.`);
             return null;
         }
         const offset = this.orderFreeLists[allocOrder].pop()!;
-        const result = {
-            heap: this,
-            offset: offset,
-            order: order,
-        };
+        const result = new HeapBuffer(this, offset, order);
         while (allocOrder > order) {
             allocOrder--;
             const buddyOffset = BufferHeap.getBuddyOffset(offset, allocOrder);
