@@ -23,7 +23,7 @@ def run_unary_benchmark(benchmark, inputs):
     operation = getattr(torch, inputs[1])
 
     x = torch.ones(shape, dtype=torch.float32)
-    # y = torch.zeros(shape, dtype=torch.float32)
+    y = torch.zeros(shape, dtype=torch.float32)
     if has_cuda:
         x = x.cuda()
         # y = y.cuda()
@@ -31,8 +31,8 @@ def run_unary_benchmark(benchmark, inputs):
         start = time.perf_counter()
         y = x
         for i in range(benchmark["depth"]):
-            # operation(x, out=y)
-            y = operation(y)
+            operation(x, out=y)
+            # y = operation(y)
         yar = y.cpu().tolist()
         end = time.perf_counter()
         return (end - start)*1000 / benchmark["depth"]

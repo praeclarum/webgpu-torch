@@ -39,21 +39,20 @@ export class ArrayBufferStorage extends UntypedStorage {
         super();
         if (typeof byteSize === "number") {
             this._buffer = new ArrayBuffer(byteSize as number);
-        }
-        else if (byteSize instanceof ArrayBuffer) {
+        } else if (byteSize instanceof ArrayBuffer) {
             this._buffer = byteSize;
-        }
-        else if (byteSize instanceof Uint8Array) {
+        } else if (byteSize instanceof Uint8Array) {
             this._buffer = byteSize.buffer;
-        }
-        else if (byteSize instanceof Int32Array) {
+        } else if (byteSize instanceof Int32Array) {
             this._buffer = byteSize.buffer;
-        }
-        else if (byteSize instanceof Float32Array) {
+        } else if (byteSize instanceof Float32Array) {
             this._buffer = byteSize.buffer;
-        }
-        else {
-            throw new Error(`Invalid constructor argument for ArrayBufferStorage. Expected number of bytes, ArrayBuffer, or a TypedArray. Got ${byteSize} (${(byteSize as any).constructor.name})`);
+        } else {
+            throw new Error(
+                `Invalid constructor argument for ArrayBufferStorage. Expected number of bytes, ArrayBuffer, or a TypedArray. Got ${byteSize} (${
+                    (byteSize as any).constructor.name
+                })`
+            );
         }
     }
     get isMapped(): boolean {
@@ -75,7 +74,7 @@ export class ArrayBufferStorage extends UntypedStorage {
 
 export class GPUBufferStorage extends UntypedStorage {
     private _buffer: GPUBuffer;
-    private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer|null] | null = null;
+    private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer | null] | null = null;
     private _device: GPUDevice;
     get byteSize(): number {
         return this._buffer.size;
@@ -97,9 +96,17 @@ export class GPUBufferStorage extends UntypedStorage {
         }
         return null;
     }
-    constructor(buffer: GPUBuffer, device: GPUDevice)
-    constructor(byteSize: number, device: GPUDevice, usage: GPUBufferUsageFlags, )
-    constructor(input: number|GPUBuffer, device: GPUDevice, usage?: GPUBufferUsageFlags) {
+    constructor(buffer: GPUBuffer, device: GPUDevice);
+    constructor(
+        byteSize: number,
+        device: GPUDevice,
+        usage: GPUBufferUsageFlags
+    );
+    constructor(
+        input: number | GPUBuffer,
+        device: GPUDevice,
+        usage?: GPUBufferUsageFlags
+    ) {
         super();
         this._device = device;
         if (input instanceof GPUBuffer) {
@@ -112,19 +119,27 @@ export class GPUBufferStorage extends UntypedStorage {
                     this._mappedArrayBuffer = null;
                     break;
                 case "pending":
-                    throw new Error("GPUBuffer is pending. Please wait for it to finish mapping before creating a GPUBufferStorage with it.");
+                    throw new Error(
+                        "GPUBuffer is pending. Please wait for it to finish mapping before creating a GPUBufferStorage with it."
+                    );
             }
-        }
-        else if (typeof input === "number" && usage !== undefined && device !== undefined) {
+        } else if (
+            typeof input === "number" &&
+            usage !== undefined &&
+            device !== undefined
+        ) {
             this._buffer = device.createBuffer({
                 mappedAtCreation: true,
                 size: input,
                 usage: usage,
             });
             this._mappedArrayBuffer = [this._buffer, null];
-        }
-        else {
-            throw new Error(`Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${(input as any).constructor.name})`);
+        } else {
+            throw new Error(
+                `Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${
+                    (input as any).constructor.name
+                })`
+            );
         }
     }
     get isMapped(): boolean {
@@ -141,8 +156,7 @@ export class GPUBufferStorage extends UntypedStorage {
         await mapBuffer.mapAsync(GPUMapMode.READ);
         if (mapBuffer.mapState === "mapped") {
             this._mappedArrayBuffer = [mapBuffer, null];
-        }
-        else {
+        } else {
             throw new Error("GPUBuffer failed to map");
         }
     }
@@ -177,7 +191,10 @@ export class GPUBufferStorage extends UntypedStorage {
         return readBuffer;
     }
     clone(): UntypedStorage {
-        const usage = GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC | GPUBufferUsage.STORAGE;
+        const usage =
+            GPUBufferUsage.COPY_DST |
+            GPUBufferUsage.COPY_SRC |
+            GPUBufferUsage.STORAGE;
         const cloneBuffer = this._device.createBuffer({
             mappedAtCreation: false,
             size: this._buffer.size,
@@ -214,7 +231,8 @@ export function newTypedArrayForDtype(length: number, dtype: Dtype) {
 export function newTypedArrayFromArray(
     data: TensorArrayData | null,
     dtype: Dtype,
-    device: Device): { storage: UntypedStorage; shape: number[]; strides: number[] } {
+    device: Device
+): { storage: UntypedStorage; shape: number[]; strides: number[] } {
     const shape: number[] = [];
     function getShape(data: TensorArrayData | number) {
         if (typeof data === "number") {
@@ -243,9 +261,10 @@ export function newTypedArrayFromArray(
             }
             if (d instanceof Array) {
                 flatten(d);
-            }
-            else {
-                throw new Error(`Invalid data type: ${d} (${(d as any).constructor.name})`);
+            } else {
+                throw new Error(
+                    `Invalid data type: ${d} (${(d as any).constructor.name})`
+                );
             }
         }
     }
@@ -253,4 +272,115 @@ export function newTypedArrayFromArray(
         flatten(data);
     }
     return { storage, shape, strides };
+}
+
+function getNearestPowerOfTwo(size: GPUSize64): GPUSize64 {
+    return Math.pow(2, Math.ceil(Math.log2(size)));
+}
+
+export class HeapBuffer<T> {
+    readonly heap: BufferHeap<T>;
+    readonly offset: number;
+    readonly order: number;
+    constructor(heap: BufferHeap<T>, offset: number, order: number) {
+        this.heap = heap;
+        this.offset = offset;
+        this.order = order;
+    }
+}
+
+export class BufferHeap<T> {
+    private readonly _heapSize: number;
+    private readonly _heapBuffer: T;
+    private readonly _minOrder: number;
+    private orderFreeLists: number[][];
+
+    get buffer(): T {
+        return this._heapBuffer;
+    }
+    get size(): number {
+        return this._heapSize;
+    }
+
+    constructor(heapBuffer: T, heapSize: number, minOrder: number) {
+        this._heapSize = getNearestPowerOfTwo(heapSize);
+        if (this._heapSize > heapSize) {
+            throw new Error(
+                `Requested heap size ${heapSize} is not a power of two`
+            );
+        }
+
+        // if (this._heapSize > gpuDevice.limits.maxBufferSize) {
+        //     throw new Error(
+        //         `Requested heap size ${heapSize} is larger than maximum buffer size ${gpuDevice.limits.maxBufferSize}`
+        //     );
+        // }
+        // this._heapBuffer = gpuDevice.createBuffer({
+        //     mappedAtCreation: false,
+        //     size: this._heapSize,
+        //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        // });
+        this._heapBuffer = heapBuffer;
+        // this._minOrder = Math.ceil(Math.log2(gpuDevice.limits.minStorageBufferOffsetAlignment));
+        this._minOrder = minOrder;
+        this.orderFreeLists = [];
+        const maxOrder = Math.log2(this._heapSize);
+        for (let i = 0; i <= maxOrder; ++i) {
+            this.orderFreeLists.push([]);
+        }
+        this.orderFreeLists[maxOrder].push(0);
+    }
+
+    private static getBuddyOffset(offset: number, order: number): number {
+        return offset ^ (1 << order);
+    }
+
+    alloc(size: number): HeapBuffer<T> | null {
+        const order = Math.max(
+            this._minOrder,
+            Math.log2(getNearestPowerOfTwo(size))
+        );
+        console.log(
+            `Allocating ${size} bytes (order ${order}) for request of ${size} bytes`
+        );
+        let allocOrder = order;
+        while (
+            allocOrder < this.orderFreeLists.length &&
+            this.orderFreeLists[allocOrder].length === 0
+        ) {
+            allocOrder++;
+        }
+        if (allocOrder === this.orderFreeLists.length) {
+            console.error(`No available memory block found.`);
+            return null;
+        }
+        const offset = this.orderFreeLists[allocOrder].pop()!;
+        const result = {
+            heap: this,
+            offset: offset,
+            order: order,
+        };
+        while (allocOrder > order) {
+            allocOrder--;
+            const buddyOffset = BufferHeap.getBuddyOffset(offset, allocOrder);
+            this.orderFreeLists[allocOrder].push(buddyOffset);
+        }
+        return result;
+    }
+
+    free(buffer: HeapBuffer<T>): void {
+        let offset = buffer.offset;
+        let order = buffer.order;
+        while (order < this.orderFreeLists.length - 1) {
+            const buddyOffset = BufferHeap.getBuddyOffset(offset, order);
+            const index = this.orderFreeLists[order].indexOf(buddyOffset);
+            if (index === -1) {
+                break;
+            }
+            this.orderFreeLists[order].splice(index, 1);
+            order++;
+            offset = Math.min(offset, buddyOffset);
+        }
+        this.orderFreeLists[order].push(offset);
+    }
 }

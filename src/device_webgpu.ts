@@ -6,8 +6,9 @@ import { KernelWebGPU } from "./kernel_webgpu";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;
-    private _bufferPools: { [size: number]: { usage: number; buffer: GPUBuffer }[] } =
-        {};
+    private _bufferPools: {
+        [size: number]: { usage: number; buffer: GPUBuffer }[];
+    } = {};
     private _finalizationRegistry: FinalizationRegistry<GPUBuffer>;
     get gpuDevice(): GPUDevice {
         return this._device;
