@@ -25,7 +25,7 @@ export class KernelCPU extends Kernel {
     }
 
     run(
-        inputs: ATypedArray[],
+        inputs: UntypedStorage[],
         parameters: KernelParamsInput,
         outputs?: UntypedStorage[]
     ): UntypedStorage[] {
@@ -39,16 +39,18 @@ export class KernelCPU extends Kernel {
         const outputsToReturn: UntypedStorage[] = [];
 
         // Get input buffers with storage usage
-        this.spec.inputs.forEach((input, i) =>
-            args.push(
-                this.getStorageInputBuffer(
-                    input,
-                    inputs[i] ? inputs[i] : null,
-                    i,
-                    env
-                )
-            )
-        );
+        this.spec.inputs.forEach((input, i) => {
+            const o = this.getStorageInputBuffer(
+                input,
+                inputs[i] ? inputs[i] : null,
+                i,
+                env
+            );
+            const arg = o.getTypedArray(
+                shaderTypeToDtype(input.shaderType)
+            );
+            args.push(arg);
+        });
 
         // Get output buffers with storage usage
         this.spec.outputs.forEach((output, i) => {
@@ -83,10 +85,10 @@ export class KernelCPU extends Kernel {
 
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
-        providedInput: ATypedArray | null,
+        providedInput: UntypedStorage | null,
         inputIndex: number,
         env: EvalEnv
-    ): ATypedArray {
+    ): UntypedStorage {
         if (providedInput === null) {
             throw new Error(
                 `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`

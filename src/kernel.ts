@@ -100,7 +100,7 @@ export abstract class Kernel {
     }
 
     abstract run(
-        inputs: (GPUBuffer | ATypedArray)[],
+        inputs: UntypedStorage[],
         parameters: KernelParamsInput,
         outputs?: UntypedStorage[]
     ): UntypedStorage[];

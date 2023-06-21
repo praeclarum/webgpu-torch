@@ -72,7 +72,7 @@ export class KernelWebGPU extends Kernel {
         });
     }
     run(
-        inputs: GPUBuffer[],
+        inputs: UntypedStorage[],
         parameters: KernelParamsInput,
         outputs?: UntypedStorage[]
     ): UntypedStorage[] {
@@ -184,23 +184,24 @@ export class KernelWebGPU extends Kernel {
     }
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
-        providedInput: GPUBuffer | null,
+        providedInput: UntypedStorage | null,
         inputIndex: number,
         env: EvalEnv
-    ): GPUBuffer {
+    ): UntypedStorage {
         if (providedInput === null) {
             throw new Error(
                 `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
             );
         }
-        if (providedInput.usage & GPUBufferUsage.STORAGE) {
-            if (providedInput.mapState === "mapped") {
-                providedInput.unmap();
-            }
-            return providedInput;
-        } else {
-            throw new Error("Provided input buffer is not a storage buffer");
-        }
+        // if (providedInput.usage & GPUBufferUsage.STORAGE) {
+        //     if (providedInput.mapState === "mapped") {
+        //         providedInput.unmap();
+        //     }
+        //     return providedInput;
+        // } else {
+        //     throw new Error("Provided input buffer is not a storage buffer");
+        // }
+        return providedInput;
     }
     private getStorageOutputBuffer(
         outputSpec: KernelOutputSpec,
@@ -238,17 +239,20 @@ export class KernelWebGPU extends Kernel {
         }
     }
     private createBindGroup(
-        inputBuffers: GPUBuffer[],
+        inputBuffers: UntypedStorage[],
         paramsBuffer: GPUBuffer,
         outputBuffers: UntypedStorage[]
     ): GPUBindGroup {
         const entries: GPUBindGroupEntry[] = [];
         let bindingIndex = 0;
         for (let i = 0; i < inputBuffers.length; i++, bindingIndex++) {
+            const inputBuffer = inputBuffers[i] as GPUBufferStorage;
             entries.push({
                 binding: bindingIndex,
                 resource: {
-                    buffer: inputBuffers[i],
+                    buffer: inputBuffer.gpuBuffer,
+                    offset: inputBuffer.byteOffset,
+                    size: inputBuffer.byteSize,
                 },
             });
         }

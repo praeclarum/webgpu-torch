@@ -220,12 +220,8 @@ export class Tensor extends TensorBase {
         if (this.requiresGrad && isGradEnabled()) {
             throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
         }
-        const d = this.device;
         const kernel = this.device.getKernel(name, config);
-        const inputBuffers = additionalInputs.map((t) =>
-            d.getBufferForKernel(t.storage, t.dtype)
-        );
-        // const outputBuffers = [d.getBufferForKernel(this.storage, this.dtype)];
+        const inputBuffers = additionalInputs.map((t) => t.storage);
         kernel.run(inputBuffers, params, [this.storage]);
         return this;
     }
@@ -239,16 +235,13 @@ export class Tensor extends TensorBase {
         const d = this.device;
         const kernel = d.getKernel(name, config);
         const inputBuffers = [
-            d.getBufferForKernel(this.storage, this.dtype),
-            ...additionalInputs.map((t) =>
-                d.getBufferForKernel(t.storage, t.dtype)
-            ),
+            this.storage,
+            ...additionalInputs.map((t) =>t.storage),
         ];
         if (outputs.length === 0) {
             throw new Error(`Cannot run kernel "${name}" without any outputs`);
         }
-        const output0 = outputs[0];
-        const outputsAreTensors = output0 instanceof Tensor;
+        const outputsAreTensors = outputs[0] instanceof Tensor;
         const providedOutputTensors = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
             t.storage) : undefined;
         const outputBuffers = kernel.run(inputBuffers, params, providedOutputTensors);
