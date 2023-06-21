@@ -41,20 +41,25 @@ export abstract class Device {
     }
     heaps: BufferHeap<GPUBuffer | ArrayBuffer>[] = [];
     abstract allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer>;
-    heapAlloc(byteSize: number): HeapBuffer<GPUBuffer | ArrayBuffer> {
+    abstract createStorage(buffer: HeapBuffer<GPUBuffer | ArrayBuffer>): UntypedStorage;
+    heapAlloc(byteSize: number): UntypedStorage {
+        let resultBuffer: HeapBuffer<GPUBuffer | ArrayBuffer> | null = null;
         for (let heap of this.heaps) {
             const buffer = heap.alloc(byteSize);
             if (buffer !== null) {
-                return buffer;
+                resultBuffer = buffer;
             }
         }
-        const heap = this.allocBufferHeap();
-        this.heaps.push(heap);
-        const result = heap.alloc(byteSize);
-        if (result === null) {
-            throw new Error(`Out of memory when trying to allocate buffer of size ${byteSize}. Heap size is ${heap.size}.`);
+        if (resultBuffer === null) {
+            const heap = this.allocBufferHeap();
+            // console.log("Allocated GPU buffer heap of size", heap.size);
+            this.heaps.push(heap);
+            resultBuffer = heap.alloc(byteSize);
+            if (resultBuffer === null) {
+                throw new Error(`Out of memory when trying to allocate buffer of size ${byteSize}. Heap size is ${heap.size}.`);
+            }
         }
-        return result;
+        return this.createStorage(resultBuffer);
     }
     getKernel(name: string, config: KernelConfigInput): Kernel {
         const spec = kernelRegistry[name];

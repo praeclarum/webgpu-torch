@@ -1,8 +1,8 @@
 import { Device } from "./device";
-import type { ATypedArray, Dtype } from "./dtype";
-import { ArrayBufferStorage, BufferHeap, UntypedStorage } from "./storage";
-import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import { ArrayBufferStorage, BufferHeap, HeapBuffer, UntypedStorage } from "./storage";
 import { KernelCPU } from "./kernel_cpu";
+import type { ATypedArray, Dtype } from "./dtype";
+import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 
 export class DeviceCPU extends Device {
     get workgroupMaxSize(): [number, number, number] {
@@ -25,6 +25,9 @@ export class DeviceCPU extends Device {
         const array = new ArrayBuffer(size);
         const minOrder = 8; // Align to 256 bytes
         return new BufferHeap<ArrayBuffer>(array, size, minOrder);
+    }
+    createStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
+        return new ArrayBufferStorage(buffer);
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);

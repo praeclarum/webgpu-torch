@@ -1,6 +1,6 @@
 import { Device } from "./device";
 import type { ATypedArray, Dtype } from "./dtype";
-import { GPUBufferStorage, UntypedStorage, BufferHeap } from "./storage";
+import { GPUBufferStorage, UntypedStorage, BufferHeap, HeapBuffer } from "./storage";
 import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelWebGPU } from "./kernel_webgpu";
 
@@ -77,7 +77,6 @@ export class DeviceWebGPU extends Device {
     }
     allocBufferHeap(): BufferHeap<GPUBuffer> {
         const byteSize = this.gpuDevice.limits.maxBufferSize;
-        console.log("Creating GPU buffer heap of size", byteSize);
         const buffer = this._device.createBuffer({
             mappedAtCreation: true,
             size: byteSize,
@@ -85,6 +84,10 @@ export class DeviceWebGPU extends Device {
         });
         const minOrder = Math.ceil(Math.log2(this.gpuDevice.limits.minStorageBufferOffsetAlignment));
         return new BufferHeap<GPUBuffer>(buffer, byteSize, minOrder);
+    }
+    createStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
+        // return new GPUBufferStorage(buffer, this.gpuDevice);
+        throw new Error("Method not implemented.");
     }
     getPooledBuffer(descriptor: GPUBufferDescriptor): GPUBuffer {
         const sizeRaw = descriptor.size;

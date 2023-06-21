@@ -5,6 +5,7 @@ import { Shape, defaultStrides, shapeSize } from "./shape";
 export type TensorArrayData = Array<number | TensorArrayData>;
 
 export abstract class UntypedStorage {
+    abstract get byteOffset(): number;
     abstract get byteSize(): number;
     abstract get mappedArrayBuffer(): ArrayBuffer | null;
     abstract get isMapped(): boolean;
@@ -25,28 +26,44 @@ export abstract class UntypedStorage {
 }
 
 export class ArrayBufferStorage extends UntypedStorage {
-    private _buffer: ArrayBuffer;
+    private readonly _buffer: ArrayBuffer;
+    private readonly _byteOffset: number = 0;
+    private readonly _byteSize: number;
+    private readonly _heapBuffer: HeapBuffer<ArrayBuffer> | null = null;
     get cpuBuffer(): ArrayBuffer {
         return this._buffer;
     }
+    get byteOffset(): number {
+        return this._byteOffset;
+    }
     get byteSize(): number {
-        return this._buffer.byteLength;
+        return this._byteSize;
     }
     get mappedArrayBuffer(): ArrayBuffer | null {
         return this._buffer;
     }
-    constructor(byteSize: number | ArrayBuffer | ATypedArray) {
+    constructor(byteSize: number | ArrayBuffer | ATypedArray | HeapBuffer<ArrayBuffer>) {
         super();
         if (typeof byteSize === "number") {
             this._buffer = new ArrayBuffer(byteSize as number);
+            this._byteSize = byteSize;
+        } else if (byteSize instanceof HeapBuffer) {
+            this._buffer = byteSize.heap.buffer;
+            this._byteOffset = byteSize.offset;
+            this._byteSize = byteSize.byteSize;
+            this._heapBuffer = byteSize;
         } else if (byteSize instanceof ArrayBuffer) {
             this._buffer = byteSize;
+            this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Uint8Array) {
             this._buffer = byteSize.buffer;
+            this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Int32Array) {
             this._buffer = byteSize.buffer;
+            this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Float32Array) {
             this._buffer = byteSize.buffer;
+            this._byteSize = byteSize.byteLength;
         } else {
             throw new Error(
                 `Invalid constructor argument for ArrayBufferStorage. Expected number of bytes, ArrayBuffer, or a TypedArray. Got ${byteSize} (${
@@ -73,11 +90,16 @@ export class ArrayBufferStorage extends UntypedStorage {
 }
 
 export class GPUBufferStorage extends UntypedStorage {
-    private _buffer: GPUBuffer;
+    private readonly _byteOffset: number = 0;
+    private readonly _byteSize: number;
+    private readonly _buffer: GPUBuffer;
     private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer | null] | null = null;
     private _device: GPUDevice;
     get byteSize(): number {
-        return this._buffer.size;
+        return this._byteSize;
+    }
+    get byteOffset(): number {
+        return this._byteOffset;
     }
     get gpuBuffer(): GPUBuffer {
         return this._buffer;
@@ -141,6 +163,7 @@ export class GPUBufferStorage extends UntypedStorage {
                 })`
             );
         }
+        this._byteSize = this._buffer.size;
     }
     get isMapped(): boolean {
         return this._buffer.mapState === "mapped";
