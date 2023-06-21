@@ -11,6 +11,7 @@ import {
     getKernelShaderCode,
     getShaderTypeElementByteSize,
 } from "./kernel";
+import { GPUBufferStorage, UntypedStorage } from "./storage";
 
 export class KernelWebGPU extends Kernel {
     private _gpuDevice: GPUDevice;
@@ -73,8 +74,8 @@ export class KernelWebGPU extends Kernel {
     run(
         inputs: GPUBuffer[],
         parameters: KernelParamsInput,
-        outputs?: GPUBuffer[]
-    ): GPUBuffer[] {
+        outputs?: UntypedStorage[]
+    ): UntypedStorage[] {
         const runId = this._runId++;
         // console.log("run gpu kernel", this.key);
 
@@ -203,19 +204,20 @@ export class KernelWebGPU extends Kernel {
     }
     private getStorageOutputBuffer(
         outputSpec: KernelOutputSpec,
-        providedOutput: GPUBuffer | null,
+        providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
-    ): GPUBuffer {
+    ): UntypedStorage {
         if (providedOutput !== null) {
-            if (providedOutput.usage & GPUBufferUsage.STORAGE) {
-                providedOutput.unmap();
-                return providedOutput;
-            } else {
-                throw new Error(
-                    "Provided output buffer is not a storage buffer"
-                );
-            }
+            return providedOutput;
+            // if (providedOutput.usage & GPUBufferUsage.STORAGE) {
+            //     providedOutput.unmap();
+            //     return providedOutput;
+            // } else {
+            //     throw new Error(
+            //         "Provided output buffer is not a storage buffer"
+            //     );
+            // }
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
@@ -225,18 +227,20 @@ export class KernelWebGPU extends Kernel {
             );
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
-            const device = this.device as DeviceWebGPU;
-            const outputBuffer = device.getPooledBuffer({
-                size: outputBufferSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-            });
-            return outputBuffer;
+            // const device = this.device as DeviceWebGPU;
+            // const outputBuffer = device.getPooledBuffer({
+            //     size: outputBufferSize,
+            //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+            // });
+            // return outputBuffer;
+            const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
+            return outputHeapBuffer;
         }
     }
     private createBindGroup(
         inputBuffers: GPUBuffer[],
         paramsBuffer: GPUBuffer,
-        outputBuffers: GPUBuffer[]
+        outputBuffers: UntypedStorage[]
     ): GPUBindGroup {
         const entries: GPUBindGroupEntry[] = [];
         let bindingIndex = 0;
@@ -249,13 +253,17 @@ export class KernelWebGPU extends Kernel {
             });
         }
         for (let i = 0; i < this.spec.outputs.length; i++, bindingIndex++) {
-            const outputBuffer = outputBuffers[i];
-            entries.push({
+            const outputBuffer = outputBuffers[i] as GPUBufferStorage;
+            const entry = {
                 binding: bindingIndex,
                 resource: {
-                    buffer: outputBuffer,
+                    buffer: outputBuffer.gpuBuffer,
+                    offset: outputBuffer.byteOffset,
+                    size: outputBuffer.byteSize,
                 },
-            });
+            };
+            // console.log("output binding", entry);
+            entries.push(entry);
         }
         entries.push({
             binding: bindingIndex,

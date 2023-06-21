@@ -102,8 +102,8 @@ export abstract class Kernel {
     abstract run(
         inputs: (GPUBuffer | ATypedArray)[],
         parameters: KernelParamsInput,
-        outputs?: (GPUBuffer | UntypedStorage)[]
-    ): (GPUBuffer | UntypedStorage)[];
+        outputs?: UntypedStorage[]
+    ): UntypedStorage[];
 
     protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
         const env: EvalEnv = Object.assign({}, this._configEnv);

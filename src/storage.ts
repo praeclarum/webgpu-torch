@@ -122,13 +122,14 @@ export class GPUBufferStorage extends UntypedStorage {
         return null;
     }
     constructor(buffer: GPUBuffer, device: GPUDevice);
+    constructor(buffer: HeapBuffer<GPUBuffer>, device: GPUDevice);
     constructor(
         byteSize: number,
         device: GPUDevice,
         usage: GPUBufferUsageFlags
     );
     constructor(
-        input: number | GPUBuffer,
+        input: number | GPUBuffer | HeapBuffer<GPUBuffer>,
         device: GPUDevice,
         usage?: GPUBufferUsageFlags
     ) {
@@ -136,6 +137,7 @@ export class GPUBufferStorage extends UntypedStorage {
         this._device = device;
         if (input instanceof GPUBuffer) {
             this._buffer = input;
+            this._byteSize = this._buffer.size;
             switch (this._buffer.mapState) {
                 case "mapped":
                     this._mappedArrayBuffer = [this._buffer, null];
@@ -148,6 +150,12 @@ export class GPUBufferStorage extends UntypedStorage {
                         "GPUBuffer is pending. Please wait for it to finish mapping before creating a GPUBufferStorage with it."
                     );
             }
+        } else if (input instanceof HeapBuffer) {
+            this._buffer = input.heap.buffer;
+            this._byteOffset = input.offset;
+            this._byteSize = input.byteSize;
+            // console.log(`Created GPUBufferStorage from HeapBuffer with offset ${input.offset}, size ${input.byteSize}`);
+            this._mappedArrayBuffer = null;
         } else if (
             typeof input === "number" &&
             usage !== undefined &&
@@ -159,6 +167,7 @@ export class GPUBufferStorage extends UntypedStorage {
                 usage: usage,
             });
             this._mappedArrayBuffer = [this._buffer, null];
+            this._byteSize = this._buffer.size;
         } else {
             throw new Error(
                 `Invalid constructor arguments for GPUBufferStorage. Expected GPUBuffer, or byteSize, usage, and device. Got ${input} (${
@@ -166,7 +175,6 @@ export class GPUBufferStorage extends UntypedStorage {
                 })`
             );
         }
-        this._byteSize = this._buffer.size;
     }
     get isMapped(): boolean {
         return this._buffer.mapState === "mapped";

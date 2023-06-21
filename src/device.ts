@@ -36,7 +36,7 @@ export abstract class Device {
         this._type = type;
         this._heapFinalizers = new FinalizationRegistry<HeapBuffer<GPUBuffer | ArrayBuffer>>(
             (buffer) => {
-                // console.log("Finalizing heap buffer", buffer);
+                console.log("Finalizing heap buffer", buffer);
                 buffer.free();
             }
         );
