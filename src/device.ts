@@ -1,6 +1,6 @@
 import { Shape, shapeSize } from "./shape";
 import { ATypedArray, Dtype, dtypeByteSize } from "./dtype";
-import type { UntypedStorage } from "./storage";
+import type { UntypedStorage, BufferHeap, HeapBuffer } from "./storage";
 import {
     Kernel,
     KernelConfig,
@@ -38,6 +38,23 @@ export abstract class Device {
         const elementByteSize = dtypeByteSize(dtype);
         const byteSize = shapeSize(shape) * elementByteSize;
         return this.alloc(byteSize);
+    }
+    heaps: BufferHeap<GPUBuffer | ArrayBuffer>[] = [];
+    abstract allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer>;
+    heapAlloc(byteSize: number): HeapBuffer<GPUBuffer | ArrayBuffer> {
+        for (let heap of this.heaps) {
+            const buffer = heap.alloc(byteSize);
+            if (buffer !== null) {
+                return buffer;
+            }
+        }
+        const heap = this.allocBufferHeap();
+        this.heaps.push(heap);
+        const result = heap.alloc(byteSize);
+        if (result === null) {
+            throw new Error(`Out of memory when trying to allocate buffer of size ${byteSize}. Heap size is ${heap.size}.`);
+        }
+        return result;
     }
     getKernel(name: string, config: KernelConfigInput): Kernel {
         const spec = kernelRegistry[name];

@@ -1,6 +1,6 @@
 import { Device } from "./device";
 import type { ATypedArray, Dtype } from "./dtype";
-import { ArrayBufferStorage, UntypedStorage } from "./storage";
+import { ArrayBufferStorage, BufferHeap, UntypedStorage } from "./storage";
 import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelCPU } from "./kernel_cpu";
 
@@ -19,6 +19,12 @@ export class DeviceCPU extends Device {
     }
     alloc(byteSize: number): UntypedStorage {
         return new ArrayBufferStorage(byteSize);
+    }
+    allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer> {
+        const size = 256*1024*1024;
+        const array = new ArrayBuffer(size);
+        const minOrder = 8; // Align to 256 bytes
+        return new BufferHeap<ArrayBuffer>(array, size, minOrder);
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);
