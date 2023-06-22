@@ -6,16 +6,20 @@ import type { UntypedStorage } from "./storage";
 
 type NodeId = number;
 
+export type GraphNodeOutputRef = {node: GraphNode, outputIndex: number};
+export type GraphNodeOutputSpec = {dtype: Dtype, shape: Shape, strides: Strides};
+
 export abstract class GraphNode {
     readonly id: NodeId;
     private static nextId = 0;
-    abstract get inputs(): GraphNode[];
     abstract get device(): Device;
-    abstract get shape(): Shape;
-    abstract get strides(): Shape;
+    abstract get inputs(): GraphNodeOutputRef[];
+    abstract get outputs(): GraphNodeOutputSpec[];
+    // abstract get shape(): Shape;
+    // abstract get strides(): Shape;
+    // abstract get dtype(): Dtype;
     abstract get storageAvailable(): boolean;
-    abstract get storage(): UntypedStorage;
-    abstract get dtype(): Dtype;
+    abstract get storages(): UntypedStorage[];
     abstract get isSource(): boolean;
     get isComputed(): boolean {
         return !this.isSource;
@@ -26,33 +30,25 @@ export abstract class GraphNode {
 }
 
 export class SourceNode extends GraphNode {
-    private readonly _shape: Shape;
-    private readonly _strides: Strides;
-    private readonly _storage: UntypedStorage;
-    private readonly _dtype: Dtype;
+    private readonly _outputs: GraphNodeOutputSpec[];
+    private readonly _storages: UntypedStorage[];
     get isSource(): boolean {
         return true;
     }
-    get inputs(): GraphNode[] {
+    get device(): Device {
+        return this._storages[0].device;
+    }
+    get inputs(): GraphNodeOutputRef[] {
         return [];
     }
-    get device(): Device {
-        return this._storage.device;
-    }
-    get shape(): Shape {
-        return this._shape;
-    }
-    get strides(): Strides {
-        return this._strides;
+    get outputs(): GraphNodeOutputSpec[] {
+        return this._outputs;
     }
     get storageAvailable(): boolean {
         return true;
     }
-    get storage(): UntypedStorage {
-        return this._storage;
-    }
-    get dtype(): Dtype {
-        return this._dtype;
+    get storages(): UntypedStorage[] {
+        return this._storages;
     }
     constructor(
         storage: UntypedStorage,
@@ -61,10 +57,8 @@ export class SourceNode extends GraphNode {
         strides: Strides
     ) {
         super();
-        this._shape = shape;
-        this._strides = strides;
-        this._storage = storage;
-        this._dtype = dtype;
+        this._outputs = [{dtype, shape, strides}];
+        this._storages = [storage];
     }
 }
 
@@ -83,11 +77,9 @@ function setsAreEqual<T>(a: Set<T>, b: Set<T>) {
 export class ComputedNode extends GraphNode {
     readonly kernel: Kernel;
     readonly params: KernelParamsInput;
-    readonly inputs: GraphNode[];
-    private readonly _shape: Shape;
-    private readonly _strides: Strides;
-    private readonly _dtype: Dtype;
-    private _storage: UntypedStorage | null = null;
+    readonly inputs: GraphNodeOutputRef[];
+    private readonly _outputs: GraphNodeOutputSpec[];
+    private _storages: UntypedStorage[] | null = null;
     get isSource(): boolean {
         return false;
     }
@@ -95,38 +87,33 @@ export class ComputedNode extends GraphNode {
         return this.kernel.device;
     }
     get storageAvailable(): boolean {
-        return this._storage !== null;
+        return this._storages !== null;
     }
-    get storage(): UntypedStorage {
-        if (this._storage === null) {
-            this._storage = this.run();
+    get storages(): UntypedStorage[] {
+        if (this._storages === null) {
+            this._storages = this.run();
         }
-        return this._storage;
+        return this._storages;
     }
-    get shape(): Shape {
-        return this._shape;
-    }
-    get strides(): Strides {
-        return this._strides;
-    }
-    get dtype(): Dtype {
-        return this._dtype;
+    get outputs(): GraphNodeOutputSpec[] {
+        return this._outputs;
     }
     constructor(
         kernel: Kernel,
-        inputs: GraphNode[],
+        inputs: GraphNodeOutputRef[],
         params: KernelParamsInput,
-        outputShape: Shape
+        outputs: GraphNodeOutputSpec[]
     ) {
         super();
         this.kernel = kernel;
-        this._dtype = shaderTypeToDtype(this.kernel.spec.outputs[0].shaderType);
         this.params = params;
         this.inputs = inputs;
-        this._shape = outputShape;
-        this._strides = defaultStrides(outputShape);
+        this._outputs = outputs;
+        // this._dtype = shaderTypeToDtype(this.kernel.spec.outputs[0].shaderType);
+        // this._shapes = outputShapes;
+        // this._strides = defaultStrides(outputShape);
     }
-    private run(): UntypedStorage {
+    private run(): UntypedStorage[] {
         // const inputs = this.inputs.map((input) => input.storage);
         // const outputs = this.kernel.run(inputs, this.params);
         const device = this.device;
@@ -153,26 +140,26 @@ export class ComputedNode extends GraphNode {
                 temporaryStoragePool[byteSize].push(storage);
             }
         };
-        const computedStorages: {[nodeId: number]: UntypedStorage} = {};
+        const computedStorages: {[nodeId: number]: UntypedStorage[]} = {};
         const n = depthFirstNodes.length;
         for (let i = 0; i < n; i++) {
             const node = depthFirstNodes[i];
             const nodeId = node.id;
             // Easy case, we already have the storage for this node.
             if (nodeId in nodesWithStorage) {
-                computedStorages[nodeId] = nodesWithStorage[nodeId].storage;
+                computedStorages[nodeId] = nodesWithStorage[nodeId].storages;
                 continue;
             }
             const inputs = node.inputs.map((input, j) => {
-                const inputS = computedStorages[input.id];
+                const inputS = computedStorages[input.node.id][input.outputIndex];
                 if (inputS === undefined) {
                     throw new Error(`Input #${j} of node ${this.id} with kernel \"${this.kernel.spec.name}\" not computed yet`);
                 }
                 return inputS;
             });
-            const output = alloc(dtypeByteSize(node.dtype) * shapeSize(node.shape));
-            this.kernel.run(inputs, this.params, [output]);
-            computedStorages[nodeId] = output;
+            const outputs = this.outputs.map(output => alloc(dtypeByteSize(output.dtype) * shapeSize(output.shape)));
+            this.kernel.run(inputs, this.params, outputs);
+            computedStorages[nodeId] = outputs;
             // Free any nodes that are not live anymore.
             for (let inLiveId of liveness.ins[i]) {
                 if (inLiveId in nodesWithStorage) {
@@ -181,8 +168,11 @@ export class ComputedNode extends GraphNode {
                 if (liveness.outs[i].has(inLiveId)) {
                     continue;
                 }
-                free(computedStorages[inLiveId]);
+                const storagesToFree = computedStorages[inLiveId];
                 delete computedStorages[inLiveId];
+                for (let storage of storagesToFree) {
+                    free(storage);
+                }
             }
         }
         return computedStorages[this.id];
@@ -200,7 +190,7 @@ export class ComputedNode extends GraphNode {
                 nodesWithStorage[node.id] = node;
             } else {
                 for (let input of node.inputs) {
-                    topoSort(input);
+                    topoSort(input.node);
                 }
             }
             depthFirstNodes.push(node);
@@ -236,7 +226,7 @@ export class ComputedNode extends GraphNode {
                 const nins = new Set<NodeId>(nouts);
                 nins.delete(node.id);
                 for (let input of node.inputs) {
-                    nins.add(input.id);
+                    nins.add(input.node.id);
                 }
                 changesOccurred = changesOccurred || !setsAreEqual(nins, ins[i]);
                 ins[i] = nins;

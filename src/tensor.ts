@@ -9,11 +9,11 @@ import {
     newTypedArrayFromArray,
 } from "./storage";
 import { type GradientFunction, type GradientContext, isGradEnabled } from "./autograd";
-import type { KernelConfigInput, KernelParamsInput } from "./kernel";
+import { shaderTypeToDtype, type KernelConfigInput, type KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
-import { GraphNode, SourceNode, ComputedNode } from "./graph";
+import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec } from "./graph";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -41,14 +41,14 @@ export class Tensor extends TensorBase {
     private _gradCtx: GradientContext | null;
     public grad: Tensor | null = null;
 
-    private _node: GraphNode;
+    private _node: GraphNodeOutputRef;
 
-    get node(): GraphNode {
+    get node(): GraphNodeOutputRef {
         return this._node;
     }
     get storage(): UntypedStorage {
         // return this._storage;
-        return this.node.storage;
+        return this.node.node.storages[this.node.outputIndex];
     }
     get dtype(): Dtype {
         return this._dtype;
@@ -96,7 +96,7 @@ export class Tensor extends TensorBase {
         return this._gradFunc;
     }
 
-    constructor(node: GraphNode)
+    constructor(node: GraphNodeOutputRef)
     constructor(spec: TensorSpec)
     constructor(
         array: TensorData,
@@ -104,7 +104,7 @@ export class Tensor extends TensorBase {
         device?: Deviceish,
         requiresGrad?: boolean)
     constructor(
-        arrayOrSpec: TensorData | TensorSpec | GraphNode,
+        arrayOrSpec: TensorData | TensorSpec | GraphNodeOutputRef,
         dtype?: Dtype,
         device?: Deviceish,
         requiresGrad?: boolean
@@ -120,12 +120,17 @@ export class Tensor extends TensorBase {
             this._dtype = dt;
             this._shape = array.shape;
             this._strides = array.strides;
-            this._node = new SourceNode(array.storage, this._dtype, this._shape, this._strides);
-        } else if (arrayOrSpec instanceof GraphNode) {
-            this._dtype = arrayOrSpec.dtype;
-            this._shape = arrayOrSpec.shape;
-            this._strides = arrayOrSpec.strides;
-            this._node = arrayOrSpec;
+            this._node = {
+                node: new SourceNode(array.storage, this._dtype, this._shape, this._strides),
+                outputIndex: 0
+            };
+        } else if (arrayOrSpec.hasOwnProperty("node") && (arrayOrSpec as any).node instanceof GraphNode) {
+            const noder = arrayOrSpec as GraphNodeOutputRef;
+            const spec = noder.node.outputs[noder.outputIndex];
+            this._dtype = spec.dtype;
+            this._shape = spec.shape;
+            this._strides = spec.strides;
+            this._node = noder;
         } else if (arrayOrSpec.hasOwnProperty("data")) {
             const jdata = arrayOrSpec as TensorSpec;
             d = jdata.device ? getDevice(jdata.device) : d;
@@ -149,7 +154,10 @@ export class Tensor extends TensorBase {
             } else {
                 throw new Error("Cannot create tensor from json data " + jdata);
             }
-            this._node = new SourceNode(storage, this._dtype, this._shape, this._strides);
+            this._node = {
+                node: new SourceNode(storage, this._dtype, this._shape, this._strides),
+                outputIndex: 0
+            };
         } else {
             throw new Error(
                 "Invalid data type for Tensor constructor. Expected an array of values or a json object with a 'data' property."
@@ -248,42 +256,71 @@ export class Tensor extends TensorBase {
         outputs: Shape[] | Tensor[],
         ...additionalInputs: Tensor[]
     ): Tensor[] {
-        const d = this.device;
-        const kernel = d.getKernel(name, config);
-        const inputBuffers = [
-            this.storage,
-            ...additionalInputs.map((t) =>t.storage),
-        ];
         if (outputs.length === 0) {
             throw new Error(`Cannot run kernel "${name}" without any outputs`);
         }
+        const d = this.device;
+        const kernel = d.getKernel(name, config);
         const outputsAreTensors = outputs[0] instanceof Tensor;
-        const providedOutputTensors = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
-            t.storage) : undefined;
-        const outputBuffers = kernel.run(inputBuffers, params, providedOutputTensors);
-        if (outputsAreTensors) {
-            return outputs as Tensor[];
+        const lazy = true;
+        if (lazy) {
+            const inputRefs = [this._node, ...additionalInputs.map((t) => t._node)];
+            const outputSpecs: GraphNodeOutputSpec[] = [];
+            for (let i = 0; i < outputs.length; i++) {
+                const output = outputs[i];
+                if (output instanceof Tensor) {
+                    outputSpecs.push({
+                        shape: output.shape,
+                        dtype: output.dtype,
+                        strides: output.strides,
+                    });
+                }
+                else {
+                    outputSpecs.push({
+                        shape: output,
+                        dtype: shaderTypeToDtype(kernel.spec.outputs[i].shaderType),
+                        strides: defaultStrides(output),
+                    });
+                }
+            }
+            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            return outputs.map((output, i) => {
+                const ref = {
+                    node: node,
+                    outputIndex: i,
+                };
+                return new Tensor(ref);
+            });
         }
         else {
-            if (outputBuffers.length !== outputs.length) {
-                throw new Error(
-                    `Expected ${outputs.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`
+            const inputStorages = [
+                this.storage,
+                ...additionalInputs.map((t) =>t.storage),
+            ];
+            const providedOutputStorages = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
+                t.storage) : undefined;
+            const outputStorages = kernel.run(inputStorages, params, providedOutputStorages);
+            if (outputsAreTensors) {
+                return outputs as Tensor[];
+            }
+            else {
+                if (outputStorages.length !== outputs.length) {
+                    throw new Error(
+                        `Expected ${outputs.length} output buffers (given the provided outputShapes to runKernel), but got ${outputStorages.length} output buffers when running the kernel "${name}".`
+                    );
+                }
+                return outputStorages.map(
+                    (outputBuffer, i) => {
+                        return new Tensor({
+                            data: outputBuffer as UntypedStorage,
+                            dtype: this.dtype,
+                            shape: (outputs as Shape[])[i],
+                            strides: defaultStrides((outputs as Shape[])[i]),
+                            device: this.device,
+                        });
+                    }
                 );
             }
-            return outputBuffers.map(
-                (outputBuffer, i) => {
-                    const o = new Tensor({
-                        data: outputBuffer as UntypedStorage,
-                        dtype: this.dtype,
-                        shape: (outputs as Shape[])[i],
-                        strides: defaultStrides((outputs as Shape[])[i]),
-                        device: this.device,
-                    });
-                    const inputNodes = [this._node, ...additionalInputs.map((t) => t._node)];
-                    o._node = new ComputedNode(kernel, inputNodes, params, (outputs as Shape[])[i]);
-                    return o;
-                }
-            );
         }
     }
 
