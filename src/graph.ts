@@ -157,7 +157,11 @@ export class ComputedNode extends GraphNode {
                 }
                 return inputS;
             });
-            const outputs = this.outputs.map(output => alloc(dtypeByteSize(output.dtype) * shapeSize(output.shape)));
+            const outputs = this.outputs.map((output, i) => {
+                // output size = dtypeByteSize(output.dtype) * shapeSize(output.shape)
+                const outputByteSize = this.kernel.eval(this.kernel.spec.outputs[i].size, this.params) * dtypeByteSize(output.dtype);
+                return alloc(outputByteSize);
+            });
             this.kernel.run(inputs, this.params, outputs);
             computedStorages[nodeId] = outputs;
             // Free any nodes that are not live anymore.

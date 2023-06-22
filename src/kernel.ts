@@ -105,6 +105,11 @@ export abstract class Kernel {
         outputs?: UntypedStorage[]
     ): UntypedStorage[];
 
+    eval(expr: ExprCode, parameters: KernelParamsInput): number {
+        const [env, paramValues] = this.getRunEnv(parameters);
+        return evalCode(expr, env);
+    }
+
     protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
         const env: EvalEnv = Object.assign({}, this._configEnv);
         const paramValues: number[] = [];
