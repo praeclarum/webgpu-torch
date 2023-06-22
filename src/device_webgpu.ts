@@ -83,6 +83,14 @@ export class DeviceWebGPU extends Device {
         buffer.unmap();
         return new GPUBufferStorage(buffer, this.gpuDevice);
     }
+    alloc(byteSize: number): UntypedStorage {
+        const buffer = this._device.createBuffer({
+            mappedAtCreation: false,
+            size: byteSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        });
+        return new GPUBufferStorage(buffer, this.gpuDevice);
+    }
     allocBufferHeap(): BufferHeap<GPUBuffer> {
         const byteSize = this.gpuDevice.limits.maxBufferSize;
         const buffer = this._device.createBuffer({

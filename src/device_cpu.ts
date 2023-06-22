@@ -25,6 +25,9 @@ export class DeviceCPU extends Device {
         init(storage.getTypedArray(dtype));
         return storage;
     }
+    alloc(byteSize: number): UntypedStorage {
+        return new ArrayBufferStorage(byteSize);
+    }
     allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer> {
         const size = 256*1024*1024;
         const array = new ArrayBuffer(size);
