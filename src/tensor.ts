@@ -13,6 +13,7 @@ import type { KernelConfigInput, KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
+import { GraphNode, SourceNode, ComputedNode } from "./graph";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -40,6 +41,11 @@ export class Tensor extends TensorBase {
     private _gradCtx: GradientContext | null;
     public grad: Tensor | null = null;
 
+    private _node: GraphNode;
+
+    get node(): GraphNode {
+        return this._node;
+    }
     get storage(): UntypedStorage {
         return this._storage;
     }
@@ -134,6 +140,7 @@ export class Tensor extends TensorBase {
             );
         }
         this._device = d;
+        this._node = new SourceNode(this._storage, this._dtype, this._shape, this._strides);
         this._requiresGrad = requiresGrad || false;
         this._gradFunc = null;
         this._gradCtx = null;
