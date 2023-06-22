@@ -3,14 +3,11 @@
 import { IAutoFunction, shouldCreateGradient } from "./autograd";
 import type { Tensor } from "./tensor";
 
-export function unary(func: IAutoFunction, input: Tensor, output?: Tensor): Tensor {
+export function unary(func: IAutoFunction, input: Tensor): Tensor {
     if (shouldCreateGradient(input)) {
-        if (output !== undefined) {
-            throw new Error("Cannot specify output tensor when creating gradient");
-        }
         return func.apply(input);
     }
-    return func.forward([input], output);
+    return func.forward([input]);
 }
 
 export function unaryWithAlpha(func: IAutoFunction, input: Tensor, alpha?: number): Tensor {

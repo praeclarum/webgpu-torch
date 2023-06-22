@@ -32,7 +32,7 @@ export type GradientFunction = (
 ) => (Tensor | null)[];
 
 export interface IAutoFunction {
-    forward(inputs: FunctionInput[], output?: Tensor): Tensor;
+    forward(inputs: FunctionInput[]): Tensor;
     apply(...inputs: FunctionInput[]): Tensor;
     backward(
         ctx: GradientContext,
