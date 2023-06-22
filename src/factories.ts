@@ -12,9 +12,9 @@ export function ones(
     const d = getDevice(device);
     const s = getShape(shape);
     const dt = getDtype(dtype);
-    const storage = d.allocFor(s, dt);
-    const array = storage.getTypedArray(dt);
-    array.fill(1);
+    const storage = d.initStorage(s, dt, (array) => {
+        array.fill(1);
+    });
     return new Tensor({
         data: storage,
         dtype: dt,
@@ -32,9 +32,9 @@ export function zeros(
     const d = getDevice(device);
     const s = getShape(shape);
     const dt = getDtype(dtype);
-    const storage = d.allocFor(s, dt);
-    const array = storage.getTypedArray(dt);
-    array.fill(1);
+    const storage = d.initStorage(s, dt, (array) => {
+        array.fill(1);
+    });
     return new Tensor({
         data: storage,
         dtype: dt,

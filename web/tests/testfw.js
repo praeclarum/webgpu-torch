@@ -100,7 +100,7 @@ async function runTestsAsync($testDiv) {
             appendTestResult($failureBody, t, error);
             setFailed();
         }
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 1));
     }
     setStatusText('Done');
 }

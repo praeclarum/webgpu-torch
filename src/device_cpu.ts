@@ -1,8 +1,9 @@
 import { Device } from "./device";
-import type { ATypedArray, Dtype } from "./dtype";
-import { ArrayBufferStorage, UntypedStorage } from "./storage";
-import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import { ArrayBufferStorage, BufferHeap, HeapBuffer, UntypedStorage } from "./storage";
 import { KernelCPU } from "./kernel_cpu";
+import { dtypeByteSize, type ATypedArray, type Dtype } from "./dtype";
+import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import { Shape, shapeSize } from "./shape";
 
 export class DeviceCPU extends Device {
     get workgroupMaxSize(): [number, number, number] {
@@ -17,34 +18,26 @@ export class DeviceCPU extends Device {
     constructor() {
         super("cpu", "cpu");
     }
+    initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): ArrayBufferStorage {
+        const elementByteSize = dtypeByteSize(dtype);
+        const byteSize = shapeSize(shape) * elementByteSize;
+        const storage = new ArrayBufferStorage(byteSize);
+        init(storage.getTypedArray(dtype));
+        return storage;
+    }
     alloc(byteSize: number): UntypedStorage {
         return new ArrayBufferStorage(byteSize);
     }
+    allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer> {
+        const size = 256*1024*1024;
+        const array = new ArrayBuffer(size);
+        const minOrder = 8; // Align to 256 bytes
+        return new BufferHeap<ArrayBuffer>(array, size, minOrder);
+    }
+    createHeapStorage(buffer: HeapBuffer<ArrayBuffer>): UntypedStorage {
+        return new ArrayBufferStorage(buffer);
+    }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);
-    }
-    getStorageFromKernel(storage: ATypedArray | GPUBuffer): UntypedStorage {
-        if (
-            storage instanceof Uint8Array ||
-            storage instanceof Uint32Array ||
-            storage instanceof Int32Array ||
-            storage instanceof Float32Array
-        ) {
-            return new ArrayBufferStorage(storage.buffer);
-        }
-        throw new Error(
-            `Cannot wrap buffer of type ${storage.constructor.name} to get CPU storage`
-        );
-    }
-    getBufferForKernel(
-        storage: UntypedStorage,
-        dtype: Dtype
-    ): ATypedArray | GPUBuffer {
-        if (storage instanceof ArrayBufferStorage) {
-            return storage.getTypedArray(dtype);
-        }
-        throw new Error(
-            `Cannot unwrap buffer of type ${storage.constructor.name} to get CPU buffer`
-        );
     }
 }

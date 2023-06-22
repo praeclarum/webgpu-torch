@@ -2,12 +2,27 @@ export type Dtype = "float32" | "int32" | "uint32" | "uint8";
 
 export type ATypedArray = Uint8Array | Int32Array | Uint32Array | Float32Array;
 
-export const dtypeArrayCtors = {
+const dtypeArrayCtors = {
     "uint8": Uint8Array,
     "int32": Int32Array,
     "uint32": Uint32Array,
     "float32": Float32Array,
 };
+
+export function dtypedBufferToTypedArray(dtype: Dtype, buffer: ArrayBuffer, byteOffset?: number, byteLength?: number): ATypedArray {
+    const ctor = dtypeArrayCtors[dtype];
+    if (ctor === undefined) {
+        throw new Error(`Invalid dtype \"${dtype}\"`);
+    }
+    if (byteOffset === undefined) {
+        byteOffset = 0;
+    }
+    if (byteLength === undefined) {
+        byteLength = buffer.byteLength - byteOffset;
+    }
+    const length = byteLength / ctor.BYTES_PER_ELEMENT;
+    return new ctor(buffer, byteOffset, length);
+}
 
 export function dtypeByteSize(dtype: Dtype): number {
     switch (dtype) {

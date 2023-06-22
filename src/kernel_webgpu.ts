@@ -1,4 +1,5 @@
 import { Device } from "./device";
+import { DeviceWebGPU } from "./device_webgpu";
 import { EvalEnv } from "./expr";
 import {
     Kernel,
@@ -10,6 +11,7 @@ import {
     getKernelShaderCode,
     getShaderTypeElementByteSize,
 } from "./kernel";
+import { GPUBufferStorage, UntypedStorage } from "./storage";
 
 export class KernelWebGPU extends Kernel {
     private _gpuDevice: GPUDevice;
@@ -20,7 +22,7 @@ export class KernelWebGPU extends Kernel {
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
         super(spec, config, device);
-        const gpuDevice = (device as any).gpuDevice;
+        const gpuDevice = (device as DeviceWebGPU).gpuDevice;
         if (!gpuDevice) {
             throw new Error("Cannot create a GPU kernel without a GPU device");
         }
@@ -70,10 +72,10 @@ export class KernelWebGPU extends Kernel {
         });
     }
     run(
-        inputs: GPUBuffer[],
+        inputs: UntypedStorage[],
         parameters: KernelParamsInput,
-        outputs?: GPUBuffer[]
-    ): GPUBuffer[] {
+        outputs?: UntypedStorage[]
+    ): UntypedStorage[] {
         const runId = this._runId++;
         // console.log("run gpu kernel", this.key);
 
@@ -182,39 +184,41 @@ export class KernelWebGPU extends Kernel {
     }
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
-        providedInput: GPUBuffer | null,
+        providedInput: UntypedStorage | null,
         inputIndex: number,
         env: EvalEnv
-    ): GPUBuffer {
+    ): UntypedStorage {
         if (providedInput === null) {
             throw new Error(
                 `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
             );
         }
-        if (providedInput.usage & GPUBufferUsage.STORAGE) {
-            if (providedInput.mapState === "mapped") {
-                providedInput.unmap();
+        const providedBuffer = (providedInput as GPUBufferStorage).gpuBuffer;
+        if (providedBuffer.usage & GPUBufferUsage.STORAGE) {
+            if (providedBuffer.mapState === "mapped") {
+                providedBuffer.unmap();
             }
-            return providedInput;
         } else {
             throw new Error("Provided input buffer is not a storage buffer");
         }
+        return providedInput;
     }
     private getStorageOutputBuffer(
         outputSpec: KernelOutputSpec,
-        providedOutput: GPUBuffer | null,
+        providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
-    ): GPUBuffer {
+    ): UntypedStorage {
         if (providedOutput !== null) {
-            if (providedOutput.usage & GPUBufferUsage.STORAGE) {
-                providedOutput.unmap();
-                return providedOutput;
+            const providedBuffer = (providedOutput as GPUBufferStorage).gpuBuffer;
+            if (providedBuffer.usage & GPUBufferUsage.STORAGE) {
+                if (providedBuffer.mapState === "mapped") {
+                    providedBuffer.unmap();
+                }
             } else {
-                throw new Error(
-                    "Provided output buffer is not a storage buffer"
-                );
+                throw new Error("Provided output buffer is not a storage buffer");
             }
+            return providedOutput;
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
@@ -224,37 +228,46 @@ export class KernelWebGPU extends Kernel {
             );
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
-            const outputBuffer = this._gpuDevice.createBuffer({
-                mappedAtCreation: false,
-                size: outputBufferSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-            });
-            return outputBuffer;
+            // const device = this.device as DeviceWebGPU;
+            // const outputBuffer = device.getPooledBuffer({
+            //     size: outputBufferSize,
+            //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+            // });
+            // return outputBuffer;
+            const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
+            return outputHeapBuffer;
         }
     }
     private createBindGroup(
-        inputBuffers: GPUBuffer[],
+        inputBuffers: UntypedStorage[],
         paramsBuffer: GPUBuffer,
-        outputBuffers: GPUBuffer[]
+        outputBuffers: UntypedStorage[]
     ): GPUBindGroup {
         const entries: GPUBindGroupEntry[] = [];
         let bindingIndex = 0;
         for (let i = 0; i < inputBuffers.length; i++, bindingIndex++) {
+            const inputBuffer = inputBuffers[i] as GPUBufferStorage;
             entries.push({
                 binding: bindingIndex,
                 resource: {
-                    buffer: inputBuffers[i],
+                    buffer: inputBuffer.gpuBuffer,
+                    offset: inputBuffer.byteOffset,
+                    size: inputBuffer.byteSize,
                 },
             });
         }
         for (let i = 0; i < this.spec.outputs.length; i++, bindingIndex++) {
-            const outputBuffer = outputBuffers[i];
-            entries.push({
+            const outputBuffer = outputBuffers[i] as GPUBufferStorage;
+            const entry = {
                 binding: bindingIndex,
                 resource: {
-                    buffer: outputBuffer,
+                    buffer: outputBuffer.gpuBuffer,
+                    offset: outputBuffer.byteOffset,
+                    size: outputBuffer.byteSize,
                 },
-            });
+            };
+            // console.log("output binding", entry);
+            entries.push(entry);
         }
         entries.push({
             binding: bindingIndex,

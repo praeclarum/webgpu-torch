@@ -1,7 +1,8 @@
-import { Device } from "./device";
-import { ATypedArray, Dtype } from "./dtype";
 import { ExprCode, evalCode, compileCode, CompiledExpr, EvalEnv } from "./expr";
 import { CodeWriter } from "./opgen";
+import type { Device } from "./device";
+import type { ATypedArray, Dtype } from "./dtype";
+import type { UntypedStorage } from "./storage";
 
 export type ShaderDynamicArrayType = "array<u8>" | "array<i32>" | "array<u32>" | "array<f32>";
 
@@ -99,10 +100,10 @@ export abstract class Kernel {
     }
 
     abstract run(
-        inputs: (GPUBuffer | ATypedArray)[],
+        inputs: UntypedStorage[],
         parameters: KernelParamsInput,
-        outputs?: (GPUBuffer | ATypedArray)[]
-    ): (GPUBuffer | ATypedArray)[];
+        outputs?: UntypedStorage[]
+    ): UntypedStorage[];
 
     protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
         const env: EvalEnv = Object.assign({}, this._configEnv);
