@@ -256,14 +256,18 @@ export class Tensor extends TensorBase {
                 );
             }
             return outputBuffers.map(
-                (outputBuffer, i) =>
-                    new Tensor({
+                (outputBuffer, i) => {
+                    const o = new Tensor({
                         data: outputBuffer as UntypedStorage,
                         dtype: this.dtype,
                         shape: (outputs as Shape[])[i],
                         strides: defaultStrides((outputs as Shape[])[i]),
                         device: this.device,
-                    })
+                    });
+                    const inputNodes = [this._node, ...additionalInputs.map((t) => t._node)];
+                    o._node = new ComputedNode(kernel, inputNodes, params, (outputs as Shape[])[i]);
+                    return o;
+                }
             );
         }
     }

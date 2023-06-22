@@ -13,6 +13,10 @@ export abstract class UntypedStorage {
     abstract destroy(): void;
     abstract clone(): UntypedStorage;
     abstract toTypedArrayAsync(dtype: Dtype): Promise<ATypedArray>;
+    async toArrayAsync(dtype: Dtype): Promise<TensorArrayData> {
+        const typedArray = await this.toTypedArrayAsync(dtype);
+        return Array.from(typedArray);
+    }
 }
 
 export class ArrayBufferStorage extends UntypedStorage {

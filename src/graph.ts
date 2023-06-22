@@ -12,6 +12,9 @@ export abstract class GraphNode {
     abstract get shape(): Shape;
     abstract get storage(): UntypedStorage;
     abstract get isSource(): boolean;
+    get isComputed(): boolean {
+        return !this.isSource;
+    }
     constructor() {
         this.id = GraphNode.nextId++;
     }
@@ -35,7 +38,12 @@ export class SourceNode extends GraphNode {
     get storage(): UntypedStorage {
         return this._storage;
     }
-    constructor(storage: UntypedStorage, dtype: Dtype, shape: Shape, strides: Strides) {
+    constructor(
+        storage: UntypedStorage,
+        dtype: Dtype,
+        shape: Shape,
+        strides: Strides
+    ) {
         super();
         this._shape = shape;
         this._storage = storage;
@@ -63,10 +71,12 @@ export class ComputedNode extends GraphNode {
     get shape(): Shape {
         return this._shape;
     }
-    constructor(kernel: Kernel,
-        params: KernelParamsInput,
+    constructor(
+        kernel: Kernel,
         inputs: GraphNode[],
-        outputShape: Shape) {
+        params: KernelParamsInput,
+        outputShape: Shape
+    ) {
         super();
         this.kernel = kernel;
         this.params = params;
