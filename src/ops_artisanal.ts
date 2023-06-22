@@ -130,5 +130,8 @@ export function tensor(
     device?: Deviceish,
     requiresGrad?: boolean
 ): Tensor {
-    return new Tensor(arrayOrSpec, dtype, device, requiresGrad);
+    if (arrayOrSpec.hasOwnProperty("data")) {
+        return new Tensor(arrayOrSpec as TensorSpec);
+    }
+    return new Tensor(arrayOrSpec as TensorData, dtype, device, requiresGrad);
 }

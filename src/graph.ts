@@ -1,7 +1,7 @@
 import type { Device } from "./device";
 import { dtypeByteSize, type Dtype } from "./dtype";
 import { shaderTypeToDtype, type Kernel, type KernelParamsInput } from "./kernel";
-import { shapeSize, type Shape, type Strides } from "./shape";
+import { shapeSize, type Shape, type Strides, defaultStrides } from "./shape";
 import type { UntypedStorage } from "./storage";
 
 type NodeId = number;
@@ -12,6 +12,7 @@ export abstract class GraphNode {
     abstract get inputs(): GraphNode[];
     abstract get device(): Device;
     abstract get shape(): Shape;
+    abstract get strides(): Shape;
     abstract get storageAvailable(): boolean;
     abstract get storage(): UntypedStorage;
     abstract get dtype(): Dtype;
@@ -26,6 +27,7 @@ export abstract class GraphNode {
 
 export class SourceNode extends GraphNode {
     private readonly _shape: Shape;
+    private readonly _strides: Strides;
     private readonly _storage: UntypedStorage;
     private readonly _dtype: Dtype;
     get isSource(): boolean {
@@ -39,6 +41,9 @@ export class SourceNode extends GraphNode {
     }
     get shape(): Shape {
         return this._shape;
+    }
+    get strides(): Strides {
+        return this._strides;
     }
     get storageAvailable(): boolean {
         return true;
@@ -57,6 +62,7 @@ export class SourceNode extends GraphNode {
     ) {
         super();
         this._shape = shape;
+        this._strides = strides;
         this._storage = storage;
         this._dtype = dtype;
     }
@@ -79,6 +85,7 @@ export class ComputedNode extends GraphNode {
     readonly params: KernelParamsInput;
     readonly inputs: GraphNode[];
     private readonly _shape: Shape;
+    private readonly _strides: Strides;
     private readonly _dtype: Dtype;
     private _storage: UntypedStorage | null = null;
     get isSource(): boolean {
@@ -99,6 +106,9 @@ export class ComputedNode extends GraphNode {
     get shape(): Shape {
         return this._shape;
     }
+    get strides(): Strides {
+        return this._strides;
+    }
     get dtype(): Dtype {
         return this._dtype;
     }
@@ -114,6 +124,7 @@ export class ComputedNode extends GraphNode {
         this.params = params;
         this.inputs = inputs;
         this._shape = outputShape;
+        this._strides = defaultStrides(outputShape);
     }
     private run(): UntypedStorage {
         // const inputs = this.inputs.map((input) => input.storage);
@@ -152,7 +163,13 @@ export class ComputedNode extends GraphNode {
                 computedStorages[nodeId] = nodesWithStorage[nodeId].storage;
                 continue;
             }
-            const inputs = node.inputs.map((input) => computedStorages[input.id]);
+            const inputs = node.inputs.map((input, j) => {
+                const inputS = computedStorages[input.id];
+                if (inputS === undefined) {
+                    throw new Error(`Input #${j} of node ${this.id} with kernel \"${this.kernel.spec.name}\" not computed yet`);
+                }
+                return inputS;
+            });
             const output = alloc(dtypeByteSize(node.dtype) * shapeSize(node.shape));
             this.kernel.run(inputs, this.params, [output]);
             computedStorages[nodeId] = output;

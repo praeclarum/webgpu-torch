@@ -113,7 +113,7 @@ export class KernelCPU extends Kernel {
                 return providedOutput;
             }
             throw new Error(
-                `Output buffer #${outputIndex} (out of ${this.spec.outputs.length}) named "${outputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage`
+                `Output buffer #${outputIndex} (out of ${this.spec.outputs.length}) named "${outputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage. It's a ${providedOutput.constructor.name}`
             );
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(

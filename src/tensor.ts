@@ -31,7 +31,7 @@ export type TensorSpec = {
 export class Tensor extends TensorBase {
     private _device: Device;
 
-    private _storage: UntypedStorage;
+    // private _storage: UntypedStorage;
     private _dtype: Dtype;
     private _shape: Shape;
     private _strides: Strides;
@@ -47,7 +47,8 @@ export class Tensor extends TensorBase {
         return this._node;
     }
     get storage(): UntypedStorage {
-        return this._storage;
+        // return this._storage;
+        return this.node.storage;
     }
     get dtype(): Dtype {
         return this._dtype;
@@ -95,8 +96,15 @@ export class Tensor extends TensorBase {
         return this._gradFunc;
     }
 
+    constructor(node: GraphNode)
+    constructor(spec: TensorSpec)
     constructor(
-        arrayOrSpec: TensorData | TensorSpec,
+        array: TensorData,
+        dtype?: Dtype,
+        device?: Deviceish,
+        requiresGrad?: boolean)
+    constructor(
+        arrayOrSpec: TensorData | TensorSpec | GraphNode,
         dtype?: Dtype,
         device?: Deviceish,
         requiresGrad?: boolean
@@ -108,23 +116,30 @@ export class Tensor extends TensorBase {
             throw new Error("Cannot create tensor from null");
         } else if (arrayOrSpec instanceof Array) {
             const array = newTypedArrayFromArray(arrayOrSpec, dt, d);
-            this._storage = array.storage;
+            // this._storage = array.storage;
             this._dtype = dt;
             this._shape = array.shape;
             this._strides = array.strides;
+            this._node = new SourceNode(array.storage, this._dtype, this._shape, this._strides);
+        } else if (arrayOrSpec instanceof GraphNode) {
+            this._dtype = arrayOrSpec.dtype;
+            this._shape = arrayOrSpec.shape;
+            this._strides = arrayOrSpec.strides;
+            this._node = arrayOrSpec;
         } else if (arrayOrSpec.hasOwnProperty("data")) {
             const jdata = arrayOrSpec as TensorSpec;
             d = jdata.device ? getDevice(jdata.device) : d;
             dt = jdata.dtype ? getDtype(jdata.dtype) : dt;
             requiresGrad = requiresGrad || jdata.requiresGrad;
+            let storage: UntypedStorage;
             if (jdata.data instanceof Array) {
                 const array = newTypedArrayFromArray(jdata.data, dt, d);
-                this._storage = array.storage;
+                storage = array.storage;
                 this._dtype = dt;
                 this._shape = array.shape;
                 this._strides = array.strides;
             } else if (jdata.data instanceof UntypedStorage) {
-                this._storage = jdata.data;
+                storage = jdata.data;
                 this._dtype = dt;
                 if (jdata.shape === undefined && jdata.strides === undefined) {
                     throw new Error("Cannot create tensor from storage without also specifying the shape and strides.");
@@ -134,13 +149,13 @@ export class Tensor extends TensorBase {
             } else {
                 throw new Error("Cannot create tensor from json data " + jdata);
             }
+            this._node = new SourceNode(storage, this._dtype, this._shape, this._strides);
         } else {
             throw new Error(
                 "Invalid data type for Tensor constructor. Expected an array of values or a json object with a 'data' property."
             );
         }
         this._device = d;
-        this._node = new SourceNode(this._storage, this._dtype, this._shape, this._strides);
         this._requiresGrad = requiresGrad || false;
         this._gradFunc = null;
         this._gradCtx = null;
