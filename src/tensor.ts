@@ -48,7 +48,7 @@ export class Tensor extends TensorBase {
     }
     get storage(): UntypedStorage {
         // return this._storage;
-        return this.node.node.storages[this.node.outputIndex];
+        return this._node.node.storages[this._node.outputIndex];
     }
     get dtype(): Dtype {
         return this._dtype;
@@ -244,9 +244,27 @@ export class Tensor extends TensorBase {
         if (this.requiresGrad && isGradEnabled()) {
             throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
         }
-        const kernel = this.device.getKernel(name, config);
-        const inputBuffers = additionalInputs.map((t) => t.storage);
-        kernel.run(inputBuffers, params, [this.storage]);
+        const lazy = true;
+        if (lazy) {
+            const nameWithoutTrailing_ = name.endsWith("_") ? name.slice(0, -1) : name;
+            const kernel = this.device.getKernel(nameWithoutTrailing_, config);
+            const inputRefs = [this._node, ...additionalInputs.map((t) => t._node)];
+            const outputSpecs: GraphNodeOutputSpec[] = [{
+                shape: this.shape,
+                dtype: this.dtype,
+                strides: this.strides,
+            }];
+            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            this._node = {
+                node,
+                outputIndex: 0,
+            };
+        }
+        else {
+            const kernel = this.device.getKernel(name, config);
+            const inputBuffers = additionalInputs.map((t) => t.storage);
+            kernel.run(inputBuffers, params, [this.storage]);
+        }
         return this;
     }
     runKernel(

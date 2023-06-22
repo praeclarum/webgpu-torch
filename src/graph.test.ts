@@ -31,3 +31,13 @@ test("deep equal-width graphs use minimal buffers", async () => {
     const node = y.node.node as ComputedNode;
     expect(node.inputs).toEqual([ys[depth - 2].node]);
 });
+
+test("inplace ops handled correctly", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.neg();
+    x.neg_();
+    const z = x.neg();
+    expect(await x.toArrayAsync()).toEqual([-1, -2, -3]);
+    expect(await y.toArrayAsync()).toEqual([-1, -2, -3]);
+    expect(await z.toArrayAsync()).toEqual([1, 2, 3]);
+});

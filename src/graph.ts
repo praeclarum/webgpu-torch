@@ -189,7 +189,7 @@ export class ComputedNode extends GraphNode {
                     ) * dtypeByteSize(output.dtype);
                 return alloc(outputByteSize);
             });
-            node.kernel.run(inputs, this.params, outputs);
+            node.kernel.run(inputs, node.params, outputs);
             computedStorages[nodeId] = outputs;
             // Free any nodes that are not live anymore.
             for (let inLiveId of liveness.ins[i]) {
