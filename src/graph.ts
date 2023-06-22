@@ -127,7 +127,7 @@ export class ComputedNode extends GraphNode {
             }
             const storage = temporaryStoragePool[byteSize].pop();
             if (storage !== undefined) {
-                console.log("reuse temp", byteSize);
+                // console.log("reuse temp", byteSize);
                 return storage;
             }
             // console.log("alloc temp", byteSize);
@@ -135,7 +135,7 @@ export class ComputedNode extends GraphNode {
         };
         const free = (storage: UntypedStorage) => {
             const byteSize = storage.byteSize;
-            console.log("free temp", byteSize);
+            // console.log("free temp", byteSize);
             if (!(byteSize in temporaryStoragePool)) {
                 temporaryStoragePool[byteSize] = [storage];
             } else {
@@ -143,8 +143,11 @@ export class ComputedNode extends GraphNode {
             }
         };
         const computedStorages: {[nodeId: number]: UntypedStorage} = {};
-        for (let node of depthFirstNodes) {
+        const n = depthFirstNodes.length;
+        for (let i = 0; i < n; i++) {
+            const node = depthFirstNodes[i];
             const nodeId = node.id;
+            // Easy case, we already have the storage for this node.
             if (nodeId in nodesWithStorage) {
                 computedStorages[nodeId] = nodesWithStorage[nodeId].storage;
                 continue;
@@ -153,6 +156,17 @@ export class ComputedNode extends GraphNode {
             const output = alloc(dtypeByteSize(node.dtype) * shapeSize(node.shape));
             this.kernel.run(inputs, this.params, [output]);
             computedStorages[nodeId] = output;
+            // Free any nodes that are not live anymore.
+            for (let inLiveId of liveness.ins[i]) {
+                if (inLiveId in nodesWithStorage) {
+                    continue;
+                }
+                if (liveness.outs[i].has(inLiveId)) {
+                    continue;
+                }
+                free(computedStorages[inLiveId]);
+                delete computedStorages[inLiveId];
+            }
         }
         return computedStorages[this.id];
     }
