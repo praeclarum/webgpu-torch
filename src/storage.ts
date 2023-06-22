@@ -1,10 +1,13 @@
 import { Device } from "./device";
+import { DeviceWebGPU } from "./device_webgpu";
+import { cpuDevice } from "./devices";
 import { ATypedArray, Dtype, dtypedBufferToTypedArray } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
 
 export abstract class UntypedStorage {
+    abstract get device(): Device;
     abstract get byteOffset(): number;
     abstract get byteSize(): number;
     abstract destroy(): void;
@@ -17,6 +20,9 @@ export class ArrayBufferStorage extends UntypedStorage {
     private readonly _byteOffset: number = 0;
     private readonly _byteSize: number;
     private readonly _heapBuffer: HeapBuffer<ArrayBuffer> | null = null;
+    get device(): Device {
+        return cpuDevice;
+    }
     get cpuBuffer(): ArrayBuffer {
         return this._buffer;
     }
@@ -71,10 +77,14 @@ export class ArrayBufferStorage extends UntypedStorage {
 }
 
 export class GPUBufferStorage extends UntypedStorage {
+    private readonly _device: DeviceWebGPU;
     private readonly _byteOffset: number = 0;
     private readonly _byteSize: number;
     private readonly _buffer: GPUBuffer;
-    private _device: GPUDevice;
+    private _gpuDevice: GPUDevice;
+    get device(): Device {
+        return this._device;
+    }
     get byteSize(): number {
         return this._byteSize;
     }
@@ -85,22 +95,23 @@ export class GPUBufferStorage extends UntypedStorage {
         return this._buffer;
     }
     get gpuDevice(): GPUDevice {
-        return this._device;
+        return this._gpuDevice;
     }
-    constructor(buffer: GPUBuffer, device: GPUDevice);
-    constructor(buffer: HeapBuffer<GPUBuffer>, device: GPUDevice);
+    constructor(buffer: GPUBuffer, device: DeviceWebGPU);
+    constructor(buffer: HeapBuffer<GPUBuffer>, device: DeviceWebGPU);
     constructor(
         byteSize: number,
-        device: GPUDevice,
+        device: DeviceWebGPU,
         usage: GPUBufferUsageFlags
     );
     constructor(
         input: number | GPUBuffer | HeapBuffer<GPUBuffer>,
-        device: GPUDevice,
+        device: DeviceWebGPU,
         usage?: GPUBufferUsageFlags
     ) {
         super();
         this._device = device;
+        this._gpuDevice = device.gpuDevice;
         if (input instanceof GPUBuffer) {
             this._buffer = input;
             this._byteSize = this._buffer.size;
@@ -114,7 +125,7 @@ export class GPUBufferStorage extends UntypedStorage {
             usage !== undefined &&
             device !== undefined
         ) {
-            this._buffer = device.createBuffer({
+            this._buffer = this._gpuDevice.createBuffer({
                 mappedAtCreation: true,
                 size: input,
                 usage: usage,
@@ -143,14 +154,14 @@ export class GPUBufferStorage extends UntypedStorage {
     }
     private copyBufferToReadableBuffer(): GPUBuffer {
         const size = this._byteSize;
-        const readBuffer = this._device.createBuffer({
+        const readBuffer = this._gpuDevice.createBuffer({
             mappedAtCreation: false,
             size: size,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
         // console.log("copyBufferToReadableBuffer", this._buffer, readBuffer);
         // Encode commands for copying outputs to readable buffers
-        const commandEncoder = this._device.createCommandEncoder();
+        const commandEncoder = this._gpuDevice.createCommandEncoder();
         commandEncoder.copyBufferToBuffer(
             this._buffer /* source buffer */,
             this._byteOffset /* source offset */,
@@ -160,7 +171,7 @@ export class GPUBufferStorage extends UntypedStorage {
         );
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
-        this._device.queue.submit([gpuCommands]);
+        this._gpuDevice.queue.submit([gpuCommands]);
         return readBuffer;
     }
     clone(): UntypedStorage {
@@ -168,12 +179,12 @@ export class GPUBufferStorage extends UntypedStorage {
             GPUBufferUsage.COPY_DST |
             GPUBufferUsage.COPY_SRC |
             GPUBufferUsage.STORAGE;
-        const cloneBuffer = this._device.createBuffer({
+        const cloneBuffer = this._gpuDevice.createBuffer({
             mappedAtCreation: false,
             size: this._buffer.size,
             usage: usage,
         });
-        const commandEncoder = this._device.createCommandEncoder();
+        const commandEncoder = this._gpuDevice.createCommandEncoder();
         commandEncoder.copyBufferToBuffer(
             this._buffer /* source buffer */,
             0 /* source offset */,
@@ -183,7 +194,7 @@ export class GPUBufferStorage extends UntypedStorage {
         );
         // Submit GPU commands
         const gpuCommands = commandEncoder.finish();
-        this._device.queue.submit([gpuCommands]);
+        this._gpuDevice.queue.submit([gpuCommands]);
         return new GPUBufferStorage(cloneBuffer, this._device);
     }
 }

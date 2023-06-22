@@ -2,7 +2,7 @@ import type { Device, DeviceType, Deviceish } from "./device";
 import { DeviceCPU } from "./device_cpu";
 import { DeviceWebGPU } from "./device_webgpu";
 
-const cpuDevice = new DeviceCPU();
+export const cpuDevice = new DeviceCPU();
 let webgpuDevice: DeviceWebGPU | null = null;
 
 const devices: { [id: string]: Device } = {

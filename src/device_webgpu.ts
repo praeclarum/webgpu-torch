@@ -81,7 +81,7 @@ export class DeviceWebGPU extends Device {
         const array = dtypedBufferToTypedArray(dtype, arrayBuffer);
         init(array);
         buffer.unmap();
-        return new GPUBufferStorage(buffer, this.gpuDevice);
+        return new GPUBufferStorage(buffer, this);
     }
     alloc(byteSize: number): UntypedStorage {
         const buffer = this._device.createBuffer({
@@ -89,7 +89,7 @@ export class DeviceWebGPU extends Device {
             size: byteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
-        return new GPUBufferStorage(buffer, this.gpuDevice);
+        return new GPUBufferStorage(buffer, this);
     }
     allocBufferHeap(): BufferHeap<GPUBuffer> {
         const byteSize = this.gpuDevice.limits.maxBufferSize;
@@ -102,7 +102,7 @@ export class DeviceWebGPU extends Device {
         return new BufferHeap<GPUBuffer>(buffer, byteSize, minOrder);
     }
     createHeapStorage(buffer: HeapBuffer<GPUBuffer>): UntypedStorage {
-        return new GPUBufferStorage(buffer, this.gpuDevice);
+        return new GPUBufferStorage(buffer, this);
     }
     getPooledBuffer(descriptor: GPUBufferDescriptor): GPUBuffer {
         const sizeRaw = descriptor.size;
