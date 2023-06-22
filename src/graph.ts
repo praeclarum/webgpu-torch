@@ -1,13 +1,21 @@
 import type { Device } from "./device";
 import { dtypeByteSize, type Dtype } from "./dtype";
-import { shaderTypeToDtype, type Kernel, type KernelParamsInput } from "./kernel";
+import {
+    shaderTypeToDtype,
+    type Kernel,
+    type KernelParamsInput,
+} from "./kernel";
 import { shapeSize, type Shape, type Strides, defaultStrides } from "./shape";
 import type { UntypedStorage } from "./storage";
 
 type NodeId = number;
 
-export type GraphNodeOutputRef = {node: GraphNode, outputIndex: number};
-export type GraphNodeOutputSpec = {dtype: Dtype, shape: Shape, strides: Strides};
+export type GraphNodeOutputRef = { node: GraphNode; outputIndex: number };
+export type GraphNodeOutputSpec = {
+    dtype: Dtype;
+    shape: Shape;
+    strides: Strides;
+};
 
 export abstract class GraphNode {
     readonly id: NodeId;
@@ -57,7 +65,7 @@ export class SourceNode extends GraphNode {
         strides: Strides
     ) {
         super();
-        this._outputs = [{dtype, shape, strides}];
+        this._outputs = [{ dtype, shape, strides }];
         this._storages = [storage];
     }
 }
@@ -105,6 +113,11 @@ export class ComputedNode extends GraphNode {
         outputs: GraphNodeOutputSpec[]
     ) {
         super();
+        if (inputs.length !== kernel.spec.inputs.length) {
+            throw new Error(
+                `Kernel \"${kernel.spec.name}\" expects ${kernel.spec.inputs.length} inputs, but ${inputs.length} were provided`
+            );
+        }
         this.kernel = kernel;
         this.params = params;
         this.inputs = inputs;
@@ -117,8 +130,10 @@ export class ComputedNode extends GraphNode {
         // const inputs = this.inputs.map((input) => input.storage);
         // const outputs = this.kernel.run(inputs, this.params);
         const device = this.device;
-        const [depthFirstNodes, nodesWithStorage, liveness] = this.createExecutionPlan();
-        const temporaryStoragePool: {[byteSize: number]: UntypedStorage[]} = {};
+        const [depthFirstNodes, nodesWithStorage, liveness] =
+            this.createExecutionPlan();
+        const temporaryStoragePool: { [byteSize: number]: UntypedStorage[] } =
+            {};
         const alloc = (byteSize: number) => {
             if (!(byteSize in temporaryStoragePool)) {
                 temporaryStoragePool[byteSize] = [];
@@ -140,7 +155,7 @@ export class ComputedNode extends GraphNode {
                 temporaryStoragePool[byteSize].push(storage);
             }
         };
-        const computedStorages: {[nodeId: number]: UntypedStorage[]} = {};
+        const computedStorages: { [nodeId: number]: UntypedStorage[] } = {};
         const n = depthFirstNodes.length;
         for (let i = 0; i < n; i++) {
             const node = depthFirstNodes[i];
@@ -150,19 +165,31 @@ export class ComputedNode extends GraphNode {
                 computedStorages[nodeId] = nodesWithStorage[nodeId].storages;
                 continue;
             }
+            if (!(node instanceof ComputedNode)) {
+                throw new Error(
+                    `Node ${nodeId} is not a ComputedNode, but it is not in nodesWithStorage`
+                );
+            }
             const inputs = node.inputs.map((input, j) => {
-                const inputS = computedStorages[input.node.id][input.outputIndex];
+                const inputS =
+                    computedStorages[input.node.id][input.outputIndex];
                 if (inputS === undefined) {
-                    throw new Error(`Input #${j} of node ${this.id} with kernel \"${this.kernel.spec.name}\" not computed yet`);
+                    throw new Error(
+                        `Input #${j} of node ${this.id} with kernel \"${this.kernel.spec.name}\" not computed yet`
+                    );
                 }
                 return inputS;
             });
             const outputs = this.outputs.map((output, i) => {
                 // output size = dtypeByteSize(output.dtype) * shapeSize(output.shape)
-                const outputByteSize = this.kernel.eval(this.kernel.spec.outputs[i].size, this.params) * dtypeByteSize(output.dtype);
+                const outputByteSize =
+                    this.kernel.eval(
+                        this.kernel.spec.outputs[i].size,
+                        this.params
+                    ) * dtypeByteSize(output.dtype);
                 return alloc(outputByteSize);
             });
-            this.kernel.run(inputs, this.params, outputs);
+            node.kernel.run(inputs, this.params, outputs);
             computedStorages[nodeId] = outputs;
             // Free any nodes that are not live anymore.
             for (let inLiveId of liveness.ins[i]) {
@@ -181,7 +208,11 @@ export class ComputedNode extends GraphNode {
         }
         return computedStorages[this.id];
     }
-    private createExecutionPlan(): [GraphNode[], { [nodeId: number]: GraphNode }, {ins: Set<NodeId>[], outs: Set<NodeId>[]}] {
+    private createExecutionPlan(): [
+        GraphNode[],
+        { [nodeId: number]: GraphNode },
+        { ins: Set<NodeId>[]; outs: Set<NodeId>[] }
+    ] {
         const depthFirstNodes: GraphNode[] = [];
         const visitedNodes = new Set<number>();
         const nodesWithStorage: { [nodeId: number]: GraphNode } = {};
@@ -204,7 +235,10 @@ export class ComputedNode extends GraphNode {
         // console.log(`Liveness for node#${this.id}`, liveness);
         return [depthFirstNodes, nodesWithStorage, liveness];
     }
-    private getLiveness(depthFirstNodes: GraphNode[]): {ins: Set<NodeId>[], outs: Set<NodeId>[]} {
+    private getLiveness(depthFirstNodes: GraphNode[]): {
+        ins: Set<NodeId>[];
+        outs: Set<NodeId>[];
+    } {
         const n = depthFirstNodes.length;
         const ins: Set<NodeId>[] = [];
         const outs: Set<NodeId>[] = [];
@@ -222,21 +256,22 @@ export class ComputedNode extends GraphNode {
                     for (let inn of ins[i + 1]) {
                         nouts.add(inn);
                     }
-                }
-                else {
+                } else {
                     nouts.add(node.id);
                 }
-                changesOccurred = changesOccurred || !setsAreEqual(nouts, outs[i]);
+                changesOccurred =
+                    changesOccurred || !setsAreEqual(nouts, outs[i]);
                 const nins = new Set<NodeId>(nouts);
                 nins.delete(node.id);
                 for (let input of node.inputs) {
                     nins.add(input.node.id);
                 }
-                changesOccurred = changesOccurred || !setsAreEqual(nins, ins[i]);
+                changesOccurred =
+                    changesOccurred || !setsAreEqual(nins, ins[i]);
                 ins[i] = nins;
                 outs[i] = nouts;
             }
         }
-        return {ins, outs};
+        return { ins, outs };
     }
 }

@@ -30,6 +30,11 @@ export class KernelCPU extends Kernel {
         outputs?: UntypedStorage[]
     ): UntypedStorage[] {
         // console.log("run cpu kernel", this.key);
+        if (inputs.length !== this.spec.inputs.length) {
+            throw new Error(
+                `Expected ${this.spec.inputs.length} inputs for kernel \"${this.spec.name}\", got ${inputs.length}`
+            );
+        }
 
         // Build the parameter environment
         const [env, paramValues] = this.getRunEnv(parameters);
@@ -42,7 +47,7 @@ export class KernelCPU extends Kernel {
         this.spec.inputs.forEach((input, i) => {
             const o = this.getStorageInputBuffer(
                 input,
-                inputs[i] ? inputs[i] : null,
+                inputs[i],
                 i,
                 env
             );
@@ -85,15 +90,10 @@ export class KernelCPU extends Kernel {
 
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
-        providedInput: UntypedStorage | null,
+        providedInput: UntypedStorage,
         inputIndex: number,
         env: EvalEnv
     ): ArrayBufferStorage {
-        if (providedInput === null) {
-            throw new Error(
-                `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
-            );
-        }
         if (providedInput instanceof ArrayBufferStorage) {
             return providedInput;
         }
