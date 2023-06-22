@@ -39,7 +39,7 @@ export class SourceNode extends GraphNode {
 
 export class ComputedNode extends GraphNode {
     readonly kernel: Kernel;
-    readonly params: number[];
+    readonly params: KernelParamsInput;
     readonly inputs: GraphNode[];
     private readonly _shape: Shape;
     private _storage: UntypedStorage | null = null;
@@ -48,7 +48,7 @@ export class ComputedNode extends GraphNode {
     }
     get storage(): UntypedStorage {
         if (this._storage === null) {
-            this._storage = this.execute();
+            this._storage = this.run();
         }
         return this._storage;
     }
@@ -56,7 +56,7 @@ export class ComputedNode extends GraphNode {
         return this._shape;
     }
     constructor(kernel: Kernel,
-        params: number[],
+        params: KernelParamsInput,
         inputs: GraphNode[],
         outputShape: Shape) {
         super();
@@ -65,7 +65,9 @@ export class ComputedNode extends GraphNode {
         this.inputs = inputs;
         this._shape = outputShape;
     }
-    private execute(): UntypedStorage {
-        throw new Error("Execute not implemented");
+    private run(): UntypedStorage {
+        const inputs = this.inputs.map((input) => input.storage);
+        const outputs = this.kernel.run(inputs, this.params);
+        return outputs[0];
     }
 }
