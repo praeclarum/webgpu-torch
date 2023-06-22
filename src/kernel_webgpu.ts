@@ -5,6 +5,7 @@ import {
     Kernel,
     KernelConfig,
     KernelInputSpec,
+    KernelOutputCompiledSpec,
     KernelOutputSpec,
     KernelParamsInput,
     KernelSpec,
@@ -21,7 +22,7 @@ export class KernelWebGPU extends Kernel {
     private _runId: number = 0;
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
-        super(spec, config, device);
+        super(spec, config, device, {});
         const gpuDevice = (device as DeviceWebGPU).gpuDevice;
         if (!gpuDevice) {
             throw new Error("Cannot create a GPU kernel without a GPU device");
@@ -204,7 +205,7 @@ export class KernelWebGPU extends Kernel {
         return providedInput;
     }
     private getStorageOutputBuffer(
-        outputSpec: KernelOutputSpec,
+        outputSpec: KernelOutputCompiledSpec,
         providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
@@ -224,7 +225,7 @@ export class KernelWebGPU extends Kernel {
                 outputSpec.shaderType
             );
             const outputElementCount = Math.ceil(
-                this._outputSizeFuncs[outputIndex](env)
+                this._spec.outputs[outputIndex].size(env)
             );
             // console.log("output size", outputElementCount, outputElementByteSize);
             const outputBufferSize = outputElementByteSize * outputElementCount;
@@ -234,7 +235,7 @@ export class KernelWebGPU extends Kernel {
             //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
             // });
             // return outputBuffer;
-            const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
+            const outputHeapBuffer = this.device.alloc(outputBufferSize);
             return outputHeapBuffer;
         }
     }

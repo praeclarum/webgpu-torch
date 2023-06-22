@@ -617,7 +617,7 @@ export type CompiledExpr = (env: { [name: string]: any }) => number;
 
 export function compileCode(code: ExprCode): CompiledExpr {
     if (typeof code === "number") {
-        return () => code;
+        return (env: EvalEnv) => code;
     }
     const expr = parseCode(code);
     // console.log("parsed", expr);

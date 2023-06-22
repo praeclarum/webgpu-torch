@@ -180,13 +180,11 @@ export class ComputedNode extends GraphNode {
                 }
                 return inputS;
             });
-            const outputs = this.outputs.map((output, i) => {
-                // output size = dtypeByteSize(output.dtype) * shapeSize(output.shape)
+            const [nodeRunEnv, paramValues] = node.kernel.getRunEnv(node.params);
+            const outputs = node.outputs.map((output, i) => {
                 const outputByteSize =
-                    this.kernel.eval(
-                        this.kernel.spec.outputs[i].size,
-                        this.params
-                    ) * dtypeByteSize(output.dtype);
+                    node.kernel.spec.outputs[i].size(nodeRunEnv) *
+                    dtypeByteSize(output.dtype);
                 return alloc(outputByteSize);
             });
             node.kernel.run(inputs, node.params, outputs);

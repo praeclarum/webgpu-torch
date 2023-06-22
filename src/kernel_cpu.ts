@@ -5,6 +5,7 @@ import {
     Kernel,
     KernelConfig,
     KernelInputSpec,
+    KernelOutputCompiledSpec,
     KernelOutputSpec,
     KernelParamsInput,
     KernelSpec,
@@ -19,7 +20,7 @@ export class KernelCPU extends Kernel {
     private _javaScriptFunction: Function;
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
-        super(spec, config, device);
+        super(spec, config, device, jsMathEnv);
         this._javaScriptCode = getKernelJavaScriptCode(spec, config);
         this._javaScriptFunction = eval(this._javaScriptCode);
     }
@@ -103,7 +104,7 @@ export class KernelCPU extends Kernel {
     }
 
     private getStorageOutputBuffer(
-        outputSpec: KernelOutputSpec,
+        outputSpec: KernelOutputCompiledSpec,
         providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
@@ -120,7 +121,7 @@ export class KernelCPU extends Kernel {
                 outputSpec.shaderType
             );
             const outputElementCount = Math.ceil(
-                this._outputSizeFuncs[outputIndex](env)
+                this._spec.outputs[outputIndex].size(env)
             );
             const outputBufferSize = outputElementByteSize * outputElementCount;
             // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
@@ -129,5 +130,13 @@ export class KernelCPU extends Kernel {
             // const outputBuffer = this.device.alloc(outputBufferSize);
             // return outputBuffer;
         }
+    }
+}
+
+const jsMathEnv: EvalEnv = {};
+for (const name of Object.getOwnPropertyNames(Math)) {
+    const f = (Math as any)[name];
+    if (typeof f === "function") {
+        jsMathEnv[name] = f;
     }
 }
