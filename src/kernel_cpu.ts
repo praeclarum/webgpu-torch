@@ -12,7 +12,7 @@ import {
     getShaderTypeElementByteSize,
     shaderTypeToDtype,
 } from "./kernel";
-import { UntypedStorage } from "./storage";
+import { ArrayBufferStorage, UntypedStorage } from "./storage";
 
 export class KernelCPU extends Kernel {
     private _javaScriptCode: string;
@@ -88,13 +88,18 @@ export class KernelCPU extends Kernel {
         providedInput: UntypedStorage | null,
         inputIndex: number,
         env: EvalEnv
-    ): UntypedStorage {
+    ): ArrayBufferStorage {
         if (providedInput === null) {
             throw new Error(
                 `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
             );
         }
-        return providedInput;
+        if (providedInput instanceof ArrayBufferStorage) {
+            return providedInput;
+        }
+        throw new Error(
+            `Input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage`
+        );
     }
 
     private getStorageOutputBuffer(
@@ -102,9 +107,14 @@ export class KernelCPU extends Kernel {
         providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
-    ): UntypedStorage {
+    ): ArrayBufferStorage {
         if (providedOutput !== null) {
-            return providedOutput;
+            if (providedOutput instanceof ArrayBufferStorage) {
+                return providedOutput;
+            }
+            throw new Error(
+                `Output buffer #${outputIndex} (out of ${this.spec.outputs.length}) named "${outputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage`
+            );
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
@@ -115,7 +125,7 @@ export class KernelCPU extends Kernel {
             const outputBufferSize = outputElementByteSize * outputElementCount;
             // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
             const outputHeapBuffer = this.device.heapAlloc(outputBufferSize);
-            return outputHeapBuffer;
+            return outputHeapBuffer as ArrayBufferStorage;
             // const outputBuffer = this.device.alloc(outputBufferSize);
             // return outputBuffer;
         }

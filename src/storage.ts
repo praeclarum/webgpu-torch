@@ -1,5 +1,5 @@
 import { Device } from "./device";
-import { ATypedArray, Dtype, dtypeArrayCtors } from "./dtype";
+import { ATypedArray, Dtype, dtypedBufferToTypedArray } from "./dtype";
 import { Shape, defaultStrides, shapeSize } from "./shape";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
@@ -7,25 +7,9 @@ export type TensorArrayData = Array<number | TensorArrayData>;
 export abstract class UntypedStorage {
     abstract get byteOffset(): number;
     abstract get byteSize(): number;
-    abstract get mappedArrayBuffer(): ArrayBuffer | null;
-    abstract get isMapped(): boolean;
-    abstract mapReadAsync(): Promise<void>;
-    abstract unmap(): void;
     abstract destroy(): void;
     abstract clone(): UntypedStorage;
-    getTypedArray(dtype: Dtype): ATypedArray {
-        const buffer = this.mappedArrayBuffer;
-        if (buffer === null) {
-            throw new Error("Storage is not mapped");
-        }
-        if (dtype in dtypeArrayCtors) {
-            const byteOffset = this.byteOffset;
-            const ctor = dtypeArrayCtors[dtype];
-            const length = this.byteSize / ctor.BYTES_PER_ELEMENT;
-            return new ctor(buffer, byteOffset, length);
-        }
-        throw new Error(`Unsupported dtype: ${dtype}`);
-    }
+    abstract toTypedArrayAsync(dtype: Dtype): Promise<ATypedArray>;
 }
 
 export class ArrayBufferStorage extends UntypedStorage {
@@ -41,9 +25,6 @@ export class ArrayBufferStorage extends UntypedStorage {
     }
     get byteSize(): number {
         return this._byteSize;
-    }
-    get mappedArrayBuffer(): ArrayBuffer | null {
-        return this._buffer;
     }
     constructor(byteSize: number | ArrayBuffer | ATypedArray | HeapBuffer<ArrayBuffer>) {
         super();
@@ -75,14 +56,11 @@ export class ArrayBufferStorage extends UntypedStorage {
             );
         }
     }
-    get isMapped(): boolean {
-        return true;
+    getTypedArray(dtype: Dtype): ATypedArray {
+        return dtypedBufferToTypedArray(dtype, this._buffer, this._byteOffset, this._byteSize);
     }
-    async mapReadAsync(): Promise<void> {
-        // Do nothing
-    }
-    unmap(): void {
-        // Do nothing
+    async toTypedArrayAsync(dtype: Dtype): Promise<ATypedArray> {
+        return this.getTypedArray(dtype);
     }
     destroy(): void {
         // Do nothing
@@ -96,7 +74,6 @@ export class GPUBufferStorage extends UntypedStorage {
     private readonly _byteOffset: number = 0;
     private readonly _byteSize: number;
     private readonly _buffer: GPUBuffer;
-    private _mappedArrayBuffer: [GPUBuffer, ArrayBuffer | null] | null = null;
     private _device: GPUDevice;
     get byteSize(): number {
         return this._byteSize;
@@ -109,17 +86,6 @@ export class GPUBufferStorage extends UntypedStorage {
     }
     get gpuDevice(): GPUDevice {
         return this._device;
-    }
-    get mappedArrayBuffer(): ArrayBuffer | null {
-        if (this._mappedArrayBuffer !== null) {
-            let ar = this._mappedArrayBuffer[1];
-            if (ar === null) {
-                ar = this._mappedArrayBuffer[0].getMappedRange();
-                this._mappedArrayBuffer[1] = ar;
-            }
-            return ar;
-        }
-        return null;
     }
     constructor(buffer: GPUBuffer, device: GPUDevice);
     constructor(buffer: HeapBuffer<GPUBuffer>, device: GPUDevice);
@@ -138,24 +104,11 @@ export class GPUBufferStorage extends UntypedStorage {
         if (input instanceof GPUBuffer) {
             this._buffer = input;
             this._byteSize = this._buffer.size;
-            switch (this._buffer.mapState) {
-                case "mapped":
-                    this._mappedArrayBuffer = [this._buffer, null];
-                    break;
-                case "unmapped":
-                    this._mappedArrayBuffer = null;
-                    break;
-                case "pending":
-                    throw new Error(
-                        "GPUBuffer is pending. Please wait for it to finish mapping before creating a GPUBufferStorage with it."
-                    );
-            }
         } else if (input instanceof HeapBuffer) {
             this._buffer = input.heap.buffer;
             this._byteOffset = input.offset;
             this._byteSize = input.byteSize;
             // console.log(`Created GPUBufferStorage from HeapBuffer with offset ${input.offset}, size ${input.byteSize}`);
-            this._mappedArrayBuffer = null;
         } else if (
             typeof input === "number" &&
             usage !== undefined &&
@@ -166,7 +119,6 @@ export class GPUBufferStorage extends UntypedStorage {
                 size: input,
                 usage: usage,
             });
-            this._mappedArrayBuffer = [this._buffer, null];
             this._byteSize = this._buffer.size;
         } else {
             throw new Error(
@@ -176,34 +128,21 @@ export class GPUBufferStorage extends UntypedStorage {
             );
         }
     }
-    get isMapped(): boolean {
-        return this._buffer.mapState === "mapped";
-    }
-    async mapReadAsync(): Promise<void> {
-        if (this.isMapped) {
-            return;
-        }
-        let mapBuffer: GPUBuffer = this._buffer;
-        if ((this._buffer.usage & GPUBufferUsage.MAP_READ) === 0) {
-            mapBuffer = this.copyBufferToReadableBuffer();
-        }
-        await mapBuffer.mapAsync(GPUMapMode.READ);
-        if (mapBuffer.mapState === "mapped") {
-            this._mappedArrayBuffer = [mapBuffer, null];
-        } else {
-            throw new Error("GPUBuffer failed to map");
-        }
-    }
-    unmap(): void {
-        this._mappedArrayBuffer = null;
-        this._buffer.unmap();
-    }
     destroy(): void {
-        this._mappedArrayBuffer = null;
         this._buffer.destroy();
     }
+    async toTypedArrayAsync(dtype: Dtype): Promise<ATypedArray> {
+        const mapBuffer = this.copyBufferToReadableBuffer();
+        await mapBuffer.mapAsync(GPUMapMode.READ);
+        if (mapBuffer.mapState !== "mapped") {
+            throw new Error("GPUBuffer failed to map");
+        }
+        const arrayBuffer = mapBuffer.getMappedRange();
+        const array = dtypedBufferToTypedArray(dtype, arrayBuffer);
+        return array;
+    }
     private copyBufferToReadableBuffer(): GPUBuffer {
-        const size = this._buffer.size;
+        const size = this._byteSize;
         const readBuffer = this._device.createBuffer({
             mappedAtCreation: false,
             size: size,
@@ -214,7 +153,7 @@ export class GPUBufferStorage extends UntypedStorage {
         const commandEncoder = this._device.createCommandEncoder();
         commandEncoder.copyBufferToBuffer(
             this._buffer /* source buffer */,
-            0 /* source offset */,
+            this._byteOffset /* source offset */,
             readBuffer /* destination buffer */,
             0 /* destination offset */,
             size /* size */
@@ -280,31 +219,32 @@ export function newTypedArrayFromArray(
     }
     const strides = defaultStrides(shape);
     const size = shapeSize(shape);
-    const storage = device.allocFor(shape, dtype);
-    const flatData = storage.getTypedArray(dtype);
-    let flatIndex = 0;
-    function flatten(data: TensorArrayData) {
-        for (let i = 0; i < data.length; i++) {
-            let d = data[i];
-            if (typeof d === "number") {
-                for (let j = 0; j < data.length; j++) {
-                    flatData[flatIndex] = data[j] as number;
-                    flatIndex++;
+    const storage = device.initStorage(shape, dtype, (flatData) => {
+        // const flatData = storage.getTypedArray(dtype);
+        let flatIndex = 0;
+        function flatten(data: TensorArrayData) {
+            for (let i = 0; i < data.length; i++) {
+                let d = data[i];
+                if (typeof d === "number") {
+                    for (let j = 0; j < data.length; j++) {
+                        flatData[flatIndex] = data[j] as number;
+                        flatIndex++;
+                    }
+                    return;
                 }
-                return;
-            }
-            if (d instanceof Array) {
-                flatten(d);
-            } else {
-                throw new Error(
-                    `Invalid data type: ${d} (${(d as any).constructor.name})`
-                );
+                if (d instanceof Array) {
+                    flatten(d);
+                } else {
+                    throw new Error(
+                        `Invalid data type: ${d} (${(d as any).constructor.name})`
+                    );
+                }
             }
         }
-    }
-    if (data !== null) {
-        flatten(data);
-    }
+        if (data !== null) {
+            flatten(data);
+        }
+    });
     return { storage, shape, strides };
 }
 

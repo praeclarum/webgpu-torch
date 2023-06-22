@@ -193,14 +193,14 @@ export class KernelWebGPU extends Kernel {
                 `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
             );
         }
-        // if (providedInput.usage & GPUBufferUsage.STORAGE) {
-        //     if (providedInput.mapState === "mapped") {
-        //         providedInput.unmap();
-        //     }
-        //     return providedInput;
-        // } else {
-        //     throw new Error("Provided input buffer is not a storage buffer");
-        // }
+        const providedBuffer = (providedInput as GPUBufferStorage).gpuBuffer;
+        if (providedBuffer.usage & GPUBufferUsage.STORAGE) {
+            if (providedBuffer.mapState === "mapped") {
+                providedBuffer.unmap();
+            }
+        } else {
+            throw new Error("Provided input buffer is not a storage buffer");
+        }
         return providedInput;
     }
     private getStorageOutputBuffer(
@@ -210,15 +210,15 @@ export class KernelWebGPU extends Kernel {
         env: EvalEnv
     ): UntypedStorage {
         if (providedOutput !== null) {
+            const providedBuffer = (providedOutput as GPUBufferStorage).gpuBuffer;
+            if (providedBuffer.usage & GPUBufferUsage.STORAGE) {
+                if (providedBuffer.mapState === "mapped") {
+                    providedBuffer.unmap();
+                }
+            } else {
+                throw new Error("Provided output buffer is not a storage buffer");
+            }
             return providedOutput;
-            // if (providedOutput.usage & GPUBufferUsage.STORAGE) {
-            //     providedOutput.unmap();
-            //     return providedOutput;
-            // } else {
-            //     throw new Error(
-            //         "Provided output buffer is not a storage buffer"
-            //     );
-            // }
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType

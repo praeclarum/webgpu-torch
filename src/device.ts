@@ -36,17 +36,12 @@ export abstract class Device {
         this._type = type;
         this._heapFinalizers = new FinalizationRegistry<HeapBuffer<GPUBuffer | ArrayBuffer>>(
             (buffer) => {
-                console.log("Finalizing heap buffer", buffer);
+                // console.log("Finalizing heap buffer", buffer);
                 buffer.free();
             }
         );
     }
-    abstract alloc(byteSize: number): UntypedStorage;
-    allocFor(shape: Shape, dtype: Dtype): UntypedStorage {
-        const elementByteSize = dtypeByteSize(dtype);
-        const byteSize = shapeSize(shape) * elementByteSize;
-        return this.alloc(byteSize);
-    }
+    abstract initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): UntypedStorage;
     abstract allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer>;
     abstract createHeapStorage(buffer: HeapBuffer<GPUBuffer | ArrayBuffer>): UntypedStorage;
     heapAlloc(byteSize: number): UntypedStorage {
@@ -86,12 +81,4 @@ export abstract class Device {
         return kernel;
     }
     abstract createKernel(spec: KernelSpec, config: KernelConfig): Kernel;
-    abstract getBufferForKernel(
-        storage: UntypedStorage,
-        dtype: Dtype
-    ): ATypedArray | GPUBuffer;
-    abstract getStorageFromKernel(
-        buffer: ATypedArray | GPUBuffer,
-        pooled: boolean
-    ): UntypedStorage;
 }

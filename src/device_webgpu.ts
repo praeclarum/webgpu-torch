@@ -1,8 +1,9 @@
 import { Device } from "./device";
-import type { ATypedArray, Dtype } from "./dtype";
+import { ATypedArray, Dtype, dtypeByteSize, dtypedBufferToTypedArray } from "./dtype";
 import { GPUBufferStorage, UntypedStorage, BufferHeap, HeapBuffer } from "./storage";
 import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
 import { KernelWebGPU } from "./kernel_webgpu";
+import { Shape, shapeSize } from "./shape";
 
 export class DeviceWebGPU extends Device {
     private _device: GPUDevice;
@@ -68,17 +69,24 @@ export class DeviceWebGPU extends Device {
             }
         }
     }
-    alloc(byteSize: number): GPUBufferStorage {
-        return new GPUBufferStorage(
-            byteSize,
-            this._device,
-            GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
-        );
+    initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): UntypedStorage {
+        const elementByteSize = dtypeByteSize(dtype);
+        const byteSize = shapeSize(shape) * elementByteSize;
+        const buffer = this._device.createBuffer({
+            mappedAtCreation: true,
+            size: byteSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+        });
+        const arrayBuffer = buffer.getMappedRange();
+        const array = dtypedBufferToTypedArray(dtype, arrayBuffer);
+        init(array);
+        buffer.unmap();
+        return new GPUBufferStorage(buffer, this.gpuDevice);
     }
     allocBufferHeap(): BufferHeap<GPUBuffer> {
         const byteSize = this.gpuDevice.limits.maxBufferSize;
         const buffer = this._device.createBuffer({
-            mappedAtCreation: true,
+            mappedAtCreation: false,
             size: byteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
@@ -119,31 +127,5 @@ export class DeviceWebGPU extends Device {
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelWebGPU(spec, config, this);
-    }
-    getStorageFromKernel(
-        storage: ATypedArray | GPUBuffer,
-        pooled: boolean
-    ): UntypedStorage {
-        if (storage instanceof GPUBuffer) {
-            const s = new GPUBufferStorage(storage, this.gpuDevice);
-            if (pooled) {
-                // this._finalizationRegistry.register(s, storage);
-            }
-            return s;
-        }
-        throw new Error(
-            `Cannot wrap buffer of type ${storage.constructor.name} to get GPU storage`
-        );
-    }
-    getBufferForKernel(
-        storage: UntypedStorage,
-        dtype: Dtype
-    ): ATypedArray | GPUBuffer {
-        if (storage instanceof GPUBufferStorage) {
-            return storage.gpuBuffer;
-        }
-        throw new Error(
-            `Cannot unwrap storage of type ${storage.constructor.name} to get GPU buffer`
-        );
     }
 }

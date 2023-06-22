@@ -1,8 +1,9 @@
 import { Device } from "./device";
 import { ArrayBufferStorage, BufferHeap, HeapBuffer, UntypedStorage } from "./storage";
 import { KernelCPU } from "./kernel_cpu";
-import type { ATypedArray, Dtype } from "./dtype";
+import { dtypeByteSize, type ATypedArray, type Dtype } from "./dtype";
 import type { Kernel, KernelConfig, KernelSpec } from "./kernel";
+import { Shape, shapeSize } from "./shape";
 
 export class DeviceCPU extends Device {
     get workgroupMaxSize(): [number, number, number] {
@@ -17,8 +18,12 @@ export class DeviceCPU extends Device {
     constructor() {
         super("cpu", "cpu");
     }
-    alloc(byteSize: number): UntypedStorage {
-        return new ArrayBufferStorage(byteSize);
+    initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): ArrayBufferStorage {
+        const elementByteSize = dtypeByteSize(dtype);
+        const byteSize = shapeSize(shape) * elementByteSize;
+        const storage = new ArrayBufferStorage(byteSize);
+        init(storage.getTypedArray(dtype));
+        return storage;
     }
     allocBufferHeap(): BufferHeap<GPUBuffer | ArrayBuffer> {
         const size = 256*1024*1024;
@@ -31,29 +36,5 @@ export class DeviceCPU extends Device {
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelCPU(spec, config, this);
-    }
-    getStorageFromKernel(storage: ATypedArray | GPUBuffer, pooled: boolean): UntypedStorage {
-        if (
-            storage instanceof Uint8Array ||
-            storage instanceof Uint32Array ||
-            storage instanceof Int32Array ||
-            storage instanceof Float32Array
-        ) {
-            return new ArrayBufferStorage(storage.buffer);
-        }
-        throw new Error(
-            `Cannot wrap buffer of type ${storage.constructor.name} to get CPU storage`
-        );
-    }
-    getBufferForKernel(
-        storage: UntypedStorage,
-        dtype: Dtype
-    ): ATypedArray | GPUBuffer {
-        if (storage instanceof ArrayBufferStorage) {
-            return storage.getTypedArray(dtype);
-        }
-        throw new Error(
-            `Cannot unwrap buffer of type ${storage.constructor.name} to get CPU buffer`
-        );
     }
 }

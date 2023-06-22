@@ -165,14 +165,8 @@ export class Tensor extends TensorBase {
         }
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
-    async toTypedArrayAsync(): Promise<ATypedArray> {
-        await this.storage.mapReadAsync();
-        const data = this.storage.getTypedArray(this.dtype);
-        return data;
-    }
     async toArrayAsync(): Promise<TensorArrayData> {
-        await this.storage.mapReadAsync();
-        const data = this.storage.getTypedArray(this.dtype);
+        const data = await this.storage.toTypedArrayAsync(this.dtype);
         const shape = this.shape;
         const strides = this.strides;
     
