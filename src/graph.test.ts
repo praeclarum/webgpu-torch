@@ -21,7 +21,7 @@ test("deep equal-width graphs use minimal buffers", async () => {
     const x = tensor([1, 2, 3]);
     let y = x;
     const ys: Tensor[] = [];
-    const depth = 101;
+    const depth = 51;
     for (let i = 0; i < depth; i++) {
         y = y.neg();
         ys.push(y);

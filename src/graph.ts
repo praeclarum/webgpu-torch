@@ -4,8 +4,10 @@ import { shaderTypeToDtype, type Kernel, type KernelParamsInput } from "./kernel
 import { shapeSize, type Shape, type Strides } from "./shape";
 import type { UntypedStorage } from "./storage";
 
+type NodeId = number;
+
 export abstract class GraphNode {
-    readonly id: number;
+    readonly id: NodeId;
     private static nextId = 0;
     abstract get inputs(): GraphNode[];
     abstract get device(): Device;
@@ -60,6 +62,18 @@ export class SourceNode extends GraphNode {
     }
 }
 
+function setsAreEqual<T>(a: Set<T>, b: Set<T>) {
+    if (a.size !== b.size) {
+        return false;
+    }
+    for (let item of a) {
+        if (!b.has(item)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export class ComputedNode extends GraphNode {
     readonly kernel: Kernel;
     readonly params: KernelParamsInput;
@@ -105,7 +119,7 @@ export class ComputedNode extends GraphNode {
         // const inputs = this.inputs.map((input) => input.storage);
         // const outputs = this.kernel.run(inputs, this.params);
         const device = this.device;
-        const [nodesToEval, nodesWithStorage] = this.createExecutionPlan();
+        const [depthFirstNodes, nodesWithStorage, liveness] = this.createExecutionPlan();
         const temporaryStoragePool: {[byteSize: number]: UntypedStorage[]} = {};
         const alloc = (byteSize: number) => {
             if (!(byteSize in temporaryStoragePool)) {
@@ -116,7 +130,7 @@ export class ComputedNode extends GraphNode {
                 console.log("reuse temp", byteSize);
                 return storage;
             }
-            console.log("alloc temp", byteSize);
+            // console.log("alloc temp", byteSize);
             return device.alloc(byteSize);
         };
         const free = (storage: UntypedStorage) => {
@@ -129,7 +143,7 @@ export class ComputedNode extends GraphNode {
             }
         };
         const computedStorages: {[nodeId: number]: UntypedStorage} = {};
-        for (let node of nodesToEval) {
+        for (let node of depthFirstNodes) {
             const nodeId = node.id;
             if (nodeId in nodesWithStorage) {
                 computedStorages[nodeId] = nodesWithStorage[nodeId].storage;
@@ -142,8 +156,8 @@ export class ComputedNode extends GraphNode {
         }
         return computedStorages[this.id];
     }
-    private createExecutionPlan(): [GraphNode[], { [nodeId: number]: GraphNode }] {
-        const sortedNodes: GraphNode[] = [];
+    private createExecutionPlan(): [GraphNode[], { [nodeId: number]: GraphNode }, {ins: Set<NodeId>[], outs: Set<NodeId>[]}] {
+        const depthFirstNodes: GraphNode[] = [];
         const visitedNodes = new Set<number>();
         const nodesWithStorage: { [nodeId: number]: GraphNode } = {};
         function topoSort(node: GraphNode) {
@@ -158,10 +172,46 @@ export class ComputedNode extends GraphNode {
                     topoSort(input);
                 }
             }
-            sortedNodes.push(node);
+            depthFirstNodes.push(node);
         }
         topoSort(this);
-        // console.log("Sorted nodes", sortedNodes.length);
-        return [sortedNodes, nodesWithStorage];
+        const liveness = this.getLiveness(depthFirstNodes);
+        // console.log(`Liveness for node#${this.id}`, liveness);
+        return [depthFirstNodes, nodesWithStorage, liveness];
+    }
+    private getLiveness(depthFirstNodes: GraphNode[]): {ins: Set<NodeId>[], outs: Set<NodeId>[]} {
+        const n = depthFirstNodes.length;
+        const ins: Set<NodeId>[] = [];
+        const outs: Set<NodeId>[] = [];
+        for (let i = 0; i < n; i++) {
+            ins.push(new Set<NodeId>());
+            outs.push(new Set<NodeId>());
+        }
+        let changesOccurred = true;
+        while (changesOccurred) {
+            changesOccurred = false;
+            for (let i = n - 1; i >= 0; i--) {
+                const node = depthFirstNodes[i];
+                const nouts = new Set<NodeId>();
+                if (i + 1 < n) {
+                    for (let inn of ins[i + 1]) {
+                        nouts.add(inn);
+                    }
+                }
+                else {
+                    nouts.add(node.id);
+                }
+                changesOccurred = changesOccurred || !setsAreEqual(nouts, outs[i]);
+                const nins = new Set<NodeId>(nouts);
+                nins.delete(node.id);
+                for (let input of node.inputs) {
+                    nins.add(input.id);
+                }
+                changesOccurred = changesOccurred || !setsAreEqual(nins, ins[i]);
+                ins[i] = nins;
+                outs[i] = nouts;
+            }
+        }
+        return {ins, outs};
     }
 }
