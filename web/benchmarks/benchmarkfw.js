@@ -149,13 +149,13 @@ async function runBenchmarksAsync($benchmarksDiv) {
         $benchmarksTableRowName.innerText = b.key;
         $benchmarksTableRow.appendChild($benchmarksTableRowName);
         const $benchmarksTableRowTime = document.createElement('td');
-        $benchmarksTableRowTime.innerText = `${b.meanTime.toFixed(4)}`;
+        $benchmarksTableRowTime.innerText = `${b.meanTime.toFixed(3)}`;
         $benchmarksTableRow.appendChild($benchmarksTableRowTime);
         for (let ok of otherKeys) {
             const $benchmarksTableRowOther = document.createElement('td');
             if (otherResults[ok].results[b.key]) {
                 const ms = otherResults[ok].results[b.key].mean_ms;
-                $benchmarksTableRowOther.innerText = `${ms.toFixed(4)}`;
+                $benchmarksTableRowOther.innerText = `${ms.toFixed(3)}`;
             }
             $benchmarksTableRow.appendChild($benchmarksTableRowOther);
         }
