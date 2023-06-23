@@ -10,22 +10,36 @@ import type { UntypedStorage } from "./storage";
 
 type NodeId = number;
 
-export type GraphNodeOutputRef = { node: GraphNode; outputIndex: number };
 export type GraphNodeOutputSpec = {
     dtype: Dtype;
     shape: Shape;
     strides: Strides;
 };
 
+export class GraphNodeOutputRef {
+    readonly node: GraphNode;
+    readonly outputIndex: number;
+    constructor(node: GraphNode, outputIndex: number) {
+        this.node = node;
+        this.outputIndex = outputIndex;
+    }
+    addRef(): GraphNodeOutputRef {
+        this.node.addRef();
+        return this;
+    }
+}
+
 export abstract class GraphNode {
-    readonly id: NodeId;
     private static nextId = 0;
+    readonly id: NodeId;
+    private readonly _outputRefs: GraphNodeOutputRef[] = [];
+    private _referenceCount = 0;
+    get referenceCount(): number {
+        return this._referenceCount;
+    }
     abstract get device(): Device;
     abstract get inputs(): GraphNodeOutputRef[];
     abstract get outputs(): GraphNodeOutputSpec[];
-    // abstract get shape(): Shape;
-    // abstract get strides(): Shape;
-    // abstract get dtype(): Dtype;
     abstract get storageAvailable(): boolean;
     abstract get storages(): UntypedStorage[];
     abstract get isSource(): boolean;
@@ -34,6 +48,15 @@ export abstract class GraphNode {
     }
     constructor() {
         this.id = GraphNode.nextId++;
+    }
+    getOutputRef(outputIndex: number): GraphNodeOutputRef {
+        if (this._outputRefs[outputIndex] === undefined) {
+            this._outputRefs[outputIndex] = new GraphNodeOutputRef(this, outputIndex);
+        }
+        return this._outputRefs[outputIndex];
+    }
+    addRef(): void {
+        this._referenceCount++;
     }
 }
 
@@ -122,13 +145,8 @@ export class ComputedNode extends GraphNode {
         this.params = params;
         this.inputs = inputs;
         this._outputs = outputs;
-        // this._dtype = shaderTypeToDtype(this.kernel.spec.outputs[0].shaderType);
-        // this._shapes = outputShapes;
-        // this._strides = defaultStrides(outputShape);
     }
     private run(): UntypedStorage[] {
-        // const inputs = this.inputs.map((input) => input.storage);
-        // const outputs = this.kernel.run(inputs, this.params);
         const device = this.device;
         const [depthFirstNodes, nodesWithStorage, liveness] =
             this.createExecutionPlan();
@@ -213,6 +231,7 @@ export class ComputedNode extends GraphNode {
     ] {
         const depthFirstNodes: GraphNode[] = [];
         const visitedNodes = new Set<number>();
+        const retainNodes: GraphNode[] = [this];
         const nodesWithStorage: { [nodeId: number]: GraphNode } = {};
         function topoSort(node: GraphNode) {
             if (visitedNodes.has(node.id)) {
@@ -225,15 +244,18 @@ export class ComputedNode extends GraphNode {
                 for (let input of node.inputs) {
                     topoSort(input.node);
                 }
+                if (node.referenceCount > 1) {
+                    retainNodes.push(node);
+                }
             }
             depthFirstNodes.push(node);
         }
         topoSort(this);
-        const liveness = this.getLiveness(depthFirstNodes);
+        const liveness = this.getLiveness(depthFirstNodes, retainNodes);
         // console.log(`Liveness for node#${this.id}`, liveness);
         return [depthFirstNodes, nodesWithStorage, liveness];
     }
-    private getLiveness(depthFirstNodes: GraphNode[]): {
+    private getLiveness(depthFirstNodes: GraphNode[], outputNodes: GraphNode[]): {
         ins: Set<NodeId>[];
         outs: Set<NodeId>[];
     } {
@@ -255,7 +277,9 @@ export class ComputedNode extends GraphNode {
                         nouts.add(inn);
                     }
                 } else {
-                    nouts.add(node.id);
+                    for (let outputNode of outputNodes) {
+                        nouts.add(outputNode.id);
+                    }
                 }
                 changesOccurred =
                     changesOccurred || !setsAreEqual(nouts, outs[i]);

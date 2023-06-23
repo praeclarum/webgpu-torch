@@ -41,3 +41,24 @@ test("inplace ops handled correctly", async () => {
     expect(await y.toArrayAsync()).toEqual([-1, -2, -3]);
     expect(await z.toArrayAsync()).toEqual([1, 2, 3]);
 });
+
+test("temporaries are not retained", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.neg();
+    const z = y.neg();
+    expect(await z.toArrayAsync()).toEqual([1, 2, 3]);
+    expect(y.node.node.storageAvailable).toEqual(false);
+    expect(z.node.node.storageAvailable).toEqual(true);
+});
+
+test("aliases are retained", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.neg();
+    const z = y.neg();
+    const w = y.neg();
+    expect(await z.toArrayAsync()).toEqual([1, 2, 3]);
+    expect(await w.toArrayAsync()).toEqual([1, 2, 3]);
+    expect(y.node.node.storageAvailable).toEqual(true);
+    expect(z.node.node.storageAvailable).toEqual(true);
+    expect(w.node.node.storageAvailable).toEqual(true);
+});

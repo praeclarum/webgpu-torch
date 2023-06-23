@@ -120,10 +120,7 @@ export class Tensor extends TensorBase {
             this._dtype = dt;
             this._shape = array.shape;
             this._strides = array.strides;
-            this._node = {
-                node: new SourceNode(array.storage, this._dtype, this._shape, this._strides),
-                outputIndex: 0
-            };
+            this._node = (new SourceNode(array.storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else if (arrayOrSpec.hasOwnProperty("node") && (arrayOrSpec as any).node instanceof GraphNode) {
             const noder = arrayOrSpec as GraphNodeOutputRef;
             const spec = noder.node.outputs[noder.outputIndex];
@@ -154,10 +151,7 @@ export class Tensor extends TensorBase {
             } else {
                 throw new Error("Cannot create tensor from json data " + jdata);
             }
-            this._node = {
-                node: new SourceNode(storage, this._dtype, this._shape, this._strides),
-                outputIndex: 0
-            };
+            this._node = (new SourceNode(storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else {
             throw new Error(
                 "Invalid data type for Tensor constructor. Expected an array of values or a json object with a 'data' property."
@@ -248,17 +242,14 @@ export class Tensor extends TensorBase {
         if (lazy) {
             const nameWithoutTrailing_ = name.endsWith("_") ? name.slice(0, -1) : name;
             const kernel = this.device.getKernel(nameWithoutTrailing_, config);
-            const inputRefs = [this._node, ...additionalInputs.map((t) => t._node)];
+            const inputRefs = [this._node.addRef(), ...additionalInputs.map((t) => t._node.addRef())];
             const outputSpecs: GraphNodeOutputSpec[] = [{
                 shape: this.shape,
                 dtype: this.dtype,
                 strides: this.strides,
             }];
             const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
-            this._node = {
-                node,
-                outputIndex: 0,
-            };
+            this._node = node.getOutputRef(0);
         }
         else {
             const kernel = this.device.getKernel(name, config);
@@ -282,7 +273,7 @@ export class Tensor extends TensorBase {
         const outputsAreTensors = outputs[0] instanceof Tensor;
         const lazy = true;
         if (lazy) {
-            const inputRefs = [this._node, ...additionalInputs.map((t) => t._node)];
+            const inputRefs = [this._node.addRef(), ...additionalInputs.map((t) => t._node.addRef())];
             const outputSpecs: GraphNodeOutputSpec[] = [];
             for (let i = 0; i < outputs.length; i++) {
                 const output = outputs[i];
@@ -302,13 +293,7 @@ export class Tensor extends TensorBase {
                 }
             }
             const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
-            return outputs.map((output, i) => {
-                const ref = {
-                    node: node,
-                    outputIndex: i,
-                };
-                return new Tensor(ref);
-            });
+            return outputs.map((output, i) => new Tensor(node.getOutputRef(i)));
         }
         else {
             const inputStorages = [
