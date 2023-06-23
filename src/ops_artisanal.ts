@@ -70,6 +70,10 @@ export function conv2d(input: Tensor, weight: Tensor, bias?: Tensor, stride?: nu
     }
 }
 
+export function matmul(input: Tensor, other: Tensor): Tensor {
+    throw new Error("matmul not implemented yet");
+}
+
 export function mm(input: Tensor, other: Tensor): Tensor {
     if (shouldCreateGradient(input, other)) {
         throw new Error("mm gradient not supported yet");
