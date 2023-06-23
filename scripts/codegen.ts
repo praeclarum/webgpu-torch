@@ -67,12 +67,11 @@ function writeParams(inputName: string, otherIsScalar: boolean, hasAlpha: boolea
     w.writeLine(`};`);
 }
 
-function writeReductionParams(inputName: string, dimName: string | null, w: CodeWriter) {
+function writeReductionParams(sizeShapeName: string, dimName: string | null, w: CodeWriter) {
     w.writeLine(`const params = {`);
     w.indent();
-    w.writeLine(`size: shapeSize(${inputName}.shape),`);
+    w.writeLine(`size: shapeSize(${sizeShapeName}),`);
     if (dimName) {
-        w.writeLine(`dim: ${dimName},`);
     }
     w.dedent();
     w.writeLine(`};`);
@@ -90,7 +89,8 @@ function writeTensorCode(): void {
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
         const hasAlpha = opSpec.alpha ?? false;
-        const isReduction = opSpec.type === "reduction";        
+        const isReduction = opSpec.type === "reduction";
+        if (isReduction && kernelSpec.name.endsWith("_dim")) continue;
         writeOpHeader(opSpec, kernelSpec.name, false, " {", w);
         w.indent();
         if (isInplace) {
@@ -219,7 +219,12 @@ import { shapeSize } from "./shape";`);
         let outputShapesS: string = "[input.shape]";
         if (isReduction) {
             outputShapesS = "[[]]";
-            config["workgroupSize"] = 256;
+            if (kernelSpec.config.find(x => x.name==="dim")) {
+                continue;
+            }
+            else {
+                config["workgroupSize"] = 256;
+            }
         }
         const configS = JSON.stringify(config);
         const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
@@ -276,8 +281,12 @@ import { shapeSize } from "./shape";`);
             w.indent();
             w.writeLine(`if (typeof dim === "number") {`);
             w.indent();
-            writeReductionParams("input", "dim", w);
-            w.writeLine(`return input.runKernel(\"${kernelSpec.name}_dim\", ${configS}, params, ${outputShapesS})[0];`);
+            w.writeLine(`const inputShape = input.shape;`);
+            w.writeLine(`let outputShape = input.shape.slice();`);
+            w.writeLine(`outputShape[dim] = 1;`);
+            writeReductionParams("outputShape", "dim", w);
+            w.writeLine(`if (!keepdim) outputShape.splice(dim, 1);`);
+            w.writeLine(`return input.runKernel(\"${kernelSpec.name}_dim\", {dim,maxdim:inputShape.length,dtype:\"${config.dtype}\"}, params, [outputShape])[0];`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
@@ -287,7 +296,7 @@ import { shapeSize } from "./shape";`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
-            writeReductionParams("input", null, w);
+            writeReductionParams("input.shape", null, w);
             w.writeLine(`return input.runKernel(\"${kernelSpec.name}\", ${configS}, params, ${outputShapesS})[0];`);
             w.dedent();
             w.writeLine(`}`);
@@ -349,7 +358,7 @@ import { shapeSize } from "./shape";`);
             w.indent();
             w.writeLine(`if (typeof dim === "number") {`);
             w.indent();
-            writeReductionParams("input", "dim", w);
+            writeReductionParams("input.shape", "dim", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_dim_grad", ${configS}, params, [input.shape], output, outputGrad);`);
             w.dedent();
             w.writeLine(`} else {`);
@@ -360,7 +369,7 @@ import { shapeSize } from "./shape";`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
-            writeReductionParams("input", null, w);
+            writeReductionParams("input.shape", null, w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape], output, outputGrad);`);
             w.dedent();
             w.writeLine(`}`);
@@ -466,6 +475,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
         const isReduction = opSpec.type === "reduction";
+        if (isReduction && kernelSpec.name.endsWith("_dim")) continue;
         const hasAlpha = opSpec.alpha ?? false;
         const funcName = kernelSpec.name[0].toUpperCase() + kernelSpec.name.slice(1) + "Function";
         const writeHeader = (name: string, isAlias: boolean) => {

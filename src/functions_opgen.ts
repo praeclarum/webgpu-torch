@@ -1353,11 +1353,14 @@ export class AllFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("all_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("all_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1386,7 +1389,6 @@ export class AllFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("all_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1406,11 +1408,14 @@ export class AnyFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("any_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("any_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1439,7 +1444,6 @@ export class AnyFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("any_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1459,11 +1463,14 @@ export class MeanFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("mean_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("mean_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1492,7 +1499,6 @@ export class MeanFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("mean_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1512,11 +1518,14 @@ export class NormFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("norm_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("norm_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1545,7 +1554,6 @@ export class NormFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("norm_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1565,11 +1573,14 @@ export class ProdFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("prod_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("prod_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1598,7 +1609,6 @@ export class ProdFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("prod_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1618,11 +1628,14 @@ export class SumFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("sum_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("sum_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1651,7 +1664,6 @@ export class SumFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("sum_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1671,11 +1683,14 @@ export class CountNonzeroFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
                 };
-                return input.runKernel("countNonzero_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("countNonzero_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1704,7 +1719,6 @@ export class CountNonzeroFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("countNonzero_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {

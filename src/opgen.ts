@@ -37,7 +37,7 @@ export function opSpecToKernelSpecs(op: OpSpec): KernelSpec[] {
 }
 
 function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
-    const specs = [getReductionKernelSpec(op)];
+    const specs = [getReductionKernelSpec(op), getReductionDimKernelSpec(op)];
     if (op.backward) {
         specs.push(getReductionGradKernelSpec(op, op.backward));
     }
@@ -74,11 +74,14 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
         input: "input[i]",
         output: "accumulator",
     });
-    const reduceCode = op.reduce === undefined ? "" : exprCodeToWebGLShader(op.reduce, {
-        input: "input[i]",
-        output: "accumulator",
-        inputSize: "parameters.size",
-    });
+    const reduceCode =
+        op.reduce === undefined
+            ? ""
+            : exprCodeToWebGLShader(op.reduce, {
+                  input: "input[i]",
+                  output: "accumulator",
+                  inputSize: "parameters.size",
+              });
     const shader = `
     var ${initCode};
     // Load inputData into local memory
@@ -136,7 +139,10 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     };
 }
 
-function getReductionGradKernelSpec(op: ReductionOpSpec, backwardExprCode: ExprCode): KernelSpec {
+function getReductionGradKernelSpec(
+    op: ReductionOpSpec,
+    backwardExprCode: ExprCode
+): KernelSpec {
     const backwardShaderCode = exprCodeToWebGLShader(backwardExprCode, {
         input: "input[index]",
         output: "output[0]",
@@ -194,7 +200,120 @@ function getReductionGradKernelSpec(op: ReductionOpSpec, backwardExprCode: ExprC
     };
 }
 
-function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean, isOtherScalar: boolean): KernelSpec {
+function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
+    const initCode = exprCodeToWebGLShader(op.init, {
+        input: "input[local_id.x]",
+        output: "accumulator",
+    });
+    const forwardCode = exprCodeToWebGLShader(op.forward, {
+        input: "input[i]",
+        output: "accumulator",
+    });
+    const reduceCode =
+        op.reduce === undefined
+            ? ""
+            : exprCodeToWebGLShader(op.reduce, {
+                  input: "input[i]",
+                  output: "accumulator",
+                  inputSize: "parameters.size",
+              });
+    const shader = `
+    var ${initCode};
+    // Load inputData into local memory
+    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {
+        ${forwardCode};
+    }
+    // Write partial group sum to outputData
+    output[local_id.x] = accumulator;
+
+    workgroupBarrier(); // Make sure all threads have completed reduction
+
+    // First thread sums up results from all other threads
+    if (local_id.x == 0u) {
+        var numToSum = min(parameters.size, $$workgroupSize$$u);
+        for (var i = 1u; i < numToSum; i++) {
+            accumulator ${op.combineOp}= output[i];
+        }
+        // Store final reduction in the first element of result array
+        ${reduceCode};
+        output[0] = accumulator;
+    }
+`;
+    return {
+        name: op.name + "_dim",
+        config: [
+            {
+                name: "dtype",
+            },
+            {
+                name: "dim",
+            },
+            {
+                name: "maxdim",
+            },
+        ],
+        parameters: [
+            {
+                name: "inputShape0",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape1",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape2",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape3",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride0",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride1",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride2",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride3",
+                shaderType: "u32",
+            },
+            {
+                name: "size",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["size/256", 1, 1],
+        shader: shader,
+    };
+}
+
+function getBinaryKernelSpec(
+    op: BinaryOpSpec,
+    inplace: boolean,
+    isOtherScalar: boolean
+): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
