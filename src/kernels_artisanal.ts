@@ -104,6 +104,59 @@ export const kernels: { [name: string]: KernelSpec } = {
     }
 `
     },
+    mv: {
+        name: "mv",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "outputRows",
+                shaderType: "u32",
+            }
+        ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "outputRows",
+            },
+        ],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["outputRows/256", 1, 1],
+        shader: `
+    let outputIndex = global_id.x;
+    if (outputIndex >= parameters.resultRows) {
+        return;
+    }
+    var result = 42.0;
+    output[outputIndex] = result;
+`
+    },
     mm: {
         name: "mm",
         config: [

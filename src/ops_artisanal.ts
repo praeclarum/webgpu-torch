@@ -4,6 +4,7 @@ import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
 import type { Shape, StridedShape, Strides } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
+import { KernelParamsInput } from "./kernel";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
@@ -252,6 +253,7 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
         bop = broadcast.b;
         const aopdims = aop.shape.length;
         const bopdims = bop.shape.length;
+        outputShape = broadcast.output.shape;
         if (aop.shape[aopdims - 1] !== bop.shape[bopdims - 2]) {
             throw new Error(
                 `mat1 and mat2 shapes cannot be multiplied (${aop.shape[aopdims-2]}x${aop.shape[aopdims-1]} and ${bop.shape[bopdims-2]}x${bop.shape[bopdims-1]})`
@@ -262,18 +264,29 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
             `matmul not supported for ${adims}D and ${bdims}D tensors`
         );
     }
-    const params = {
-        resultRows: input.shape[0],
-        resultCols: other.shape[1],
-        innerDim: input.shape[1],
-        alpha: 1.0,
-    };
-    return input.runKernel(
+    let params: KernelParamsInput = {};
+    if (op === "mm") {
+        params = {
+            resultRows: outputShape[0],
+            resultCols: outputShape[1],
+            innerDim: aop.shape[1],
+            alpha: 1.0,
+        };
+    }
+    else if (op === "mv") {
+        params = {
+            aRowStride: aop.strides[0],
+            aColStride: aop.strides[1],
+            bRowStride: bop.strides[0],
+            outputRows: outputShape[0],
+        };
+    }
+    return atensor.runKernel(
         op,
         { resultDtype: input.dtype },
         params,
-        [[params.resultRows, params.resultCols]],
-        other
+        [outputShape],
+        btensor
     )[0];
 }
 
