@@ -73,9 +73,9 @@ function writeReductionParams(sizeShapeName: string, dimName: string | null, w: 
     w.writeLine(`size: shapeSize(${sizeShapeName}),`);
     if (dimName) {
         for (let dim = 0; dim < 4; dim++) {
-            w.writeLine(`inputShape${dim}: input.shape[${dim}],`);
-            w.writeLine(`inputStride${dim}: input.strides[${dim}],`);
-            w.writeLine(`outputStride${dim}: outputStrides[${dim}],`);
+            w.writeLine(`inputShape${dim}: input.shape.length > ${dim} ? input.shape[${dim}] : 1,`);
+            w.writeLine(`inputStride${dim}: input.shape.length > ${dim} ? input.strides[${dim}] : 1,`);
+            w.writeLine(`outputStride${dim}: outputShape.length > ${dim} ? outputStrides[${dim}] : 1,`);
         }
     }
     w.dedent();

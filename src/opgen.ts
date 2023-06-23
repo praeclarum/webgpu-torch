@@ -215,17 +215,34 @@ function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
             : exprCodeToWebGLShader(op.reduce, {
                   input: "input[inputIndex]",
                   output: "accumulator",
-                  inputSize: "parameters.size",
+                  inputSize: "dimN",
               });
     let shader = `
     let outputIndex = global_id.x;
     if (outputIndex >= parameters.size) {
         return;
     }
-    let inputIndex = 0;
+    var i = outputIndex;
+    var outputIndex0 = u32(i / parameters.outputStride0);
+    i = i % parameters.outputStride0;
+    var outputIndex1 = u32(i / parameters.outputStride1);
+    i = i % parameters.outputStride1;
+    var outputIndex2 = u32(i / parameters.outputStride2);
+    i = i % parameters.outputStride2;
+    var outputIndex3 = i;
+    let dimN = parameters.inputShape$$dim$$;
     var ${initCode};
-    ${forwardCode};
+    for (var dimI = 0u; dimI < dimN; dimI++) {
+        outputIndex$$dim$$ = dimI;
+        let inputIndex =
+            outputIndex0 * parameters.inputStride0 +
+            outputIndex1 * parameters.inputStride1 +
+            outputIndex2 * parameters.inputStride2 +
+            outputIndex3;
+        ${forwardCode};
+    }
     ${reduceCode};
+    output[outputIndex] = accumulator;
 `;
     return {
         name: op.name + "_dim",
@@ -271,6 +288,22 @@ function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
             },
             {
                 name: "inputStride3",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride0",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride1",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride2",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride3",
                 shaderType: "u32",
             },
             {
