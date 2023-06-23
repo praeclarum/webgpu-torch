@@ -23,8 +23,7 @@ function insertCodegenIntoFile(path: string, codegen: string): void {
     const pre = code.slice(0, startIndex + codegenMarker.length);
     const post = code.slice(endIndex);
     const newCode = pre + "\n" + codegen + "\n    " + post;
-    console.log("Writing", path);
-    fs.writeFileSync(path, newCode);
+    writeFile(path, newCode);
 }
 
 function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: string, w: CodeWriter) {
@@ -48,7 +47,7 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
             w.writeLine(`${name}(alpha?: number): Tensor${suffix}`);
         }
         else {
-            w.writeLine(`${name}(output?: Tensor): Tensor${suffix}`);
+            w.writeLine(`${name}(): Tensor${suffix}`);
         }
     }
 };
@@ -130,7 +129,7 @@ function writeTensorCode(): void {
                     w.writeLine(`return ops.${kernelSpec.name}(this, alpha);`);
                 }
                 else {
-                    w.writeLine(`return ops.${kernelSpec.name}(this, output);`);
+                    w.writeLine(`return ops.${kernelSpec.name}(this);`);
                 }
             }
         }
@@ -267,7 +266,7 @@ import { shapeSize } from "./shape";`);
         w.indent();
 
         // Forward
-        w.writeLine(`static forward(inputs: FunctionInput[], output?: Tensor): Tensor {`);
+        w.writeLine(`static forward(inputs: FunctionInput[]): Tensor {`);
         w.indent();
         writeUnpackInputs("inputs", true);
         
@@ -309,7 +308,7 @@ import { shapeSize } from "./shape";`);
         }
         else {
             writeParams("input", false, hasAlpha, "alpha", w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, output ? [output] : ${outputShapesS})[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS})[0];`);
         }
         w.dedent();
         w.writeLine(`}`);
@@ -383,8 +382,17 @@ import { shapeSize } from "./shape";`);
     const code = w.toString();
     // console.log(code);
     const path = absSrcDir + "/functions_opgen.ts";
-    console.log("Writing", path);
-    fs.writeFileSync(path, code);
+    writeFile(path, code);
+}
+function writeFile(path: string, code: string) {
+    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    if (oldCode === code) {
+        console.log("OK", path);
+    }
+    else {
+        console.log("Writing", path);
+        fs.writeFileSync(path, code, { encoding: "utf8" });
+    }
 }
 writeFunctionsCode();
 
@@ -477,7 +485,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
                     w.writeLine(`export function ${name}(input: Tensor, alpha?: number): Tensor {`);
                 }
                 else {
-                    w.writeLine(`export function ${name}(input: Tensor, output?: Tensor): Tensor {`);
+                    w.writeLine(`export function ${name}(input: Tensor): Tensor {`);
                 }
             }
         };
@@ -499,7 +507,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
                 w.writeLine(`return unaryWithAlpha(functions.${funcName}, input, alpha);`);
             }
             else {
-                w.writeLine(`return unary(functions.${funcName}, input, output);`);
+                w.writeLine(`return unary(functions.${funcName}, input);`);
             }
         }
         w.dedent();
@@ -531,8 +539,7 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
     const code = w.toString();
     // console.log(code);
     const path = absSrcDir + "/ops_opgen.ts";
-    console.log("Writing", path);
-    fs.writeFileSync(path, code);
+    writeFile(path, code);
 }
 writeOpsCode();
 
@@ -580,8 +587,7 @@ import { Module } from "./nn_module";`);
     const code = w.toString();
     // console.log(code);
     const path = absSrcDir + "/nn_opgen.ts";
-    console.log("Writing", path);
-    fs.writeFileSync(path, code);
+    writeFile(path, code);
 }
 writeNNModulesCode();
 

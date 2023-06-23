@@ -5,6 +5,7 @@ import {
     Kernel,
     KernelConfig,
     KernelInputSpec,
+    KernelOutputCompiledSpec,
     KernelOutputSpec,
     KernelParamsInput,
     KernelSpec,
@@ -19,7 +20,7 @@ export class KernelCPU extends Kernel {
     private _javaScriptFunction: Function;
 
     constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
-        super(spec, config, device);
+        super(spec, config, device, jsMathEnv);
         this._javaScriptCode = getKernelJavaScriptCode(spec, config);
         this._javaScriptFunction = eval(this._javaScriptCode);
     }
@@ -30,6 +31,11 @@ export class KernelCPU extends Kernel {
         outputs?: UntypedStorage[]
     ): UntypedStorage[] {
         // console.log("run cpu kernel", this.key);
+        if (inputs.length !== this.spec.inputs.length) {
+            throw new Error(
+                `Expected ${this.spec.inputs.length} inputs for kernel \"${this.spec.name}\", got ${inputs.length}`
+            );
+        }
 
         // Build the parameter environment
         const [env, paramValues] = this.getRunEnv(parameters);
@@ -42,7 +48,7 @@ export class KernelCPU extends Kernel {
         this.spec.inputs.forEach((input, i) => {
             const o = this.getStorageInputBuffer(
                 input,
-                inputs[i] ? inputs[i] : null,
+                inputs[i],
                 i,
                 env
             );
@@ -85,15 +91,10 @@ export class KernelCPU extends Kernel {
 
     private getStorageInputBuffer(
         inputSpec: KernelInputSpec,
-        providedInput: UntypedStorage | null,
+        providedInput: UntypedStorage,
         inputIndex: number,
         env: EvalEnv
     ): ArrayBufferStorage {
-        if (providedInput === null) {
-            throw new Error(
-                `Missing input buffer #${inputIndex} (out of ${this.spec.inputs.length}) named "${inputSpec.name}" in kernel "${this.key}"`
-            );
-        }
         if (providedInput instanceof ArrayBufferStorage) {
             return providedInput;
         }
@@ -103,7 +104,7 @@ export class KernelCPU extends Kernel {
     }
 
     private getStorageOutputBuffer(
-        outputSpec: KernelOutputSpec,
+        outputSpec: KernelOutputCompiledSpec,
         providedOutput: UntypedStorage | null,
         outputIndex: number,
         env: EvalEnv
@@ -113,14 +114,14 @@ export class KernelCPU extends Kernel {
                 return providedOutput;
             }
             throw new Error(
-                `Output buffer #${outputIndex} (out of ${this.spec.outputs.length}) named "${outputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage`
+                `Output buffer #${outputIndex} (out of ${this.spec.outputs.length}) named "${outputSpec.name}" in kernel "${this.key}" is not an ArrayBufferStorage. It's a ${providedOutput.constructor.name}`
             );
         } else {
             const outputElementByteSize = getShaderTypeElementByteSize(
                 outputSpec.shaderType
             );
             const outputElementCount = Math.ceil(
-                this._outputSizeFuncs[outputIndex](env)
+                this._spec.outputs[outputIndex].size(env)
             );
             const outputBufferSize = outputElementByteSize * outputElementCount;
             // console.log("output", outputSpec.name, "size:", outputElementCount, "* byte size:", outputElementByteSize, "= buffer size:", outputBufferSize);
@@ -129,5 +130,13 @@ export class KernelCPU extends Kernel {
             // const outputBuffer = this.device.alloc(outputBufferSize);
             // return outputBuffer;
         }
+    }
+}
+
+const jsMathEnv: EvalEnv = {};
+for (const name of Object.getOwnPropertyNames(Math)) {
+    const f = (Math as any)[name];
+    if (typeof f === "function") {
+        jsMathEnv[name] = f;
     }
 }

@@ -4,9 +4,15 @@ import type { Device } from "./device";
 import type { ATypedArray, Dtype } from "./dtype";
 import type { UntypedStorage } from "./storage";
 
-export type ShaderDynamicArrayType = "array<u8>" | "array<i32>" | "array<u32>" | "array<f32>";
+export type ShaderDynamicArrayType =
+    | "array<u8>"
+    | "array<i32>"
+    | "array<u32>"
+    | "array<f32>";
 
-export type ShaderArrayType = ShaderDynamicArrayType | [ShaderDynamicArrayType, number];
+export type ShaderArrayType =
+    | ShaderDynamicArrayType
+    | [ShaderDynamicArrayType, number];
 
 export type ShaderType =
     | "u8"
@@ -30,6 +36,18 @@ export interface KernelSpec {
     shader: string;
 }
 
+export interface KernelCompiledSpec {
+    name: string;
+    config: KernelConfigSpec[];
+    workgroupSize: [CompiledExpr, CompiledExpr, CompiledExpr];
+    parameters: KernelParamSpec[];
+    workgroupCount: [CompiledExpr, CompiledExpr, CompiledExpr];
+    workgroupVariables?: KernelInputSpec[];
+    inputs: KernelInputSpec[];
+    outputs: KernelOutputCompiledSpec[];
+    shader: string;
+}
+
 export interface KernelInputSpec {
     name: string;
     shaderType: ShaderType;
@@ -39,6 +57,12 @@ export interface KernelOutputSpec {
     name: string;
     shaderType: ShaderType;
     size: ExprCode;
+}
+
+export interface KernelOutputCompiledSpec {
+    name: string;
+    shaderType: ShaderType;
+    size: CompiledExpr;
 }
 
 export interface KernelParamSpec {
@@ -57,18 +81,14 @@ export type KernelKey = string;
 
 export abstract class Kernel {
     private _key: KernelKey;
-    private _spec: KernelSpec;
+    protected _spec: KernelCompiledSpec;
     private _config: KernelConfig;
     private _device: Device;
-    private _workgroupCountXFunc: CompiledExpr;
-    private _workgroupCountYFunc: CompiledExpr;
-    private _workgroupCountZFunc: CompiledExpr;
-    protected _outputSizeFuncs: CompiledExpr[];
     private _configEnv: EvalEnv;
     get key(): KernelKey {
         return this._key;
     }
-    get spec(): KernelSpec {
+    get spec(): KernelCompiledSpec {
         return this._spec;
     }
     get config(): KernelConfig {
@@ -77,21 +97,17 @@ export abstract class Kernel {
     get device(): Device {
         return this._device;
     }
-    constructor(spec: KernelSpec, config: KernelConfig, device: Device) {
+    protected constructor(
+        spec: KernelSpec,
+        config: KernelConfig,
+        device: Device,
+        baseEnv: EvalEnv
+    ) {
         this._key = getKernelKey(spec, config);
         this._device = device;
-        this._spec = spec;
+        this._spec = compileKernelSpec(spec);
         this._config = config;
-        this._workgroupCountXFunc = compileCode(spec.workgroupCount[0]);
-        this._workgroupCountYFunc = compileCode(spec.workgroupCount[1]);
-        this._workgroupCountZFunc = compileCode(spec.workgroupCount[2]);
-        this._outputSizeFuncs = [];
-        for (let i = 0; i < this._spec.outputs.length; i++) {
-            const outputSpec = this._spec.outputs[i];
-            const outputElementCount = compileCode(outputSpec.size);
-            this._outputSizeFuncs.push(outputElementCount);
-        }
-        this._configEnv = Object.assign({}, jsMathEnv);
+        this._configEnv = Object.assign({}, baseEnv);
         for (let i = 0; i < this._spec.config.length; i++) {
             const configSpec = this._spec.config[i];
             const configValue = this._config[i];
@@ -105,14 +121,16 @@ export abstract class Kernel {
         outputs?: UntypedStorage[]
     ): UntypedStorage[];
 
-    protected getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
+    public getRunEnv(parameters: KernelParamsInput): [EvalEnv, number[]] {
         const env: EvalEnv = Object.assign({}, this._configEnv);
         const paramValues: number[] = [];
         for (let i = 0; i < this.spec.parameters.length; i++) {
             const param = this.spec.parameters[i];
             const paramValue = parameters[param.name];
             if (paramValue === undefined) {
-                throw new Error(`Missing parameter \"${param.name}\" for kernel \"${this.spec.name}\"`);
+                throw new Error(
+                    `Missing parameter \"${param.name}\" for kernel \"${this.spec.name}\"`
+                );
             }
             paramValues.push(paramValue);
             env[param.name] = paramValue;
@@ -121,9 +139,9 @@ export abstract class Kernel {
     }
 
     getWorkgroupCounts(env: EvalEnv): [number, number, number] {
-        const workgroupCountX = Math.ceil(this._workgroupCountXFunc(env));
-        const workgroupCountY = Math.ceil(this._workgroupCountYFunc(env));
-        const workgroupCountZ = Math.ceil(this._workgroupCountZFunc(env));
+        const workgroupCountX = Math.ceil(this._spec.workgroupCount[0](env));
+        const workgroupCountY = Math.ceil(this._spec.workgroupCount[1](env));
+        const workgroupCountZ = Math.ceil(this._spec.workgroupCount[2](env));
         if (workgroupCountX > this.device.workgroupMaxCount) {
             throw new Error(
                 `Workgroup count X (${workgroupCountX}) exceeds the maximum allowed value (${this.device.workgroupMaxCount})`
@@ -144,12 +162,31 @@ export abstract class Kernel {
     }
 }
 
-const jsMathEnv: EvalEnv = {};
-for (const name of Object.getOwnPropertyNames(Math)) {
-    const f = (Math as any)[name];
-    if (typeof f === "function") {
-        jsMathEnv[name] = f;
-    }
+function compileKernelSpec(spec: KernelSpec): KernelCompiledSpec {
+    return {
+        name: spec.name,
+        parameters: spec.parameters,
+        config: spec.config,
+        shader: spec.shader,
+        workgroupCount: spec.workgroupCount.map(x => compileCode(x)) as [
+            CompiledExpr,
+            CompiledExpr,
+            CompiledExpr
+        ],
+        workgroupSize: spec.workgroupSize.map(x => compileCode(x)) as [
+            CompiledExpr,
+            CompiledExpr,
+            CompiledExpr
+        ],
+        inputs: spec.inputs,
+        outputs: spec.outputs.map((outputSpec) => {
+            return {
+                name: outputSpec.name,
+                shaderType: outputSpec.shaderType,
+                size: compileCode(outputSpec.size),
+            };
+        }),
+    };
 }
 
 export function getKernelConfig(
@@ -251,13 +288,13 @@ function configShader(
 export function shaderTypeToCode(shaderType: ShaderType): string {
     if (typeof shaderType === "string") {
         return shaderType;
-    } if (shaderType instanceof Array) {
+    }
+    if (shaderType instanceof Array) {
         return shaderType[0].replace(">", ", " + shaderType[1] + ">");
     } else {
         throw new Error(`Unknown shader type ${shaderType}`);
     }
 }
-
 
 export function getKernelShaderCode(
     spec: KernelSpec,
@@ -296,10 +333,20 @@ export function getKernelShaderCode(
             );
         }
     }
-    const [workgroupMaxSizeX, workgroupMaxSizeY, workgroupMaxSizeZ] = device.workgroupMaxSize;
-    const workgroupSizeX = Math.min(workgroupMaxSizeX, Math.ceil(evalCode(spec.workgroupSize[0], env)));
-    const workgroupSizeY = Math.min(workgroupMaxSizeY, Math.ceil(evalCode(spec.workgroupSize[1], env)));
-    const workgroupSizeZ = Math.min(workgroupMaxSizeZ, Math.ceil(evalCode(spec.workgroupSize[2], env)));
+    const [workgroupMaxSizeX, workgroupMaxSizeY, workgroupMaxSizeZ] =
+        device.workgroupMaxSize;
+    const workgroupSizeX = Math.min(
+        workgroupMaxSizeX,
+        Math.ceil(evalCode(spec.workgroupSize[0], env))
+    );
+    const workgroupSizeY = Math.min(
+        workgroupMaxSizeY,
+        Math.ceil(evalCode(spec.workgroupSize[1], env))
+    );
+    const workgroupSizeZ = Math.min(
+        workgroupMaxSizeZ,
+        Math.ceil(evalCode(spec.workgroupSize[2], env))
+    );
     shaderCodeParts.push(
         `@compute @workgroup_size(${workgroupSizeX}, ${workgroupSizeY}, ${workgroupSizeZ})`
     );
@@ -335,14 +382,17 @@ const javaScriptSubstitutions: [RegExp, string][] = [
     ["local_id\\.x", "local_id_x"],
     ["local_id\\.y", "local_id_y"],
     ["local_id\\.z", "local_id_z"],
-    ["workgroupBarrier\\s*\\(\\s*\\)\\s*;", "yield \"workgroupBarrier\";"],
-    ["storageBarrier\\s*\\(\\s*\\)\\s*;", "yield \"storageBarrier\";"],
+    ["workgroupBarrier\\s*\\(\\s*\\)\\s*;", 'yield "workgroupBarrier";'],
+    ["storageBarrier\\s*\\(\\s*\\)\\s*;", 'yield "storageBarrier";'],
 ].map(([regex, replacement]) => [new RegExp(regex, "g"), replacement]);
 
 // Add all the Math. functions to the substitution list
 for (const name of Object.getOwnPropertyNames(Math)) {
     if (typeof (Math as any)[name] === "function") {
-        javaScriptSubstitutions.push([new RegExp(`\\b${name}\\(`, "g"), `Math.${name}(`]);
+        javaScriptSubstitutions.push([
+            new RegExp(`\\b${name}\\(`, "g"),
+            `Math.${name}(`,
+        ]);
     }
 }
 
@@ -497,7 +547,9 @@ export function getKernelJavaScriptCode(
         w.writeLine(`while (!allDone) {`);
         w.indent();
         w.writeLine(`allDone = true;`);
-        w.writeLine(`for (let local_index = 0; local_index < ${workgroupSize}; local_index++) {`);
+        w.writeLine(
+            `for (let local_index = 0; local_index < ${workgroupSize}; local_index++) {`
+        );
         w.indent();
         w.writeLine(`const barrier = barriers[local_index];`);
         w.writeLine(`const barrierValue = barrier.next();`);

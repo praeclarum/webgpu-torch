@@ -9,11 +9,11 @@ import {
     newTypedArrayFromArray,
 } from "./storage";
 import { type GradientFunction, type GradientContext, isGradEnabled } from "./autograd";
-import type { KernelConfigInput, KernelParamsInput } from "./kernel";
+import { shaderTypeToDtype, type KernelConfigInput, type KernelParamsInput } from "./kernel";
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
-import { GraphNode, SourceNode, ComputedNode } from "./graph";
+import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec } from "./graph";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -31,7 +31,7 @@ export type TensorSpec = {
 export class Tensor extends TensorBase {
     private _device: Device;
 
-    private _storage: UntypedStorage;
+    // private _storage: UntypedStorage;
     private _dtype: Dtype;
     private _shape: Shape;
     private _strides: Strides;
@@ -41,13 +41,14 @@ export class Tensor extends TensorBase {
     private _gradCtx: GradientContext | null;
     public grad: Tensor | null = null;
 
-    private _node: GraphNode;
+    private _node: GraphNodeOutputRef;
 
-    get node(): GraphNode {
+    get node(): GraphNodeOutputRef {
         return this._node;
     }
     get storage(): UntypedStorage {
-        return this._storage;
+        // return this._storage;
+        return this._node.node.storages[this._node.outputIndex];
     }
     get dtype(): Dtype {
         return this._dtype;
@@ -95,8 +96,15 @@ export class Tensor extends TensorBase {
         return this._gradFunc;
     }
 
+    constructor(node: GraphNodeOutputRef)
+    constructor(spec: TensorSpec)
     constructor(
-        arrayOrSpec: TensorData | TensorSpec,
+        array: TensorData,
+        dtype?: Dtype,
+        device?: Deviceish,
+        requiresGrad?: boolean)
+    constructor(
+        arrayOrSpec: TensorData | TensorSpec | GraphNodeOutputRef,
         dtype?: Dtype,
         device?: Deviceish,
         requiresGrad?: boolean
@@ -108,23 +116,32 @@ export class Tensor extends TensorBase {
             throw new Error("Cannot create tensor from null");
         } else if (arrayOrSpec instanceof Array) {
             const array = newTypedArrayFromArray(arrayOrSpec, dt, d);
-            this._storage = array.storage;
+            // this._storage = array.storage;
             this._dtype = dt;
             this._shape = array.shape;
             this._strides = array.strides;
+            this._node = (new SourceNode(array.storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
+        } else if (arrayOrSpec.hasOwnProperty("node") && (arrayOrSpec as any).node instanceof GraphNode) {
+            const noder = arrayOrSpec as GraphNodeOutputRef;
+            const spec = noder.node.outputs[noder.outputIndex];
+            this._dtype = spec.dtype;
+            this._shape = spec.shape;
+            this._strides = spec.strides;
+            this._node = noder;
         } else if (arrayOrSpec.hasOwnProperty("data")) {
             const jdata = arrayOrSpec as TensorSpec;
             d = jdata.device ? getDevice(jdata.device) : d;
             dt = jdata.dtype ? getDtype(jdata.dtype) : dt;
             requiresGrad = requiresGrad || jdata.requiresGrad;
+            let storage: UntypedStorage;
             if (jdata.data instanceof Array) {
                 const array = newTypedArrayFromArray(jdata.data, dt, d);
-                this._storage = array.storage;
+                storage = array.storage;
                 this._dtype = dt;
                 this._shape = array.shape;
                 this._strides = array.strides;
             } else if (jdata.data instanceof UntypedStorage) {
-                this._storage = jdata.data;
+                storage = jdata.data;
                 this._dtype = dt;
                 if (jdata.shape === undefined && jdata.strides === undefined) {
                     throw new Error("Cannot create tensor from storage without also specifying the shape and strides.");
@@ -134,13 +151,13 @@ export class Tensor extends TensorBase {
             } else {
                 throw new Error("Cannot create tensor from json data " + jdata);
             }
+            this._node = (new SourceNode(storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else {
             throw new Error(
                 "Invalid data type for Tensor constructor. Expected an array of values or a json object with a 'data' property."
             );
         }
         this._device = d;
-        this._node = new SourceNode(this._storage, this._dtype, this._shape, this._strides);
         this._requiresGrad = requiresGrad || false;
         this._gradFunc = null;
         this._gradCtx = null;
@@ -212,6 +229,14 @@ export class Tensor extends TensorBase {
         }
     }
 
+    /** Eagerly compute this tensor if it is lazy.
+     * @returns This tensor.
+     */
+    eager(): Tensor {
+        this.node.node.eager();
+        return this;
+    }
+
     runKernelInplace(
         name: string,
         config: KernelConfigInput,
@@ -221,9 +246,24 @@ export class Tensor extends TensorBase {
         if (this.requiresGrad && isGradEnabled()) {
             throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
         }
-        const kernel = this.device.getKernel(name, config);
-        const inputBuffers = additionalInputs.map((t) => t.storage);
-        kernel.run(inputBuffers, params, [this.storage]);
+        const lazy = true;
+        if (lazy) {
+            const nameWithoutTrailing_ = name.endsWith("_") ? name.slice(0, -1) : name;
+            const kernel = this.device.getKernel(nameWithoutTrailing_, config);
+            const inputRefs = [this._node.addRef(), ...additionalInputs.map((t) => t._node.addRef())];
+            const outputSpecs: GraphNodeOutputSpec[] = [{
+                shape: this.shape,
+                dtype: this.dtype,
+                strides: this.strides,
+            }];
+            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            this._node = node.getOutputRef(0);
+        }
+        else {
+            const kernel = this.device.getKernel(name, config);
+            const inputBuffers = additionalInputs.map((t) => t.storage);
+            kernel.run(inputBuffers, params, [this.storage]);
+        }
         return this;
     }
     runKernel(
@@ -233,42 +273,65 @@ export class Tensor extends TensorBase {
         outputs: Shape[] | Tensor[],
         ...additionalInputs: Tensor[]
     ): Tensor[] {
-        const d = this.device;
-        const kernel = d.getKernel(name, config);
-        const inputBuffers = [
-            this.storage,
-            ...additionalInputs.map((t) =>t.storage),
-        ];
         if (outputs.length === 0) {
             throw new Error(`Cannot run kernel "${name}" without any outputs`);
         }
+        const d = this.device;
+        const kernel = d.getKernel(name, config);
         const outputsAreTensors = outputs[0] instanceof Tensor;
-        const providedOutputTensors = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
-            t.storage) : undefined;
-        const outputBuffers = kernel.run(inputBuffers, params, providedOutputTensors);
-        if (outputsAreTensors) {
-            return outputs as Tensor[];
+        const lazy = true;
+        if (lazy) {
+            const inputRefs = [this._node.addRef(), ...additionalInputs.map((t) => t._node.addRef())];
+            const outputSpecs: GraphNodeOutputSpec[] = [];
+            for (let i = 0; i < outputs.length; i++) {
+                const output = outputs[i];
+                if (output instanceof Tensor) {
+                    outputSpecs.push({
+                        shape: output.shape,
+                        dtype: output.dtype,
+                        strides: output.strides,
+                    });
+                }
+                else {
+                    outputSpecs.push({
+                        shape: output,
+                        dtype: shaderTypeToDtype(kernel.spec.outputs[i].shaderType),
+                        strides: defaultStrides(output),
+                    });
+                }
+            }
+            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            return outputs.map((output, i) => new Tensor(node.getOutputRef(i)));
         }
         else {
-            if (outputBuffers.length !== outputs.length) {
-                throw new Error(
-                    `Expected ${outputs.length} output buffers (given the provided outputShapes to runKernel), but got ${outputBuffers.length} output buffers when running the kernel "${name}".`
+            const inputStorages = [
+                this.storage,
+                ...additionalInputs.map((t) =>t.storage),
+            ];
+            const providedOutputStorages = outputsAreTensors ? (outputs as Tensor[]).map((t) =>
+                t.storage) : undefined;
+            const outputStorages = kernel.run(inputStorages, params, providedOutputStorages);
+            if (outputsAreTensors) {
+                return outputs as Tensor[];
+            }
+            else {
+                if (outputStorages.length !== outputs.length) {
+                    throw new Error(
+                        `Expected ${outputs.length} output buffers (given the provided outputShapes to runKernel), but got ${outputStorages.length} output buffers when running the kernel "${name}".`
+                    );
+                }
+                return outputStorages.map(
+                    (outputBuffer, i) => {
+                        return new Tensor({
+                            data: outputBuffer as UntypedStorage,
+                            dtype: this.dtype,
+                            shape: (outputs as Shape[])[i],
+                            strides: defaultStrides((outputs as Shape[])[i]),
+                            device: this.device,
+                        });
+                    }
                 );
             }
-            return outputBuffers.map(
-                (outputBuffer, i) => {
-                    const o = new Tensor({
-                        data: outputBuffer as UntypedStorage,
-                        dtype: this.dtype,
-                        shape: (outputs as Shape[])[i],
-                        strides: defaultStrides((outputs as Shape[])[i]),
-                        device: this.device,
-                    });
-                    const inputNodes = [this._node, ...additionalInputs.map((t) => t._node)];
-                    o._node = new ComputedNode(kernel, inputNodes, params, (outputs as Shape[])[i]);
-                    return o;
-                }
-            );
         }
     }
 
@@ -308,12 +371,12 @@ export class Tensor extends TensorBase {
                     `Gradient can only be implicitly created for scalar outputs`
                 );
             }
-            grad = ones(1);
+            grad = ones(1, this.dtype, this.device);
         }
         if (this.grad) {
-            this.grad.add_(grad);
+            this.grad.add_(grad).eager();
         } else {
-            this.grad = grad;
+            this.grad = grad.eager();
         }
         if (!this._gradFunc || !this._gradCtx) {
             return;
@@ -385,8 +448,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    abs(output?: Tensor): Tensor {
-        return ops.abs(this, output);
+    abs(): Tensor {
+        return ops.abs(this);
     }
     /**
     * Alias for `abs`.
@@ -405,7 +468,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    absolute(output?: Tensor): Tensor {
+    absolute(): Tensor {
         return ops.abs(this);
     }
     /**
@@ -423,7 +486,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    abs_(output?: Tensor): Tensor {
+    abs_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -444,8 +507,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    acos(output?: Tensor): Tensor {
-        return ops.acos(this, output);
+    acos(): Tensor {
+        return ops.acos(this);
     }
     /**
     * Alias for `acos`.
@@ -464,7 +527,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    arccos(output?: Tensor): Tensor {
+    arccos(): Tensor {
         return ops.acos(this);
     }
     /**
@@ -482,7 +545,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    acos_(output?: Tensor): Tensor {
+    acos_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -503,8 +566,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    acosh(output?: Tensor): Tensor {
-        return ops.acosh(this, output);
+    acosh(): Tensor {
+        return ops.acosh(this);
     }
     /**
     * Alias for `acosh`.
@@ -523,7 +586,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    arccosh(output?: Tensor): Tensor {
+    arccosh(): Tensor {
         return ops.acosh(this);
     }
     /**
@@ -541,7 +604,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    acosh_(output?: Tensor): Tensor {
+    acosh_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -611,8 +674,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    asin(output?: Tensor): Tensor {
-        return ops.asin(this, output);
+    asin(): Tensor {
+        return ops.asin(this);
     }
     /**
     * Alias for `asin`.
@@ -631,7 +694,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    arcsin(output?: Tensor): Tensor {
+    arcsin(): Tensor {
         return ops.asin(this);
     }
     /**
@@ -649,7 +712,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    asin_(output?: Tensor): Tensor {
+    asin_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -670,8 +733,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    asinh(output?: Tensor): Tensor {
-        return ops.asinh(this, output);
+    asinh(): Tensor {
+        return ops.asinh(this);
     }
     /**
     * Alias for `asinh`.
@@ -690,7 +753,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    arcsinh(output?: Tensor): Tensor {
+    arcsinh(): Tensor {
         return ops.asinh(this);
     }
     /**
@@ -708,7 +771,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    asinh_(output?: Tensor): Tensor {
+    asinh_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -729,8 +792,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    atan(output?: Tensor): Tensor {
-        return ops.atan(this, output);
+    atan(): Tensor {
+        return ops.atan(this);
     }
     /**
     * Alias for `atan`.
@@ -749,7 +812,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    arctan(output?: Tensor): Tensor {
+    arctan(): Tensor {
         return ops.atan(this);
     }
     /**
@@ -767,7 +830,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    atan_(output?: Tensor): Tensor {
+    atan_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -852,8 +915,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    ceil(output?: Tensor): Tensor {
-        return ops.ceil(this, output);
+    ceil(): Tensor {
+        return ops.ceil(this);
     }
     /**
     * ![Plot of ceil and its gradient](../../plots/ceil.svg)
@@ -870,7 +933,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    ceil_(output?: Tensor): Tensor {
+    ceil_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -936,8 +999,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    cos(output?: Tensor): Tensor {
-        return ops.cos(this, output);
+    cos(): Tensor {
+        return ops.cos(this);
     }
     /**
     * ![Plot of cos and its gradient](../../plots/cos.svg)
@@ -954,7 +1017,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    cos_(output?: Tensor): Tensor {
+    cos_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -975,8 +1038,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    cosh(output?: Tensor): Tensor {
-        return ops.cosh(this, output);
+    cosh(): Tensor {
+        return ops.cosh(this);
     }
     /**
     * ![Plot of cosh and its gradient](../../plots/cosh.svg)
@@ -993,7 +1056,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    cosh_(output?: Tensor): Tensor {
+    cosh_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1014,8 +1077,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    deg2rad(output?: Tensor): Tensor {
-        return ops.deg2rad(this, output);
+    deg2rad(): Tensor {
+        return ops.deg2rad(this);
     }
     /**
     * ![Plot of deg2rad and its gradient](../../plots/deg2rad.svg)
@@ -1032,7 +1095,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    deg2rad_(output?: Tensor): Tensor {
+    deg2rad_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1117,8 +1180,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    exp(output?: Tensor): Tensor {
-        return ops.exp(this, output);
+    exp(): Tensor {
+        return ops.exp(this);
     }
     /**
     * ![Plot of exp and its gradient](../../plots/exp.svg)
@@ -1135,7 +1198,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    exp_(output?: Tensor): Tensor {
+    exp_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1156,8 +1219,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    exp2(output?: Tensor): Tensor {
-        return ops.exp2(this, output);
+    exp2(): Tensor {
+        return ops.exp2(this);
     }
     /**
     * ![Plot of exp2 and its gradient](../../plots/exp2.svg)
@@ -1174,7 +1237,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    exp2_(output?: Tensor): Tensor {
+    exp2_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1195,8 +1258,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    expm1(output?: Tensor): Tensor {
-        return ops.expm1(this, output);
+    expm1(): Tensor {
+        return ops.expm1(this);
     }
     /**
     * ![Plot of expm1 and its gradient](../../plots/expm1.svg)
@@ -1213,7 +1276,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    expm1_(output?: Tensor): Tensor {
+    expm1_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1234,8 +1297,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    floor(output?: Tensor): Tensor {
-        return ops.floor(this, output);
+    floor(): Tensor {
+        return ops.floor(this);
     }
     /**
     * ![Plot of floor and its gradient](../../plots/floor.svg)
@@ -1252,7 +1315,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    floor_(output?: Tensor): Tensor {
+    floor_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1273,8 +1336,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    frac(output?: Tensor): Tensor {
-        return ops.frac(this, output);
+    frac(): Tensor {
+        return ops.frac(this);
     }
     /**
     * ![Plot of frac and its gradient](../../plots/frac.svg)
@@ -1291,7 +1354,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    frac_(output?: Tensor): Tensor {
+    frac_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1402,8 +1465,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log(output?: Tensor): Tensor {
-        return ops.log(this, output);
+    log(): Tensor {
+        return ops.log(this);
     }
     /**
     * ![Plot of log and its gradient](../../plots/log.svg)
@@ -1420,7 +1483,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log_(output?: Tensor): Tensor {
+    log_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1441,8 +1504,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log10(output?: Tensor): Tensor {
-        return ops.log10(this, output);
+    log10(): Tensor {
+        return ops.log10(this);
     }
     /**
     * ![Plot of log10 and its gradient](../../plots/log10.svg)
@@ -1459,7 +1522,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log10_(output?: Tensor): Tensor {
+    log10_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1480,8 +1543,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log1p(output?: Tensor): Tensor {
-        return ops.log1p(this, output);
+    log1p(): Tensor {
+        return ops.log1p(this);
     }
     /**
     * ![Plot of log1p and its gradient](../../plots/log1p.svg)
@@ -1498,7 +1561,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log1p_(output?: Tensor): Tensor {
+    log1p_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1519,8 +1582,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log2(output?: Tensor): Tensor {
-        return ops.log2(this, output);
+    log2(): Tensor {
+        return ops.log2(this);
     }
     /**
     * ![Plot of log2 and its gradient](../../plots/log2.svg)
@@ -1537,7 +1600,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    log2_(output?: Tensor): Tensor {
+    log2_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1712,8 +1775,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    neg(output?: Tensor): Tensor {
-        return ops.neg(this, output);
+    neg(): Tensor {
+        return ops.neg(this);
     }
     /**
     * Alias for `neg`.
@@ -1732,7 +1795,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    negative(output?: Tensor): Tensor {
+    negative(): Tensor {
         return ops.neg(this);
     }
     /**
@@ -1750,7 +1813,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    neg_(output?: Tensor): Tensor {
+    neg_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1771,8 +1834,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    positive(output?: Tensor): Tensor {
-        return ops.positive(this, output);
+    positive(): Tensor {
+        return ops.positive(this);
     }
     /**
     * ![Plot of positive and its gradient](../../plots/positive.svg)
@@ -1789,7 +1852,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    positive_(output?: Tensor): Tensor {
+    positive_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1855,8 +1918,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    rad2deg(output?: Tensor): Tensor {
-        return ops.rad2deg(this, output);
+    rad2deg(): Tensor {
+        return ops.rad2deg(this);
     }
     /**
     * ![Plot of rad2deg and its gradient](../../plots/rad2deg.svg)
@@ -1873,7 +1936,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    rad2deg_(output?: Tensor): Tensor {
+    rad2deg_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1894,8 +1957,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    reciprocal(output?: Tensor): Tensor {
-        return ops.reciprocal(this, output);
+    reciprocal(): Tensor {
+        return ops.reciprocal(this);
     }
     /**
     * ![Plot of reciprocal and its gradient](../../plots/reciprocal.svg)
@@ -1912,7 +1975,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    reciprocal_(output?: Tensor): Tensor {
+    reciprocal_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1933,8 +1996,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    relu(output?: Tensor): Tensor {
-        return ops.relu(this, output);
+    relu(): Tensor {
+        return ops.relu(this);
     }
     /**
     * ![Plot of relu and its gradient](../../plots/relu.svg)
@@ -1951,7 +2014,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    relu_(output?: Tensor): Tensor {
+    relu_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -1972,8 +2035,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    round(output?: Tensor): Tensor {
-        return ops.round(this, output);
+    round(): Tensor {
+        return ops.round(this);
     }
     /**
     * ![Plot of round and its gradient](../../plots/round.svg)
@@ -1990,7 +2053,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    round_(output?: Tensor): Tensor {
+    round_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2011,8 +2074,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    rsqrt(output?: Tensor): Tensor {
-        return ops.rsqrt(this, output);
+    rsqrt(): Tensor {
+        return ops.rsqrt(this);
     }
     /**
     * ![Plot of rsqrt and its gradient](../../plots/rsqrt.svg)
@@ -2029,7 +2092,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    rsqrt_(output?: Tensor): Tensor {
+    rsqrt_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2050,8 +2113,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sigmoid(output?: Tensor): Tensor {
-        return ops.sigmoid(this, output);
+    sigmoid(): Tensor {
+        return ops.sigmoid(this);
     }
     /**
     * ![Plot of sigmoid and its gradient](../../plots/sigmoid.svg)
@@ -2068,7 +2131,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sigmoid_(output?: Tensor): Tensor {
+    sigmoid_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2089,8 +2152,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sign(output?: Tensor): Tensor {
-        return ops.sign(this, output);
+    sign(): Tensor {
+        return ops.sign(this);
     }
     /**
     * ![Plot of sign and its gradient](../../plots/sign.svg)
@@ -2107,7 +2170,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sign_(output?: Tensor): Tensor {
+    sign_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2128,8 +2191,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    silu(output?: Tensor): Tensor {
-        return ops.silu(this, output);
+    silu(): Tensor {
+        return ops.silu(this);
     }
     /**
     * ![Plot of silu and its gradient](../../plots/silu.svg)
@@ -2146,7 +2209,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    silu_(output?: Tensor): Tensor {
+    silu_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2167,8 +2230,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sin(output?: Tensor): Tensor {
-        return ops.sin(this, output);
+    sin(): Tensor {
+        return ops.sin(this);
     }
     /**
     * ![Plot of sin and its gradient](../../plots/sin.svg)
@@ -2185,7 +2248,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sin_(output?: Tensor): Tensor {
+    sin_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2206,8 +2269,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sinc(output?: Tensor): Tensor {
-        return ops.sinc(this, output);
+    sinc(): Tensor {
+        return ops.sinc(this);
     }
     /**
     * ![Plot of sinc and its gradient](../../plots/sinc.svg)
@@ -2224,7 +2287,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sinc_(output?: Tensor): Tensor {
+    sinc_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2245,8 +2308,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sinh(output?: Tensor): Tensor {
-        return ops.sinh(this, output);
+    sinh(): Tensor {
+        return ops.sinh(this);
     }
     /**
     * ![Plot of sinh and its gradient](../../plots/sinh.svg)
@@ -2263,7 +2326,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sinh_(output?: Tensor): Tensor {
+    sinh_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2284,8 +2347,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sqrt(output?: Tensor): Tensor {
-        return ops.sqrt(this, output);
+    sqrt(): Tensor {
+        return ops.sqrt(this);
     }
     /**
     * ![Plot of sqrt and its gradient](../../plots/sqrt.svg)
@@ -2302,7 +2365,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sqrt_(output?: Tensor): Tensor {
+    sqrt_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2323,8 +2386,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    square(output?: Tensor): Tensor {
-        return ops.square(this, output);
+    square(): Tensor {
+        return ops.square(this);
     }
     /**
     * ![Plot of square and its gradient](../../plots/square.svg)
@@ -2341,7 +2404,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    square_(output?: Tensor): Tensor {
+    square_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2431,8 +2494,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    tan(output?: Tensor): Tensor {
-        return ops.tan(this, output);
+    tan(): Tensor {
+        return ops.tan(this);
     }
     /**
     * ![Plot of tan and its gradient](../../plots/tan.svg)
@@ -2449,7 +2512,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    tan_(output?: Tensor): Tensor {
+    tan_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2470,8 +2533,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    tanh(output?: Tensor): Tensor {
-        return ops.tanh(this, output);
+    tanh(): Tensor {
+        return ops.tanh(this);
     }
     /**
     * ![Plot of tanh and its gradient](../../plots/tanh.svg)
@@ -2488,7 +2551,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    tanh_(output?: Tensor): Tensor {
+    tanh_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
@@ -2509,8 +2572,8 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    trunc(output?: Tensor): Tensor {
-        return ops.trunc(this, output);
+    trunc(): Tensor {
+        return ops.trunc(this);
     }
     /**
     * Alias for `trunc`.
@@ -2529,7 +2592,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    fix(output?: Tensor): Tensor {
+    fix(): Tensor {
         return ops.trunc(this);
     }
     /**
@@ -2547,7 +2610,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    trunc_(output?: Tensor): Tensor {
+    trunc_(): Tensor {
         const params = {
             size: shapeSize(this.shape),
         };
