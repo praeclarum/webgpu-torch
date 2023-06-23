@@ -368,9 +368,9 @@ export function getKernelShaderCode(
     shaderCodeParts.push("    " + configdShader);
     shaderCodeParts.push("}");
     const shaderCode = shaderCodeParts.join("\n");
-    if (spec.name === "mean_dim") {
-        console.log(shaderCode);
-    }
+    // if (spec.name === "mean_dim") {
+    //     console.log(shaderCode);
+    // }
     return shaderCode;
 }
 

@@ -37,6 +37,12 @@ function eq(a, b) {
         for (let k in a) { if (!eq(a[k], b[k])) return false; }
         return true;
     }
+    if (typeof a === 'number' && typeof b === 'number') {
+        if (Number.isNaN(a) && Number.isNaN(b)) return true;
+        if (a === 0 && b === 0) return true;
+        const epsilon = Math.max(Math.abs(a), Math.abs(b)) * 1e-6;
+        return Math.abs(a - b) < epsilon;
+    }
     return false;
 }
 
