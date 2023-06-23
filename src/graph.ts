@@ -49,6 +49,7 @@ export abstract class GraphNode {
     constructor() {
         this.id = GraphNode.nextId++;
     }
+    abstract eager(): void;
     getOutputRef(outputIndex: number): GraphNodeOutputRef {
         if (this._outputRefs[outputIndex] === undefined) {
             this._outputRefs[outputIndex] = new GraphNodeOutputRef(this, outputIndex);
@@ -91,18 +92,9 @@ export class SourceNode extends GraphNode {
         this._outputs = [{ dtype, shape, strides }];
         this._storages = [storage];
     }
-}
-
-function setsAreEqual<T>(a: Set<T>, b: Set<T>) {
-    if (a.size !== b.size) {
-        return false;
+    eager(): void {
+        // Nothing to do
     }
-    for (let item of a) {
-        if (!b.has(item)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 export class ComputedNode extends GraphNode {
@@ -145,6 +137,11 @@ export class ComputedNode extends GraphNode {
         this.params = params;
         this.inputs = inputs;
         this._outputs = outputs;
+    }
+    eager(): void {
+        if (this._storages === null) {
+            ComputedNode.run([this]);
+        }
     }
     private static run(outputNodes: GraphNode[]): void {
         const device = outputNodes[0].device;
@@ -310,4 +307,16 @@ export class ComputedNode extends GraphNode {
         }
         return { ins, outs };
     }
+}
+
+function setsAreEqual<T>(a: Set<T>, b: Set<T>) {
+    if (a.size !== b.size) {
+        return false;
+    }
+    for (let item of a) {
+        if (!b.has(item)) {
+            return false;
+        }
+    }
+    return true;
 }

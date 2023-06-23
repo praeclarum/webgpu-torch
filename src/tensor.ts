@@ -229,6 +229,14 @@ export class Tensor extends TensorBase {
         }
     }
 
+    /** Eagerly compute this tensor if it is lazy.
+     * @returns This tensor.
+     */
+    eager(): Tensor {
+        this.node.node.eager();
+        return this;
+    }
+
     runKernelInplace(
         name: string,
         config: KernelConfigInput,
@@ -363,12 +371,12 @@ export class Tensor extends TensorBase {
                     `Gradient can only be implicitly created for scalar outputs`
                 );
             }
-            grad = ones(1);
+            grad = ones(1, this.dtype, this.device);
         }
         if (this.grad) {
-            this.grad.add_(grad);
+            this.grad.add_(grad).eager();
         } else {
-            this.grad = grad;
+            this.grad = grad.eager();
         }
         if (!this._gradFunc || !this._gradCtx) {
             return;
