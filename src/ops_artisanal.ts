@@ -114,17 +114,134 @@ function reshapeForMatrixMultiply(
     return { shape: newShape, strides: newStrides };
 }
 
-export function matmul(input: Tensor, other: Tensor): Tensor {
-    const atype = input.shape.length == 0 ? "s" : (input.shape.length == 1 ? "v" : "m");
-    const btype = other.shape.length == 0 ? "s" : (other.shape.length == 1 ? "v" : "m");
-    const ammlayout = reshapeForMatrixMultiply(input.shape, input.strides);
-    const bshape = other.shape;
-    if (bshape.length == 1) {
-        if (ammlayout.shape[1] !== bshape[0]) {
-            throw new Error(`size mismatch, got ${ammlayout.shape[0]}, ${ammlayout.shape[0]}x${ammlayout.shape[1]},${bshape[0]}`);
+function broadcastBatchedMatmul(
+    input: Tensor,
+    other: Tensor
+): {
+    outputShape: number[];
+    outputStrides: number[];
+    inputStrides: number[];
+    otherStrides: number[];
+} {
+    const inputShape = input.shape.slice();
+    const otherShape = other.shape.slice();
+
+    const padFront = (arr: number[], length: number) => {
+        while (arr.length < length) {
+            arr.unshift(1);
+        }
+    };
+
+    if (inputShape.length === 1) {
+        inputShape.unshift(1);
+    }
+
+    if (otherShape.length === 1) {
+        otherShape.push(1);
+    }
+
+    // Pad shapes to the same length by putting 1's in front
+    const maxLength = Math.max(inputShape.length, otherShape.length);
+    padFront(inputShape, maxLength);
+    padFront(otherShape, maxLength);
+
+    const outputShape: number[] = [];
+    for (let dim = 0; dim < inputShape.length - 2; dim++) {
+        if (inputShape[dim] === 1 || otherShape[dim] === 1) {
+            outputShape[dim] = Math.max(inputShape[dim], otherShape[dim]);
+        } else if (inputShape[dim] === otherShape[dim]) {
+            outputShape[dim] = inputShape[dim];
+        } else {
+            throw new Error(
+                `The size of tensor a (${inputShape[dim]}) must match the size of tensor b (${otherShape[dim]}) at non-singleton dimension ${dim}`
+            );
         }
     }
-    throw new Error(`A shape from ${input.shape} to ${ammlayout.shape}`);
+
+    outputShape.push(inputShape[inputShape.length - 2]);
+    outputShape.push(otherShape[otherShape.length - 1]);
+
+    const outputStrides = outputShape
+        .map((_, i) => outputShape.slice(i + 1).reduce((a, b) => a * b, 1))
+        .concat([1]);
+
+    const inputStrides = input.strides.slice();
+    padFront(inputStrides, maxLength - 2);
+    const otherStrides = input.strides.slice();
+    padFront(otherStrides, maxLength - 2);
+
+    return { outputShape, outputStrides, inputStrides, otherStrides };
+}
+
+export function matmul(input: Tensor, other: Tensor): Tensor {
+    const ashape = input.shape;
+    const bshape = other.shape;
+    const adims = ashape.length;
+    const bdims = bshape.length;
+    if (adims === 0 || bdims === 0) {
+        throw new Error("matmul requires at least 1D tensors");
+    }
+    let op: string;
+    // If both tensors are 1-dimensional, the dot product (scalar) is returned
+    if (adims === 1 && bdims === 1) {
+        op = "vv";
+        if (ashape[0] !== bshape[0]) {
+            throw new Error(
+                `inconsistent tensor size, expected tensor [${ashape}] and src [${bshape}] to have the same number of elements, but got ${ashape[0]} and ${bshape[0]} elements respectively`
+            );
+        }
+    }
+    // If both arguments are 2-dimensional, the matrix-matrix product is returned
+    else if (adims === 2 && bdims === 2) {
+        op = "mm";
+    }
+    // If the first argument is 1-dimensional and the second argument is 2-dimensional, a 1 is prepended to its dimension
+    else if (adims === 1 && bdims === 2) {
+        op = "vm";
+        const bmmshape = reshapeForMatrixMultiply(bshape, other.strides);
+        if (ashape[0] !== bmmshape.shape[0]) {
+            throw new Error(
+                `mat1 and mat2 shapes cannot be multiplied (1x${ashape[0]} and ${bshape[0]}x${bshape[1]})`
+            );
+        }
+    }
+    // If the first argument is 2-dimensional and the second argument is 1-dimensional, the matrix-vector product is returned
+    else if (adims === 2 && bdims == 1) {
+        op = "mv";
+        const ammshape = reshapeForMatrixMultiply(ashape, input.strides);
+        if (ammshape.shape[1] !== bshape[0]) {
+            throw new Error(
+                `size mismatch, got ${ammshape.shape[0]}, ${ammshape.shape[0]}x${ammshape.shape[1]},${bshape[0]}`
+            );
+        }
+    } else if (adims >= 1 && bdims >= 1 && (adims > 2 || bdims > 2)) {
+        op = "bmm";
+        const broadcast = broadcastBatchedMatmul(input, other);
+        const ammshape = reshapeForMatrixMultiply(ashape, input.strides);
+        const bmmshape = reshapeForMatrixMultiply(bshape, other.strides);
+        if (ammshape.shape[1] !== bmmshape.shape[0]) {
+            throw new Error(
+                `mat1 and mat2 shapes cannot be multiplied (${ammshape.shape[0]}x${ammshape.shape[1]} and ${bmmshape.shape[0]}x${bmmshape.shape[1]})`
+            );
+        }
+    } else {
+        throw new Error(
+            `matmul not supported for ${adims}D and ${bdims}D tensors`
+        );
+    }
+    const params = {
+        resultRows: input.shape[0],
+        resultCols: other.shape[1],
+        innerDim: input.shape[1],
+        alpha: 1.0,
+    };
+    return input.runKernel(
+        op,
+        { resultDtype: input.dtype },
+        params,
+        [[params.resultRows, params.resultCols]],
+        other
+    )[0];
 }
 
 export function mm(input: Tensor, other: Tensor): Tensor {
