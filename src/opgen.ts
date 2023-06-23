@@ -151,7 +151,7 @@ function getReductionGradKernelSpec(
         inputSize: "parameters.size",
     });
     const shader = `
-    var index = global_id.x;
+    let index = global_id.x;
     if (index >= parameters.size) {
         return;
     }
@@ -202,42 +202,30 @@ function getReductionGradKernelSpec(
 
 function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
     const initCode = exprCodeToWebGLShader(op.init, {
-        input: "input[local_id.x]",
+        input: "input[inputIndex]",
         output: "accumulator",
     });
     const forwardCode = exprCodeToWebGLShader(op.forward, {
-        input: "input[i]",
+        input: "input[inputIndex]",
         output: "accumulator",
     });
     const reduceCode =
         op.reduce === undefined
             ? ""
             : exprCodeToWebGLShader(op.reduce, {
-                  input: "input[i]",
+                  input: "input[inputIndex]",
                   output: "accumulator",
                   inputSize: "parameters.size",
               });
-    const shader = `
+    let shader = `
+    let outputIndex = global_id.x;
+    if (outputIndex >= parameters.size) {
+        return;
+    }
+    let inputIndex = 0;
     var ${initCode};
-    // Load inputData into local memory
-    for (var i = local_id.x; i < parameters.size; i += $$workgroupSize$$) {
-        ${forwardCode};
-    }
-    // Write partial group sum to outputData
-    output[local_id.x] = accumulator;
-
-    workgroupBarrier(); // Make sure all threads have completed reduction
-
-    // First thread sums up results from all other threads
-    if (local_id.x == 0u) {
-        var numToSum = min(parameters.size, $$workgroupSize$$u);
-        for (var i = 1u; i < numToSum; i++) {
-            accumulator ${op.combineOp}= output[i];
-        }
-        // Store final reduction in the first element of result array
-        ${reduceCode};
-        output[0] = accumulator;
-    }
+    ${forwardCode};
+    ${reduceCode};
 `;
     return {
         name: op.name + "_dim",

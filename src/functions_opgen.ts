@@ -5,7 +5,7 @@ import {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize } from "./shape";
+import { shapeSize, defaultStrides } from "./shape";
 export class AbsFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
@@ -1356,8 +1356,21 @@ export class AllFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("all_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1411,8 +1424,21 @@ export class AnyFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("any_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1466,8 +1492,21 @@ export class MeanFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("mean_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1521,8 +1560,21 @@ export class NormFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("norm_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1576,8 +1628,21 @@ export class ProdFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("prod_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1631,8 +1696,21 @@ export class SumFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("sum_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
@@ -1686,8 +1764,21 @@ export class CountNonzeroFunction extends AutoFunction {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
                 outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
                     size: shapeSize(outputShape),
+                    inputShape0: input.shape[0],
+                    inputStride0: input.strides[0],
+                    outputStride0: outputStrides[0],
+                    inputShape1: input.shape[1],
+                    inputStride1: input.strides[1],
+                    outputStride1: outputStrides[1],
+                    inputShape2: input.shape[2],
+                    inputStride2: input.strides[2],
+                    outputStride2: outputStrides[2],
+                    inputShape3: input.shape[3],
+                    inputStride3: input.strides[3],
+                    outputStride3: outputStrides[3],
                 };
                 if (!keepdim) outputShape.splice(dim, 1);
                 return input.runKernel("countNonzero_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];

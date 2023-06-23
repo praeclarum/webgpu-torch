@@ -72,6 +72,11 @@ function writeReductionParams(sizeShapeName: string, dimName: string | null, w: 
     w.indent();
     w.writeLine(`size: shapeSize(${sizeShapeName}),`);
     if (dimName) {
+        for (let dim = 0; dim < 4; dim++) {
+            w.writeLine(`inputShape${dim}: input.shape[${dim}],`);
+            w.writeLine(`inputStride${dim}: input.strides[${dim}],`);
+            w.writeLine(`outputStride${dim}: outputStrides[${dim}],`);
+        }
     }
     w.dedent();
     w.writeLine(`};`);
@@ -201,7 +206,7 @@ function writeFunctionsCode(): void {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize } from "./shape";`);
+import { shapeSize, defaultStrides } from "./shape";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -284,6 +289,7 @@ import { shapeSize } from "./shape";`);
             w.writeLine(`const inputShape = input.shape;`);
             w.writeLine(`let outputShape = input.shape.slice();`);
             w.writeLine(`outputShape[dim] = 1;`);
+            w.writeLine(`let outputStrides = defaultStrides(outputShape);`);
             writeReductionParams("outputShape", "dim", w);
             w.writeLine(`if (!keepdim) outputShape.splice(dim, 1);`);
             w.writeLine(`return input.runKernel(\"${kernelSpec.name}_dim\", {dim,maxdim:inputShape.length,dtype:\"${config.dtype}\"}, params, [outputShape])[0];`);
@@ -358,7 +364,7 @@ import { shapeSize } from "./shape";`);
             w.indent();
             w.writeLine(`if (typeof dim === "number") {`);
             w.indent();
-            writeReductionParams("input.shape", "dim", w);
+            writeReductionParams("input.shape", null, w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_dim_grad", ${configS}, params, [input.shape], output, outputGrad);`);
             w.dedent();
             w.writeLine(`} else {`);
