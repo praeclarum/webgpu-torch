@@ -122,9 +122,9 @@ export class ComputedNode extends GraphNode {
     }
     get storages(): UntypedStorage[] {
         if (this._storages === null) {
-            this._storages = this.run();
+            ComputedNode.run([this]);
         }
-        return this._storages;
+        return this._storages!;
     }
     get outputs(): GraphNodeOutputSpec[] {
         return this._outputs;
@@ -146,10 +146,10 @@ export class ComputedNode extends GraphNode {
         this.inputs = inputs;
         this._outputs = outputs;
     }
-    private run(): UntypedStorage[] {
-        const device = this.device;
-        const [depthFirstNodes, nodesWithStorage, liveness] =
-            this.createExecutionPlan();
+    private static run(outputNodes: GraphNode[]): void {
+        const device = outputNodes[0].device;
+        const [depthFirstNodes, nodesWithStorage, liveness, retainNodes] =
+            this.createExecutionPlan(outputNodes);
         const temporaryStoragePool: { [byteSize: number]: UntypedStorage[] } =
             {};
         const alloc = (byteSize: number) => {
@@ -178,7 +178,7 @@ export class ComputedNode extends GraphNode {
         for (let i = 0; i < n; i++) {
             const node = depthFirstNodes[i];
             const nodeId = node.id;
-            // Easy case, we already have the storage for this node.
+            // Easy case, we already have the storage for this node
             if (nodeId in nodesWithStorage) {
                 computedStorages[nodeId] = nodesWithStorage[nodeId].storages;
                 continue;
@@ -193,7 +193,7 @@ export class ComputedNode extends GraphNode {
                     computedStorages[input.node.id][input.outputIndex];
                 if (inputS === undefined) {
                     throw new Error(
-                        `Input #${j} of node ${this.id} with kernel \"${this.kernel.spec.name}\" not computed yet`
+                        `Input #${j} of node ${node.id} with kernel \"${node.kernel.spec.name}\" not computed yet`
                     );
                 }
                 return inputS;
@@ -207,31 +207,43 @@ export class ComputedNode extends GraphNode {
             });
             node.kernel.run(inputs, node.params, outputs);
             computedStorages[nodeId] = outputs;
-            // Free any nodes that are not live anymore.
+            // Free any nodes that are not live anymore
             for (let inLiveId of liveness.ins[i]) {
-                if (inLiveId in nodesWithStorage) {
-                    continue;
-                }
                 if (liveness.outs[i].has(inLiveId)) {
                     continue;
                 }
                 const storagesToFree = computedStorages[inLiveId];
                 delete computedStorages[inLiveId];
-                for (let storage of storagesToFree) {
-                    free(storage);
+                if (!(inLiveId in nodesWithStorage)) {
+                    for (let storage of storagesToFree) {
+                        free(storage);
+                    }
                 }
             }
         }
-        return computedStorages[this.id];
+        // Set the storages of the retained nodes
+        for (let node of retainNodes) {
+            if (node instanceof ComputedNode) {
+                const nodeId = node.id;
+                const storages = computedStorages[nodeId];
+                if (storages === undefined) {
+                    throw new Error(
+                        `Node ${nodeId} with kernel \"${node.kernel.spec.name}\" not computed`
+                    );
+                }
+                node._storages = storages;
+            }
+        }
     }
-    private createExecutionPlan(): [
+    private static createExecutionPlan(outputNodes: GraphNode[]): [
         GraphNode[],
         { [nodeId: number]: GraphNode },
-        { ins: Set<NodeId>[]; outs: Set<NodeId>[] }
+        { ins: Set<NodeId>[]; outs: Set<NodeId>[] },
+        GraphNode[]
     ] {
         const depthFirstNodes: GraphNode[] = [];
         const visitedNodes = new Set<number>();
-        const retainNodes: GraphNode[] = [this];
+        const retainNodes: GraphNode[] = outputNodes.slice();
         const nodesWithStorage: { [nodeId: number]: GraphNode } = {};
         function topoSort(node: GraphNode) {
             if (visitedNodes.has(node.id)) {
@@ -250,12 +262,14 @@ export class ComputedNode extends GraphNode {
             }
             depthFirstNodes.push(node);
         }
-        topoSort(this);
-        const liveness = this.getLiveness(depthFirstNodes, retainNodes);
+        for (let outputNode of outputNodes) {
+            topoSort(outputNode);
+        }
+        const liveness = ComputedNode.getLiveness(depthFirstNodes, retainNodes);
         // console.log(`Liveness for node#${this.id}`, liveness);
-        return [depthFirstNodes, nodesWithStorage, liveness];
+        return [depthFirstNodes, nodesWithStorage, liveness, retainNodes];
     }
-    private getLiveness(depthFirstNodes: GraphNode[], outputNodes: GraphNode[]): {
+    private static getLiveness(depthFirstNodes: GraphNode[], outputNodes: GraphNode[]): {
         ins: Set<NodeId>[];
         outs: Set<NodeId>[];
     } {
