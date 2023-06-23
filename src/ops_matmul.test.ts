@@ -57,11 +57,6 @@ test("matmul (2,) x (1, 1)", async () => {
     const b = ones([1, 1]);
     expect(() => matmul(a, b)).toThrow('mat1 and mat2 shapes cannot be multiplied (1x2 and 1x1)');
 });
-test("matmul (2,) x (1, 1, 3)", async () => {
-    const a = ones([2]);
-    const b = ones([1, 1, 3]);
-    expect(() => matmul(a, b)).toThrow('size mismatch, got 3, 3x1,2');
-});
 test("matmul (2,) x (2, 1)", async () => {
     const a = tensor([39.0, -34.0]);
     expect(a.shape).toEqual([2]);
@@ -71,15 +66,44 @@ test("matmul (2,) x (2, 1)", async () => {
     expect(c.shape).toEqual([1]);
     expect(await c.toArrayAsync()).toEqual([6059.0]);
 });
+test("matmul (2,) x (3, 5)", async () => {
+    const a = ones([2]);
+    const b = ones([3, 5]);
+    expect(() => matmul(a, b)).toThrow('mat1 and mat2 shapes cannot be multiplied (1x2 and 3x5)');
+});
+test("matmul (2,) x (1, 1, 3)", async () => {
+    const a = ones([2]);
+    const b = ones([1, 1, 3]);
+    expect(() => matmul(a, b)).toThrow('size mismatch, got 3, 3x1,2');
+});
 test("matmul (2,) x (2, 1, 3)", async () => {
     const a = ones([2]);
     const b = ones([2, 1, 3]);
     expect(() => matmul(a, b)).toThrow('size mismatch, got 6, 6x1,2');
 });
+test("matmul (2,) x (3, 5, 7)", async () => {
+    const a = ones([2]);
+    const b = ones([3, 5, 7]);
+    expect(() => matmul(a, b)).toThrow('size mismatch, got 21, 21x5,2');
+});
+test("matmul (2,) x (3, 5, 7, 11)", async () => {
+    const a = ones([2]);
+    const b = ones([3, 5, 7, 11]);
+    expect(() => matmul(a, b)).toThrow('size mismatch, got 165, 165x7,2');
+});
 test("matmul (1, 2) x (1,)", async () => {
     const a = ones([1, 2]);
     const b = ones([1]);
     expect(() => matmul(a, b)).toThrow('size mismatch, got 1, 1x2,1');
+});
+test("matmul (1, 2) x (2,)", async () => {
+    const a = tensor([[39.0, 122.0]]);
+    expect(a.shape).toEqual([1, 2]);
+    const b = tensor([-140.0, -82.0]);
+    expect(b.shape).toEqual([2]);
+    const c = matmul(a, b);
+    expect(c.shape).toEqual([1]);
+    expect(await c.toArrayAsync()).toEqual([-15464.0]);
 });
 test("matmul (1, 2) x (1, 3)", async () => {
     const a = ones([1, 2]);
@@ -105,15 +129,6 @@ test("matmul (1, 2) x (2, 1, 3)", async () => {
     const b = ones([2, 1, 3]);
     expect(() => matmul(a, b)).toThrow('mat1 and mat2 shapes cannot be multiplied (6x1 and 2x1)');
 });
-test("matmul (1, 2) x (2,)", async () => {
-    const a = tensor([[39.0, 122.0]]);
-    expect(a.shape).toEqual([1, 2]);
-    const b = tensor([-140.0, -82.0]);
-    expect(b.shape).toEqual([2]);
-    const c = matmul(a, b);
-    expect(c.shape).toEqual([1]);
-    expect(await c.toArrayAsync()).toEqual([-15464.0]);
-});
 test("matmul (1, 2) x (2, 3)", async () => {
     const a = tensor([[-14.0, -116.0]]);
     expect(a.shape).toEqual([1, 2]);
@@ -127,6 +142,11 @@ test("matmul (2, 2) x (1,)", async () => {
     const a = ones([2, 2]);
     const b = ones([1]);
     expect(() => matmul(a, b)).toThrow('size mismatch, got 2, 2x2,1');
+});
+test("matmul (1, 1, 3) x (2,)", async () => {
+    const a = ones([1, 1, 3]);
+    const b = ones([2]);
+    expect(() => matmul(a, b)).toThrow('size mismatch, got 1, 1x3,2');
 });
 test("matmul (1, 2, 3) x (3,)", async () => {
     const a = tensor([[[-61.0, -62.0, 177.0], [-13.0, 203.0, 17.0]]]);

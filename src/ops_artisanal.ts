@@ -120,7 +120,9 @@ function broadcastBatchedMatmul(
 ): {
     outputShape: number[];
     outputStrides: number[];
+    inputShape: number[];
     inputStrides: number[];
+    otherShape: number[];
     otherStrides: number[];
 } {
     const inputShape = input.shape.slice();
@@ -170,7 +172,14 @@ function broadcastBatchedMatmul(
     const otherStrides = input.strides.slice();
     padFront(otherStrides, maxLength - 2);
 
-    return { outputShape, outputStrides, inputStrides, otherStrides };
+    return {
+        outputShape,
+        outputStrides,
+        inputShape,
+        inputStrides,
+        otherShape,
+        otherStrides,
+    };
 }
 
 export function matmul(input: Tensor, other: Tensor): Tensor {
@@ -194,22 +203,41 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     // If both arguments are 2-dimensional, the matrix-matrix product is returned
     else if (adims === 2 && bdims === 2) {
         op = "mm";
-    }
-    // If the first argument is 1-dimensional and the second argument is 2-dimensional, a 1 is prepended to its dimension
-    else if (adims === 1 && bdims === 2) {
-        op = "vm";
-        const bmmshape = reshapeForMatrixMultiply(bshape, other.strides);
-        if (ashape[0] !== bmmshape.shape[0]) {
+        if (ashape[1] !== bshape[0]) {
             throw new Error(
-                `mat1 and mat2 shapes cannot be multiplied (1x${ashape[0]} and ${bshape[0]}x${bshape[1]})`
+                `mat1 and mat2 shapes cannot be multiplied (${ashape[0]}x${ashape[1]} and ${bshape[0]}x${bshape[1]})`
             );
         }
     }
+    // If the first argument is 1-dimensional and the second argument is 2-dimensional, a 1 is prepended to its dimension
+    else if (adims === 1 && bdims >= 2) {
+        op = "vm";
+        const btshape = bshape.slice();
+        const btstrides = other.strides.slice();
+        let t = btshape[btshape.length - 1];
+        btshape[btshape.length - 1] = btshape[btshape.length - 2];
+        btshape[btshape.length - 2] = t;
+        t = btstrides[btstrides.length - 1];
+        btstrides[btstrides.length - 1] = btstrides[btstrides.length - 2];
+        btstrides[btstrides.length - 2] = t;
+        const bmmshape = reshapeForMatrixMultiply(btshape, btstrides);
+        if (ashape[0] !== bmmshape.shape[0]) {
+            if (bdims === 2) {
+                throw new Error(
+                    `mat1 and mat2 shapes cannot be multiplied (1x${ashape[0]} and ${bshape[0]}x${bshape[1]})`
+                );
+            } else {
+                throw new Error(
+                    `size mismatch, got ${bmmshape.shape[0]}, ${bmmshape.shape[0]}x${bmmshape.shape[1]},${ashape[0]}`
+                );
+            }
+        }
+    }
     // If the first argument is 2-dimensional and the second argument is 1-dimensional, the matrix-vector product is returned
-    else if (adims === 2 && bdims == 1) {
+    else if (adims >= 2 && bdims == 1) {
         op = "mv";
         const ammshape = reshapeForMatrixMultiply(ashape, input.strides);
-        if (ammshape.shape[1] !== bshape[0]) {
+        if (ammshape.shape[adims - 1] !== bshape[0]) {
             throw new Error(
                 `size mismatch, got ${ammshape.shape[0]}, ${ammshape.shape[0]}x${ammshape.shape[1]},${bshape[0]}`
             );
@@ -217,9 +245,15 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     } else if (adims >= 1 && bdims >= 1 && (adims > 2 || bdims > 2)) {
         op = "bmm";
         const broadcast = broadcastBatchedMatmul(input, other);
-        const ammshape = reshapeForMatrixMultiply(ashape, input.strides);
-        const bmmshape = reshapeForMatrixMultiply(bshape, other.strides);
-        if (ammshape.shape[1] !== bmmshape.shape[0]) {
+        const ammshape = reshapeForMatrixMultiply(
+            broadcast.inputShape,
+            broadcast.inputStrides
+        );
+        const bmmshape = reshapeForMatrixMultiply(
+            broadcast.otherShape,
+            broadcast.otherStrides
+        );
+        if (ammshape.shape[ammshape.shape.length - 1] !== bmmshape.shape[0]) {
             throw new Error(
                 `mat1 and mat2 shapes cannot be multiplied (${ammshape.shape[0]}x${ammshape.shape[1]} and ${bmmshape.shape[0]}x${bmmshape.shape[1]})`
             );
