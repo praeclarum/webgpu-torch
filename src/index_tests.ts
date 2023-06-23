@@ -10,6 +10,7 @@ export * from "./kernel.test";
 export * from "./nn.test";
 export * from "./nn_diffusers.test";
 export * from "./ops.test";
+export * from "./ops_reductions.test";
 export * from "./optim.test";
 export * from "./shape.test";
 export * from "./storage.test";
