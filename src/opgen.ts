@@ -37,7 +37,7 @@ export function opSpecToKernelSpecs(op: OpSpec): KernelSpec[] {
 }
 
 function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
-    const specs = [getReductionKernelSpec(op)];
+    const specs = [getReductionKernelSpec(op), getReductionDimKernelSpec(op)];
     if (op.backward) {
         specs.push(getReductionGradKernelSpec(op, op.backward));
     }
@@ -74,11 +74,14 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
         input: "input[i]",
         output: "accumulator",
     });
-    const reduceCode = op.reduce === undefined ? "" : exprCodeToWebGLShader(op.reduce, {
-        input: "input[i]",
-        output: "accumulator",
-        inputSize: "parameters.size",
-    });
+    const reduceCode =
+        op.reduce === undefined
+            ? ""
+            : exprCodeToWebGLShader(op.reduce, {
+                  input: "input[i]",
+                  output: "accumulator",
+                  inputSize: "parameters.size",
+              });
     const shader = `
     var ${initCode};
     // Load inputData into local memory
@@ -136,7 +139,10 @@ function getReductionKernelSpec(op: ReductionOpSpec): KernelSpec {
     };
 }
 
-function getReductionGradKernelSpec(op: ReductionOpSpec, backwardExprCode: ExprCode): KernelSpec {
+function getReductionGradKernelSpec(
+    op: ReductionOpSpec,
+    backwardExprCode: ExprCode
+): KernelSpec {
     const backwardShaderCode = exprCodeToWebGLShader(backwardExprCode, {
         input: "input[index]",
         output: "output[0]",
@@ -145,7 +151,7 @@ function getReductionGradKernelSpec(op: ReductionOpSpec, backwardExprCode: ExprC
         inputSize: "parameters.size",
     });
     const shader = `
-    var index = global_id.x;
+    let index = global_id.x;
     if (index >= parameters.size) {
         return;
     }
@@ -194,7 +200,141 @@ function getReductionGradKernelSpec(op: ReductionOpSpec, backwardExprCode: ExprC
     };
 }
 
-function getBinaryKernelSpec(op: BinaryOpSpec, inplace: boolean, isOtherScalar: boolean): KernelSpec {
+function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
+    const initCode = exprCodeToWebGLShader(op.init, {
+        input: "input[inputIndex]",
+        output: "accumulator",
+    });
+    const forwardCode = exprCodeToWebGLShader(op.forward, {
+        input: "input[inputIndex]",
+        output: "accumulator",
+    });
+    const reduceCode =
+        op.reduce === undefined
+            ? ""
+            : exprCodeToWebGLShader(op.reduce, {
+                  input: "input[inputIndex]",
+                  output: "accumulator",
+                  inputSize: "dimN",
+              });
+    let shader = `
+    let outputIndex = global_id.x;
+    if (outputIndex >= parameters.size) {
+        return;
+    }
+    var i = outputIndex;
+    var outputIndex0 = u32(i / parameters.outputStride0);
+    i = i % parameters.outputStride0;
+    var outputIndex1 = u32(i / parameters.outputStride1);
+    i = i % parameters.outputStride1;
+    var outputIndex2 = u32(i / parameters.outputStride2);
+    i = i % parameters.outputStride2;
+    var outputIndex3 = i;
+    let dimN = parameters.inputShape$$dim$$;
+    var ${initCode};
+    for (var dimI = 0u; dimI < dimN; dimI++) {
+        outputIndex$$dim$$ = dimI;
+        let inputIndex =
+            outputIndex0 * parameters.inputStride0 +
+            outputIndex1 * parameters.inputStride1 +
+            outputIndex2 * parameters.inputStride2 +
+            outputIndex3;
+        ${forwardCode};
+    }
+    ${reduceCode};
+    output[outputIndex] = accumulator;
+`;
+    return {
+        name: op.name + "_dim",
+        config: [
+            {
+                name: "dtype",
+            },
+            {
+                name: "dim",
+            },
+            {
+                name: "maxdim",
+            },
+        ],
+        parameters: [
+            {
+                name: "inputShape0",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape1",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape2",
+                shaderType: "u32",
+            },
+            {
+                name: "inputShape3",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride0",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride1",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride2",
+                shaderType: "u32",
+            },
+            {
+                name: "inputStride3",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride0",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride1",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride2",
+                shaderType: "u32",
+            },
+            {
+                name: "outputStride3",
+                shaderType: "u32",
+            },
+            {
+                name: "size",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "input",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "size",
+            },
+        ],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["size/256", 1, 1],
+        shader: shader,
+    };
+}
+
+function getBinaryKernelSpec(
+    op: BinaryOpSpec,
+    inplace: boolean,
+    isOtherScalar: boolean
+): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
             name: "size",

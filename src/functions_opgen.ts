@@ -5,7 +5,7 @@ import {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize } from "./shape";
+import { shapeSize, defaultStrides } from "./shape";
 export class AbsFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
@@ -1353,11 +1353,27 @@ export class AllFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("all_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("all_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1386,7 +1402,6 @@ export class AllFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("all_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1406,11 +1421,27 @@ export class AnyFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("any_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("any_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1439,7 +1470,6 @@ export class AnyFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("any_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1459,11 +1489,27 @@ export class MeanFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("mean_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("mean_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1492,7 +1538,6 @@ export class MeanFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("mean_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1512,11 +1557,27 @@ export class NormFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("norm_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("norm_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1545,7 +1606,6 @@ export class NormFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("norm_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1565,11 +1625,27 @@ export class ProdFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("prod_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("prod_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1598,7 +1674,6 @@ export class ProdFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("prod_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1618,11 +1693,27 @@ export class SumFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("sum_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("sum_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1651,7 +1742,6 @@ export class SumFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("sum_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
@@ -1671,11 +1761,27 @@ export class CountNonzeroFunction extends AutoFunction {
         if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
+                const inputShape = input.shape;
+                let outputShape = input.shape.slice();
+                outputShape[dim] = 1;
+                let outputStrides = defaultStrides(outputShape);
                 const params = {
-                    size: shapeSize(input.shape),
-                    dim: dim,
+                    size: shapeSize(outputShape),
+                    inputShape0: input.shape.length > 0 ? input.shape[0] : 1,
+                    inputStride0: input.shape.length > 0 ? input.strides[0] : 1,
+                    outputStride0: outputShape.length > 0 ? outputStrides[0] : 1,
+                    inputShape1: input.shape.length > 1 ? input.shape[1] : 1,
+                    inputStride1: input.shape.length > 1 ? input.strides[1] : 1,
+                    outputStride1: outputShape.length > 1 ? outputStrides[1] : 1,
+                    inputShape2: input.shape.length > 2 ? input.shape[2] : 1,
+                    inputStride2: input.shape.length > 2 ? input.strides[2] : 1,
+                    outputStride2: outputShape.length > 2 ? outputStrides[2] : 1,
+                    inputShape3: input.shape.length > 3 ? input.shape[3] : 1,
+                    inputStride3: input.shape.length > 3 ? input.strides[3] : 1,
+                    outputStride3: outputShape.length > 3 ? outputStrides[3] : 1,
                 };
-                return input.runKernel("countNonzero_dim", {"dtype":"float32","workgroupSize":256}, params, [[]])[0];
+                if (!keepdim) outputShape.splice(dim, 1);
+                return input.runKernel("countNonzero_dim", {dim,maxdim:inputShape.length,dtype:"float32"}, params, [outputShape])[0];
             } else {
                 throw new Error("Multi-dimension reduction not supported");
             }
@@ -1704,7 +1810,6 @@ export class CountNonzeroFunction extends AutoFunction {
             if (typeof dim === "number") {
                 const params = {
                     size: shapeSize(input.shape),
-                    dim: dim,
                 };
                 return input.runKernel("countNonzero_dim_grad", {"dtype":"float32","workgroupSize":256}, params, [input.shape], output, outputGrad);
             } else {
