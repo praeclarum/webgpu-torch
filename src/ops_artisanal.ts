@@ -1,31 +1,40 @@
+import { shouldCreateGradient } from "./autograd";
+import { Tensor } from "./tensor";
 import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
-import { Tensor } from "./tensor";
-import { shouldCreateGradient } from "./autograd";
+import type { Shape, Strides } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
 }
 
-export function clone(input: Tensor, memoryFormat: MemoryFormat = "preserveFormat"): Tensor {
+export function clone(
+    input: Tensor,
+    memoryFormat: MemoryFormat = "preserveFormat"
+): Tensor {
     if (shouldCreateGradient(input)) {
         throw new Error("clone gradient not supported yet");
         // return CloneFunction.apply(input);
     } else {
         const newStorage = input.storage.clone();
-        return new Tensor({data: newStorage, shape: input.shape, dtype: input.dtype, requiresGrad: input.requiresGrad});
+        return new Tensor({
+            data: newStorage,
+            shape: input.shape,
+            dtype: input.dtype,
+            requiresGrad: input.requiresGrad,
+        });
     }
 }
 
 /**
  * Applies a 2D convolution over an input image composed of several input planes.
- * 
+ *
  * #### Forward
  * ```
  * output[y, x] = sum(Ky, sum(Kx, input[y + ky, x + kx] * weight[ky, kx])) + bias
  * ```
- * 
+ *
  * @param input input tensor of shape [B, inChannels, iH, iW]
  * @param weight filters of shape [outChannels, inChannels, kH, kW]
  * @param bias optional bias tensor of shape [outChannels]
@@ -33,9 +42,15 @@ export function clone(input: Tensor, memoryFormat: MemoryFormat = "preserveForma
  * @param padding implicit padding on both sides of the kernel. Can be a single number or a tuple (padH, padW). Default: 0
  *     `padding="valid"` is the same as no padding. `padding="same"` pads the input so the output has the shape as the input.
  *     However, this mode can only be used when `stride` is 1.
- * @returns 
+ * @returns
  */
-export function conv2d(input: Tensor, weight: Tensor, bias?: Tensor, stride?: number | [number, number], padding?: number | [number, number] | "valid" | "same"): Tensor {
+export function conv2d(
+    input: Tensor,
+    weight: Tensor,
+    bias?: Tensor,
+    stride?: number | [number, number],
+    padding?: number | [number, number] | "valid" | "same"
+): Tensor {
     if (shouldCreateGradient(input, weight)) {
         throw new Error("conv2d gradient not supported yet");
     } else {
@@ -64,14 +79,52 @@ export function conv2d(input: Tensor, weight: Tensor, bias?: Tensor, stride?: nu
             "conv2d",
             { dtype: input.dtype },
             params,
-            [[params.batchSize, params.outputChannels, params.outputHeight, params.outputWidth]],
+            [
+                [
+                    params.batchSize,
+                    params.outputChannels,
+                    params.outputHeight,
+                    params.outputWidth,
+                ],
+            ],
             weight
         )[0];
     }
 }
 
+function reshapeForMatrixMultiply(
+    shape: Shape,
+    strides: Strides
+): { shape: Shape; strides: Strides } {
+    const shapeLength = shape.length;
+    if (shapeLength == 0) {
+        return { shape: [1, 1], strides: [1, 1] };
+    }
+    if (shapeLength == 1) {
+        return { shape: [1, shape[0]], strides: [1, strides[0]] };
+    }
+    const lastDimension = shape[shapeLength - 1];
+    const lastStride = strides[shapeLength - 1];
+    let combinedDimension = 1;
+    for (let i = 0; i < shapeLength - 1; i++) {
+        combinedDimension *= shape[i];
+    }
+    const newShape: Shape = [combinedDimension, lastDimension];
+    const newStrides: Strides = [strides[0], lastStride];
+    return { shape: newShape, strides: newStrides };
+}
+
 export function matmul(input: Tensor, other: Tensor): Tensor {
-    throw new Error("matmul not implemented yet");
+    const atype = input.shape.length == 0 ? "s" : (input.shape.length == 1 ? "v" : "m");
+    const btype = other.shape.length == 0 ? "s" : (other.shape.length == 1 ? "v" : "m");
+    const ammlayout = reshapeForMatrixMultiply(input.shape, input.strides);
+    const bshape = other.shape;
+    if (bshape.length == 1) {
+        if (ammlayout.shape[1] !== bshape[0]) {
+            throw new Error(`size mismatch, got ${ammlayout.shape[0]}, ${ammlayout.shape[0]}x${ammlayout.shape[1]},${bshape[0]}`);
+        }
+    }
+    throw new Error(`A shape from ${input.shape} to ${ammlayout.shape}`);
 }
 
 export function mm(input: Tensor, other: Tensor): Tensor {
@@ -119,7 +172,6 @@ export function t(input: Tensor): Tensor {
         return input.withShape(newShape, newStrides);
     }
 }
-
 
 export function tensor(spec: TensorSpec): Tensor;
 export function tensor(
