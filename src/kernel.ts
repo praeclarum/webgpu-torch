@@ -403,7 +403,8 @@ const javaScriptGlobalFunctions: { [name: string]: string } = {
     fract: "function fract(x) { return x - Math.floor(x); }",
     select: "function select(falseValue, trueValue, condition) { return condition ? trueValue : falseValue; }",
     f32: "function f32(x) { return x; }",
-    i32: "function i32(x) { return x; }",
+    i32: "function i32(x) { return Math.floor(x) | 0; }",
+    u32: "function u32(x) { return Math.floor(x) >>> 0; }",
 };
 
 export function getKernelJavaScriptCode(
