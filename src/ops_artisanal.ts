@@ -2,7 +2,7 @@ import { shouldCreateGradient } from "./autograd";
 import { Tensor } from "./tensor";
 import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
-import type { Shape, StridedShape, Strides } from "./shape";
+import { contiguousStridedShape, type Shape, type StridedShape, type Strides } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
 
@@ -166,17 +166,13 @@ function broadcastBatchedMatmul(
     outputShape.push(inputShape[inputShape.length - 2]);
     outputShape.push(otherShape[otherShape.length - 1]);
 
-    const outputStrides = outputShape
-        .map((_, i) => outputShape.slice(i + 1).reduce((a, b) => a * b, 1))
-        .concat([1]);
-
     const inputStrides = input.strides.slice();
     padFront(inputStrides, maxLength - 2);
     const otherStrides = other.strides.slice();
     padFront(otherStrides, maxLength - 2);
 
     return {
-        output: { shape: outputShape, strides: outputStrides },
+        output: contiguousStridedShape(outputShape),
         a: { shape: inputShape, strides: inputStrides },
         b: { shape: otherShape, strides: otherStrides },
     };
