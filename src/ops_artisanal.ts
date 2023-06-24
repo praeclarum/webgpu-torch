@@ -290,18 +290,15 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     }
     let params: KernelParamsInput = {};
     if (op === "bmm") {
-        const batchSize = Math.max(aop.shape[0], bop.shape[0]);
-        const aBatchStride = aop.strides[0];
-        const bBatchStride = bop.strides[0];
         params = {
-            batchSize,
+            batchSize: Math.max(aop.shape[0], bop.shape[0]),
             aRows: aop.shape[1],
             aCols: aop.shape[2],
             bCols: bop.shape[2],
-            aBatchStride,
+            aBatchStride: aop.strides[0],
             aRowStride: aop.strides[1],
             aColStride: aop.strides[2],
-            bBatchStride,
+            bBatchStride: bop.strides[0],
             bRowStride: bop.strides[1],
             bColStride: bop.strides[2],
             alpha: 1.0,

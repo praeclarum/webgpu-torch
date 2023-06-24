@@ -327,7 +327,7 @@ export const kernels: { [name: string]: KernelSpec } = {
     }
     var result = 0.0;
     var aIndex = outputBatch * parameters.aBatchStride + outputRow * parameters.aRowStride;
-    var bIndex = outputBatch * parameters.aBatchStride + outputCol * parameters.bColStride;
+    var bIndex = outputBatch * parameters.bBatchStride + outputCol * parameters.bColStride;
     for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
         result = result + a[aIndex] * b[bIndex];
         aIndex = aIndex + parameters.aColStride;
