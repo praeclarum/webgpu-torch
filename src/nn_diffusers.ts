@@ -1,5 +1,7 @@
 import type { Dtype } from "./dtype";
-import { Conv2d, GroupNorm, Linear } from "./nn_cnn";
+import { Linear } from "./nn_basic";
+import { GroupNorm } from "./nn_norm";
+import { Conv2d } from "./nn_2d";
 import { Module, ModuleList, Sequential } from "./nn_module";
 import { SiLU } from "./nn_opgen";
 import { cat } from "./ops_artisanal";
