@@ -46,14 +46,30 @@ test("sum vector grad", async () => {
 test("mean vector", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.mean();
-    const a = await y.toArrayAsync();
-    expect(a).toBeCloseTo(2);
+    expect(await y.toArrayAsync()).toBeCloseTo(2);
 });
 
 test("mean vector grad", async () => {
     const x = tensor({data:[1, 2, 3, 4], requiresGrad: true});
     const y = x.mean();
     y.backward();
-    const a = await x.grad!.toArrayAsync();
-    expect(a).toEqual([0.25, 0.25, 0.25, 0.25]);
+    expect(await x.grad!.toArrayAsync()).toEqual([0.25, 0.25, 0.25, 0.25]);
+});
+
+test("add 1d broadcasts", async () => {
+    const x = tensor([1, 2, 3]);
+    // const y = x.add(tensor([4]));
+    // expect(await y.toArrayAsync()).toEqual([5, 6, 7]);
+});
+
+test("add 2d to 1d broadcasts", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    // const y = x.add(tensor([4]));
+    // expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
+});
+
+test("add 2d to 1d broadcasts", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    // const y = x.add(tensor([[4]]));
+    // expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
 });

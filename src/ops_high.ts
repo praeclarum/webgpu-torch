@@ -1,6 +1,7 @@
 // High level ops
 
 import { IAutoFunction, shouldCreateGradient } from "./autograd";
+import { broadcastShapes, shapeSize, stridedShapeIsContiguous } from "./shape";
 import type { Tensor } from "./tensor";
 
 export function unary(func: IAutoFunction, input: Tensor): Tensor {
@@ -10,22 +11,31 @@ export function unary(func: IAutoFunction, input: Tensor): Tensor {
     return func.forward([input]);
 }
 
-export function unaryWithAlpha(func: IAutoFunction, input: Tensor, alpha?: number): Tensor {
+export function unaryWithAlpha(
+    func: IAutoFunction,
+    input: Tensor,
+    alpha?: number
+): Tensor {
     if (shouldCreateGradient(input)) {
         return func.apply(input, alpha);
     }
     return func.forward([input, alpha]);
 }
 
-export function binary(func: IAutoFunction, input: Tensor, other: number | Tensor): Tensor {
+export function binary(
+    func: IAutoFunction,
+    input: Tensor,
+    other: number | Tensor
+): Tensor {
     if (typeof other === "number") {
         if (shouldCreateGradient(input)) {
             return func.apply(input, other);
         }
-    }
-    else {
+    } else {
         if (input.shape.length !== other.shape.length) {
-            throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+            throw new Error(
+                `Shape dimensions must match. Got ${input.shape} and ${other.shape}`
+            );
         }
         if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
             return func.apply(input, other);
@@ -34,15 +44,31 @@ export function binary(func: IAutoFunction, input: Tensor, other: number | Tenso
     return func.forward([input, other]);
 }
 
-export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: number | Tensor, alpha?: number): Tensor {
+export function binaryWithAlpha(
+    func: IAutoFunction,
+    input: Tensor,
+    other: number | Tensor,
+    alpha?: number
+): Tensor {
     if (typeof other === "number") {
         if (shouldCreateGradient(input)) {
             return func.apply(input, other, alpha);
         }
-    }
-    else {
+    } else {
+        const broadcasted = broadcastShapes(input, other);
+        if (
+            (input.shape.length > 1 || other.shape.length > 1) &&
+            (!stridedShapeIsContiguous(broadcasted.a) ||
+                !stridedShapeIsContiguous(broadcasted.b))
+        ) {
+            throw new Error(
+                "Non-contiguous broadcasted shapes are not supported yet"
+            );
+        }
         if (input.shape.length !== other.shape.length) {
-            throw new Error(`Shape dimensions must match. Got ${input.shape} and ${other.shape}`);
+            throw new Error(
+                `Shape dimensions must match. Got ${input.shape} and ${other.shape}`
+            );
         }
         if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
             return func.apply(input, other, alpha);
@@ -51,7 +77,12 @@ export function binaryWithAlpha(func: IAutoFunction, input: Tensor, other: numbe
     return func.forward([input, other, alpha]);
 }
 
-export function reduction(func: IAutoFunction, input: Tensor, dim?: number | number[], keepdim?: boolean): Tensor {
+export function reduction(
+    func: IAutoFunction,
+    input: Tensor,
+    dim?: number | number[],
+    keepdim?: boolean
+): Tensor {
     if (shouldCreateGradient(input)) {
         return func.apply(input, dim, keepdim);
     }
