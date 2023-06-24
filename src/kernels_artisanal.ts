@@ -158,10 +158,12 @@ export const kernels: { [name: string]: KernelSpec } = {
         return;
     }
     var result = 0.0;
+    var aIndex = outputRow * parameters.aRowStride;
+    var bIndex = 0u;
     for (var aCol = 0u; aCol < parameters.aCols; aCol++) {
-        var aIndex = outputRow * parameters.aRowStride + aCol * parameters.aColStride;
-        var bIndex = aCol * parameters.bRowStride;
         result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
     }
     output[outputRow] = result;
 `
@@ -233,10 +235,12 @@ export const kernels: { [name: string]: KernelSpec } = {
         return;
     }
     var result = 0.0;
+    let aIndex = outputRow * parameters.aRowStride;
+    let bIndex = outputCol * parameters.bColStride;
     for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
-        let aIndex = outputRow * parameters.aCols + aCol;
-        let bIndex = aCol * parameters.bCols + outputCol;
         result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
     }
     let index = outputCol + outputRow * parameters.bCols;
     resultMatrix[index] = result;
