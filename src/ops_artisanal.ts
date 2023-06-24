@@ -124,26 +124,31 @@ function broadcastBatchedMatmul(
     b: StridedShape;
 } {
     const inputShape = input.shape.slice();
+    const inputStrides = input.strides.slice();
     const otherShape = other.shape.slice();
+    const otherStrides = other.strides.slice();
 
-    const padFront = (arr: number[], length: number) => {
-        while (arr.length < length) {
-            arr.unshift(1);
+    const padFront = (shape: number[], strides: number[], length: number) => {
+        while (shape.length < length) {
+            shape.unshift(1);
+            strides.unshift(0);
         }
     };
 
     if (inputShape.length === 1) {
         inputShape.unshift(1);
+        inputStrides.unshift(0);
     }
 
     if (otherShape.length === 1) {
         otherShape.push(1);
+        otherStrides.push(0);
     }
 
     // Pad shapes to the same length by putting 1's in front
     const maxLength = Math.max(inputShape.length, otherShape.length);
-    padFront(inputShape, maxLength);
-    padFront(otherShape, maxLength);
+    padFront(inputShape, inputStrides, maxLength);
+    padFront(otherShape, otherStrides, maxLength);
 
     const outputShape: number[] = [];
     for (let dim = 0; dim < inputShape.length - 2; dim++) {
@@ -162,14 +167,8 @@ function broadcastBatchedMatmul(
             );
         }
     }
-
     outputShape.push(inputShape[inputShape.length - 2]);
     outputShape.push(otherShape[otherShape.length - 1]);
-
-    const inputStrides = input.strides.slice();
-    padFront(inputStrides, maxLength - 2);
-    const otherStrides = other.strides.slice();
-    padFront(otherStrides, maxLength - 2);
 
     return {
         output: contiguousStridedShape(outputShape),
@@ -186,12 +185,14 @@ function reshapeBatchedMatmul(tensor: StridedShape): StridedShape {
         throw new Error("Input tensor must be at least 3D");
     }
 
-    const lastTwoDims = inputShape.splice(-2);
-    const batchSize = inputShape.reduce((a, b) => a * b, 1);
+    let batchSize = 1;
+    for (let i = 0; i < inputShape.length - 2; i++) {
+        batchSize *= inputShape[i];
+    }
 
-    const newShape = [batchSize].concat(lastTwoDims);
+    const newShape = [batchSize].concat(inputShape.slice(inputShape.length - 2));
     const newStrides = [
-        inputStrides[0] * inputShape[0],
+        inputStrides[inputStrides.length - 3],
         inputStrides[inputStrides.length - 2],
         inputStrides[inputStrides.length - 1],
     ];
@@ -290,8 +291,8 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     let params: KernelParamsInput = {};
     if (op === "bmm") {
         const batchSize = Math.max(aop.shape[0], bop.shape[0]);
-        const aBatchStride = aop.shape[0] === 1 ? 0 : aop.strides[0];
-        const bBatchStride = bop.shape[0] === 1 ? 0 : bop.strides[0];
+        const aBatchStride = aop.strides[0];
+        const bBatchStride = bop.strides[0];
         params = {
             batchSize,
             aRows: aop.shape[1],
