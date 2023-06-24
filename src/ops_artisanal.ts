@@ -154,6 +154,12 @@ function broadcastBatchedMatmul(
     for (let dim = 0; dim < inputShape.length - 2; dim++) {
         if (inputShape[dim] === 1 || otherShape[dim] === 1) {
             outputShape[dim] = Math.max(inputShape[dim], otherShape[dim]);
+            if (inputShape[dim] === 1) {
+                inputStrides[dim] = 0;
+            }
+            if (otherShape[dim] === 1) {
+                otherStrides[dim] = 0;
+            }            
         } else if (inputShape[dim] === otherShape[dim]) {
             outputShape[dim] = inputShape[dim];
         } else {
