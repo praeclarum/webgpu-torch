@@ -188,6 +188,7 @@ export class ComputedNode extends GraphNode {
                     `Node ${nodeId} is not a ComputedNode, but it is not in nodesWithStorage`
                 );
             }
+            node as ComputedNode;
             const inputs = node.inputs.map((input, j) => {
                 const inputS =
                     computedStorages[input.node.id][input.outputIndex];

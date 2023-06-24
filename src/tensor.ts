@@ -190,10 +190,10 @@ export class Tensor extends TensorBase {
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
     async toArrayAsync(): Promise<TensorArrayData | number> {
-        const data = await this.storage.toTypedArrayAsync(this.dtype);
+        const storage = this.storage;
+        const data = await storage.toTypedArrayAsync(this.dtype);
         const shape = this.shape;
         const strides = this.strides;
-        // console.log("DATA", data.length);
     
         if (shape.length == 0) {
             return data[0];
@@ -213,7 +213,7 @@ export class Tensor extends TensorBase {
                 const length = shape[dim];
                 const subarray = data.subarray(offset, offset + length);
                 if (subarray.length !== length) {
-                    throw new Error(`Failed to get sub array for index [${index}] (tensor shape [${shape}] and strides [${strides}]) at offset ${offset} with length ${length} from buffer of length ${data.length}`);
+                    throw new Error(`Failed to get sub array for index [${index}] (tensor shape [${shape}] and strides [${strides}]) at offset ${offset} with length ${length} from buffer of length ${data.length} (storage has ${storage.byteSize} bytes)`);
                 }
                 return Array.from(subarray);
             } else {

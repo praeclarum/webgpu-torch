@@ -299,7 +299,7 @@ export const kernels: { [name: string]: KernelSpec } = {
 `
     },
     bmm: {
-        name: "mm",
+        name: "bmm",
         config: [
             {
                 name: "resultDtype",
