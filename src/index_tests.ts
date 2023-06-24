@@ -8,6 +8,7 @@ export * from "./expr.test";
 export * from "./graph.test";
 export * from "./kernel.test";
 export * from "./nn.test";
+export * from "./nn_applications.test";
 export * from "./nn_diffusers.test";
 export * from "./ops.test";
 export * from "./ops_matmul.test";

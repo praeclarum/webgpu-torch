@@ -448,9 +448,12 @@ export class Sequential extends Container {
     }
     constructor(modules: Module[]) {
         super();
-        for (const [i, module] of modules.entries()) {
-            this.addModule(i, module);
+        for (const module of modules) {
+            this.push(module);
         }
+    }
+    push(module: Module) {
+        this.addModule(this.children.length, module);
     }
     forward(input: Tensor): Tensor {
         for (const module of this.children) {

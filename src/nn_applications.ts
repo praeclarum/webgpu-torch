@@ -12,7 +12,7 @@ export class DeepSDF extends Module {
         this.pointEncoder = new Linear(3, width);
         this.block1 = new Sequential([]);
         for (let i = 0; i < depth; i++) {
-            this.block1.addModule(i, new Sequential([
+            this.block1.push(new Sequential([
                 new Linear(width, width),
                 new ReLU(),
             ]));
