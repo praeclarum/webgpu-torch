@@ -267,9 +267,13 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     let params: KernelParamsInput = {};
     if (op === "mm") {
         params = {
-            resultRows: outputShape[0],
-            resultCols: outputShape[1],
-            innerDim: aop.shape[1],
+            aRows: aop.shape[0],
+            aCols: aop.shape[1],
+            bCols: bop.shape[1],
+            aRowStride: aop.strides[0],
+            aColStride: aop.strides[1],
+            bRowStride: bop.strides[0],
+            bColStride: bop.strides[1],
             alpha: 1.0,
         };
     }
@@ -306,16 +310,20 @@ export function mm(input: Tensor, other: Tensor): Tensor {
             );
         }
         const params = {
-            resultRows: input.shape[0],
-            resultCols: other.shape[1],
-            innerDim: input.shape[1],
+            aRows: input.shape[0],
+            aCols: input.shape[1],
+            bCols: other.shape[1],
+            aRowStride: input.strides[0],
+            aColStride: input.strides[1],
+            bRowStride: other.strides[0],
+            bColStride: other.strides[1],
             alpha: 1.0,
         };
         return input.runKernel(
             "mm",
             { resultDtype: input.dtype },
             params,
-            [[params.resultRows, params.resultCols]],
+            [[params.aRows, params.bCols]],
             other
         )[0];
     }

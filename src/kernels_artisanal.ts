@@ -175,15 +175,31 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         parameters: [
             {
-                name: "resultRows",
+                name: "aRows",
                 shaderType: "u32",
             },
             {
-                name: "resultCols",
+                name: "aCols",
                 shaderType: "u32",
             },
             {
-                name: "innerDim",
+                name: "bCols",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bColStride",
                 shaderType: "u32",
             },
             {
@@ -193,11 +209,11 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         inputs: [
             {
-                name: "firstMatrix",
+                name: "a",
                 shaderType: "array<f32>",
             },
             {
-                name: "secondMatrix",
+                name: "b",
                 shaderType: "array<f32>",
             },
         ],
@@ -205,22 +221,24 @@ export const kernels: { [name: string]: KernelSpec } = {
             {
                 name: "resultMatrix",
                 shaderType: "array<f32>",
-                size: "resultRows * resultCols",
+                size: "aRows * bCols",
             },
         ],
-        workgroupSize: [8, 8, 1],
-        workgroupCount: ["resultRows/8", "resultCols/8", 1],
+        workgroupSize: [16, 16, 1],
+        workgroupCount: ["aRows/16", "bCols/16", 1],
         shader: `
-    if (global_id.x >= parameters.resultRows || global_id.y >= parameters.resultCols) {
+    let outputRow = global_id.x;
+    let outputCol = global_id.y;
+    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols) {
         return;
     }
     var result = 0.0;
-    for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
-        let a = global_id.x * parameters.innerDim + i;
-        let b = i * parameters.resultCols + global_id.y;
-        result = result + firstMatrix[a] * secondMatrix[b];
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
+        let aIndex = outputRow * parameters.aCols + aCol;
+        let bIndex = aCol * parameters.bCols + outputCol;
+        result = result + a[aIndex] * b[bIndex];
     }
-    let index = global_id.y + global_id.x * parameters.resultCols;
+    let index = outputCol + outputRow * parameters.bCols;
     resultMatrix[index] = result;
 `
     },
