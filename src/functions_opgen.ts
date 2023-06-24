@@ -95,7 +95,7 @@ export class AddFunction extends AutoFunction {
                     size: shapeSize(input.shape),
                     alpha: alpha || 1.0,
                 };
-                return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("add_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -104,7 +104,7 @@ export class AddFunction extends AutoFunction {
                     size: shapeSize(input.shape),
                     alpha: alpha || 1.0,
                 };
-                return input.runKernel("add_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -213,7 +213,7 @@ export class Atan2Function extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -221,7 +221,7 @@ export class Atan2Function extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -280,7 +280,7 @@ export class CopysignFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -288,7 +288,7 @@ export class CopysignFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -395,7 +395,7 @@ export class DivFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("div_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -403,7 +403,7 @@ export class DivFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("div_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -558,7 +558,7 @@ export class HypotFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -566,7 +566,7 @@ export class HypotFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -601,7 +601,7 @@ export class LdexpFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -609,7 +609,7 @@ export class LdexpFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -740,7 +740,7 @@ export class LogaddexpFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -748,7 +748,7 @@ export class LogaddexpFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -783,7 +783,7 @@ export class Logaddexp2Function extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -791,7 +791,7 @@ export class Logaddexp2Function extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -826,7 +826,7 @@ export class MulFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("mul_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -834,7 +834,7 @@ export class MulFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("mul_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -917,7 +917,7 @@ export class PowFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("pow_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -925,7 +925,7 @@ export class PowFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("pow_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -1274,7 +1274,7 @@ export class SubFunction extends AutoFunction {
                     size: shapeSize(input.shape),
                     alpha: alpha || 1.0,
                 };
-                return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("sub_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1283,7 +1283,7 @@ export class SubFunction extends AutoFunction {
                     size: shapeSize(input.shape),
                     alpha: alpha || 1.0,
                 };
-                return input.runKernel("sub_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }
@@ -1392,7 +1392,7 @@ export class XlogyFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1400,7 +1400,7 @@ export class XlogyFunction extends AutoFunction {
                 const params = {
                     size: shapeSize(input.shape),
                 };
-                return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
             }
         }
     }

@@ -324,7 +324,7 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
             w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
             w.indent();
             writeParams("input", false, hasAlpha, "alpha", w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, ${outputShapesS}, other)[0];`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
@@ -334,7 +334,7 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
             w.dedent();
             w.writeLine(`}`);
             writeParams("input", false, hasAlpha, "alpha", w);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
             w.dedent();
             w.writeLine(`}`);
             w.dedent();
