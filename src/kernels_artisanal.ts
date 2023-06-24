@@ -104,6 +104,58 @@ export const kernels: { [name: string]: KernelSpec } = {
     }
 `
     },
+    dot: {
+        name: "dot",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "1",
+            },
+        ],
+        workgroupSize: [1, 1, 1],
+        workgroupCount: [1, 1, 1],
+        shader: `
+    var result = 0.0;
+    var aIndex = 0u;
+    var bIndex = 0u;
+    for (var aRow = 0u; aRow < parameters.aRows; aRow = aRow + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aRowStride;
+        bIndex = bIndex + parameters.bRowStride;
+    }
+    output[0] = result;
+`
+    },
     mv: {
         name: "mv",
         config: [
