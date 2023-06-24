@@ -5,6 +5,7 @@ import type { Dtype } from "./dtype";
 import { contiguousStridedShape, type Shape, type StridedShape, type Strides } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
+import { LinearFunction } from "./functions_artisanal";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
@@ -216,6 +217,13 @@ function reshapeBatchedMatmul(tensor: StridedShape): StridedShape {
         shape: newShape,
         strides: newStrides,
     };
+}
+
+export function linear(input: Tensor, weight: Tensor, bias?: Tensor): Tensor {
+    if (shouldCreateGradient(input, weight, bias)) {
+        return LinearFunction.apply(input, weight, bias);
+    }
+    return LinearFunction.forward([input, weight, bias]);
 }
 
 export function matmul(input: Tensor, other: Tensor): Tensor {

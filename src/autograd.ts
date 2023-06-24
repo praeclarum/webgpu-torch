@@ -79,12 +79,12 @@ export function setGradEnabled(mode: boolean): void {
     _gradEnabled = mode;
 }
 
-export function shouldCreateGradient(...inputs: Tensor[]): boolean {
+export function shouldCreateGradient(...inputs: (Tensor|undefined)[]): boolean {
     if (!_gradEnabled) {
         return false;
     }
     for (const input of inputs) {
-        if (input.requiresGrad) {
+        if (input !== undefined && input.requiresGrad) {
             return true;
         }
     }
