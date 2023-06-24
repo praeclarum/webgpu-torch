@@ -119,7 +119,7 @@ test("sum(x, n=3)", async () => {
     const x = tensor(xar);
     const sum = x.sum();
     expect(sum.shape).toEqual([]);
-    expect(await sum.toArrayAsync()).toEqual([(n * (n - 1)) / 2]);
+    expect(await sum.toArrayAsync()).toEqual((n * (n - 1)) / 2);
 });
 
 test("sum(x, n=911)", async () => {
@@ -131,14 +131,14 @@ test("sum(x, n=911)", async () => {
     const x = tensor(xar);
     const sum = x.sum();
     expect(sum.shape).toEqual([]);
-    expect(await sum.toArrayAsync()).toEqual([(n * (n - 1)) / 2]);
+    expect(await sum.toArrayAsync()).toEqual((n * (n - 1)) / 2);
 });
 
 test("norm", async () => {
     const x = tensor([3, 4]);
     const norm = x.norm();
     expect(norm.shape).toEqual([]);
-    expect(await norm.toArrayAsync()).toEqual([5]);
+    expect(await norm.toArrayAsync()).toEqual(5);
 });
 
 test("conv2d", async () => {

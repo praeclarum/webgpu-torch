@@ -104,6 +104,122 @@ export const kernels: { [name: string]: KernelSpec } = {
     }
 `
     },
+    dot: {
+        name: "dot",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+        ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "1",
+            },
+        ],
+        workgroupSize: [1, 1, 1],
+        workgroupCount: [1, 1, 1],
+        shader: `
+    var result = 0.0;
+    var aIndex = 0u;
+    var bIndex = 0u;
+    for (var aRow = 0u; aRow < parameters.aRows; aRow = aRow + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aRowStride;
+        bIndex = bIndex + parameters.bRowStride;
+    }
+    output[0] = result;
+`
+    },
+    mv: {
+        name: "mv",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aCols",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+       ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "aRows",
+            },
+        ],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["aRows/256", 1, 1],
+        shader: `
+    let outputRow = global_id.x;
+    if (outputRow >= parameters.aRows) {
+        return;
+    }
+    var result = 0.0;
+    var aIndex = outputRow * parameters.aRowStride;
+    var bIndex = 0u;
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
+    }
+    output[outputRow] = result;
+`
+    },
     mm: {
         name: "mm",
         config: [
@@ -113,15 +229,31 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         parameters: [
             {
-                name: "resultRows",
+                name: "aRows",
                 shaderType: "u32",
             },
             {
-                name: "resultCols",
+                name: "aCols",
                 shaderType: "u32",
             },
             {
-                name: "innerDim",
+                name: "bCols",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bColStride",
                 shaderType: "u32",
             },
             {
@@ -131,35 +263,132 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         inputs: [
             {
-                name: "firstMatrix",
+                name: "a",
                 shaderType: "array<f32>",
             },
             {
-                name: "secondMatrix",
+                name: "b",
                 shaderType: "array<f32>",
             },
         ],
         outputs: [
             {
-                name: "resultMatrix",
+                name: "output",
                 shaderType: "array<f32>",
-                size: "resultRows * resultCols",
+                size: "aRows * bCols",
             },
         ],
-        workgroupSize: [8, 8, 1],
-        workgroupCount: ["resultRows/8", "resultCols/8", 1],
+        workgroupSize: [16, 16, 1],
+        workgroupCount: ["aRows/16", "bCols/16", 1],
         shader: `
-    if (global_id.x >= parameters.resultRows || global_id.y >= parameters.resultCols) {
+    let outputRow = global_id.x;
+    let outputCol = global_id.y;
+    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols) {
         return;
     }
     var result = 0.0;
-    for (var i = 0u; i < parameters.innerDim; i = i + 1u) {
-        let a = global_id.x * parameters.innerDim + i;
-        let b = i * parameters.resultCols + global_id.y;
-        result = result + firstMatrix[a] * secondMatrix[b];
+    var aIndex = outputRow * parameters.aRowStride;
+    var bIndex = outputCol * parameters.bColStride;
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
     }
-    let index = global_id.y + global_id.x * parameters.resultCols;
-    resultMatrix[index] = result;
+    let outputIndex = outputCol + outputRow * parameters.bCols;
+    output[outputIndex] = result;
+`
+    },
+    bmm: {
+        name: "bmm",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "batchSize",
+                shaderType: "u32",
+            },
+            {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aCols",
+                shaderType: "u32",
+            },
+            {
+                name: "bCols",
+                shaderType: "u32",
+            },
+            {
+                name: "aBatchStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bBatchStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "alpha",
+                shaderType: "f32",
+            },
+        ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "batchSize * aRows * bCols",
+            },
+        ],
+        workgroupSize: [8, 8, 4],
+        workgroupCount: ["aRows/8", "bCols/8", "batchSize/4"],
+        shader: `
+    let outputRow = global_id.x;
+    let outputCol = global_id.y;
+    let outputBatch = global_id.z;
+    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols || outputBatch >= parameters.batchSize) {
+        return;
+    }
+    var result = 0.0;
+    var aIndex = outputBatch * parameters.aBatchStride + outputRow * parameters.aRowStride;
+    var bIndex = outputBatch * parameters.bBatchStride + outputCol * parameters.bColStride;
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
+    }
+    let outputRowStride = parameters.bCols;
+    let outputBatchStride = parameters.aRows * outputRowStride;
+    let outputIndex = outputBatch * outputBatchStride + outputRow * outputRowStride + outputCol;
+    output[outputIndex] = result;
 `
     },
     sumDim: {

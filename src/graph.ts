@@ -52,7 +52,10 @@ export abstract class GraphNode {
     abstract eager(): void;
     getOutputRef(outputIndex: number): GraphNodeOutputRef {
         if (this._outputRefs[outputIndex] === undefined) {
-            this._outputRefs[outputIndex] = new GraphNodeOutputRef(this, outputIndex);
+            this._outputRefs[outputIndex] = new GraphNodeOutputRef(
+                this,
+                outputIndex
+            );
         }
         return this._outputRefs[outputIndex];
     }
@@ -185,6 +188,7 @@ export class ComputedNode extends GraphNode {
                     `Node ${nodeId} is not a ComputedNode, but it is not in nodesWithStorage`
                 );
             }
+            node as ComputedNode;
             const inputs = node.inputs.map((input, j) => {
                 const inputS =
                     computedStorages[input.node.id][input.outputIndex];
@@ -195,11 +199,14 @@ export class ComputedNode extends GraphNode {
                 }
                 return inputS;
             });
-            const [nodeRunEnv, paramValues] = node.kernel.getRunEnv(node.params);
+            const [nodeRunEnv, paramValues] = node.kernel.getRunEnv(
+                node.params
+            );
             const outputs = node.outputs.map((output, i) => {
+                const outputNumElements =
+                    node.kernel.spec.outputs[i].size(nodeRunEnv);
                 const outputByteSize =
-                    node.kernel.spec.outputs[i].size(nodeRunEnv) *
-                    dtypeByteSize(output.dtype);
+                    outputNumElements * dtypeByteSize(output.dtype);
                 return alloc(outputByteSize);
             });
             node.kernel.run(inputs, node.params, outputs);
@@ -232,7 +239,9 @@ export class ComputedNode extends GraphNode {
             }
         }
     }
-    private static createExecutionPlan(outputNodes: GraphNode[]): [
+    private static createExecutionPlan(
+        outputNodes: GraphNode[]
+    ): [
         GraphNode[],
         { [nodeId: number]: GraphNode },
         { ins: Set<NodeId>[]; outs: Set<NodeId>[] },
@@ -266,7 +275,10 @@ export class ComputedNode extends GraphNode {
         // console.log(`Liveness for node#${this.id}`, liveness);
         return [depthFirstNodes, nodesWithStorage, liveness, retainNodes];
     }
-    private static getLiveness(depthFirstNodes: GraphNode[], outputNodes: GraphNode[]): {
+    private static getLiveness(
+        depthFirstNodes: GraphNode[],
+        outputNodes: GraphNode[]
+    ): {
         ins: Set<NodeId>[];
         outs: Set<NodeId>[];
     } {

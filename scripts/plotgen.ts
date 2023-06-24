@@ -130,10 +130,10 @@ async function sampleUnaryOp(op: UnaryOpSpec, numSamples: number, bounds: PlotBo
         // console.log("input:", inputTensor);
         const outputTensor = (inputTensor as any)[op.name]() as Tensor;
         outputTensor.backward();
-        const outputArray = await outputTensor.toArrayAsync();
-        outputSamples.push(outputArray[0] as number);
-        const inputGradArray = await inputTensor.grad!.toArrayAsync();
-        inputGradSamples.push(inputGradArray[0] as number);
+        const outputArray = await outputTensor.toArrayAsync() as number[];
+        outputSamples.push(outputArray[0]);
+        const inputGradArray = await inputTensor.grad!.toArrayAsync() as number[];
+        inputGradSamples.push(inputGradArray[0]);
     }
     const results: OpSamples = { input: inputSamples, output: outputSamples, inputGrad: inputGradSamples };
     return results;

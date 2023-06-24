@@ -2,6 +2,11 @@ export type Shape = number[];
 export type Shapeish = Shape | number;
 export type Strides = number[];
 
+export interface StridedShape {
+    shape: Shape;
+    strides: Strides;
+}
+
 export function getShape(shapeish: Shapeish): Shape {
     if (typeof shapeish === "number") {
         return [shapeish];
@@ -30,4 +35,9 @@ export function defaultStrides(shape: Shape): Strides {
         stride *= shape[i];
     }
     return strides;
+}
+
+export function contiguousStridedShape(shape: Shape): StridedShape {
+    const strides = defaultStrides(shape);
+    return { shape, strides };
 }

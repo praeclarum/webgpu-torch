@@ -5,7 +5,7 @@ test("sum dim=0/1", async () => {
     expect(x.shape).toEqual([2]);
     const y = x.sum(0);
     expect(y.shape).toEqual([]);
-    expect(await y.toArrayAsync()).toEqual([-32.0]);
+    expect(await y.toArrayAsync()).toEqual(-32.0);
 });
 test("sum dim=0/2", async () => {
     const x = tensor([[70.0, 40.0, 49.0], [80.0, -59.0, 27.0]]);
@@ -75,7 +75,7 @@ test("prod dim=0/1", async () => {
     expect(x.shape).toEqual([2]);
     const y = x.prod(0);
     expect(y.shape).toEqual([]);
-    expect(await y.toArrayAsync()).toEqual([1330.0]);
+    expect(await y.toArrayAsync()).toEqual(1330.0);
 });
 test("prod dim=0/2", async () => {
     const x = tensor([[20.0, -6.0, 34.0], [52.0, -16.0, 31.0]]);
@@ -131,7 +131,7 @@ test("mean dim=0/1", async () => {
     expect(x.shape).toEqual([2]);
     const y = x.mean(0);
     expect(y.shape).toEqual([]);
-    expect(await y.toArrayAsync()).toEqual([-7.5]);
+    expect(await y.toArrayAsync()).toEqual(-7.5);
 });
 test("mean dim=0/2", async () => {
     const x = tensor([[23.0, 38.0, -34.0], [76.0, -89.0, 67.0]]);
@@ -201,7 +201,7 @@ test("norm dim=0/1", async () => {
     expect(x.shape).toEqual([2]);
     const y = x.norm(0);
     expect(y.shape).toEqual([]);
-    expect(await y.toArrayAsync()).toEqual([100.4987564086914]);
+    expect(await y.toArrayAsync()).toEqual(100.4987564086914);
 });
 test("norm dim=0/2", async () => {
     const x = tensor([[35.0, -78.0, -30.0], [-61.0, 46.0, -35.0]]);
