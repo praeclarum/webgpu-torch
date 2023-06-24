@@ -113,7 +113,18 @@ function writePlotSvg(op: OpSpec, samples: OpSamples, bounds: PlotBounds): void 
     w.writeLine(`</svg>`);
 
     const plotFileName = `${plotsDir}/${op.name}.svg`;
-    fs.writeFileSync(plotFileName, w.toString());
+    writeFile(plotFileName, w.toString());
+}
+
+function writeFile(path: string, code: string) {
+    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    if (oldCode === code) {
+        // console.log("OK", path);
+    }
+    else {
+        console.log("Writing", path);
+        fs.writeFileSync(path, code, { encoding: "utf8" });
+    }
 }
 
 async function sampleUnaryOp(op: UnaryOpSpec, numSamples: number, bounds: PlotBounds): Promise<OpSamples> {

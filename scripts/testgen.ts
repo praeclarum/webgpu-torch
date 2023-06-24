@@ -173,7 +173,7 @@ function writePythonTests() {
     w.writeLine(`f.write(results_json)`);
     w.dedent();
     w.dedent();
-    fs.writeFileSync(pythonTestsPath, w.toString(), "utf-8");
+    writeFile(pythonTestsPath, w.toString());
 }
 writePythonTests();
 
@@ -229,7 +229,7 @@ function writeTypeScriptTestCode() {
             }
         }
     }
-    fs.writeFileSync(typeScriptTestsPath, w.toString(), "utf-8");
+    writeFile(typeScriptTestsPath, w.toString());
 }
 writeTypeScriptTestCode();
 
@@ -246,6 +246,18 @@ export { tensor } from "./ops_artisanal";`);
     }
     w.writeLine(`export * from "./${typeScriptTestsName.slice(0, -3)}";`);
     w.writeLine(``);
-    fs.writeFileSync(indexTestsPath, w.toString(), "utf-8");
+    writeFile(indexTestsPath, w.toString());
 }
+
+function writeFile(path: string, code: string) {
+    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    if (oldCode === code) {
+        console.log("OK", path);
+    }
+    else {
+        console.log("Writing", path);
+        fs.writeFileSync(path, code, { encoding: "utf8" });
+    }
+}
+
 writeIndexTests();
