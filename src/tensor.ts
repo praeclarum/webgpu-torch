@@ -193,11 +193,12 @@ export class Tensor extends TensorBase {
         const data = await this.storage.toTypedArrayAsync(this.dtype);
         const shape = this.shape;
         const strides = this.strides;
+        // console.log("DATA", data.length);
     
         if (shape.length == 0) {
             return data[0];
         }
-        if (shape.length == 0 || (shape.length == 1 && shape[0] == 1)) {
+        if (shape.length == 1 && shape[0] == 1) {
             return [data[0]];
         }
     
