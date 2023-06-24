@@ -211,6 +211,9 @@ export class Tensor extends TensorBase {
                 const offset = calculateOffset(index);
                 const length = shape[dim];
                 const subarray = data.subarray(offset, offset + length);
+                if (subarray.length !== length) {
+                    throw new Error(`Failed to get sub array for index [${index}] (tensor shape [${shape}] and strides [${strides}]) at offset ${offset} with length ${length} from buffer of length ${data.length}`);
+                }
                 return Array.from(subarray);
             } else {
                 const result: TensorArrayData = [];
