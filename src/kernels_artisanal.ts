@@ -160,7 +160,7 @@ export const kernels: { [name: string]: KernelSpec } = {
     var result = 0.0;
     var aIndex = outputRow * parameters.aRowStride;
     var bIndex = 0u;
-    for (var aCol = 0u; aCol < parameters.aCols; aCol++) {
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
         result = result + a[aIndex] * b[bIndex];
         aIndex = aIndex + parameters.aColStride;
         bIndex = bIndex + parameters.bRowStride;
@@ -235,8 +235,8 @@ export const kernels: { [name: string]: KernelSpec } = {
         return;
     }
     var result = 0.0;
-    let aIndex = outputRow * parameters.aRowStride;
-    let bIndex = outputCol * parameters.bColStride;
+    var aIndex = outputRow * parameters.aRowStride;
+    var bIndex = outputCol * parameters.bColStride;
     for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
         result = result + a[aIndex] * b[bIndex];
         aIndex = aIndex + parameters.aColStride;
