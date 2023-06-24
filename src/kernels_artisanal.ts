@@ -221,7 +221,7 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         outputs: [
             {
-                name: "resultMatrix",
+                name: "output",
                 shaderType: "array<f32>",
                 size: "aRows * bCols",
             },
@@ -242,8 +242,90 @@ export const kernels: { [name: string]: KernelSpec } = {
         aIndex = aIndex + parameters.aColStride;
         bIndex = bIndex + parameters.bRowStride;
     }
-    let index = outputCol + outputRow * parameters.bCols;
-    resultMatrix[index] = result;
+    let outputIndex = outputCol + outputRow * parameters.bCols;
+    output[outputIndex] = result;
+`
+    },
+    bmm: {
+        name: "mm",
+        config: [
+            {
+                name: "resultDtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "batchSize",
+                shaderType: "u32",
+            },
+            {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aCols",
+                shaderType: "u32",
+            },
+            {
+                name: "bCols",
+                shaderType: "u32",
+            },
+            {
+                name: "aRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bRowStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "alpha",
+                shaderType: "f32",
+            },
+        ],
+        inputs: [
+            {
+                name: "a",
+                shaderType: "array<f32>",
+            },
+            {
+                name: "b",
+                shaderType: "array<f32>",
+            },
+        ],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "batchSize * aRows * bCols",
+            },
+        ],
+        workgroupSize: [8, 8, 4],
+        workgroupCount: ["aRows/8", "bCols/8", "batchSize/4"],
+        shader: `
+    let outputRow = global_id.x;
+    let outputCol = global_id.y;
+    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols) {
+        return;
+    }
+    var result = 0.0;
+    var aIndex = outputRow * parameters.aRowStride;
+    var bIndex = outputCol * parameters.bColStride;
+    for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
+        result = result + a[aIndex] * b[bIndex];
+        aIndex = aIndex + parameters.aColStride;
+        bIndex = bIndex + parameters.bRowStride;
+    }
+    let outputIndex = outputCol + outputRow * parameters.bCols;
+    output[outputIndex] = result;
 `
     },
     sumDim: {

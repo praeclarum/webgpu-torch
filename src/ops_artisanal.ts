@@ -115,6 +115,28 @@ function reshapeForMatrixMultiply(
     return { shape: newShape, strides: newStrides };
 }
 
+/**
+ * If the first argument is 1-dimensional,
+ * a 1 is prepended to its dimension for the purpose of the batched matrix multiply and removed after.
+ * If the second argument is 1-dimensional,
+ * a 1 is appended to its dimension for the purpose of the batched matrix multiple and removed after.
+ * The non-matrix (i.e. batch) dimensions are broadcasted (and thus must be broadcastable).
+ *
+ * For example,
+ *
+ * if input is a (j×1×n×n) tensor and other is a (k×n×n) tensor, out will be a (j×k×n×n) tensor.
+ * Note that the broadcasting logic only looks at the batch dimensions when determining if the inputs are broadcastable,
+ * and not the matrix dimensions.
+ *
+ * For example,
+ *
+ * if input is a (j×1×n×m) tensor and other is a (k×m×p) tensor,
+ * these inputs are valid for broadcasting even though the final two dimensions (i.e. the matrix dimensions) are different.
+ * out will be a (j×k×n×p) tensor.
+ * @param input The first tensor to be multiplied
+ * @param other The second tensor to be multiplied
+ * @returns The shapes and strides of the inputs and the output
+ */
 function broadcastBatchedMatmul(
     input: Tensor,
     other: Tensor
@@ -153,7 +175,12 @@ function broadcastBatchedMatmul(
             outputShape[dim] = inputShape[dim];
         } else {
             throw new Error(
-                `The size of tensor a (${inputShape[dim]}) must match the size of tensor b (${otherShape[dim]}) at non-singleton dimension ${dim}`
+                "The size of tensor a (" +
+                    inputShape[dim] +
+                    ") must match the size of tensor b (" +
+                    otherShape[dim] +
+                    ") at non-singleton dimension " +
+                    dim
             );
         }
     }
@@ -167,7 +194,7 @@ function broadcastBatchedMatmul(
 
     const inputStrides = input.strides.slice();
     padFront(inputStrides, maxLength - 2);
-    const otherStrides = input.strides.slice();
+    const otherStrides = other.strides.slice();
     padFront(otherStrides, maxLength - 2);
 
     return {
@@ -256,7 +283,11 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
         outputShape = broadcast.output.shape;
         if (aop.shape[aopdims - 1] !== bop.shape[bopdims - 2]) {
             throw new Error(
-                `mat1 and mat2 shapes cannot be multiplied (${aop.shape[aopdims-2]}x${aop.shape[aopdims-1]} and ${bop.shape[bopdims-2]}x${bop.shape[bopdims-1]})`
+                `mat1 and mat2 shapes cannot be multiplied (${
+                    aop.shape[aopdims - 2]
+                }x${aop.shape[aopdims - 1]} and ${bop.shape[bopdims - 2]}x${
+                    bop.shape[bopdims - 1]
+                })`
             );
         }
     } else {
@@ -265,7 +296,20 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
         );
     }
     let params: KernelParamsInput = {};
-    if (op === "mm") {
+    if (op === "bmm") {
+        const batchSize = 1;
+        params = {
+            batchSize: batchSize,
+            aRows: aop.shape[0],
+            aCols: aop.shape[1],
+            bCols: bop.shape[1],
+            aRowStride: aop.strides[0],
+            aColStride: aop.strides[1],
+            bRowStride: bop.strides[0],
+            bColStride: bop.strides[1],
+            alpha: 1.0,
+        };
+    } else if (op === "mm") {
         params = {
             aRows: aop.shape[0],
             aCols: aop.shape[1],
@@ -276,8 +320,7 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
             bColStride: bop.strides[1],
             alpha: 1.0,
         };
-    }
-    else if (op === "mv") {
+    } else if (op === "mv") {
         params = {
             aRows: aop.shape[0],
             aCols: aop.shape[1],
