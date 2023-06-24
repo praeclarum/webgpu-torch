@@ -49,14 +49,14 @@ test("sgd step with params with grads", async () => {
     const paramInitialValue = [1.5];
     const params = [new Tensor({data: paramInitialValue, requiresGrad: true})];
     const loss = sigmoid(params[0]);
-    const lossValues = await loss.toArrayAsync();
+    const lossValues = await loss.toArrayAsync() as number[];
     expect(lossValues[0]).toBeCloseTo(0.81757448);
     loss.backward();
     expect(params[0].grad).not.toBeNull();
-    const paramGradValues = await params[0].grad!.toArrayAsync();
+    const paramGradValues = await params[0].grad!.toArrayAsync() as number[];
     expect(paramGradValues[0]).toBeCloseTo(0.14914645);
     const optimizer = new SGD(params, 0.1);
     optimizer.step();
-    const paramValue = await params[0].toArrayAsync();
+    const paramValue = await params[0].toArrayAsync() as number[];
     expect(paramValue[0]).toBeCloseTo(1.5 - 0.1 * 0.14914645);
 });

@@ -227,7 +227,7 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
         op = "dot";
         aop = a;
         bop = b;
-        outputShape = [a.shape[0]];
+        outputShape = [];
     }
     // If both arguments are 2-dimensional, the matrix-matrix product is returned
     else if (adims === 2 && bdims === 2) {
@@ -320,6 +320,12 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
             aCols: aop.shape[1],
             aRowStride: aop.strides[0],
             aColStride: aop.strides[1],
+            bRowStride: bop.strides[0],
+        };
+    } else if (op === "dot") {
+        params = {
+            aRows: aop.shape[0],
+            aRowStride: aop.strides[0],
             bRowStride: bop.strides[0],
         };
     }

@@ -7,7 +7,7 @@ test("sigmoid(1).size == 307", async () => {
     const x = ones(n);
     const y = x.sigmoid();
     expect(y.shape[0]).toBe(n);
-    const a = await y.toArrayAsync();
+    const a = await y.toArrayAsync() as number[];
     expect(a.length).toBe(n);
     for (let i = 0; i < n; i++) {
         expect(a[i]).toBeCloseTo(0.7310585786300049);
@@ -32,7 +32,7 @@ test("sum vector", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.sum();
     const a = await y.toArrayAsync();
-    expect(a).toEqual([6]);
+    expect(a).toEqual(6);
 });
 
 test("sum vector grad", async () => {
@@ -47,7 +47,7 @@ test("mean vector", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.mean();
     const a = await y.toArrayAsync();
-    expect(a[0]).toBeCloseTo(2);
+    expect(a).toBeCloseTo(2);
 });
 
 test("mean vector grad", async () => {

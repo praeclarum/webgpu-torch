@@ -14,7 +14,13 @@ for (const opSpec of registry) {
     opSpecByName[opSpec.name] = opSpec;
 }
 
-function compareArrays(x: TensorArrayData, expected: TestArrayData, precision: number, deviceType: DeviceType): void {
+function compareArrays(x: TensorArrayData|number, expected: TestArrayData, precision: number, deviceType: DeviceType): void {
+    if (typeof expected == "number") {
+        expected = [expected];
+    }
+    if (typeof x == "number") {
+        x = [x];
+    }
     expect(x.length).toEqual(expected.length);
     for (let i = 0; i < x.length; i++) {
         const actual = x[i];

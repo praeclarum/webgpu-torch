@@ -189,11 +189,14 @@ export class Tensor extends TensorBase {
         }
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
-    async toArrayAsync(): Promise<TensorArrayData> {
+    async toArrayAsync(): Promise<TensorArrayData | number> {
         const data = await this.storage.toTypedArrayAsync(this.dtype);
         const shape = this.shape;
         const strides = this.strides;
     
+        if (shape.length == 0) {
+            return data[0];
+        }
         if (shape.length == 0 || (shape.length == 1 && shape[0] == 1)) {
             return [data[0]];
         }
