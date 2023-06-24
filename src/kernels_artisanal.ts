@@ -113,6 +113,14 @@ export const kernels: { [name: string]: KernelSpec } = {
         ],
         parameters: [
             {
+                name: "aRows",
+                shaderType: "u32",
+            },
+            {
+                name: "aCols",
+                shaderType: "u32",
+            },
+            {
                 name: "aRowStride",
                 shaderType: "u32",
             },
@@ -124,11 +132,7 @@ export const kernels: { [name: string]: KernelSpec } = {
                 name: "bRowStride",
                 shaderType: "u32",
             },
-            {
-                name: "outputRows",
-                shaderType: "u32",
-            }
-        ],
+       ],
         inputs: [
             {
                 name: "a",
@@ -143,18 +147,23 @@ export const kernels: { [name: string]: KernelSpec } = {
             {
                 name: "output",
                 shaderType: "array<f32>",
-                size: "outputRows",
+                size: "aRows",
             },
         ],
         workgroupSize: [256, 1, 1],
-        workgroupCount: ["outputRows/256", 1, 1],
+        workgroupCount: ["aRows/256", 1, 1],
         shader: `
-    let outputIndex = global_id.x;
-    if (outputIndex >= parameters.resultRows) {
+    let outputRow = global_id.x;
+    if (outputRow >= parameters.aRows) {
         return;
     }
-    var result = 42.0;
-    output[outputIndex] = result;
+    var result = 0.0;
+    for (var aCol = 0u; aCol < parameters.aCols; aCol++) {
+        var aIndex = outputRow * parameters.aRowStride + aCol * parameters.aColStride;
+        var bIndex = aCol * parameters.bRowStride;
+        result = result + a[aIndex] * b[bIndex];
+    }
+    output[outputRow] = result;
 `
     },
     mm: {

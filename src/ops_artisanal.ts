@@ -275,10 +275,11 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     }
     else if (op === "mv") {
         params = {
+            aRows: aop.shape[0],
+            aCols: aop.shape[1],
             aRowStride: aop.strides[0],
             aColStride: aop.strides[1],
             bRowStride: bop.strides[0],
-            outputRows: outputShape[0],
         };
     }
     return atensor.runKernel(
