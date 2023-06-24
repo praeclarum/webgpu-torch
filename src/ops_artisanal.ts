@@ -128,6 +128,10 @@ function broadcastBatchedMatmul(
     const otherShape = other.shape.slice();
     const otherStrides = other.strides.slice();
 
+    if (inputShape.length < 2 && otherShape.length < 2) {
+        throw new Error(`Expected at least 2D tensors for matmul broadcast, got ${inputShape} and ${otherShape}`);
+    }
+
     const padFront = (shape: number[], strides: number[], length: number) => {
         while (shape.length < length) {
             shape.unshift(1);
@@ -135,14 +139,16 @@ function broadcastBatchedMatmul(
         }
     };
 
+    let squeezeOutput: number | null = null;
     if (inputShape.length === 1) {
         inputShape.unshift(1);
         inputStrides.unshift(0);
+        squeezeOutput = -2;
     }
-
-    if (otherShape.length === 1) {
+    else if (otherShape.length === 1) {
         otherShape.push(1);
         otherStrides.push(0);
+        squeezeOutput = -1;
     }
 
     // Pad shapes to the same length by putting 1's in front
@@ -175,6 +181,9 @@ function broadcastBatchedMatmul(
     }
     outputShape.push(inputShape[inputShape.length - 2]);
     outputShape.push(otherShape[otherShape.length - 1]);
+    if (squeezeOutput !== null) {
+        outputShape.splice(squeezeOutput, 1);
+    }
 
     return {
         output: contiguousStridedShape(outputShape),
