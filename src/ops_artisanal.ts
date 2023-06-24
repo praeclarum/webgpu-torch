@@ -93,28 +93,6 @@ export function conv2d(
     }
 }
 
-function reshapeForMatrixMultiply(
-    shape: Shape,
-    strides: Strides
-): StridedShape {
-    const shapeLength = shape.length;
-    if (shapeLength == 0) {
-        return { shape: [1, 1], strides: [1, 1] };
-    }
-    if (shapeLength == 1) {
-        return { shape: [1, shape[0]], strides: [1, strides[0]] };
-    }
-    const lastDimension = shape[shapeLength - 1];
-    const lastStride = strides[shapeLength - 1];
-    let combinedDimension = 1;
-    for (let i = 0; i < shapeLength - 1; i++) {
-        combinedDimension *= shape[i];
-    }
-    const newShape: Shape = [combinedDimension, lastDimension];
-    const newStrides: Strides = [strides[0], lastStride];
-    return { shape: newShape, strides: newStrides };
-}
-
 /**
  * If the first argument is 1-dimensional,
  * a 1 is prepended to its dimension for the purpose of the batched matrix multiply and removed after.
@@ -204,6 +182,30 @@ function broadcastBatchedMatmul(
     };
 }
 
+function reshapeBatchedMatmul(tensor: StridedShape): StridedShape {
+    const inputShape = tensor.shape;
+    const inputStrides = tensor.strides;
+
+    if (inputShape.length < 3) {
+        throw new Error("Input tensor must be at least 3D");
+    }
+
+    const lastTwoDims = inputShape.splice(-2);
+    const batchSize = inputShape.reduce((a, b) => a * b, 1);
+
+    const newShape = [batchSize].concat(lastTwoDims);
+    const newStrides = [
+        inputStrides[0] * inputShape[0],
+        inputStrides[inputStrides.length - 2],
+        inputStrides[inputStrides.length - 1],
+    ];
+
+    return {
+        shape: newShape,
+        strides: newStrides,
+    };
+}
+
 export function matmul(input: Tensor, other: Tensor): Tensor {
     const a: StridedShape = { shape: input.shape, strides: input.strides };
     const b: StridedShape = { shape: other.shape, strides: other.strides };
@@ -276,18 +278,12 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     } else if (adims >= 1 && bdims >= 1 && (adims > 2 || bdims > 2)) {
         op = "bmm";
         const broadcast = broadcastBatchedMatmul(input, other);
-        aop = broadcast.a;
-        bop = broadcast.b;
-        const aopdims = aop.shape.length;
-        const bopdims = bop.shape.length;
+        aop = reshapeBatchedMatmul(broadcast.a);
+        bop = reshapeBatchedMatmul(broadcast.b);
         outputShape = broadcast.output.shape;
-        if (aop.shape[aopdims - 1] !== bop.shape[bopdims - 2]) {
+        if (aop.shape[2] !== bop.shape[1]) {
             throw new Error(
-                `mat1 and mat2 shapes cannot be multiplied (${
-                    aop.shape[aopdims - 2]
-                }x${aop.shape[aopdims - 1]} and ${bop.shape[bopdims - 2]}x${
-                    bop.shape[bopdims - 1]
-                })`
+                `mat1 and mat2 shapes cannot be multiplied (${aop.shape[1]}x${aop.shape[2]} and ${bop.shape[1]}x${bop.shape[2]})`
             );
         }
     } else {
@@ -297,16 +293,20 @@ export function matmul(input: Tensor, other: Tensor): Tensor {
     }
     let params: KernelParamsInput = {};
     if (op === "bmm") {
-        const batchSize = 1;
+        const batchSize = Math.max(aop.shape[0], bop.shape[0]);
+        const aBatchStride = aop.shape[0] === 1 ? 0 : aop.strides[0];
+        const bBatchStride = bop.shape[0] === 1 ? 0 : bop.strides[0];
         params = {
-            batchSize: batchSize,
-            aRows: aop.shape[0],
-            aCols: aop.shape[1],
-            bCols: bop.shape[1],
-            aRowStride: aop.strides[0],
-            aColStride: aop.strides[1],
-            bRowStride: bop.strides[0],
-            bColStride: bop.strides[1],
+            batchSize,
+            aRows: aop.shape[1],
+            aCols: aop.shape[2],
+            bCols: bop.shape[2],
+            aBatchStride,
+            aRowStride: aop.strides[1],
+            aColStride: aop.strides[2],
+            bBatchStride,
+            bRowStride: bop.strides[1],
+            bColStride: bop.strides[2],
             alpha: 1.0,
         };
     } else if (op === "mm") {

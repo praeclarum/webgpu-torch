@@ -271,11 +271,19 @@ export const kernels: { [name: string]: KernelSpec } = {
                 shaderType: "u32",
             },
             {
+                name: "aBatchStride",
+                shaderType: "u32",
+            },
+            {
                 name: "aRowStride",
                 shaderType: "u32",
             },
             {
                 name: "aColStride",
+                shaderType: "u32",
+            },
+            {
+                name: "bBatchStride",
                 shaderType: "u32",
             },
             {
