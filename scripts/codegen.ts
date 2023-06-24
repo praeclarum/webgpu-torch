@@ -90,6 +90,8 @@ function writeTensorCode(): void {
         const isInplace = kernelSpec.name.endsWith("_");
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
@@ -180,6 +182,8 @@ function writeTensorDeclCode(): void {
         const isInplace = kernelSpec.name.endsWith("_");
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         writeOpHeader(opSpec, kernelSpec.name, false, ";", w);
@@ -206,7 +210,7 @@ function writeFunctionsCode(): void {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize, defaultStrides } from "./shape";`);
+import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } from "./shape";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -214,6 +218,8 @@ import { shapeSize, defaultStrides } from "./shape";`);
         }
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
@@ -280,7 +286,6 @@ import { shapeSize, defaultStrides } from "./shape";`);
         w.indent();
         writeUnpackInputs("inputs", true);
         
-        w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isReduction) {
             w.writeLine(`if (dim !== undefined) {`);
             w.indent();
@@ -315,9 +320,23 @@ import { shapeSize, defaultStrides } from "./shape";`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
-            w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
+            w.writeLine(`const broadcasted = broadcastShapes(input, other);`);
+            w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
+            w.indent();
             writeParams("input", false, hasAlpha, "alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            w.writeLine(`if (shapeSize(input.shape) !== shapeSize(other.shape)) {`);
+            w.indent();
+            w.writeLine(`throw new Error(\`Shape sizes must match. Got \${input.shape} and \${other.shape}\`);`);
+            w.dedent();
+            w.writeLine(`}`);
+            writeParams("input", false, hasAlpha, "alpha", w);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.dedent();
+            w.writeLine(`}`);
             w.dedent();
             w.writeLine(`}`);
         }
@@ -477,6 +496,8 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
         }
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";

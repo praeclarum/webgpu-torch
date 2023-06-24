@@ -46,10 +46,11 @@ function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
     const specs = [
-        getBinaryKernelSpec(op, false, false),
-        getBinaryKernelSpec(op, true, false),
-        getBinaryKernelSpec(op, false, true),
-        getBinaryKernelSpec(op, true, true),
+        getBinaryKernelSpec(op, false, false, false),
+        getBinaryKernelSpec(op, true, false, false),
+        getBinaryKernelSpec(op, false, true, false),
+        getBinaryKernelSpec(op, true, true, false),
+        getBinaryKernelSpec(op, false, false, true),
     ];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
@@ -333,7 +334,8 @@ function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
 function getBinaryKernelSpec(
     op: BinaryOpSpec,
     inplace: boolean,
-    isOtherScalar: boolean
+    isOtherScalar: boolean,
+    strided: boolean
 ): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
@@ -387,6 +389,9 @@ function getBinaryKernelSpec(
     let name = op.name;
     if (isOtherScalar) {
         name += "_scalar";
+    }
+    if (strided) {
+        name += "_strided";
     }
     if (inplace) {
         name += "_";
