@@ -321,18 +321,21 @@ export const kernels: { [name: string]: KernelSpec } = {
         shader: `
     let outputRow = global_id.x;
     let outputCol = global_id.y;
-    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols) {
+    let outputBatch = global_id.z;
+    if (outputRow >= parameters.aRows || outputCol >= parameters.bCols || outputBatch >= parameters.batchSize) {
         return;
     }
     var result = 0.0;
-    var aIndex = outputRow * parameters.aRowStride;
-    var bIndex = outputCol * parameters.bColStride;
+    var aIndex = outputBatch * parameters.aBatchStride + outputRow * parameters.aRowStride;
+    var bIndex = outputBatch * parameters.aBatchStride + outputCol * parameters.bColStride;
     for (var aCol = 0u; aCol < parameters.aCols; aCol = aCol + 1u) {
         result = result + a[aIndex] * b[bIndex];
         aIndex = aIndex + parameters.aColStride;
         bIndex = bIndex + parameters.bRowStride;
     }
-    let outputIndex = outputCol + outputRow * parameters.bCols;
+    let outputRowStride = parameters.bCols;
+    let outputBatchStride = parameters.aRows * outputRowStride;
+    let outputIndex = outputBatch * outputBatchStride + outputRow * outputRowStride + outputCol;
     output[outputIndex] = result;
 `
     },
