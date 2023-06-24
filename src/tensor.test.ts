@@ -19,7 +19,7 @@ test("can toggle requiresGrad", () => {
 test("linear forward", async () => {
     const input = tensor([[3]]);
     const weight = tensor([[10], [11]]);
-    const bias = tensor([[1000, 10000]]);
+    const bias = tensor([1000, 10000]);
     const output = LinearFunction.apply(input, weight, bias);
     const expected = [[3 * 10 + 1000, 3 * 11 + 10000]];
     expect(output.shape).toEqual([1, 2]);
