@@ -51,6 +51,7 @@ function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
         getBinaryKernelSpec(op, false, true, false),
         getBinaryKernelSpec(op, true, true, false),
         getBinaryKernelSpec(op, false, false, true),
+        getBinaryKernelSpec(op, true, false, true),
     ];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
@@ -409,7 +410,6 @@ function getBinaryKernelSpec(
             outputIndex2 * parameters.otherStrides2 +
             outputIndex3;
         ${shaderSnippet};`;
-        console.log(shader);
     }
     else {
         shader = `

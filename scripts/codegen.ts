@@ -109,8 +109,41 @@ function writeTensorCode(): void {
                 w.dedent();
                 w.writeLine(`} else {`);
                 w.indent();
+                w.writeLine(`const broadcasted = broadcastShapes(this, other);`);
+                w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
+                w.indent();
+                // Build broadcasted params
+                const maxdim = 4;
+                w.writeLine(`const inputDims = broadcasted.a.shape.length;`);
+                w.writeLine(`const otherDims = broadcasted.b.shape.length;`);
+                w.writeLine(`if (inputDims > ${maxdim} || otherDims > ${maxdim}) {`);
+                w.indent();
+                w.writeLine(`throw new Error("Broadcasting not supported for tensors with more than ${maxdim} dimensions");`);
+                w.dedent();
+                w.writeLine(`}`);
+                w.writeLine(`const params = {`);
+                w.indent();
+                for (let dim = 0; dim < maxdim; ++dim) {
+                    w.writeLine(`inputStrides${dim}: inputDims > ${dim} ? broadcasted.a.strides[${dim}] : 0,`);
+                    w.writeLine(`otherStrides${dim}: otherDims > ${dim} ? broadcasted.b.strides[${dim}] : 0,`);
+                    w.writeLine(`outputStrides${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.strides[${dim}] : 1,`);
+                }
+                w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
+                if (hasAlpha) {
+                    w.writeLine(`alpha: alpha || 1.0,`);
+                }
+                w.dedent();
+                w.writeLine(`};`);
+                const nameWithoutTrailingUnderscore = kernelSpec.name.slice(0, -1);
+                w.writeLine(`return this.runKernel("${nameWithoutTrailingUnderscore}_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];`);
+                w.dedent();
+                w.writeLine(`} else {`);
+                w.indent();
+                // Build contiguous params
                 writeParams("this", false, hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
+                w.dedent();
+                w.writeLine(`}`);
                 w.dedent();
                 w.writeLine(`}`);
             }

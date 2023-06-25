@@ -30,14 +30,6 @@ function _grad_sum_to_size(grad: Tensor, targetShape: Shape): Tensor {
 export class LinearFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, weight, bias] = inputs as [Tensor, Tensor, Tensor?];
-        if (bias !== undefined) {
-            if (bias.shape.length !== 1) {
-                throw new Error("bias must be 1D");
-            }
-            if (bias.shape[0] !== weight.shape[0]) {
-                throw new Error("bias must have same size as weight");
-            }
-        }
         const output = matmul(input, weight.t());
         if (bias) {
             output.add_(bias);
