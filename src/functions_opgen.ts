@@ -91,9 +91,34 @@ export class AddFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
-                    alpha: alpha || 1.0,
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("add_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -210,8 +235,34 @@ export class Atan2Function extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -277,8 +328,34 @@ export class CopysignFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -392,8 +469,34 @@ export class DivFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("div_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -555,8 +658,34 @@ export class HypotFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -598,8 +727,34 @@ export class LdexpFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -737,8 +892,34 @@ export class LogaddexpFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -780,8 +961,34 @@ export class Logaddexp2Function extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -823,8 +1030,34 @@ export class MulFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("mul_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -914,8 +1147,34 @@ export class PowFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("pow_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -1270,9 +1529,34 @@ export class SubFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
-                    alpha: alpha || 1.0,
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("sub_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {
@@ -1389,8 +1673,34 @@ export class XlogyFunction extends AutoFunction {
         } else {
             const broadcasted = broadcastShapes(input, other);
             if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
                 const params = {
-                    size: shapeSize(input.shape),
+                    inputShape0: inputDims > 0 ? broadcasted.a.shape[0] : 1,
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherShape0: otherDims > 0 ? broadcasted.b.shape[0] : 1,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputShape0: broadcasted.output.shape.length > 0 ? broadcasted.output.shape[0] : 1,
+                    inputShape1: inputDims > 1 ? broadcasted.a.shape[1] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherShape1: otherDims > 1 ? broadcasted.b.shape[1] : 1,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputShape1: broadcasted.output.shape.length > 1 ? broadcasted.output.shape[1] : 1,
+                    inputShape2: inputDims > 2 ? broadcasted.a.shape[2] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherShape2: otherDims > 2 ? broadcasted.b.shape[2] : 1,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputShape2: broadcasted.output.shape.length > 2 ? broadcasted.output.shape[2] : 1,
+                    inputShape3: inputDims > 3 ? broadcasted.a.shape[3] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherShape3: otherDims > 3 ? broadcasted.b.shape[3] : 1,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: 1.0,
                 };
                 return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
             } else {

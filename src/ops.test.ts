@@ -59,17 +59,17 @@ test("mean vector grad", async () => {
 test("add 1d broadcasts", async () => {
     const x = tensor([1, 2, 3]);
     const y = x.add(tensor([4]));
-    // expect(await y.toArrayAsync()).toEqual([5, 6, 7]);
+    expect(await y.toArrayAsync()).toEqual([5, 6, 7]);
 });
 
 test("add 2d to 1d broadcasts", async () => {
     const x = tensor([[1, 2, 3], [4, 5, 6]]);
     const y = x.add(tensor([4]));
-    // expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
+    expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
 });
 
 test("add 2d to 1d broadcasts", async () => {
     const x = tensor([[1, 2, 3], [4, 5, 6]]);
     const y = x.add(tensor([[4]]));
-    // expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
+    expect(await y.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
 });

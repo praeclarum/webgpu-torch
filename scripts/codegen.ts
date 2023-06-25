@@ -323,11 +323,33 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
             w.writeLine(`const broadcasted = broadcastShapes(input, other);`);
             w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
             w.indent();
-            writeParams("input", false, hasAlpha, "alpha", w);
+            // Build broadcasted params
+            const maxdim = 4;
+            w.writeLine(`const inputDims = broadcasted.a.shape.length;`);
+            w.writeLine(`const otherDims = broadcasted.b.shape.length;`);
+            w.writeLine(`if (inputDims > ${maxdim} || otherDims > ${maxdim}) {`);
+            w.indent();
+            w.writeLine(`throw new Error("Broadcasting not supported for tensors with more than ${maxdim} dimensions");`);
+            w.dedent();
+            w.writeLine(`}`);
+            w.writeLine(`const params = {`);
+            w.indent();
+            for (let dim = 0; dim < maxdim; ++dim) {
+                w.writeLine(`inputShape${dim}: inputDims > ${dim} ? broadcasted.a.shape[${dim}] : 1,`);
+                w.writeLine(`inputStrides${dim}: inputDims > ${dim} ? broadcasted.a.strides[${dim}] : 0,`);
+                w.writeLine(`otherShape${dim}: otherDims > ${dim} ? broadcasted.b.shape[${dim}] : 1,`);
+                w.writeLine(`otherStrides${dim}: otherDims > ${dim} ? broadcasted.b.strides[${dim}] : 0,`);
+                w.writeLine(`outputShape${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.shape[${dim}] : 1,`);
+            }
+            w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
+            w.writeLine(`alpha: 1.0,`);
+            w.dedent();
+            w.writeLine(`};`);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, ${outputShapesS}, other)[0];`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
+            // Build contiguous params
             w.writeLine(`if (shapeSize(input.shape) !== shapeSize(other.shape)) {`);
             w.indent();
             w.writeLine(`throw new Error(\`Shape sizes must match. Got \${input.shape} and \${other.shape}\`);`);
