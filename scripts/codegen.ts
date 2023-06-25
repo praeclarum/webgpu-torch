@@ -342,10 +342,12 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
                 w.writeLine(`outputShape${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.shape[${dim}] : 1,`);
             }
             w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
-            w.writeLine(`alpha: 1.0,`);
+            if (hasAlpha) {
+                w.writeLine(`alpha: alpha || 1.0,`);
+            }
             w.dedent();
             w.writeLine(`};`);
-            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, [broadcasted.output.shape], other)[0];`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();

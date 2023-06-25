@@ -118,9 +118,9 @@ export class AddFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
+                    alpha: alpha || 1.0,
                 };
-                return input.runKernel("add_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("add_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -262,9 +262,8 @@ export class Atan2Function extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -355,9 +354,8 @@ export class CopysignFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -496,9 +494,8 @@ export class DivFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("div_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("div_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -685,9 +682,8 @@ export class HypotFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -754,9 +750,8 @@ export class LdexpFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -919,9 +914,8 @@ export class LogaddexpFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -988,9 +982,8 @@ export class Logaddexp2Function extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1057,9 +1050,8 @@ export class MulFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("mul_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("mul_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1174,9 +1166,8 @@ export class PowFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("pow_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("pow_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1556,9 +1547,9 @@ export class SubFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
+                    alpha: alpha || 1.0,
                 };
-                return input.runKernel("sub_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("sub_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
@@ -1700,9 +1691,8 @@ export class XlogyFunction extends AutoFunction {
                     otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
                     outputShape3: broadcasted.output.shape.length > 3 ? broadcasted.output.shape[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
-                    alpha: 1.0,
                 };
-                return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [input.shape], other)[0];
+                return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
             } else {
                 if (shapeSize(input.shape) !== shapeSize(other.shape)) {
                     throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);

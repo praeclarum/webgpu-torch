@@ -337,19 +337,44 @@ function getBinaryKernelSpec(
     isOtherScalar: boolean,
     strided: boolean
 ): KernelSpec {
+    const maxdim = 4;
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
             shaderType: "u32",
         },
     ];
+    if (strided) {
+        for (let dim = 0; dim < maxdim; dim++) {
+            parameters.push({
+                name: `inputShape${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `inputStrides${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `otherShape${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `otherStrides${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `outputShape${dim}`,
+                shaderType: "u32",
+            });
+        }
+    }
     const subs: any = {
-        input: "input[global_id.x]",
-        other: "other[global_id.x]",
-        output: "output[global_id.x]",
+        input: "input[inputIndex]",
+        other: "other[otherIndex]",
+        output: "output[outputIndex]",
     };
     if (inplace) {
-        subs.output = "input[global_id.x]";
+        subs.output = "input[outputIndex]";
     }
     if (isOtherScalar) {
         subs.other = "parameters.other";
@@ -366,11 +391,48 @@ function getBinaryKernelSpec(
         subs["alpha"] = "parameters.alpha";
     }
     const shaderSnippet = exprCodeToWebGLShader(op.forward, subs);
-    const shader = `
-        if (global_id.x >= parameters.size) {
+    let shader: string;
+    if (strided) {
+        shader = `
+        let outputIndex = global_id.x;
+        if (outputIndex >= parameters.size) {
             return;
         }
+        let outputStrides3 = 1u;
+        let outputStrides2 = parameters.outputShape3 * outputStrides3;
+        let outputStrides1 = parameters.outputShape2 * outputStrides2;
+        let outputStrides0 = parameters.outputShape1 * outputStrides1;
+        var i = outputIndex;
+        let outputIndex0 = u32(i / outputStrides0);
+        i = i % outputStrides0;
+        let outputIndex1 = u32(i / outputStrides1);
+        i = i % outputStrides1;
+        let outputIndex2 = u32(i / outputStrides2);
+        i = i % outputStrides2;
+        let outputIndex3 = i;
+        let inputIndex =
+            outputIndex0 * parameters.inputStrides0 +
+            outputIndex1 * parameters.inputStrides1 +
+            outputIndex2 * parameters.inputStrides2 +
+            outputIndex3;
+        let otherIndex =
+            outputIndex0 * parameters.otherStrides0 +
+            outputIndex1 * parameters.otherStrides1 +
+            outputIndex2 * parameters.otherStrides2 +
+            outputIndex3;
         ${shaderSnippet};`;
+        console.log(shader);
+    }
+    else {
+        shader = `
+        let outputIndex = global_id.x;
+        if (outputIndex >= parameters.size) {
+            return;
+        }
+        let inputIndex = outputIndex;
+        let otherIndex = outputIndex;
+        ${shaderSnippet};`;
+    }
     const inputs: KernelInputSpec[] = [];
     if (!isOtherScalar) {
         inputs.push({
