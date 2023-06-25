@@ -46,10 +46,12 @@ function getReductionKernelSpecs(op: ReductionOpSpec): KernelSpec[] {
 
 function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
     const specs = [
-        getBinaryKernelSpec(op, false, false),
-        getBinaryKernelSpec(op, true, false),
-        getBinaryKernelSpec(op, false, true),
-        getBinaryKernelSpec(op, true, true),
+        getBinaryKernelSpec(op, false, false, false),
+        getBinaryKernelSpec(op, true, false, false),
+        getBinaryKernelSpec(op, false, true, false),
+        getBinaryKernelSpec(op, true, true, false),
+        getBinaryKernelSpec(op, false, false, true),
+        getBinaryKernelSpec(op, true, false, true),
     ];
     if (op.backward) {
         specs.push(getBinaryGradKernelSpec(op, op.backward));
@@ -333,21 +335,39 @@ function getReductionDimKernelSpec(op: ReductionOpSpec): KernelSpec {
 function getBinaryKernelSpec(
     op: BinaryOpSpec,
     inplace: boolean,
-    isOtherScalar: boolean
+    isOtherScalar: boolean,
+    strided: boolean
 ): KernelSpec {
+    const maxdim = 4;
     const parameters: KernelParamSpec[] = [
         {
             name: "size",
             shaderType: "u32",
         },
     ];
+    if (strided) {
+        for (let dim = 0; dim < maxdim; dim++) {
+            parameters.push({
+                name: `inputStrides${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `otherStrides${dim}`,
+                shaderType: "u32",
+            });
+            parameters.push({
+                name: `outputStrides${dim}`,
+                shaderType: "u32",
+            });
+        }
+    }
     const subs: any = {
-        input: "input[global_id.x]",
-        other: "other[global_id.x]",
-        output: "output[global_id.x]",
+        input: "input[inputIndex]",
+        other: "other[otherIndex]",
+        output: "output[outputIndex]",
     };
     if (inplace) {
-        subs.output = "input[global_id.x]";
+        subs.output = "input[outputIndex]";
     }
     if (isOtherScalar) {
         subs.other = "parameters.other";
@@ -364,11 +384,43 @@ function getBinaryKernelSpec(
         subs["alpha"] = "parameters.alpha";
     }
     const shaderSnippet = exprCodeToWebGLShader(op.forward, subs);
-    const shader = `
-        if (global_id.x >= parameters.size) {
+    let shader: string;
+    if (strided) {
+        shader = `
+        let outputIndex = global_id.x;
+        if (outputIndex >= parameters.size) {
             return;
         }
+        var i = outputIndex;
+        let outputIndex0 = u32(i / parameters.outputStrides0);
+        i = i % parameters.outputStrides0;
+        let outputIndex1 = u32(i / parameters.outputStrides1);
+        i = i % parameters.outputStrides1;
+        let outputIndex2 = u32(i / parameters.outputStrides2);
+        i = i % parameters.outputStrides2;
+        let outputIndex3 = i;
+        let inputIndex =
+            outputIndex0 * parameters.inputStrides0 +
+            outputIndex1 * parameters.inputStrides1 +
+            outputIndex2 * parameters.inputStrides2 +
+            outputIndex3;
+        let otherIndex =
+            outputIndex0 * parameters.otherStrides0 +
+            outputIndex1 * parameters.otherStrides1 +
+            outputIndex2 * parameters.otherStrides2 +
+            outputIndex3;
         ${shaderSnippet};`;
+    }
+    else {
+        shader = `
+        let outputIndex = global_id.x;
+        if (outputIndex >= parameters.size) {
+            return;
+        }
+        let inputIndex = outputIndex;
+        let otherIndex = outputIndex;
+        ${shaderSnippet};`;
+    }
     const inputs: KernelInputSpec[] = [];
     if (!isOtherScalar) {
         inputs.push({
@@ -387,6 +439,9 @@ function getBinaryKernelSpec(
     let name = op.name;
     if (isOtherScalar) {
         name += "_scalar";
+    }
+    if (strided) {
+        name += "_strided";
     }
     if (inplace) {
         name += "_";

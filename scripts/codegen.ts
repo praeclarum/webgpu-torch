@@ -90,6 +90,8 @@ function writeTensorCode(): void {
         const isInplace = kernelSpec.name.endsWith("_");
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
@@ -107,8 +109,41 @@ function writeTensorCode(): void {
                 w.dedent();
                 w.writeLine(`} else {`);
                 w.indent();
+                w.writeLine(`const broadcasted = broadcastShapes(this, other);`);
+                w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
+                w.indent();
+                // Build broadcasted params
+                const maxdim = 4;
+                w.writeLine(`const inputDims = broadcasted.a.shape.length;`);
+                w.writeLine(`const otherDims = broadcasted.b.shape.length;`);
+                w.writeLine(`if (inputDims > ${maxdim} || otherDims > ${maxdim}) {`);
+                w.indent();
+                w.writeLine(`throw new Error("Broadcasting not supported for tensors with more than ${maxdim} dimensions");`);
+                w.dedent();
+                w.writeLine(`}`);
+                w.writeLine(`const params = {`);
+                w.indent();
+                for (let dim = 0; dim < maxdim; ++dim) {
+                    w.writeLine(`inputStrides${dim}: inputDims > ${dim} ? broadcasted.a.strides[${dim}] : 0,`);
+                    w.writeLine(`otherStrides${dim}: otherDims > ${dim} ? broadcasted.b.strides[${dim}] : 0,`);
+                    w.writeLine(`outputStrides${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.strides[${dim}] : 1,`);
+                }
+                w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
+                if (hasAlpha) {
+                    w.writeLine(`alpha: alpha || 1.0,`);
+                }
+                w.dedent();
+                w.writeLine(`};`);
+                const nameWithoutTrailingUnderscore = kernelSpec.name.slice(0, -1);
+                w.writeLine(`return this.runKernel("${nameWithoutTrailingUnderscore}_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];`);
+                w.dedent();
+                w.writeLine(`} else {`);
+                w.indent();
+                // Build contiguous params
                 writeParams("this", false, hasAlpha, "alpha", w);
                 w.writeLine(`return this.runKernelInplace("${kernelSpec.name}", { dtype: this.dtype }, params, other);`);
+                w.dedent();
+                w.writeLine(`}`);
                 w.dedent();
                 w.writeLine(`}`);
             }
@@ -180,6 +215,8 @@ function writeTensorDeclCode(): void {
         const isInplace = kernelSpec.name.endsWith("_");
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         writeOpHeader(opSpec, kernelSpec.name, false, ";", w);
@@ -206,7 +243,7 @@ function writeFunctionsCode(): void {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize, defaultStrides } from "./shape";`);
+import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } from "./shape";`);
     for (const [opSpec, kernelSpec] of opKernelSpecs) {
         const isInplace = kernelSpec.name.endsWith("_");
         if (isInplace) {
@@ -214,6 +251,8 @@ import { shapeSize, defaultStrides } from "./shape";`);
         }
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";
@@ -280,7 +319,6 @@ import { shapeSize, defaultStrides } from "./shape";`);
         w.indent();
         writeUnpackInputs("inputs", true);
         
-        w.writeLine(`if (!input.isContiguous) { throw new Error("Input must be contiguous"); }`);
         if (isReduction) {
             w.writeLine(`if (dim !== undefined) {`);
             w.indent();
@@ -315,9 +353,45 @@ import { shapeSize, defaultStrides } from "./shape";`);
             w.dedent();
             w.writeLine(`} else {`);
             w.indent();
-            w.writeLine(`if (!other.isContiguous) { throw new Error("Other must be contiguous"); }`);
+            w.writeLine(`const broadcasted = broadcastShapes(input, other);`);
+            w.writeLine(`if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {`);
+            w.indent();
+            // Build broadcasted params
+            const maxdim = 4;
+            w.writeLine(`const inputDims = broadcasted.a.shape.length;`);
+            w.writeLine(`const otherDims = broadcasted.b.shape.length;`);
+            w.writeLine(`if (inputDims > ${maxdim} || otherDims > ${maxdim}) {`);
+            w.indent();
+            w.writeLine(`throw new Error("Broadcasting not supported for tensors with more than ${maxdim} dimensions");`);
+            w.dedent();
+            w.writeLine(`}`);
+            w.writeLine(`const params = {`);
+            w.indent();
+            for (let dim = 0; dim < maxdim; ++dim) {
+                w.writeLine(`inputStrides${dim}: inputDims > ${dim} ? broadcasted.a.strides[${dim}] : 0,`);
+                w.writeLine(`otherStrides${dim}: otherDims > ${dim} ? broadcasted.b.strides[${dim}] : 0,`);
+                w.writeLine(`outputStrides${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.strides[${dim}] : 1,`);
+            }
+            w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
+            if (hasAlpha) {
+                w.writeLine(`alpha: alpha || 1.0,`);
+            }
+            w.dedent();
+            w.writeLine(`};`);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_strided", ${configS}, params, [broadcasted.output.shape], other)[0];`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            // Build contiguous params
+            w.writeLine(`if (shapeSize(input.shape) !== shapeSize(other.shape)) {`);
+            w.indent();
+            w.writeLine(`throw new Error(\`Shape sizes must match. Got \${input.shape} and \${other.shape}\`);`);
+            w.dedent();
+            w.writeLine(`}`);
             writeParams("input", false, hasAlpha, "alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}", ${configS}, params, ${outputShapesS}, other)[0];`);
+            w.dedent();
+            w.writeLine(`}`);
             w.dedent();
             w.writeLine(`}`);
         }
@@ -477,6 +551,8 @@ import { unary, unaryWithAlpha, binary, binaryWithAlpha, reduction } from "./ops
         }
         const isGrad = kernelSpec.name.endsWith("_grad");
         if (isGrad) continue;
+        const isStrided = kernelSpec.name.includes("_strided");
+        if (isStrided) continue;
         const isOtherScalar = kernelSpec.name.includes("_scalar");
         if (isOtherScalar) continue;
         const isBinary = opSpec.type === "binary";

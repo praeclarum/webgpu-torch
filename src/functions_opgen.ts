@@ -5,11 +5,10 @@ import {
     GradientFunctionOutput,
 } from "./autograd";
 import type { Tensor } from "./tensor";
-import { shapeSize, defaultStrides } from "./shape";
+import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } from "./shape";
 export class AbsFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -34,7 +33,6 @@ export class AbsFunction extends AutoFunction {
 export class AcosFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -59,7 +57,6 @@ export class AcosFunction extends AutoFunction {
 export class AcoshFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -84,7 +81,6 @@ export class AcoshFunction extends AutoFunction {
 export class AddFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -93,12 +89,40 @@ export class AddFunction extends AutoFunction {
             };
             return input.runKernel("add_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-                alpha: alpha || 1.0,
-            };
-            return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: alpha || 1.0,
+                };
+                return input.runKernel("add_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                    alpha: alpha || 1.0,
+                };
+                return input.runKernel("add", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -122,7 +146,6 @@ export class AddFunction extends AutoFunction {
 export class AsinFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -147,7 +170,6 @@ export class AsinFunction extends AutoFunction {
 export class AsinhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -172,7 +194,6 @@ export class AsinhFunction extends AutoFunction {
 export class AtanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -197,7 +218,6 @@ export class AtanFunction extends AutoFunction {
 export class Atan2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -205,11 +225,38 @@ export class Atan2Function extends AutoFunction {
             };
             return input.runKernel("atan2_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("atan2_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("atan2", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -231,7 +278,6 @@ export class Atan2Function extends AutoFunction {
 export class CeilFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -256,7 +302,6 @@ export class CeilFunction extends AutoFunction {
 export class CopysignFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -264,11 +309,38 @@ export class CopysignFunction extends AutoFunction {
             };
             return input.runKernel("copysign_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("copysign_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("copysign", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -290,7 +362,6 @@ export class CopysignFunction extends AutoFunction {
 export class CosFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -315,7 +386,6 @@ export class CosFunction extends AutoFunction {
 export class CoshFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -340,7 +410,6 @@ export class CoshFunction extends AutoFunction {
 export class Deg2radFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -365,7 +434,6 @@ export class Deg2radFunction extends AutoFunction {
 export class DivFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -373,11 +441,38 @@ export class DivFunction extends AutoFunction {
             };
             return input.runKernel("div_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("div_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("div", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -399,7 +494,6 @@ export class DivFunction extends AutoFunction {
 export class ExpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -424,7 +518,6 @@ export class ExpFunction extends AutoFunction {
 export class Exp2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -449,7 +542,6 @@ export class Exp2Function extends AutoFunction {
 export class Expm1Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -474,7 +566,6 @@ export class Expm1Function extends AutoFunction {
 export class FloorFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -499,7 +590,6 @@ export class FloorFunction extends AutoFunction {
 export class FracFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -524,7 +614,6 @@ export class FracFunction extends AutoFunction {
 export class HypotFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -532,11 +621,38 @@ export class HypotFunction extends AutoFunction {
             };
             return input.runKernel("hypot_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("hypot_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("hypot", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -558,7 +674,6 @@ export class HypotFunction extends AutoFunction {
 export class LdexpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -566,11 +681,38 @@ export class LdexpFunction extends AutoFunction {
             };
             return input.runKernel("ldexp_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("ldexp_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("ldexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -592,7 +734,6 @@ export class LdexpFunction extends AutoFunction {
 export class LogFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -617,7 +758,6 @@ export class LogFunction extends AutoFunction {
 export class Log10Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -642,7 +782,6 @@ export class Log10Function extends AutoFunction {
 export class Log1pFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -667,7 +806,6 @@ export class Log1pFunction extends AutoFunction {
 export class Log2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -692,7 +830,6 @@ export class Log2Function extends AutoFunction {
 export class LogaddexpFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -700,11 +837,38 @@ export class LogaddexpFunction extends AutoFunction {
             };
             return input.runKernel("logaddexp_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("logaddexp_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("logaddexp", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -726,7 +890,6 @@ export class LogaddexpFunction extends AutoFunction {
 export class Logaddexp2Function extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -734,11 +897,38 @@ export class Logaddexp2Function extends AutoFunction {
             };
             return input.runKernel("logaddexp2_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("logaddexp2_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("logaddexp2", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -760,7 +950,6 @@ export class Logaddexp2Function extends AutoFunction {
 export class MulFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -768,11 +957,38 @@ export class MulFunction extends AutoFunction {
             };
             return input.runKernel("mul_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("mul_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("mul", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -794,7 +1010,6 @@ export class MulFunction extends AutoFunction {
 export class NegFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -819,7 +1034,6 @@ export class NegFunction extends AutoFunction {
 export class PositiveFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -844,7 +1058,6 @@ export class PositiveFunction extends AutoFunction {
 export class PowFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -852,11 +1065,38 @@ export class PowFunction extends AutoFunction {
             };
             return input.runKernel("pow_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("pow_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("pow", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -878,7 +1118,6 @@ export class PowFunction extends AutoFunction {
 export class Rad2degFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -903,7 +1142,6 @@ export class Rad2degFunction extends AutoFunction {
 export class ReciprocalFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -928,7 +1166,6 @@ export class ReciprocalFunction extends AutoFunction {
 export class ReluFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -953,7 +1190,6 @@ export class ReluFunction extends AutoFunction {
 export class RoundFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -978,7 +1214,6 @@ export class RoundFunction extends AutoFunction {
 export class RsqrtFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1003,7 +1238,6 @@ export class RsqrtFunction extends AutoFunction {
 export class SigmoidFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1028,7 +1262,6 @@ export class SigmoidFunction extends AutoFunction {
 export class SignFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1053,7 +1286,6 @@ export class SignFunction extends AutoFunction {
 export class SiluFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1078,7 +1310,6 @@ export class SiluFunction extends AutoFunction {
 export class SinFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1103,7 +1334,6 @@ export class SinFunction extends AutoFunction {
 export class SincFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1128,7 +1358,6 @@ export class SincFunction extends AutoFunction {
 export class SinhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1153,7 +1382,6 @@ export class SinhFunction extends AutoFunction {
 export class SqrtFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1178,7 +1406,6 @@ export class SqrtFunction extends AutoFunction {
 export class SquareFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1203,7 +1430,6 @@ export class SquareFunction extends AutoFunction {
 export class SubFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other, alpha] = inputs as [Tensor, Tensor, number | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -1212,12 +1438,40 @@ export class SubFunction extends AutoFunction {
             };
             return input.runKernel("sub_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-                alpha: alpha || 1.0,
-            };
-            return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                    alpha: alpha || 1.0,
+                };
+                return input.runKernel("sub_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                    alpha: alpha || 1.0,
+                };
+                return input.runKernel("sub", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -1241,7 +1495,6 @@ export class SubFunction extends AutoFunction {
 export class TanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1266,7 +1519,6 @@ export class TanFunction extends AutoFunction {
 export class TanhFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1291,7 +1543,6 @@ export class TanhFunction extends AutoFunction {
 export class TruncFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input] = inputs as [Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         const params = {
             size: shapeSize(input.shape),
         };
@@ -1316,7 +1567,6 @@ export class TruncFunction extends AutoFunction {
 export class XlogyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, other] = inputs as [Tensor, Tensor];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (typeof other === "number") {
             const params = {
                 size: shapeSize(input.shape),
@@ -1324,11 +1574,38 @@ export class XlogyFunction extends AutoFunction {
             };
             return input.runKernel("xlogy_scalar", {"dtype":"float32"}, params, [input.shape])[0];
         } else {
-            if (!other.isContiguous) { throw new Error("Other must be contiguous"); }
-            const params = {
-                size: shapeSize(input.shape),
-            };
-            return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
+            const broadcasted = broadcastShapes(input, other);
+            if (!stridedShapeIsContiguous(broadcasted.a) || !stridedShapeIsContiguous(broadcasted.b)) {
+                const inputDims = broadcasted.a.shape.length;
+                const otherDims = broadcasted.b.shape.length;
+                if (inputDims > 4 || otherDims > 4) {
+                    throw new Error("Broadcasting not supported for tensors with more than 4 dimensions");
+                }
+                const params = {
+                    inputStrides0: inputDims > 0 ? broadcasted.a.strides[0] : 0,
+                    otherStrides0: otherDims > 0 ? broadcasted.b.strides[0] : 0,
+                    outputStrides0: broadcasted.output.shape.length > 0 ? broadcasted.output.strides[0] : 1,
+                    inputStrides1: inputDims > 1 ? broadcasted.a.strides[1] : 0,
+                    otherStrides1: otherDims > 1 ? broadcasted.b.strides[1] : 0,
+                    outputStrides1: broadcasted.output.shape.length > 1 ? broadcasted.output.strides[1] : 1,
+                    inputStrides2: inputDims > 2 ? broadcasted.a.strides[2] : 0,
+                    otherStrides2: otherDims > 2 ? broadcasted.b.strides[2] : 0,
+                    outputStrides2: broadcasted.output.shape.length > 2 ? broadcasted.output.strides[2] : 1,
+                    inputStrides3: inputDims > 3 ? broadcasted.a.strides[3] : 0,
+                    otherStrides3: otherDims > 3 ? broadcasted.b.strides[3] : 0,
+                    outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
+                    size: shapeSize(broadcasted.output.shape),
+                };
+                return input.runKernel("xlogy_strided", {"dtype":"float32"}, params, [broadcasted.output.shape], other)[0];
+            } else {
+                if (shapeSize(input.shape) !== shapeSize(other.shape)) {
+                    throw new Error(`Shape sizes must match. Got ${input.shape} and ${other.shape}`);
+                }
+                const params = {
+                    size: shapeSize(input.shape),
+                };
+                return input.runKernel("xlogy", {"dtype":"float32"}, params, [input.shape], other)[0];
+            }
         }
     }
     static setupContext(
@@ -1350,7 +1627,6 @@ export class XlogyFunction extends AutoFunction {
 export class AllFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1418,7 +1694,6 @@ export class AllFunction extends AutoFunction {
 export class AnyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1486,7 +1761,6 @@ export class AnyFunction extends AutoFunction {
 export class MeanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1554,7 +1828,6 @@ export class MeanFunction extends AutoFunction {
 export class NormFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1622,7 +1895,6 @@ export class NormFunction extends AutoFunction {
 export class ProdFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1690,7 +1962,6 @@ export class ProdFunction extends AutoFunction {
 export class SumFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;
@@ -1758,7 +2029,6 @@ export class SumFunction extends AutoFunction {
 export class CountNonzeroFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
         const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
-        if (!input.isContiguous) { throw new Error("Input must be contiguous"); }
         if (dim !== undefined) {
             if (typeof dim === "number") {
                 const inputShape = input.shape;

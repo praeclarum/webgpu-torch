@@ -55,22 +55,7 @@ export function binaryWithAlpha(
             return func.apply(input, other, alpha);
         }
     } else {
-        const broadcasted = broadcastShapes(input, other);
-        if (
-            (input.shape.length > 1 || other.shape.length > 1) &&
-            (!stridedShapeIsContiguous(broadcasted.a) ||
-                !stridedShapeIsContiguous(broadcasted.b))
-        ) {
-            throw new Error(
-                "Non-contiguous broadcasted shapes are not supported yet"
-            );
-        }
-        if (input.shape.length !== other.shape.length) {
-            throw new Error(
-                `Shape dimensions must match. Got ${input.shape} and ${other.shape}`
-            );
-        }
-        if (shouldCreateGradient(input) || shouldCreateGradient(other)) {
+        if (shouldCreateGradient(input, other)) {
             return func.apply(input, other, alpha);
         }
     }

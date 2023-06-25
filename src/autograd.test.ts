@@ -18,8 +18,7 @@ test("linear backwards", async () => {
     const weight = new Tensor({data:[[7, 8, 9], [10, 11, 12]], requiresGrad:  true});
     const bias = new Tensor({data:[13, 14], requiresGrad:  true});
     const output = linear(input, weight, bias);
-    // expect(await output.toArrayAsync()).toEqual([[ 63.,  82.],
-    //     [135., 181.]]);
+    expect(await output.toArrayAsync()).toEqual([[ 63.,  82.], [135., 181.]]);
     // const loss = output.sum();
     // expect(loss.gradFunc).not.toBeNull();
     // expect(loss.requiresGrad).toBe(true);
