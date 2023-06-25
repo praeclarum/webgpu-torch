@@ -335,11 +335,9 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
             w.writeLine(`const params = {`);
             w.indent();
             for (let dim = 0; dim < maxdim; ++dim) {
-                w.writeLine(`inputShape${dim}: inputDims > ${dim} ? broadcasted.a.shape[${dim}] : 1,`);
                 w.writeLine(`inputStrides${dim}: inputDims > ${dim} ? broadcasted.a.strides[${dim}] : 0,`);
-                w.writeLine(`otherShape${dim}: otherDims > ${dim} ? broadcasted.b.shape[${dim}] : 1,`);
                 w.writeLine(`otherStrides${dim}: otherDims > ${dim} ? broadcasted.b.strides[${dim}] : 0,`);
-                w.writeLine(`outputShape${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.shape[${dim}] : 1,`);
+                w.writeLine(`outputStrides${dim}: broadcasted.output.shape.length > ${dim} ? broadcasted.output.strides[${dim}] : 1,`);
             }
             w.writeLine(`size: shapeSize(broadcasted.output.shape),`);
             if (hasAlpha) {

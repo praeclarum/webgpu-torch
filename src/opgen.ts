@@ -347,15 +347,7 @@ function getBinaryKernelSpec(
     if (strided) {
         for (let dim = 0; dim < maxdim; dim++) {
             parameters.push({
-                name: `inputShape${dim}`,
-                shaderType: "u32",
-            });
-            parameters.push({
                 name: `inputStrides${dim}`,
-                shaderType: "u32",
-            });
-            parameters.push({
-                name: `otherShape${dim}`,
                 shaderType: "u32",
             });
             parameters.push({
@@ -363,7 +355,7 @@ function getBinaryKernelSpec(
                 shaderType: "u32",
             });
             parameters.push({
-                name: `outputShape${dim}`,
+                name: `outputStrides${dim}`,
                 shaderType: "u32",
             });
         }
@@ -398,17 +390,13 @@ function getBinaryKernelSpec(
         if (outputIndex >= parameters.size) {
             return;
         }
-        let outputStrides3 = 1u;
-        let outputStrides2 = parameters.outputShape3 * outputStrides3;
-        let outputStrides1 = parameters.outputShape2 * outputStrides2;
-        let outputStrides0 = parameters.outputShape1 * outputStrides1;
         var i = outputIndex;
-        let outputIndex0 = u32(i / outputStrides0);
-        i = i % outputStrides0;
-        let outputIndex1 = u32(i / outputStrides1);
-        i = i % outputStrides1;
-        let outputIndex2 = u32(i / outputStrides2);
-        i = i % outputStrides2;
+        let outputIndex0 = u32(i / parameters.outputStrides0);
+        i = i % parameters.outputStrides0;
+        let outputIndex1 = u32(i / parameters.outputStrides1);
+        i = i % parameters.outputStrides1;
+        let outputIndex2 = u32(i / parameters.outputStrides2);
+        i = i % parameters.outputStrides2;
         let outputIndex3 = i;
         let inputIndex =
             outputIndex0 * parameters.inputStrides0 +
