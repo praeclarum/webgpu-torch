@@ -63,6 +63,8 @@ function writePythonTests() {
         if (isGrad) return false;
         const isScalar = kernelName.includes("_scalar");
         if (isScalar) return false;
+        const isStrided = kernelName.includes("_strided");
+        if (isStrided) return false;
         if (kernelName == "positive_") return false; // Not in torch
         if (kernelName == "logaddexp_") return false; // Not in torch
         if (kernelName == "logaddexp2_") return false; // Not in torch
@@ -78,8 +80,6 @@ function writePythonTests() {
         const isBinary = opSpec.type == "binary";
         const isReduction = opSpec.type == "reduction";
         const isInplace = kernelName.endsWith("_");
-        const isStrided = kernelName.includes("_strided");
-        if (isStrided) continue; // Not in torch
         const hasAlpha = opSpec.alpha ?? false;
         const params = ["input"];
         if (isBinary) {
