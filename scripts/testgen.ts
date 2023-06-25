@@ -78,6 +78,8 @@ function writePythonTests() {
         const isBinary = opSpec.type == "binary";
         const isReduction = opSpec.type == "reduction";
         const isInplace = kernelName.endsWith("_");
+        const isStrided = kernelName.includes("_strided");
+        if (isStrided) continue; // Not in torch
         const hasAlpha = opSpec.alpha ?? false;
         const params = ["input"];
         if (isBinary) {
@@ -213,6 +215,8 @@ function writeTypeScriptTestCode() {
     for (var kernelName in resultsByKernelName) {
         const results = resultsByKernelName[kernelName];
         const isInPlace = kernelName.endsWith("_");
+        const isStrided = kernelName.includes("_strided");
+        if (isStrided) continue;
         for (const r of results) {
             const inputArgs = r[0].map(x => JSON.stringify(x));
             w.writeLine(`test("${kernelName}(${inputArgs.join(", ")})", async () => {`);
@@ -250,7 +254,7 @@ export { tensor } from "./ops_artisanal";`);
 }
 
 function writeFile(path: string, code: string) {
-    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    const oldCode = fs.existsSync(path) ? fs.readFileSync(path, { encoding: "utf8" }) : null;
     if (oldCode === code) {
         console.log("OK", path);
     }

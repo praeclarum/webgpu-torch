@@ -135,7 +135,7 @@ function writeTensorCode(): void {
                 w.dedent();
                 w.writeLine(`};`);
                 const nameWithoutTrailingUnderscore = kernelSpec.name.slice(0, -1);
-                w.writeLine(`return this.runKernel("${nameWithoutTrailingUnderscore}_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];`);
+                w.writeLine(`return this.runKernelInplace("${nameWithoutTrailingUnderscore}_strided_", { dtype: this.dtype }, params, other);`);
                 w.dedent();
                 w.writeLine(`} else {`);
                 w.indent();
@@ -474,7 +474,7 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
     writeFile(path, code);
 }
 function writeFile(path: string, code: string) {
-    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    const oldCode = fs.existsSync(path) ? fs.readFileSync(path, { encoding: "utf8" }) : null;
     if (oldCode === code) {
         console.log("OK", path);
     }

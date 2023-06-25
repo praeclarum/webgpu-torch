@@ -117,7 +117,7 @@ function writePlotSvg(op: OpSpec, samples: OpSamples, bounds: PlotBounds): void 
 }
 
 function writeFile(path: string, code: string) {
-    const oldCode = fs.readFileSync(path, { encoding: "utf8" });
+    const oldCode = fs.existsSync(path) ? fs.readFileSync(path, { encoding: "utf8" }) : null;
     if (oldCode === code) {
         // console.log("OK", path);
     }

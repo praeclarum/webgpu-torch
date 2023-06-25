@@ -949,7 +949,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("atan2_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("atan2_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1058,7 +1058,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("copysign_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("copysign_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1264,7 +1264,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("div_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("div_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1529,7 +1529,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("hypot_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("hypot_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1599,7 +1599,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("ldexp_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("ldexp_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1825,7 +1825,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("logaddexp_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("logaddexp_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1895,7 +1895,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("logaddexp2_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("logaddexp2_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -1984,7 +1984,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("mul_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("mul_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -2152,7 +2152,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("pow_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("pow_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -2753,7 +2753,7 @@ export class Tensor extends TensorBase {
                     size: shapeSize(broadcasted.output.shape),
                     alpha: alpha || 1.0,
                 };
-                return this.runKernel("sub_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("sub_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
@@ -2961,7 +2961,7 @@ export class Tensor extends TensorBase {
                     outputStrides3: broadcasted.output.shape.length > 3 ? broadcasted.output.strides[3] : 1,
                     size: shapeSize(broadcasted.output.shape),
                 };
-                return this.runKernel("xlogy_strided_", { dtype: this.dtype }, params, [broadcasted.output.shape], other)[0];
+                return this.runKernelInplace("xlogy_strided_", { dtype: this.dtype }, params, other);
             } else {
                 const params = {
                     size: shapeSize(this.shape),
