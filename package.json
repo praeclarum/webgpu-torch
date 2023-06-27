@@ -8,7 +8,7 @@
     "test": "jest",
     "start": "webpack-dev-server --open",
     "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",
-    "build-onnx": "pbjs -t static-module -w commonjs -o src/onnx.js onnx.proto"
+    "build-onnx": "pbjs -t static-module -w es6 -o src/onnx.js external/onnx.proto && pbts -o src/onnx.d.ts src/onnx.js"
   },
   "repository": {
     "type": "git",
