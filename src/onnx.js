@@ -1,20 +1,22 @@
 /*eslint-disable block-scoped-var, id-length, no-control-regex, no-magic-numbers, no-prototype-builtins, no-redeclare, no-shadow, no-var, sort-vars*/
-import * as $protobuf from "protobufjs/minimal";
+"use strict";
+
+var $protobuf = require("protobufjs/minimal");
 
 // Common aliases
-const $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
+var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.util;
 
 // Exported root namespace
-const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-export const onnx = $root.onnx = (() => {
+$root.onnx = (function() {
 
     /**
      * Namespace onnx.
      * @exports onnx
      * @namespace
      */
-    const onnx = {};
+    var onnx = {};
 
     /**
      * Version enum.
@@ -32,7 +34,7 @@ export const onnx = $root.onnx = (() => {
      * @property {number} IR_VERSION=9 IR_VERSION value
      */
     onnx.Version = (function() {
-        const valuesById = {}, values = Object.create(valuesById);
+        var valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "_START_VERSION"] = 0;
         values[valuesById[1] = "IR_VERSION_2017_10_10"] = 1;
         values[valuesById[2] = "IR_VERSION_2017_10_30"] = 2;
@@ -89,7 +91,7 @@ export const onnx = $root.onnx = (() => {
             this.sparseTensors = [];
             this.typeProtos = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -275,26 +277,26 @@ export const onnx = $root.onnx = (() => {
             if (message.g != null && Object.hasOwnProperty.call(message, "g"))
                 $root.onnx.GraphProto.encode(message.g, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
             if (message.floats != null && message.floats.length)
-                for (let i = 0; i < message.floats.length; ++i)
+                for (var i = 0; i < message.floats.length; ++i)
                     writer.uint32(/* id 7, wireType 5 =*/61).float(message.floats[i]);
             if (message.ints != null && message.ints.length)
-                for (let i = 0; i < message.ints.length; ++i)
+                for (var i = 0; i < message.ints.length; ++i)
                     writer.uint32(/* id 8, wireType 0 =*/64).int64(message.ints[i]);
             if (message.strings != null && message.strings.length)
-                for (let i = 0; i < message.strings.length; ++i)
+                for (var i = 0; i < message.strings.length; ++i)
                     writer.uint32(/* id 9, wireType 2 =*/74).bytes(message.strings[i]);
             if (message.tensors != null && message.tensors.length)
-                for (let i = 0; i < message.tensors.length; ++i)
+                for (var i = 0; i < message.tensors.length; ++i)
                     $root.onnx.TensorProto.encode(message.tensors[i], writer.uint32(/* id 10, wireType 2 =*/82).fork()).ldelim();
             if (message.graphs != null && message.graphs.length)
-                for (let i = 0; i < message.graphs.length; ++i)
+                for (var i = 0; i < message.graphs.length; ++i)
                     $root.onnx.GraphProto.encode(message.graphs[i], writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
             if (message.docString != null && Object.hasOwnProperty.call(message, "docString"))
                 writer.uint32(/* id 13, wireType 2 =*/106).string(message.docString);
             if (message.tp != null && Object.hasOwnProperty.call(message, "tp"))
                 $root.onnx.TypeProto.encode(message.tp, writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
             if (message.typeProtos != null && message.typeProtos.length)
-                for (let i = 0; i < message.typeProtos.length; ++i)
+                for (var i = 0; i < message.typeProtos.length; ++i)
                     $root.onnx.TypeProto.encode(message.typeProtos[i], writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
             if (message.type != null && Object.hasOwnProperty.call(message, "type"))
                 writer.uint32(/* id 20, wireType 0 =*/160).int32(message.type);
@@ -303,7 +305,7 @@ export const onnx = $root.onnx = (() => {
             if (message.sparseTensor != null && Object.hasOwnProperty.call(message, "sparseTensor"))
                 $root.onnx.SparseTensorProto.encode(message.sparseTensor, writer.uint32(/* id 22, wireType 2 =*/178).fork()).ldelim();
             if (message.sparseTensors != null && message.sparseTensors.length)
-                for (let i = 0; i < message.sparseTensors.length; ++i)
+                for (var i = 0; i < message.sparseTensors.length; ++i)
                     $root.onnx.SparseTensorProto.encode(message.sparseTensors[i], writer.uint32(/* id 23, wireType 2 =*/186).fork()).ldelim();
             return writer;
         };
@@ -335,9 +337,9 @@ export const onnx = $root.onnx = (() => {
         AttributeProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.AttributeProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.AttributeProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.name = reader.string();
@@ -387,7 +389,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.floats && message.floats.length))
                             message.floats = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.floats.push(reader.float());
                         } else
@@ -398,7 +400,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.ints && message.ints.length))
                             message.ints = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.ints.push(reader.int64());
                         } else
@@ -510,51 +512,51 @@ export const onnx = $root.onnx = (() => {
                 if (!(message.s && typeof message.s.length === "number" || $util.isString(message.s)))
                     return "s: buffer expected";
             if (message.t != null && message.hasOwnProperty("t")) {
-                let error = $root.onnx.TensorProto.verify(message.t);
+                var error = $root.onnx.TensorProto.verify(message.t);
                 if (error)
                     return "t." + error;
             }
             if (message.g != null && message.hasOwnProperty("g")) {
-                let error = $root.onnx.GraphProto.verify(message.g);
+                var error = $root.onnx.GraphProto.verify(message.g);
                 if (error)
                     return "g." + error;
             }
             if (message.sparseTensor != null && message.hasOwnProperty("sparseTensor")) {
-                let error = $root.onnx.SparseTensorProto.verify(message.sparseTensor);
+                var error = $root.onnx.SparseTensorProto.verify(message.sparseTensor);
                 if (error)
                     return "sparseTensor." + error;
             }
             if (message.tp != null && message.hasOwnProperty("tp")) {
-                let error = $root.onnx.TypeProto.verify(message.tp);
+                var error = $root.onnx.TypeProto.verify(message.tp);
                 if (error)
                     return "tp." + error;
             }
             if (message.floats != null && message.hasOwnProperty("floats")) {
                 if (!Array.isArray(message.floats))
                     return "floats: array expected";
-                for (let i = 0; i < message.floats.length; ++i)
+                for (var i = 0; i < message.floats.length; ++i)
                     if (typeof message.floats[i] !== "number")
                         return "floats: number[] expected";
             }
             if (message.ints != null && message.hasOwnProperty("ints")) {
                 if (!Array.isArray(message.ints))
                     return "ints: array expected";
-                for (let i = 0; i < message.ints.length; ++i)
+                for (var i = 0; i < message.ints.length; ++i)
                     if (!$util.isInteger(message.ints[i]) && !(message.ints[i] && $util.isInteger(message.ints[i].low) && $util.isInteger(message.ints[i].high)))
                         return "ints: integer|Long[] expected";
             }
             if (message.strings != null && message.hasOwnProperty("strings")) {
                 if (!Array.isArray(message.strings))
                     return "strings: array expected";
-                for (let i = 0; i < message.strings.length; ++i)
+                for (var i = 0; i < message.strings.length; ++i)
                     if (!(message.strings[i] && typeof message.strings[i].length === "number" || $util.isString(message.strings[i])))
                         return "strings: buffer[] expected";
             }
             if (message.tensors != null && message.hasOwnProperty("tensors")) {
                 if (!Array.isArray(message.tensors))
                     return "tensors: array expected";
-                for (let i = 0; i < message.tensors.length; ++i) {
-                    let error = $root.onnx.TensorProto.verify(message.tensors[i]);
+                for (var i = 0; i < message.tensors.length; ++i) {
+                    var error = $root.onnx.TensorProto.verify(message.tensors[i]);
                     if (error)
                         return "tensors." + error;
                 }
@@ -562,8 +564,8 @@ export const onnx = $root.onnx = (() => {
             if (message.graphs != null && message.hasOwnProperty("graphs")) {
                 if (!Array.isArray(message.graphs))
                     return "graphs: array expected";
-                for (let i = 0; i < message.graphs.length; ++i) {
-                    let error = $root.onnx.GraphProto.verify(message.graphs[i]);
+                for (var i = 0; i < message.graphs.length; ++i) {
+                    var error = $root.onnx.GraphProto.verify(message.graphs[i]);
                     if (error)
                         return "graphs." + error;
                 }
@@ -571,8 +573,8 @@ export const onnx = $root.onnx = (() => {
             if (message.sparseTensors != null && message.hasOwnProperty("sparseTensors")) {
                 if (!Array.isArray(message.sparseTensors))
                     return "sparseTensors: array expected";
-                for (let i = 0; i < message.sparseTensors.length; ++i) {
-                    let error = $root.onnx.SparseTensorProto.verify(message.sparseTensors[i]);
+                for (var i = 0; i < message.sparseTensors.length; ++i) {
+                    var error = $root.onnx.SparseTensorProto.verify(message.sparseTensors[i]);
                     if (error)
                         return "sparseTensors." + error;
                 }
@@ -580,8 +582,8 @@ export const onnx = $root.onnx = (() => {
             if (message.typeProtos != null && message.hasOwnProperty("typeProtos")) {
                 if (!Array.isArray(message.typeProtos))
                     return "typeProtos: array expected";
-                for (let i = 0; i < message.typeProtos.length; ++i) {
-                    let error = $root.onnx.TypeProto.verify(message.typeProtos[i]);
+                for (var i = 0; i < message.typeProtos.length; ++i) {
+                    var error = $root.onnx.TypeProto.verify(message.typeProtos[i]);
                     if (error)
                         return "typeProtos." + error;
                 }
@@ -600,7 +602,7 @@ export const onnx = $root.onnx = (() => {
         AttributeProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.AttributeProto)
                 return object;
-            let message = new $root.onnx.AttributeProto();
+            var message = new $root.onnx.AttributeProto();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.refAttrName != null)
@@ -715,14 +717,14 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.floats))
                     throw TypeError(".onnx.AttributeProto.floats: array expected");
                 message.floats = [];
-                for (let i = 0; i < object.floats.length; ++i)
+                for (var i = 0; i < object.floats.length; ++i)
                     message.floats[i] = Number(object.floats[i]);
             }
             if (object.ints) {
                 if (!Array.isArray(object.ints))
                     throw TypeError(".onnx.AttributeProto.ints: array expected");
                 message.ints = [];
-                for (let i = 0; i < object.ints.length; ++i)
+                for (var i = 0; i < object.ints.length; ++i)
                     if ($util.Long)
                         (message.ints[i] = $util.Long.fromValue(object.ints[i])).unsigned = false;
                     else if (typeof object.ints[i] === "string")
@@ -736,7 +738,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.strings))
                     throw TypeError(".onnx.AttributeProto.strings: array expected");
                 message.strings = [];
-                for (let i = 0; i < object.strings.length; ++i)
+                for (var i = 0; i < object.strings.length; ++i)
                     if (typeof object.strings[i] === "string")
                         $util.base64.decode(object.strings[i], message.strings[i] = $util.newBuffer($util.base64.length(object.strings[i])), 0);
                     else if (object.strings[i].length >= 0)
@@ -746,7 +748,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.tensors))
                     throw TypeError(".onnx.AttributeProto.tensors: array expected");
                 message.tensors = [];
-                for (let i = 0; i < object.tensors.length; ++i) {
+                for (var i = 0; i < object.tensors.length; ++i) {
                     if (typeof object.tensors[i] !== "object")
                         throw TypeError(".onnx.AttributeProto.tensors: object expected");
                     message.tensors[i] = $root.onnx.TensorProto.fromObject(object.tensors[i]);
@@ -756,7 +758,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.graphs))
                     throw TypeError(".onnx.AttributeProto.graphs: array expected");
                 message.graphs = [];
-                for (let i = 0; i < object.graphs.length; ++i) {
+                for (var i = 0; i < object.graphs.length; ++i) {
                     if (typeof object.graphs[i] !== "object")
                         throw TypeError(".onnx.AttributeProto.graphs: object expected");
                     message.graphs[i] = $root.onnx.GraphProto.fromObject(object.graphs[i]);
@@ -766,7 +768,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.sparseTensors))
                     throw TypeError(".onnx.AttributeProto.sparseTensors: array expected");
                 message.sparseTensors = [];
-                for (let i = 0; i < object.sparseTensors.length; ++i) {
+                for (var i = 0; i < object.sparseTensors.length; ++i) {
                     if (typeof object.sparseTensors[i] !== "object")
                         throw TypeError(".onnx.AttributeProto.sparseTensors: object expected");
                     message.sparseTensors[i] = $root.onnx.SparseTensorProto.fromObject(object.sparseTensors[i]);
@@ -776,7 +778,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.typeProtos))
                     throw TypeError(".onnx.AttributeProto.typeProtos: array expected");
                 message.typeProtos = [];
-                for (let i = 0; i < object.typeProtos.length; ++i) {
+                for (var i = 0; i < object.typeProtos.length; ++i) {
                     if (typeof object.typeProtos[i] !== "object")
                         throw TypeError(".onnx.AttributeProto.typeProtos: object expected");
                     message.typeProtos[i] = $root.onnx.TypeProto.fromObject(object.typeProtos[i]);
@@ -797,7 +799,7 @@ export const onnx = $root.onnx = (() => {
         AttributeProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.floats = [];
                 object.ints = [];
@@ -811,7 +813,7 @@ export const onnx = $root.onnx = (() => {
                 object.name = "";
                 object.f = 0;
                 if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
+                    var long = new $util.Long(0, 0, false);
                     object.i = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.i = options.longs === String ? "0" : 0;
@@ -847,12 +849,12 @@ export const onnx = $root.onnx = (() => {
                 object.g = $root.onnx.GraphProto.toObject(message.g, options);
             if (message.floats && message.floats.length) {
                 object.floats = [];
-                for (let j = 0; j < message.floats.length; ++j)
+                for (var j = 0; j < message.floats.length; ++j)
                     object.floats[j] = options.json && !isFinite(message.floats[j]) ? String(message.floats[j]) : message.floats[j];
             }
             if (message.ints && message.ints.length) {
                 object.ints = [];
-                for (let j = 0; j < message.ints.length; ++j)
+                for (var j = 0; j < message.ints.length; ++j)
                     if (typeof message.ints[j] === "number")
                         object.ints[j] = options.longs === String ? String(message.ints[j]) : message.ints[j];
                     else
@@ -860,17 +862,17 @@ export const onnx = $root.onnx = (() => {
             }
             if (message.strings && message.strings.length) {
                 object.strings = [];
-                for (let j = 0; j < message.strings.length; ++j)
+                for (var j = 0; j < message.strings.length; ++j)
                     object.strings[j] = options.bytes === String ? $util.base64.encode(message.strings[j], 0, message.strings[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.strings[j]) : message.strings[j];
             }
             if (message.tensors && message.tensors.length) {
                 object.tensors = [];
-                for (let j = 0; j < message.tensors.length; ++j)
+                for (var j = 0; j < message.tensors.length; ++j)
                     object.tensors[j] = $root.onnx.TensorProto.toObject(message.tensors[j], options);
             }
             if (message.graphs && message.graphs.length) {
                 object.graphs = [];
-                for (let j = 0; j < message.graphs.length; ++j)
+                for (var j = 0; j < message.graphs.length; ++j)
                     object.graphs[j] = $root.onnx.GraphProto.toObject(message.graphs[j], options);
             }
             if (message.docString != null && message.hasOwnProperty("docString"))
@@ -879,7 +881,7 @@ export const onnx = $root.onnx = (() => {
                 object.tp = $root.onnx.TypeProto.toObject(message.tp, options);
             if (message.typeProtos && message.typeProtos.length) {
                 object.typeProtos = [];
-                for (let j = 0; j < message.typeProtos.length; ++j)
+                for (var j = 0; j < message.typeProtos.length; ++j)
                     object.typeProtos[j] = $root.onnx.TypeProto.toObject(message.typeProtos[j], options);
             }
             if (message.type != null && message.hasOwnProperty("type"))
@@ -890,7 +892,7 @@ export const onnx = $root.onnx = (() => {
                 object.sparseTensor = $root.onnx.SparseTensorProto.toObject(message.sparseTensor, options);
             if (message.sparseTensors && message.sparseTensors.length) {
                 object.sparseTensors = [];
-                for (let j = 0; j < message.sparseTensors.length; ++j)
+                for (var j = 0; j < message.sparseTensors.length; ++j)
                     object.sparseTensors[j] = $root.onnx.SparseTensorProto.toObject(message.sparseTensors[j], options);
             }
             return object;
@@ -943,7 +945,7 @@ export const onnx = $root.onnx = (() => {
          * @property {number} TYPE_PROTOS=14 TYPE_PROTOS value
          */
         AttributeProto.AttributeType = (function() {
-            const valuesById = {}, values = Object.create(valuesById);
+            var valuesById = {}, values = Object.create(valuesById);
             values[valuesById[0] = "UNDEFINED"] = 0;
             values[valuesById[1] = "FLOAT"] = 1;
             values[valuesById[2] = "INT"] = 2;
@@ -986,7 +988,7 @@ export const onnx = $root.onnx = (() => {
          */
         function ValueInfoProto(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1075,9 +1077,9 @@ export const onnx = $root.onnx = (() => {
         ValueInfoProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.ValueInfoProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.ValueInfoProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.name = reader.string();
@@ -1130,7 +1132,7 @@ export const onnx = $root.onnx = (() => {
                 if (!$util.isString(message.name))
                     return "name: string expected";
             if (message.type != null && message.hasOwnProperty("type")) {
-                let error = $root.onnx.TypeProto.verify(message.type);
+                var error = $root.onnx.TypeProto.verify(message.type);
                 if (error)
                     return "type." + error;
             }
@@ -1151,7 +1153,7 @@ export const onnx = $root.onnx = (() => {
         ValueInfoProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.ValueInfoProto)
                 return object;
-            let message = new $root.onnx.ValueInfoProto();
+            var message = new $root.onnx.ValueInfoProto();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.type != null) {
@@ -1176,7 +1178,7 @@ export const onnx = $root.onnx = (() => {
         ValueInfoProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.name = "";
                 object.type = null;
@@ -1248,7 +1250,7 @@ export const onnx = $root.onnx = (() => {
             this.output = [];
             this.attribute = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1334,17 +1336,17 @@ export const onnx = $root.onnx = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.input != null && message.input.length)
-                for (let i = 0; i < message.input.length; ++i)
+                for (var i = 0; i < message.input.length; ++i)
                     writer.uint32(/* id 1, wireType 2 =*/10).string(message.input[i]);
             if (message.output != null && message.output.length)
-                for (let i = 0; i < message.output.length; ++i)
+                for (var i = 0; i < message.output.length; ++i)
                     writer.uint32(/* id 2, wireType 2 =*/18).string(message.output[i]);
             if (message.name != null && Object.hasOwnProperty.call(message, "name"))
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.name);
             if (message.opType != null && Object.hasOwnProperty.call(message, "opType"))
                 writer.uint32(/* id 4, wireType 2 =*/34).string(message.opType);
             if (message.attribute != null && message.attribute.length)
-                for (let i = 0; i < message.attribute.length; ++i)
+                for (var i = 0; i < message.attribute.length; ++i)
                     $root.onnx.AttributeProto.encode(message.attribute[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             if (message.docString != null && Object.hasOwnProperty.call(message, "docString"))
                 writer.uint32(/* id 6, wireType 2 =*/50).string(message.docString);
@@ -1380,9 +1382,9 @@ export const onnx = $root.onnx = (() => {
         NodeProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.NodeProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.NodeProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         if (!(message.input && message.input.length))
@@ -1456,14 +1458,14 @@ export const onnx = $root.onnx = (() => {
             if (message.input != null && message.hasOwnProperty("input")) {
                 if (!Array.isArray(message.input))
                     return "input: array expected";
-                for (let i = 0; i < message.input.length; ++i)
+                for (var i = 0; i < message.input.length; ++i)
                     if (!$util.isString(message.input[i]))
                         return "input: string[] expected";
             }
             if (message.output != null && message.hasOwnProperty("output")) {
                 if (!Array.isArray(message.output))
                     return "output: array expected";
-                for (let i = 0; i < message.output.length; ++i)
+                for (var i = 0; i < message.output.length; ++i)
                     if (!$util.isString(message.output[i]))
                         return "output: string[] expected";
             }
@@ -1479,8 +1481,8 @@ export const onnx = $root.onnx = (() => {
             if (message.attribute != null && message.hasOwnProperty("attribute")) {
                 if (!Array.isArray(message.attribute))
                     return "attribute: array expected";
-                for (let i = 0; i < message.attribute.length; ++i) {
-                    let error = $root.onnx.AttributeProto.verify(message.attribute[i]);
+                for (var i = 0; i < message.attribute.length; ++i) {
+                    var error = $root.onnx.AttributeProto.verify(message.attribute[i]);
                     if (error)
                         return "attribute." + error;
                 }
@@ -1502,19 +1504,19 @@ export const onnx = $root.onnx = (() => {
         NodeProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.NodeProto)
                 return object;
-            let message = new $root.onnx.NodeProto();
+            var message = new $root.onnx.NodeProto();
             if (object.input) {
                 if (!Array.isArray(object.input))
                     throw TypeError(".onnx.NodeProto.input: array expected");
                 message.input = [];
-                for (let i = 0; i < object.input.length; ++i)
+                for (var i = 0; i < object.input.length; ++i)
                     message.input[i] = String(object.input[i]);
             }
             if (object.output) {
                 if (!Array.isArray(object.output))
                     throw TypeError(".onnx.NodeProto.output: array expected");
                 message.output = [];
-                for (let i = 0; i < object.output.length; ++i)
+                for (var i = 0; i < object.output.length; ++i)
                     message.output[i] = String(object.output[i]);
             }
             if (object.name != null)
@@ -1527,7 +1529,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.attribute))
                     throw TypeError(".onnx.NodeProto.attribute: array expected");
                 message.attribute = [];
-                for (let i = 0; i < object.attribute.length; ++i) {
+                for (var i = 0; i < object.attribute.length; ++i) {
                     if (typeof object.attribute[i] !== "object")
                         throw TypeError(".onnx.NodeProto.attribute: object expected");
                     message.attribute[i] = $root.onnx.AttributeProto.fromObject(object.attribute[i]);
@@ -1550,7 +1552,7 @@ export const onnx = $root.onnx = (() => {
         NodeProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.input = [];
                 object.output = [];
@@ -1564,12 +1566,12 @@ export const onnx = $root.onnx = (() => {
             }
             if (message.input && message.input.length) {
                 object.input = [];
-                for (let j = 0; j < message.input.length; ++j)
+                for (var j = 0; j < message.input.length; ++j)
                     object.input[j] = message.input[j];
             }
             if (message.output && message.output.length) {
                 object.output = [];
-                for (let j = 0; j < message.output.length; ++j)
+                for (var j = 0; j < message.output.length; ++j)
                     object.output[j] = message.output[j];
             }
             if (message.name != null && message.hasOwnProperty("name"))
@@ -1578,7 +1580,7 @@ export const onnx = $root.onnx = (() => {
                 object.opType = message.opType;
             if (message.attribute && message.attribute.length) {
                 object.attribute = [];
-                for (let j = 0; j < message.attribute.length; ++j)
+                for (var j = 0; j < message.attribute.length; ++j)
                     object.attribute[j] = $root.onnx.AttributeProto.toObject(message.attribute[j], options);
             }
             if (message.docString != null && message.hasOwnProperty("docString"))
@@ -1641,7 +1643,7 @@ export const onnx = $root.onnx = (() => {
             this.initializationBinding = [];
             this.updateBinding = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -1707,10 +1709,10 @@ export const onnx = $root.onnx = (() => {
             if (message.algorithm != null && Object.hasOwnProperty.call(message, "algorithm"))
                 $root.onnx.GraphProto.encode(message.algorithm, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             if (message.initializationBinding != null && message.initializationBinding.length)
-                for (let i = 0; i < message.initializationBinding.length; ++i)
+                for (var i = 0; i < message.initializationBinding.length; ++i)
                     $root.onnx.StringStringEntryProto.encode(message.initializationBinding[i], writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             if (message.updateBinding != null && message.updateBinding.length)
-                for (let i = 0; i < message.updateBinding.length; ++i)
+                for (var i = 0; i < message.updateBinding.length; ++i)
                     $root.onnx.StringStringEntryProto.encode(message.updateBinding[i], writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
             return writer;
         };
@@ -1742,9 +1744,9 @@ export const onnx = $root.onnx = (() => {
         TrainingInfoProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TrainingInfoProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TrainingInfoProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.initialization = $root.onnx.GraphProto.decode(reader, reader.uint32());
@@ -1802,20 +1804,20 @@ export const onnx = $root.onnx = (() => {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.initialization != null && message.hasOwnProperty("initialization")) {
-                let error = $root.onnx.GraphProto.verify(message.initialization);
+                var error = $root.onnx.GraphProto.verify(message.initialization);
                 if (error)
                     return "initialization." + error;
             }
             if (message.algorithm != null && message.hasOwnProperty("algorithm")) {
-                let error = $root.onnx.GraphProto.verify(message.algorithm);
+                var error = $root.onnx.GraphProto.verify(message.algorithm);
                 if (error)
                     return "algorithm." + error;
             }
             if (message.initializationBinding != null && message.hasOwnProperty("initializationBinding")) {
                 if (!Array.isArray(message.initializationBinding))
                     return "initializationBinding: array expected";
-                for (let i = 0; i < message.initializationBinding.length; ++i) {
-                    let error = $root.onnx.StringStringEntryProto.verify(message.initializationBinding[i]);
+                for (var i = 0; i < message.initializationBinding.length; ++i) {
+                    var error = $root.onnx.StringStringEntryProto.verify(message.initializationBinding[i]);
                     if (error)
                         return "initializationBinding." + error;
                 }
@@ -1823,8 +1825,8 @@ export const onnx = $root.onnx = (() => {
             if (message.updateBinding != null && message.hasOwnProperty("updateBinding")) {
                 if (!Array.isArray(message.updateBinding))
                     return "updateBinding: array expected";
-                for (let i = 0; i < message.updateBinding.length; ++i) {
-                    let error = $root.onnx.StringStringEntryProto.verify(message.updateBinding[i]);
+                for (var i = 0; i < message.updateBinding.length; ++i) {
+                    var error = $root.onnx.StringStringEntryProto.verify(message.updateBinding[i]);
                     if (error)
                         return "updateBinding." + error;
                 }
@@ -1843,7 +1845,7 @@ export const onnx = $root.onnx = (() => {
         TrainingInfoProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.TrainingInfoProto)
                 return object;
-            let message = new $root.onnx.TrainingInfoProto();
+            var message = new $root.onnx.TrainingInfoProto();
             if (object.initialization != null) {
                 if (typeof object.initialization !== "object")
                     throw TypeError(".onnx.TrainingInfoProto.initialization: object expected");
@@ -1858,7 +1860,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.initializationBinding))
                     throw TypeError(".onnx.TrainingInfoProto.initializationBinding: array expected");
                 message.initializationBinding = [];
-                for (let i = 0; i < object.initializationBinding.length; ++i) {
+                for (var i = 0; i < object.initializationBinding.length; ++i) {
                     if (typeof object.initializationBinding[i] !== "object")
                         throw TypeError(".onnx.TrainingInfoProto.initializationBinding: object expected");
                     message.initializationBinding[i] = $root.onnx.StringStringEntryProto.fromObject(object.initializationBinding[i]);
@@ -1868,7 +1870,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.updateBinding))
                     throw TypeError(".onnx.TrainingInfoProto.updateBinding: array expected");
                 message.updateBinding = [];
-                for (let i = 0; i < object.updateBinding.length; ++i) {
+                for (var i = 0; i < object.updateBinding.length; ++i) {
                     if (typeof object.updateBinding[i] !== "object")
                         throw TypeError(".onnx.TrainingInfoProto.updateBinding: object expected");
                     message.updateBinding[i] = $root.onnx.StringStringEntryProto.fromObject(object.updateBinding[i]);
@@ -1889,7 +1891,7 @@ export const onnx = $root.onnx = (() => {
         TrainingInfoProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.initializationBinding = [];
                 object.updateBinding = [];
@@ -1904,12 +1906,12 @@ export const onnx = $root.onnx = (() => {
                 object.algorithm = $root.onnx.GraphProto.toObject(message.algorithm, options);
             if (message.initializationBinding && message.initializationBinding.length) {
                 object.initializationBinding = [];
-                for (let j = 0; j < message.initializationBinding.length; ++j)
+                for (var j = 0; j < message.initializationBinding.length; ++j)
                     object.initializationBinding[j] = $root.onnx.StringStringEntryProto.toObject(message.initializationBinding[j], options);
             }
             if (message.updateBinding && message.updateBinding.length) {
                 object.updateBinding = [];
-                for (let j = 0; j < message.updateBinding.length; ++j)
+                for (var j = 0; j < message.updateBinding.length; ++j)
                     object.updateBinding[j] = $root.onnx.StringStringEntryProto.toObject(message.updateBinding[j], options);
             }
             return object;
@@ -1977,7 +1979,7 @@ export const onnx = $root.onnx = (() => {
             this.trainingInfo = [];
             this.functions = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2109,16 +2111,16 @@ export const onnx = $root.onnx = (() => {
             if (message.graph != null && Object.hasOwnProperty.call(message, "graph"))
                 $root.onnx.GraphProto.encode(message.graph, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
             if (message.opsetImport != null && message.opsetImport.length)
-                for (let i = 0; i < message.opsetImport.length; ++i)
+                for (var i = 0; i < message.opsetImport.length; ++i)
                     $root.onnx.OperatorSetIdProto.encode(message.opsetImport[i], writer.uint32(/* id 8, wireType 2 =*/66).fork()).ldelim();
             if (message.metadataProps != null && message.metadataProps.length)
-                for (let i = 0; i < message.metadataProps.length; ++i)
+                for (var i = 0; i < message.metadataProps.length; ++i)
                     $root.onnx.StringStringEntryProto.encode(message.metadataProps[i], writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
             if (message.trainingInfo != null && message.trainingInfo.length)
-                for (let i = 0; i < message.trainingInfo.length; ++i)
+                for (var i = 0; i < message.trainingInfo.length; ++i)
                     $root.onnx.TrainingInfoProto.encode(message.trainingInfo[i], writer.uint32(/* id 20, wireType 2 =*/162).fork()).ldelim();
             if (message.functions != null && message.functions.length)
-                for (let i = 0; i < message.functions.length; ++i)
+                for (var i = 0; i < message.functions.length; ++i)
                     $root.onnx.FunctionProto.encode(message.functions[i], writer.uint32(/* id 25, wireType 2 =*/202).fork()).ldelim();
             return writer;
         };
@@ -2150,9 +2152,9 @@ export const onnx = $root.onnx = (() => {
         ModelProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.ModelProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.ModelProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.irVersion = reader.int64();
@@ -2247,8 +2249,8 @@ export const onnx = $root.onnx = (() => {
             if (message.opsetImport != null && message.hasOwnProperty("opsetImport")) {
                 if (!Array.isArray(message.opsetImport))
                     return "opsetImport: array expected";
-                for (let i = 0; i < message.opsetImport.length; ++i) {
-                    let error = $root.onnx.OperatorSetIdProto.verify(message.opsetImport[i]);
+                for (var i = 0; i < message.opsetImport.length; ++i) {
+                    var error = $root.onnx.OperatorSetIdProto.verify(message.opsetImport[i]);
                     if (error)
                         return "opsetImport." + error;
                 }
@@ -2269,15 +2271,15 @@ export const onnx = $root.onnx = (() => {
                 if (!$util.isString(message.docString))
                     return "docString: string expected";
             if (message.graph != null && message.hasOwnProperty("graph")) {
-                let error = $root.onnx.GraphProto.verify(message.graph);
+                var error = $root.onnx.GraphProto.verify(message.graph);
                 if (error)
                     return "graph." + error;
             }
             if (message.metadataProps != null && message.hasOwnProperty("metadataProps")) {
                 if (!Array.isArray(message.metadataProps))
                     return "metadataProps: array expected";
-                for (let i = 0; i < message.metadataProps.length; ++i) {
-                    let error = $root.onnx.StringStringEntryProto.verify(message.metadataProps[i]);
+                for (var i = 0; i < message.metadataProps.length; ++i) {
+                    var error = $root.onnx.StringStringEntryProto.verify(message.metadataProps[i]);
                     if (error)
                         return "metadataProps." + error;
                 }
@@ -2285,8 +2287,8 @@ export const onnx = $root.onnx = (() => {
             if (message.trainingInfo != null && message.hasOwnProperty("trainingInfo")) {
                 if (!Array.isArray(message.trainingInfo))
                     return "trainingInfo: array expected";
-                for (let i = 0; i < message.trainingInfo.length; ++i) {
-                    let error = $root.onnx.TrainingInfoProto.verify(message.trainingInfo[i]);
+                for (var i = 0; i < message.trainingInfo.length; ++i) {
+                    var error = $root.onnx.TrainingInfoProto.verify(message.trainingInfo[i]);
                     if (error)
                         return "trainingInfo." + error;
                 }
@@ -2294,8 +2296,8 @@ export const onnx = $root.onnx = (() => {
             if (message.functions != null && message.hasOwnProperty("functions")) {
                 if (!Array.isArray(message.functions))
                     return "functions: array expected";
-                for (let i = 0; i < message.functions.length; ++i) {
-                    let error = $root.onnx.FunctionProto.verify(message.functions[i]);
+                for (var i = 0; i < message.functions.length; ++i) {
+                    var error = $root.onnx.FunctionProto.verify(message.functions[i]);
                     if (error)
                         return "functions." + error;
                 }
@@ -2314,7 +2316,7 @@ export const onnx = $root.onnx = (() => {
         ModelProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.ModelProto)
                 return object;
-            let message = new $root.onnx.ModelProto();
+            var message = new $root.onnx.ModelProto();
             if (object.irVersion != null)
                 if ($util.Long)
                     (message.irVersion = $util.Long.fromValue(object.irVersion)).unsigned = false;
@@ -2328,7 +2330,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.opsetImport))
                     throw TypeError(".onnx.ModelProto.opsetImport: array expected");
                 message.opsetImport = [];
-                for (let i = 0; i < object.opsetImport.length; ++i) {
+                for (var i = 0; i < object.opsetImport.length; ++i) {
                     if (typeof object.opsetImport[i] !== "object")
                         throw TypeError(".onnx.ModelProto.opsetImport: object expected");
                     message.opsetImport[i] = $root.onnx.OperatorSetIdProto.fromObject(object.opsetImport[i]);
@@ -2360,7 +2362,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.metadataProps))
                     throw TypeError(".onnx.ModelProto.metadataProps: array expected");
                 message.metadataProps = [];
-                for (let i = 0; i < object.metadataProps.length; ++i) {
+                for (var i = 0; i < object.metadataProps.length; ++i) {
                     if (typeof object.metadataProps[i] !== "object")
                         throw TypeError(".onnx.ModelProto.metadataProps: object expected");
                     message.metadataProps[i] = $root.onnx.StringStringEntryProto.fromObject(object.metadataProps[i]);
@@ -2370,7 +2372,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.trainingInfo))
                     throw TypeError(".onnx.ModelProto.trainingInfo: array expected");
                 message.trainingInfo = [];
-                for (let i = 0; i < object.trainingInfo.length; ++i) {
+                for (var i = 0; i < object.trainingInfo.length; ++i) {
                     if (typeof object.trainingInfo[i] !== "object")
                         throw TypeError(".onnx.ModelProto.trainingInfo: object expected");
                     message.trainingInfo[i] = $root.onnx.TrainingInfoProto.fromObject(object.trainingInfo[i]);
@@ -2380,7 +2382,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.functions))
                     throw TypeError(".onnx.ModelProto.functions: array expected");
                 message.functions = [];
-                for (let i = 0; i < object.functions.length; ++i) {
+                for (var i = 0; i < object.functions.length; ++i) {
                     if (typeof object.functions[i] !== "object")
                         throw TypeError(".onnx.ModelProto.functions: object expected");
                     message.functions[i] = $root.onnx.FunctionProto.fromObject(object.functions[i]);
@@ -2401,7 +2403,7 @@ export const onnx = $root.onnx = (() => {
         ModelProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.opsetImport = [];
                 object.metadataProps = [];
@@ -2410,7 +2412,7 @@ export const onnx = $root.onnx = (() => {
             }
             if (options.defaults) {
                 if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
+                    var long = new $util.Long(0, 0, false);
                     object.irVersion = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.irVersion = options.longs === String ? "0" : 0;
@@ -2418,7 +2420,7 @@ export const onnx = $root.onnx = (() => {
                 object.producerVersion = "";
                 object.domain = "";
                 if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
+                    var long = new $util.Long(0, 0, false);
                     object.modelVersion = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.modelVersion = options.longs === String ? "0" : 0;
@@ -2447,22 +2449,22 @@ export const onnx = $root.onnx = (() => {
                 object.graph = $root.onnx.GraphProto.toObject(message.graph, options);
             if (message.opsetImport && message.opsetImport.length) {
                 object.opsetImport = [];
-                for (let j = 0; j < message.opsetImport.length; ++j)
+                for (var j = 0; j < message.opsetImport.length; ++j)
                     object.opsetImport[j] = $root.onnx.OperatorSetIdProto.toObject(message.opsetImport[j], options);
             }
             if (message.metadataProps && message.metadataProps.length) {
                 object.metadataProps = [];
-                for (let j = 0; j < message.metadataProps.length; ++j)
+                for (var j = 0; j < message.metadataProps.length; ++j)
                     object.metadataProps[j] = $root.onnx.StringStringEntryProto.toObject(message.metadataProps[j], options);
             }
             if (message.trainingInfo && message.trainingInfo.length) {
                 object.trainingInfo = [];
-                for (let j = 0; j < message.trainingInfo.length; ++j)
+                for (var j = 0; j < message.trainingInfo.length; ++j)
                     object.trainingInfo[j] = $root.onnx.TrainingInfoProto.toObject(message.trainingInfo[j], options);
             }
             if (message.functions && message.functions.length) {
                 object.functions = [];
-                for (let j = 0; j < message.functions.length; ++j)
+                for (var j = 0; j < message.functions.length; ++j)
                     object.functions[j] = $root.onnx.FunctionProto.toObject(message.functions[j], options);
             }
             return object;
@@ -2517,7 +2519,7 @@ export const onnx = $root.onnx = (() => {
          */
         function StringStringEntryProto(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2596,9 +2598,9 @@ export const onnx = $root.onnx = (() => {
         StringStringEntryProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.StringStringEntryProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.StringStringEntryProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.key = reader.string();
@@ -2663,7 +2665,7 @@ export const onnx = $root.onnx = (() => {
         StringStringEntryProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.StringStringEntryProto)
                 return object;
-            let message = new $root.onnx.StringStringEntryProto();
+            var message = new $root.onnx.StringStringEntryProto();
             if (object.key != null)
                 message.key = String(object.key);
             if (object.value != null)
@@ -2683,7 +2685,7 @@ export const onnx = $root.onnx = (() => {
         StringStringEntryProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.key = "";
                 object.value = "";
@@ -2745,7 +2747,7 @@ export const onnx = $root.onnx = (() => {
         function TensorAnnotation(properties) {
             this.quantParameterTensorNames = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -2793,7 +2795,7 @@ export const onnx = $root.onnx = (() => {
             if (message.tensorName != null && Object.hasOwnProperty.call(message, "tensorName"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.tensorName);
             if (message.quantParameterTensorNames != null && message.quantParameterTensorNames.length)
-                for (let i = 0; i < message.quantParameterTensorNames.length; ++i)
+                for (var i = 0; i < message.quantParameterTensorNames.length; ++i)
                     $root.onnx.StringStringEntryProto.encode(message.quantParameterTensorNames[i], writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             return writer;
         };
@@ -2825,9 +2827,9 @@ export const onnx = $root.onnx = (() => {
         TensorAnnotation.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorAnnotation();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorAnnotation();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.tensorName = reader.string();
@@ -2880,8 +2882,8 @@ export const onnx = $root.onnx = (() => {
             if (message.quantParameterTensorNames != null && message.hasOwnProperty("quantParameterTensorNames")) {
                 if (!Array.isArray(message.quantParameterTensorNames))
                     return "quantParameterTensorNames: array expected";
-                for (let i = 0; i < message.quantParameterTensorNames.length; ++i) {
-                    let error = $root.onnx.StringStringEntryProto.verify(message.quantParameterTensorNames[i]);
+                for (var i = 0; i < message.quantParameterTensorNames.length; ++i) {
+                    var error = $root.onnx.StringStringEntryProto.verify(message.quantParameterTensorNames[i]);
                     if (error)
                         return "quantParameterTensorNames." + error;
                 }
@@ -2900,14 +2902,14 @@ export const onnx = $root.onnx = (() => {
         TensorAnnotation.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.TensorAnnotation)
                 return object;
-            let message = new $root.onnx.TensorAnnotation();
+            var message = new $root.onnx.TensorAnnotation();
             if (object.tensorName != null)
                 message.tensorName = String(object.tensorName);
             if (object.quantParameterTensorNames) {
                 if (!Array.isArray(object.quantParameterTensorNames))
                     throw TypeError(".onnx.TensorAnnotation.quantParameterTensorNames: array expected");
                 message.quantParameterTensorNames = [];
-                for (let i = 0; i < object.quantParameterTensorNames.length; ++i) {
+                for (var i = 0; i < object.quantParameterTensorNames.length; ++i) {
                     if (typeof object.quantParameterTensorNames[i] !== "object")
                         throw TypeError(".onnx.TensorAnnotation.quantParameterTensorNames: object expected");
                     message.quantParameterTensorNames[i] = $root.onnx.StringStringEntryProto.fromObject(object.quantParameterTensorNames[i]);
@@ -2928,7 +2930,7 @@ export const onnx = $root.onnx = (() => {
         TensorAnnotation.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults)
                 object.quantParameterTensorNames = [];
             if (options.defaults)
@@ -2937,7 +2939,7 @@ export const onnx = $root.onnx = (() => {
                 object.tensorName = message.tensorName;
             if (message.quantParameterTensorNames && message.quantParameterTensorNames.length) {
                 object.quantParameterTensorNames = [];
-                for (let j = 0; j < message.quantParameterTensorNames.length; ++j)
+                for (var j = 0; j < message.quantParameterTensorNames.length; ++j)
                     object.quantParameterTensorNames[j] = $root.onnx.StringStringEntryProto.toObject(message.quantParameterTensorNames[j], options);
             }
             return object;
@@ -3006,7 +3008,7 @@ export const onnx = $root.onnx = (() => {
             this.valueInfo = [];
             this.quantizationAnnotation = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -3108,29 +3110,29 @@ export const onnx = $root.onnx = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.node != null && message.node.length)
-                for (let i = 0; i < message.node.length; ++i)
+                for (var i = 0; i < message.node.length; ++i)
                     $root.onnx.NodeProto.encode(message.node[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             if (message.name != null && Object.hasOwnProperty.call(message, "name"))
                 writer.uint32(/* id 2, wireType 2 =*/18).string(message.name);
             if (message.initializer != null && message.initializer.length)
-                for (let i = 0; i < message.initializer.length; ++i)
+                for (var i = 0; i < message.initializer.length; ++i)
                     $root.onnx.TensorProto.encode(message.initializer[i], writer.uint32(/* id 5, wireType 2 =*/42).fork()).ldelim();
             if (message.docString != null && Object.hasOwnProperty.call(message, "docString"))
                 writer.uint32(/* id 10, wireType 2 =*/82).string(message.docString);
             if (message.input != null && message.input.length)
-                for (let i = 0; i < message.input.length; ++i)
+                for (var i = 0; i < message.input.length; ++i)
                     $root.onnx.ValueInfoProto.encode(message.input[i], writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
             if (message.output != null && message.output.length)
-                for (let i = 0; i < message.output.length; ++i)
+                for (var i = 0; i < message.output.length; ++i)
                     $root.onnx.ValueInfoProto.encode(message.output[i], writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
             if (message.valueInfo != null && message.valueInfo.length)
-                for (let i = 0; i < message.valueInfo.length; ++i)
+                for (var i = 0; i < message.valueInfo.length; ++i)
                     $root.onnx.ValueInfoProto.encode(message.valueInfo[i], writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
             if (message.quantizationAnnotation != null && message.quantizationAnnotation.length)
-                for (let i = 0; i < message.quantizationAnnotation.length; ++i)
+                for (var i = 0; i < message.quantizationAnnotation.length; ++i)
                     $root.onnx.TensorAnnotation.encode(message.quantizationAnnotation[i], writer.uint32(/* id 14, wireType 2 =*/114).fork()).ldelim();
             if (message.sparseInitializer != null && message.sparseInitializer.length)
-                for (let i = 0; i < message.sparseInitializer.length; ++i)
+                for (var i = 0; i < message.sparseInitializer.length; ++i)
                     $root.onnx.SparseTensorProto.encode(message.sparseInitializer[i], writer.uint32(/* id 15, wireType 2 =*/122).fork()).ldelim();
             return writer;
         };
@@ -3162,9 +3164,9 @@ export const onnx = $root.onnx = (() => {
         GraphProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.GraphProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.GraphProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         if (!(message.node && message.node.length))
@@ -3254,8 +3256,8 @@ export const onnx = $root.onnx = (() => {
             if (message.node != null && message.hasOwnProperty("node")) {
                 if (!Array.isArray(message.node))
                     return "node: array expected";
-                for (let i = 0; i < message.node.length; ++i) {
-                    let error = $root.onnx.NodeProto.verify(message.node[i]);
+                for (var i = 0; i < message.node.length; ++i) {
+                    var error = $root.onnx.NodeProto.verify(message.node[i]);
                     if (error)
                         return "node." + error;
                 }
@@ -3266,8 +3268,8 @@ export const onnx = $root.onnx = (() => {
             if (message.initializer != null && message.hasOwnProperty("initializer")) {
                 if (!Array.isArray(message.initializer))
                     return "initializer: array expected";
-                for (let i = 0; i < message.initializer.length; ++i) {
-                    let error = $root.onnx.TensorProto.verify(message.initializer[i]);
+                for (var i = 0; i < message.initializer.length; ++i) {
+                    var error = $root.onnx.TensorProto.verify(message.initializer[i]);
                     if (error)
                         return "initializer." + error;
                 }
@@ -3275,8 +3277,8 @@ export const onnx = $root.onnx = (() => {
             if (message.sparseInitializer != null && message.hasOwnProperty("sparseInitializer")) {
                 if (!Array.isArray(message.sparseInitializer))
                     return "sparseInitializer: array expected";
-                for (let i = 0; i < message.sparseInitializer.length; ++i) {
-                    let error = $root.onnx.SparseTensorProto.verify(message.sparseInitializer[i]);
+                for (var i = 0; i < message.sparseInitializer.length; ++i) {
+                    var error = $root.onnx.SparseTensorProto.verify(message.sparseInitializer[i]);
                     if (error)
                         return "sparseInitializer." + error;
                 }
@@ -3287,8 +3289,8 @@ export const onnx = $root.onnx = (() => {
             if (message.input != null && message.hasOwnProperty("input")) {
                 if (!Array.isArray(message.input))
                     return "input: array expected";
-                for (let i = 0; i < message.input.length; ++i) {
-                    let error = $root.onnx.ValueInfoProto.verify(message.input[i]);
+                for (var i = 0; i < message.input.length; ++i) {
+                    var error = $root.onnx.ValueInfoProto.verify(message.input[i]);
                     if (error)
                         return "input." + error;
                 }
@@ -3296,8 +3298,8 @@ export const onnx = $root.onnx = (() => {
             if (message.output != null && message.hasOwnProperty("output")) {
                 if (!Array.isArray(message.output))
                     return "output: array expected";
-                for (let i = 0; i < message.output.length; ++i) {
-                    let error = $root.onnx.ValueInfoProto.verify(message.output[i]);
+                for (var i = 0; i < message.output.length; ++i) {
+                    var error = $root.onnx.ValueInfoProto.verify(message.output[i]);
                     if (error)
                         return "output." + error;
                 }
@@ -3305,8 +3307,8 @@ export const onnx = $root.onnx = (() => {
             if (message.valueInfo != null && message.hasOwnProperty("valueInfo")) {
                 if (!Array.isArray(message.valueInfo))
                     return "valueInfo: array expected";
-                for (let i = 0; i < message.valueInfo.length; ++i) {
-                    let error = $root.onnx.ValueInfoProto.verify(message.valueInfo[i]);
+                for (var i = 0; i < message.valueInfo.length; ++i) {
+                    var error = $root.onnx.ValueInfoProto.verify(message.valueInfo[i]);
                     if (error)
                         return "valueInfo." + error;
                 }
@@ -3314,8 +3316,8 @@ export const onnx = $root.onnx = (() => {
             if (message.quantizationAnnotation != null && message.hasOwnProperty("quantizationAnnotation")) {
                 if (!Array.isArray(message.quantizationAnnotation))
                     return "quantizationAnnotation: array expected";
-                for (let i = 0; i < message.quantizationAnnotation.length; ++i) {
-                    let error = $root.onnx.TensorAnnotation.verify(message.quantizationAnnotation[i]);
+                for (var i = 0; i < message.quantizationAnnotation.length; ++i) {
+                    var error = $root.onnx.TensorAnnotation.verify(message.quantizationAnnotation[i]);
                     if (error)
                         return "quantizationAnnotation." + error;
                 }
@@ -3334,12 +3336,12 @@ export const onnx = $root.onnx = (() => {
         GraphProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.GraphProto)
                 return object;
-            let message = new $root.onnx.GraphProto();
+            var message = new $root.onnx.GraphProto();
             if (object.node) {
                 if (!Array.isArray(object.node))
                     throw TypeError(".onnx.GraphProto.node: array expected");
                 message.node = [];
-                for (let i = 0; i < object.node.length; ++i) {
+                for (var i = 0; i < object.node.length; ++i) {
                     if (typeof object.node[i] !== "object")
                         throw TypeError(".onnx.GraphProto.node: object expected");
                     message.node[i] = $root.onnx.NodeProto.fromObject(object.node[i]);
@@ -3351,7 +3353,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.initializer))
                     throw TypeError(".onnx.GraphProto.initializer: array expected");
                 message.initializer = [];
-                for (let i = 0; i < object.initializer.length; ++i) {
+                for (var i = 0; i < object.initializer.length; ++i) {
                     if (typeof object.initializer[i] !== "object")
                         throw TypeError(".onnx.GraphProto.initializer: object expected");
                     message.initializer[i] = $root.onnx.TensorProto.fromObject(object.initializer[i]);
@@ -3361,7 +3363,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.sparseInitializer))
                     throw TypeError(".onnx.GraphProto.sparseInitializer: array expected");
                 message.sparseInitializer = [];
-                for (let i = 0; i < object.sparseInitializer.length; ++i) {
+                for (var i = 0; i < object.sparseInitializer.length; ++i) {
                     if (typeof object.sparseInitializer[i] !== "object")
                         throw TypeError(".onnx.GraphProto.sparseInitializer: object expected");
                     message.sparseInitializer[i] = $root.onnx.SparseTensorProto.fromObject(object.sparseInitializer[i]);
@@ -3373,7 +3375,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.input))
                     throw TypeError(".onnx.GraphProto.input: array expected");
                 message.input = [];
-                for (let i = 0; i < object.input.length; ++i) {
+                for (var i = 0; i < object.input.length; ++i) {
                     if (typeof object.input[i] !== "object")
                         throw TypeError(".onnx.GraphProto.input: object expected");
                     message.input[i] = $root.onnx.ValueInfoProto.fromObject(object.input[i]);
@@ -3383,7 +3385,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.output))
                     throw TypeError(".onnx.GraphProto.output: array expected");
                 message.output = [];
-                for (let i = 0; i < object.output.length; ++i) {
+                for (var i = 0; i < object.output.length; ++i) {
                     if (typeof object.output[i] !== "object")
                         throw TypeError(".onnx.GraphProto.output: object expected");
                     message.output[i] = $root.onnx.ValueInfoProto.fromObject(object.output[i]);
@@ -3393,7 +3395,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.valueInfo))
                     throw TypeError(".onnx.GraphProto.valueInfo: array expected");
                 message.valueInfo = [];
-                for (let i = 0; i < object.valueInfo.length; ++i) {
+                for (var i = 0; i < object.valueInfo.length; ++i) {
                     if (typeof object.valueInfo[i] !== "object")
                         throw TypeError(".onnx.GraphProto.valueInfo: object expected");
                     message.valueInfo[i] = $root.onnx.ValueInfoProto.fromObject(object.valueInfo[i]);
@@ -3403,7 +3405,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.quantizationAnnotation))
                     throw TypeError(".onnx.GraphProto.quantizationAnnotation: array expected");
                 message.quantizationAnnotation = [];
-                for (let i = 0; i < object.quantizationAnnotation.length; ++i) {
+                for (var i = 0; i < object.quantizationAnnotation.length; ++i) {
                     if (typeof object.quantizationAnnotation[i] !== "object")
                         throw TypeError(".onnx.GraphProto.quantizationAnnotation: object expected");
                     message.quantizationAnnotation[i] = $root.onnx.TensorAnnotation.fromObject(object.quantizationAnnotation[i]);
@@ -3424,7 +3426,7 @@ export const onnx = $root.onnx = (() => {
         GraphProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.node = [];
                 object.initializer = [];
@@ -3440,41 +3442,41 @@ export const onnx = $root.onnx = (() => {
             }
             if (message.node && message.node.length) {
                 object.node = [];
-                for (let j = 0; j < message.node.length; ++j)
+                for (var j = 0; j < message.node.length; ++j)
                     object.node[j] = $root.onnx.NodeProto.toObject(message.node[j], options);
             }
             if (message.name != null && message.hasOwnProperty("name"))
                 object.name = message.name;
             if (message.initializer && message.initializer.length) {
                 object.initializer = [];
-                for (let j = 0; j < message.initializer.length; ++j)
+                for (var j = 0; j < message.initializer.length; ++j)
                     object.initializer[j] = $root.onnx.TensorProto.toObject(message.initializer[j], options);
             }
             if (message.docString != null && message.hasOwnProperty("docString"))
                 object.docString = message.docString;
             if (message.input && message.input.length) {
                 object.input = [];
-                for (let j = 0; j < message.input.length; ++j)
+                for (var j = 0; j < message.input.length; ++j)
                     object.input[j] = $root.onnx.ValueInfoProto.toObject(message.input[j], options);
             }
             if (message.output && message.output.length) {
                 object.output = [];
-                for (let j = 0; j < message.output.length; ++j)
+                for (var j = 0; j < message.output.length; ++j)
                     object.output[j] = $root.onnx.ValueInfoProto.toObject(message.output[j], options);
             }
             if (message.valueInfo && message.valueInfo.length) {
                 object.valueInfo = [];
-                for (let j = 0; j < message.valueInfo.length; ++j)
+                for (var j = 0; j < message.valueInfo.length; ++j)
                     object.valueInfo[j] = $root.onnx.ValueInfoProto.toObject(message.valueInfo[j], options);
             }
             if (message.quantizationAnnotation && message.quantizationAnnotation.length) {
                 object.quantizationAnnotation = [];
-                for (let j = 0; j < message.quantizationAnnotation.length; ++j)
+                for (var j = 0; j < message.quantizationAnnotation.length; ++j)
                     object.quantizationAnnotation[j] = $root.onnx.TensorAnnotation.toObject(message.quantizationAnnotation[j], options);
             }
             if (message.sparseInitializer && message.sparseInitializer.length) {
                 object.sparseInitializer = [];
-                for (let j = 0; j < message.sparseInitializer.length; ++j)
+                for (var j = 0; j < message.sparseInitializer.length; ++j)
                     object.sparseInitializer[j] = $root.onnx.SparseTensorProto.toObject(message.sparseInitializer[j], options);
             }
             return object;
@@ -3549,7 +3551,7 @@ export const onnx = $root.onnx = (() => {
             this.doubleData = [];
             this.uint64Data = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -3691,7 +3693,7 @@ export const onnx = $root.onnx = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.dims != null && message.dims.length)
-                for (let i = 0; i < message.dims.length; ++i)
+                for (var i = 0; i < message.dims.length; ++i)
                     writer.uint32(/* id 1, wireType 0 =*/8).int64(message.dims[i]);
             if (message.dataType != null && Object.hasOwnProperty.call(message, "dataType"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.dataType);
@@ -3699,22 +3701,22 @@ export const onnx = $root.onnx = (() => {
                 $root.onnx.TensorProto.Segment.encode(message.segment, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
             if (message.floatData != null && message.floatData.length) {
                 writer.uint32(/* id 4, wireType 2 =*/34).fork();
-                for (let i = 0; i < message.floatData.length; ++i)
+                for (var i = 0; i < message.floatData.length; ++i)
                     writer.float(message.floatData[i]);
                 writer.ldelim();
             }
             if (message.int32Data != null && message.int32Data.length) {
                 writer.uint32(/* id 5, wireType 2 =*/42).fork();
-                for (let i = 0; i < message.int32Data.length; ++i)
+                for (var i = 0; i < message.int32Data.length; ++i)
                     writer.int32(message.int32Data[i]);
                 writer.ldelim();
             }
             if (message.stringData != null && message.stringData.length)
-                for (let i = 0; i < message.stringData.length; ++i)
+                for (var i = 0; i < message.stringData.length; ++i)
                     writer.uint32(/* id 6, wireType 2 =*/50).bytes(message.stringData[i]);
             if (message.int64Data != null && message.int64Data.length) {
                 writer.uint32(/* id 7, wireType 2 =*/58).fork();
-                for (let i = 0; i < message.int64Data.length; ++i)
+                for (var i = 0; i < message.int64Data.length; ++i)
                     writer.int64(message.int64Data[i]);
                 writer.ldelim();
             }
@@ -3724,20 +3726,20 @@ export const onnx = $root.onnx = (() => {
                 writer.uint32(/* id 9, wireType 2 =*/74).bytes(message.rawData);
             if (message.doubleData != null && message.doubleData.length) {
                 writer.uint32(/* id 10, wireType 2 =*/82).fork();
-                for (let i = 0; i < message.doubleData.length; ++i)
+                for (var i = 0; i < message.doubleData.length; ++i)
                     writer.double(message.doubleData[i]);
                 writer.ldelim();
             }
             if (message.uint64Data != null && message.uint64Data.length) {
                 writer.uint32(/* id 11, wireType 2 =*/90).fork();
-                for (let i = 0; i < message.uint64Data.length; ++i)
+                for (var i = 0; i < message.uint64Data.length; ++i)
                     writer.uint64(message.uint64Data[i]);
                 writer.ldelim();
             }
             if (message.docString != null && Object.hasOwnProperty.call(message, "docString"))
                 writer.uint32(/* id 12, wireType 2 =*/98).string(message.docString);
             if (message.externalData != null && message.externalData.length)
-                for (let i = 0; i < message.externalData.length; ++i)
+                for (var i = 0; i < message.externalData.length; ++i)
                     $root.onnx.StringStringEntryProto.encode(message.externalData[i], writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
             if (message.dataLocation != null && Object.hasOwnProperty.call(message, "dataLocation"))
                 writer.uint32(/* id 14, wireType 0 =*/112).int32(message.dataLocation);
@@ -3771,15 +3773,15 @@ export const onnx = $root.onnx = (() => {
         TensorProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         if (!(message.dims && message.dims.length))
                             message.dims = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.dims.push(reader.int64());
                         } else
@@ -3798,7 +3800,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.floatData && message.floatData.length))
                             message.floatData = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.floatData.push(reader.float());
                         } else
@@ -3809,7 +3811,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.int32Data && message.int32Data.length))
                             message.int32Data = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.int32Data.push(reader.int32());
                         } else
@@ -3826,7 +3828,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.int64Data && message.int64Data.length))
                             message.int64Data = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.int64Data.push(reader.int64());
                         } else
@@ -3859,7 +3861,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.doubleData && message.doubleData.length))
                             message.doubleData = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.doubleData.push(reader.double());
                         } else
@@ -3870,7 +3872,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.uint64Data && message.uint64Data.length))
                             message.uint64Data = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.uint64Data.push(reader.uint64());
                         } else
@@ -3915,7 +3917,7 @@ export const onnx = $root.onnx = (() => {
             if (message.dims != null && message.hasOwnProperty("dims")) {
                 if (!Array.isArray(message.dims))
                     return "dims: array expected";
-                for (let i = 0; i < message.dims.length; ++i)
+                for (var i = 0; i < message.dims.length; ++i)
                     if (!$util.isInteger(message.dims[i]) && !(message.dims[i] && $util.isInteger(message.dims[i].low) && $util.isInteger(message.dims[i].high)))
                         return "dims: integer|Long[] expected";
             }
@@ -3923,35 +3925,35 @@ export const onnx = $root.onnx = (() => {
                 if (!$util.isInteger(message.dataType))
                     return "dataType: integer expected";
             if (message.segment != null && message.hasOwnProperty("segment")) {
-                let error = $root.onnx.TensorProto.Segment.verify(message.segment);
+                var error = $root.onnx.TensorProto.Segment.verify(message.segment);
                 if (error)
                     return "segment." + error;
             }
             if (message.floatData != null && message.hasOwnProperty("floatData")) {
                 if (!Array.isArray(message.floatData))
                     return "floatData: array expected";
-                for (let i = 0; i < message.floatData.length; ++i)
+                for (var i = 0; i < message.floatData.length; ++i)
                     if (typeof message.floatData[i] !== "number")
                         return "floatData: number[] expected";
             }
             if (message.int32Data != null && message.hasOwnProperty("int32Data")) {
                 if (!Array.isArray(message.int32Data))
                     return "int32Data: array expected";
-                for (let i = 0; i < message.int32Data.length; ++i)
+                for (var i = 0; i < message.int32Data.length; ++i)
                     if (!$util.isInteger(message.int32Data[i]))
                         return "int32Data: integer[] expected";
             }
             if (message.stringData != null && message.hasOwnProperty("stringData")) {
                 if (!Array.isArray(message.stringData))
                     return "stringData: array expected";
-                for (let i = 0; i < message.stringData.length; ++i)
+                for (var i = 0; i < message.stringData.length; ++i)
                     if (!(message.stringData[i] && typeof message.stringData[i].length === "number" || $util.isString(message.stringData[i])))
                         return "stringData: buffer[] expected";
             }
             if (message.int64Data != null && message.hasOwnProperty("int64Data")) {
                 if (!Array.isArray(message.int64Data))
                     return "int64Data: array expected";
-                for (let i = 0; i < message.int64Data.length; ++i)
+                for (var i = 0; i < message.int64Data.length; ++i)
                     if (!$util.isInteger(message.int64Data[i]) && !(message.int64Data[i] && $util.isInteger(message.int64Data[i].low) && $util.isInteger(message.int64Data[i].high)))
                         return "int64Data: integer|Long[] expected";
             }
@@ -3967,8 +3969,8 @@ export const onnx = $root.onnx = (() => {
             if (message.externalData != null && message.hasOwnProperty("externalData")) {
                 if (!Array.isArray(message.externalData))
                     return "externalData: array expected";
-                for (let i = 0; i < message.externalData.length; ++i) {
-                    let error = $root.onnx.StringStringEntryProto.verify(message.externalData[i]);
+                for (var i = 0; i < message.externalData.length; ++i) {
+                    var error = $root.onnx.StringStringEntryProto.verify(message.externalData[i]);
                     if (error)
                         return "externalData." + error;
                 }
@@ -3984,14 +3986,14 @@ export const onnx = $root.onnx = (() => {
             if (message.doubleData != null && message.hasOwnProperty("doubleData")) {
                 if (!Array.isArray(message.doubleData))
                     return "doubleData: array expected";
-                for (let i = 0; i < message.doubleData.length; ++i)
+                for (var i = 0; i < message.doubleData.length; ++i)
                     if (typeof message.doubleData[i] !== "number")
                         return "doubleData: number[] expected";
             }
             if (message.uint64Data != null && message.hasOwnProperty("uint64Data")) {
                 if (!Array.isArray(message.uint64Data))
                     return "uint64Data: array expected";
-                for (let i = 0; i < message.uint64Data.length; ++i)
+                for (var i = 0; i < message.uint64Data.length; ++i)
                     if (!$util.isInteger(message.uint64Data[i]) && !(message.uint64Data[i] && $util.isInteger(message.uint64Data[i].low) && $util.isInteger(message.uint64Data[i].high)))
                         return "uint64Data: integer|Long[] expected";
             }
@@ -4009,12 +4011,12 @@ export const onnx = $root.onnx = (() => {
         TensorProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.TensorProto)
                 return object;
-            let message = new $root.onnx.TensorProto();
+            var message = new $root.onnx.TensorProto();
             if (object.dims) {
                 if (!Array.isArray(object.dims))
                     throw TypeError(".onnx.TensorProto.dims: array expected");
                 message.dims = [];
-                for (let i = 0; i < object.dims.length; ++i)
+                for (var i = 0; i < object.dims.length; ++i)
                     if ($util.Long)
                         (message.dims[i] = $util.Long.fromValue(object.dims[i])).unsigned = false;
                     else if (typeof object.dims[i] === "string")
@@ -4035,21 +4037,21 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.floatData))
                     throw TypeError(".onnx.TensorProto.floatData: array expected");
                 message.floatData = [];
-                for (let i = 0; i < object.floatData.length; ++i)
+                for (var i = 0; i < object.floatData.length; ++i)
                     message.floatData[i] = Number(object.floatData[i]);
             }
             if (object.int32Data) {
                 if (!Array.isArray(object.int32Data))
                     throw TypeError(".onnx.TensorProto.int32Data: array expected");
                 message.int32Data = [];
-                for (let i = 0; i < object.int32Data.length; ++i)
+                for (var i = 0; i < object.int32Data.length; ++i)
                     message.int32Data[i] = object.int32Data[i] | 0;
             }
             if (object.stringData) {
                 if (!Array.isArray(object.stringData))
                     throw TypeError(".onnx.TensorProto.stringData: array expected");
                 message.stringData = [];
-                for (let i = 0; i < object.stringData.length; ++i)
+                for (var i = 0; i < object.stringData.length; ++i)
                     if (typeof object.stringData[i] === "string")
                         $util.base64.decode(object.stringData[i], message.stringData[i] = $util.newBuffer($util.base64.length(object.stringData[i])), 0);
                     else if (object.stringData[i].length >= 0)
@@ -4059,7 +4061,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.int64Data))
                     throw TypeError(".onnx.TensorProto.int64Data: array expected");
                 message.int64Data = [];
-                for (let i = 0; i < object.int64Data.length; ++i)
+                for (var i = 0; i < object.int64Data.length; ++i)
                     if ($util.Long)
                         (message.int64Data[i] = $util.Long.fromValue(object.int64Data[i])).unsigned = false;
                     else if (typeof object.int64Data[i] === "string")
@@ -4082,7 +4084,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.externalData))
                     throw TypeError(".onnx.TensorProto.externalData: array expected");
                 message.externalData = [];
-                for (let i = 0; i < object.externalData.length; ++i) {
+                for (var i = 0; i < object.externalData.length; ++i) {
                     if (typeof object.externalData[i] !== "object")
                         throw TypeError(".onnx.TensorProto.externalData: object expected");
                     message.externalData[i] = $root.onnx.StringStringEntryProto.fromObject(object.externalData[i]);
@@ -4108,14 +4110,14 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.doubleData))
                     throw TypeError(".onnx.TensorProto.doubleData: array expected");
                 message.doubleData = [];
-                for (let i = 0; i < object.doubleData.length; ++i)
+                for (var i = 0; i < object.doubleData.length; ++i)
                     message.doubleData[i] = Number(object.doubleData[i]);
             }
             if (object.uint64Data) {
                 if (!Array.isArray(object.uint64Data))
                     throw TypeError(".onnx.TensorProto.uint64Data: array expected");
                 message.uint64Data = [];
-                for (let i = 0; i < object.uint64Data.length; ++i)
+                for (var i = 0; i < object.uint64Data.length; ++i)
                     if ($util.Long)
                         (message.uint64Data[i] = $util.Long.fromValue(object.uint64Data[i])).unsigned = true;
                     else if (typeof object.uint64Data[i] === "string")
@@ -4140,7 +4142,7 @@ export const onnx = $root.onnx = (() => {
         TensorProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.dims = [];
                 object.floatData = [];
@@ -4167,7 +4169,7 @@ export const onnx = $root.onnx = (() => {
             }
             if (message.dims && message.dims.length) {
                 object.dims = [];
-                for (let j = 0; j < message.dims.length; ++j)
+                for (var j = 0; j < message.dims.length; ++j)
                     if (typeof message.dims[j] === "number")
                         object.dims[j] = options.longs === String ? String(message.dims[j]) : message.dims[j];
                     else
@@ -4179,22 +4181,22 @@ export const onnx = $root.onnx = (() => {
                 object.segment = $root.onnx.TensorProto.Segment.toObject(message.segment, options);
             if (message.floatData && message.floatData.length) {
                 object.floatData = [];
-                for (let j = 0; j < message.floatData.length; ++j)
+                for (var j = 0; j < message.floatData.length; ++j)
                     object.floatData[j] = options.json && !isFinite(message.floatData[j]) ? String(message.floatData[j]) : message.floatData[j];
             }
             if (message.int32Data && message.int32Data.length) {
                 object.int32Data = [];
-                for (let j = 0; j < message.int32Data.length; ++j)
+                for (var j = 0; j < message.int32Data.length; ++j)
                     object.int32Data[j] = message.int32Data[j];
             }
             if (message.stringData && message.stringData.length) {
                 object.stringData = [];
-                for (let j = 0; j < message.stringData.length; ++j)
+                for (var j = 0; j < message.stringData.length; ++j)
                     object.stringData[j] = options.bytes === String ? $util.base64.encode(message.stringData[j], 0, message.stringData[j].length) : options.bytes === Array ? Array.prototype.slice.call(message.stringData[j]) : message.stringData[j];
             }
             if (message.int64Data && message.int64Data.length) {
                 object.int64Data = [];
-                for (let j = 0; j < message.int64Data.length; ++j)
+                for (var j = 0; j < message.int64Data.length; ++j)
                     if (typeof message.int64Data[j] === "number")
                         object.int64Data[j] = options.longs === String ? String(message.int64Data[j]) : message.int64Data[j];
                     else
@@ -4206,12 +4208,12 @@ export const onnx = $root.onnx = (() => {
                 object.rawData = options.bytes === String ? $util.base64.encode(message.rawData, 0, message.rawData.length) : options.bytes === Array ? Array.prototype.slice.call(message.rawData) : message.rawData;
             if (message.doubleData && message.doubleData.length) {
                 object.doubleData = [];
-                for (let j = 0; j < message.doubleData.length; ++j)
+                for (var j = 0; j < message.doubleData.length; ++j)
                     object.doubleData[j] = options.json && !isFinite(message.doubleData[j]) ? String(message.doubleData[j]) : message.doubleData[j];
             }
             if (message.uint64Data && message.uint64Data.length) {
                 object.uint64Data = [];
-                for (let j = 0; j < message.uint64Data.length; ++j)
+                for (var j = 0; j < message.uint64Data.length; ++j)
                     if (typeof message.uint64Data[j] === "number")
                         object.uint64Data[j] = options.longs === String ? String(message.uint64Data[j]) : message.uint64Data[j];
                     else
@@ -4221,7 +4223,7 @@ export const onnx = $root.onnx = (() => {
                 object.docString = message.docString;
             if (message.externalData && message.externalData.length) {
                 object.externalData = [];
-                for (let j = 0; j < message.externalData.length; ++j)
+                for (var j = 0; j < message.externalData.length; ++j)
                     object.externalData[j] = $root.onnx.StringStringEntryProto.toObject(message.externalData[j], options);
             }
             if (message.dataLocation != null && message.hasOwnProperty("dataLocation"))
@@ -4282,7 +4284,7 @@ export const onnx = $root.onnx = (() => {
          * @property {number} FLOAT8E5M2FNUZ=20 FLOAT8E5M2FNUZ value
          */
         TensorProto.DataType = (function() {
-            const valuesById = {}, values = Object.create(valuesById);
+            var valuesById = {}, values = Object.create(valuesById);
             values[valuesById[0] = "UNDEFINED"] = 0;
             values[valuesById[1] = "FLOAT"] = 1;
             values[valuesById[2] = "UINT8"] = 2;
@@ -4327,7 +4329,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Segment(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -4406,9 +4408,9 @@ export const onnx = $root.onnx = (() => {
             Segment.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorProto.Segment();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorProto.Segment();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.begin = reader.int64();
@@ -4473,7 +4475,7 @@ export const onnx = $root.onnx = (() => {
             Segment.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TensorProto.Segment)
                     return object;
-                let message = new $root.onnx.TensorProto.Segment();
+                var message = new $root.onnx.TensorProto.Segment();
                 if (object.begin != null)
                     if ($util.Long)
                         (message.begin = $util.Long.fromValue(object.begin)).unsigned = false;
@@ -4507,15 +4509,15 @@ export const onnx = $root.onnx = (() => {
             Segment.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     if ($util.Long) {
-                        let long = new $util.Long(0, 0, false);
+                        var long = new $util.Long(0, 0, false);
                         object.begin = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                     } else
                         object.begin = options.longs === String ? "0" : 0;
                     if ($util.Long) {
-                        let long = new $util.Long(0, 0, false);
+                        var long = new $util.Long(0, 0, false);
                         object.end = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                     } else
                         object.end = options.longs === String ? "0" : 0;
@@ -4570,7 +4572,7 @@ export const onnx = $root.onnx = (() => {
          * @property {number} EXTERNAL=1 EXTERNAL value
          */
         TensorProto.DataLocation = (function() {
-            const valuesById = {}, values = Object.create(valuesById);
+            var valuesById = {}, values = Object.create(valuesById);
             values[valuesById[0] = "DEFAULT"] = 0;
             values[valuesById[1] = "EXTERNAL"] = 1;
             return values;
@@ -4601,7 +4603,7 @@ export const onnx = $root.onnx = (() => {
         function SparseTensorProto(properties) {
             this.dims = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -4659,7 +4661,7 @@ export const onnx = $root.onnx = (() => {
             if (message.indices != null && Object.hasOwnProperty.call(message, "indices"))
                 $root.onnx.TensorProto.encode(message.indices, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             if (message.dims != null && message.dims.length)
-                for (let i = 0; i < message.dims.length; ++i)
+                for (var i = 0; i < message.dims.length; ++i)
                     writer.uint32(/* id 3, wireType 0 =*/24).int64(message.dims[i]);
             return writer;
         };
@@ -4691,9 +4693,9 @@ export const onnx = $root.onnx = (() => {
         SparseTensorProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.SparseTensorProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.SparseTensorProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.values = $root.onnx.TensorProto.decode(reader, reader.uint32());
@@ -4707,7 +4709,7 @@ export const onnx = $root.onnx = (() => {
                         if (!(message.dims && message.dims.length))
                             message.dims = [];
                         if ((tag & 7) === 2) {
-                            let end2 = reader.uint32() + reader.pos;
+                            var end2 = reader.uint32() + reader.pos;
                             while (reader.pos < end2)
                                 message.dims.push(reader.int64());
                         } else
@@ -4750,19 +4752,19 @@ export const onnx = $root.onnx = (() => {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.values != null && message.hasOwnProperty("values")) {
-                let error = $root.onnx.TensorProto.verify(message.values);
+                var error = $root.onnx.TensorProto.verify(message.values);
                 if (error)
                     return "values." + error;
             }
             if (message.indices != null && message.hasOwnProperty("indices")) {
-                let error = $root.onnx.TensorProto.verify(message.indices);
+                var error = $root.onnx.TensorProto.verify(message.indices);
                 if (error)
                     return "indices." + error;
             }
             if (message.dims != null && message.hasOwnProperty("dims")) {
                 if (!Array.isArray(message.dims))
                     return "dims: array expected";
-                for (let i = 0; i < message.dims.length; ++i)
+                for (var i = 0; i < message.dims.length; ++i)
                     if (!$util.isInteger(message.dims[i]) && !(message.dims[i] && $util.isInteger(message.dims[i].low) && $util.isInteger(message.dims[i].high)))
                         return "dims: integer|Long[] expected";
             }
@@ -4780,7 +4782,7 @@ export const onnx = $root.onnx = (() => {
         SparseTensorProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.SparseTensorProto)
                 return object;
-            let message = new $root.onnx.SparseTensorProto();
+            var message = new $root.onnx.SparseTensorProto();
             if (object.values != null) {
                 if (typeof object.values !== "object")
                     throw TypeError(".onnx.SparseTensorProto.values: object expected");
@@ -4795,7 +4797,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.dims))
                     throw TypeError(".onnx.SparseTensorProto.dims: array expected");
                 message.dims = [];
-                for (let i = 0; i < object.dims.length; ++i)
+                for (var i = 0; i < object.dims.length; ++i)
                     if ($util.Long)
                         (message.dims[i] = $util.Long.fromValue(object.dims[i])).unsigned = false;
                     else if (typeof object.dims[i] === "string")
@@ -4820,7 +4822,7 @@ export const onnx = $root.onnx = (() => {
         SparseTensorProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults)
                 object.dims = [];
             if (options.defaults) {
@@ -4833,7 +4835,7 @@ export const onnx = $root.onnx = (() => {
                 object.indices = $root.onnx.TensorProto.toObject(message.indices, options);
             if (message.dims && message.dims.length) {
                 object.dims = [];
-                for (let j = 0; j < message.dims.length; ++j)
+                for (var j = 0; j < message.dims.length; ++j)
                     if (typeof message.dims[j] === "number")
                         object.dims[j] = options.longs === String ? String(message.dims[j]) : message.dims[j];
                     else
@@ -4891,7 +4893,7 @@ export const onnx = $root.onnx = (() => {
         function TensorShapeProto(properties) {
             this.dim = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -4929,7 +4931,7 @@ export const onnx = $root.onnx = (() => {
             if (!writer)
                 writer = $Writer.create();
             if (message.dim != null && message.dim.length)
-                for (let i = 0; i < message.dim.length; ++i)
+                for (var i = 0; i < message.dim.length; ++i)
                     $root.onnx.TensorShapeProto.Dimension.encode(message.dim[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             return writer;
         };
@@ -4961,9 +4963,9 @@ export const onnx = $root.onnx = (() => {
         TensorShapeProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorShapeProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorShapeProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         if (!(message.dim && message.dim.length))
@@ -5009,8 +5011,8 @@ export const onnx = $root.onnx = (() => {
             if (message.dim != null && message.hasOwnProperty("dim")) {
                 if (!Array.isArray(message.dim))
                     return "dim: array expected";
-                for (let i = 0; i < message.dim.length; ++i) {
-                    let error = $root.onnx.TensorShapeProto.Dimension.verify(message.dim[i]);
+                for (var i = 0; i < message.dim.length; ++i) {
+                    var error = $root.onnx.TensorShapeProto.Dimension.verify(message.dim[i]);
                     if (error)
                         return "dim." + error;
                 }
@@ -5029,12 +5031,12 @@ export const onnx = $root.onnx = (() => {
         TensorShapeProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.TensorShapeProto)
                 return object;
-            let message = new $root.onnx.TensorShapeProto();
+            var message = new $root.onnx.TensorShapeProto();
             if (object.dim) {
                 if (!Array.isArray(object.dim))
                     throw TypeError(".onnx.TensorShapeProto.dim: array expected");
                 message.dim = [];
-                for (let i = 0; i < object.dim.length; ++i) {
+                for (var i = 0; i < object.dim.length; ++i) {
                     if (typeof object.dim[i] !== "object")
                         throw TypeError(".onnx.TensorShapeProto.dim: object expected");
                     message.dim[i] = $root.onnx.TensorShapeProto.Dimension.fromObject(object.dim[i]);
@@ -5055,12 +5057,12 @@ export const onnx = $root.onnx = (() => {
         TensorShapeProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults)
                 object.dim = [];
             if (message.dim && message.dim.length) {
                 object.dim = [];
-                for (let j = 0; j < message.dim.length; ++j)
+                for (var j = 0; j < message.dim.length; ++j)
                     object.dim[j] = $root.onnx.TensorShapeProto.Dimension.toObject(message.dim[j], options);
             }
             return object;
@@ -5113,7 +5115,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Dimension(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -5143,7 +5145,7 @@ export const onnx = $root.onnx = (() => {
             Dimension.prototype.denotation = "";
 
             // OneOf field names bound to virtual getters and setters
-            let $oneOfFields;
+            var $oneOfFields;
 
             /**
              * Dimension value.
@@ -5216,9 +5218,9 @@ export const onnx = $root.onnx = (() => {
             Dimension.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorShapeProto.Dimension();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TensorShapeProto.Dimension();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.dimValue = reader.int64();
@@ -5267,7 +5269,7 @@ export const onnx = $root.onnx = (() => {
             Dimension.verify = function verify(message) {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
-                let properties = {};
+                var properties = {};
                 if (message.dimValue != null && message.hasOwnProperty("dimValue")) {
                     properties.value = 1;
                     if (!$util.isInteger(message.dimValue) && !(message.dimValue && $util.isInteger(message.dimValue.low) && $util.isInteger(message.dimValue.high)))
@@ -5297,7 +5299,7 @@ export const onnx = $root.onnx = (() => {
             Dimension.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TensorShapeProto.Dimension)
                     return object;
-                let message = new $root.onnx.TensorShapeProto.Dimension();
+                var message = new $root.onnx.TensorShapeProto.Dimension();
                 if (object.dimValue != null)
                     if ($util.Long)
                         (message.dimValue = $util.Long.fromValue(object.dimValue)).unsigned = false;
@@ -5326,7 +5328,7 @@ export const onnx = $root.onnx = (() => {
             Dimension.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults)
                     object.denotation = "";
                 if (message.dimValue != null && message.hasOwnProperty("dimValue")) {
@@ -5403,7 +5405,7 @@ export const onnx = $root.onnx = (() => {
          */
         function TypeProto(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -5457,7 +5459,7 @@ export const onnx = $root.onnx = (() => {
         TypeProto.prototype.denotation = "";
 
         // OneOf field names bound to virtual getters and setters
-        let $oneOfFields;
+        var $oneOfFields;
 
         /**
          * TypeProto value.
@@ -5536,9 +5538,9 @@ export const onnx = $root.onnx = (() => {
         TypeProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.tensorType = $root.onnx.TypeProto.Tensor.decode(reader, reader.uint32());
@@ -5599,11 +5601,11 @@ export const onnx = $root.onnx = (() => {
         TypeProto.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
-            let properties = {};
+            var properties = {};
             if (message.tensorType != null && message.hasOwnProperty("tensorType")) {
                 properties.value = 1;
                 {
-                    let error = $root.onnx.TypeProto.Tensor.verify(message.tensorType);
+                    var error = $root.onnx.TypeProto.Tensor.verify(message.tensorType);
                     if (error)
                         return "tensorType." + error;
                 }
@@ -5613,7 +5615,7 @@ export const onnx = $root.onnx = (() => {
                     return "value: multiple values";
                 properties.value = 1;
                 {
-                    let error = $root.onnx.TypeProto.Sequence.verify(message.sequenceType);
+                    var error = $root.onnx.TypeProto.Sequence.verify(message.sequenceType);
                     if (error)
                         return "sequenceType." + error;
                 }
@@ -5623,7 +5625,7 @@ export const onnx = $root.onnx = (() => {
                     return "value: multiple values";
                 properties.value = 1;
                 {
-                    let error = $root.onnx.TypeProto.Map.verify(message.mapType);
+                    var error = $root.onnx.TypeProto.Map.verify(message.mapType);
                     if (error)
                         return "mapType." + error;
                 }
@@ -5633,7 +5635,7 @@ export const onnx = $root.onnx = (() => {
                     return "value: multiple values";
                 properties.value = 1;
                 {
-                    let error = $root.onnx.TypeProto.Optional.verify(message.optionalType);
+                    var error = $root.onnx.TypeProto.Optional.verify(message.optionalType);
                     if (error)
                         return "optionalType." + error;
                 }
@@ -5643,7 +5645,7 @@ export const onnx = $root.onnx = (() => {
                     return "value: multiple values";
                 properties.value = 1;
                 {
-                    let error = $root.onnx.TypeProto.SparseTensor.verify(message.sparseTensorType);
+                    var error = $root.onnx.TypeProto.SparseTensor.verify(message.sparseTensorType);
                     if (error)
                         return "sparseTensorType." + error;
                 }
@@ -5665,7 +5667,7 @@ export const onnx = $root.onnx = (() => {
         TypeProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.TypeProto)
                 return object;
-            let message = new $root.onnx.TypeProto();
+            var message = new $root.onnx.TypeProto();
             if (object.tensorType != null) {
                 if (typeof object.tensorType !== "object")
                     throw TypeError(".onnx.TypeProto.tensorType: object expected");
@@ -5708,7 +5710,7 @@ export const onnx = $root.onnx = (() => {
         TypeProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults)
                 object.denotation = "";
             if (message.tensorType != null && message.hasOwnProperty("tensorType")) {
@@ -5787,7 +5789,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Tensor(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -5866,9 +5868,9 @@ export const onnx = $root.onnx = (() => {
             Tensor.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Tensor();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Tensor();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.elemType = reader.int32();
@@ -5917,7 +5919,7 @@ export const onnx = $root.onnx = (() => {
                     if (!$util.isInteger(message.elemType))
                         return "elemType: integer expected";
                 if (message.shape != null && message.hasOwnProperty("shape")) {
-                    let error = $root.onnx.TensorShapeProto.verify(message.shape);
+                    var error = $root.onnx.TensorShapeProto.verify(message.shape);
                     if (error)
                         return "shape." + error;
                 }
@@ -5935,7 +5937,7 @@ export const onnx = $root.onnx = (() => {
             Tensor.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TypeProto.Tensor)
                     return object;
-                let message = new $root.onnx.TypeProto.Tensor();
+                var message = new $root.onnx.TypeProto.Tensor();
                 if (object.elemType != null)
                     message.elemType = object.elemType | 0;
                 if (object.shape != null) {
@@ -5958,7 +5960,7 @@ export const onnx = $root.onnx = (() => {
             Tensor.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     object.elemType = 0;
                     object.shape = null;
@@ -6018,7 +6020,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Sequence(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -6087,9 +6089,9 @@ export const onnx = $root.onnx = (() => {
             Sequence.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Sequence();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Sequence();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.elemType = $root.onnx.TypeProto.decode(reader, reader.uint32());
@@ -6131,7 +6133,7 @@ export const onnx = $root.onnx = (() => {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
                 if (message.elemType != null && message.hasOwnProperty("elemType")) {
-                    let error = $root.onnx.TypeProto.verify(message.elemType);
+                    var error = $root.onnx.TypeProto.verify(message.elemType);
                     if (error)
                         return "elemType." + error;
                 }
@@ -6149,7 +6151,7 @@ export const onnx = $root.onnx = (() => {
             Sequence.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TypeProto.Sequence)
                     return object;
-                let message = new $root.onnx.TypeProto.Sequence();
+                var message = new $root.onnx.TypeProto.Sequence();
                 if (object.elemType != null) {
                     if (typeof object.elemType !== "object")
                         throw TypeError(".onnx.TypeProto.Sequence.elemType: object expected");
@@ -6170,7 +6172,7 @@ export const onnx = $root.onnx = (() => {
             Sequence.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults)
                     object.elemType = null;
                 if (message.elemType != null && message.hasOwnProperty("elemType"))
@@ -6227,7 +6229,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Map(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -6306,9 +6308,9 @@ export const onnx = $root.onnx = (() => {
             Map.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Map();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Map();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.keyType = reader.int32();
@@ -6357,7 +6359,7 @@ export const onnx = $root.onnx = (() => {
                     if (!$util.isInteger(message.keyType))
                         return "keyType: integer expected";
                 if (message.valueType != null && message.hasOwnProperty("valueType")) {
-                    let error = $root.onnx.TypeProto.verify(message.valueType);
+                    var error = $root.onnx.TypeProto.verify(message.valueType);
                     if (error)
                         return "valueType." + error;
                 }
@@ -6375,7 +6377,7 @@ export const onnx = $root.onnx = (() => {
             Map.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TypeProto.Map)
                     return object;
-                let message = new $root.onnx.TypeProto.Map();
+                var message = new $root.onnx.TypeProto.Map();
                 if (object.keyType != null)
                     message.keyType = object.keyType | 0;
                 if (object.valueType != null) {
@@ -6398,7 +6400,7 @@ export const onnx = $root.onnx = (() => {
             Map.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     object.keyType = 0;
                     object.valueType = null;
@@ -6458,7 +6460,7 @@ export const onnx = $root.onnx = (() => {
              */
             function Optional(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -6527,9 +6529,9 @@ export const onnx = $root.onnx = (() => {
             Optional.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Optional();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.Optional();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.elemType = $root.onnx.TypeProto.decode(reader, reader.uint32());
@@ -6571,7 +6573,7 @@ export const onnx = $root.onnx = (() => {
                 if (typeof message !== "object" || message === null)
                     return "object expected";
                 if (message.elemType != null && message.hasOwnProperty("elemType")) {
-                    let error = $root.onnx.TypeProto.verify(message.elemType);
+                    var error = $root.onnx.TypeProto.verify(message.elemType);
                     if (error)
                         return "elemType." + error;
                 }
@@ -6589,7 +6591,7 @@ export const onnx = $root.onnx = (() => {
             Optional.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TypeProto.Optional)
                     return object;
-                let message = new $root.onnx.TypeProto.Optional();
+                var message = new $root.onnx.TypeProto.Optional();
                 if (object.elemType != null) {
                     if (typeof object.elemType !== "object")
                         throw TypeError(".onnx.TypeProto.Optional.elemType: object expected");
@@ -6610,7 +6612,7 @@ export const onnx = $root.onnx = (() => {
             Optional.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults)
                     object.elemType = null;
                 if (message.elemType != null && message.hasOwnProperty("elemType"))
@@ -6667,7 +6669,7 @@ export const onnx = $root.onnx = (() => {
              */
             function SparseTensor(properties) {
                 if (properties)
-                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                         if (properties[keys[i]] != null)
                             this[keys[i]] = properties[keys[i]];
             }
@@ -6746,9 +6748,9 @@ export const onnx = $root.onnx = (() => {
             SparseTensor.decode = function decode(reader, length) {
                 if (!(reader instanceof $Reader))
                     reader = $Reader.create(reader);
-                let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.SparseTensor();
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.TypeProto.SparseTensor();
                 while (reader.pos < end) {
-                    let tag = reader.uint32();
+                    var tag = reader.uint32();
                     switch (tag >>> 3) {
                     case 1: {
                             message.elemType = reader.int32();
@@ -6797,7 +6799,7 @@ export const onnx = $root.onnx = (() => {
                     if (!$util.isInteger(message.elemType))
                         return "elemType: integer expected";
                 if (message.shape != null && message.hasOwnProperty("shape")) {
-                    let error = $root.onnx.TensorShapeProto.verify(message.shape);
+                    var error = $root.onnx.TensorShapeProto.verify(message.shape);
                     if (error)
                         return "shape." + error;
                 }
@@ -6815,7 +6817,7 @@ export const onnx = $root.onnx = (() => {
             SparseTensor.fromObject = function fromObject(object) {
                 if (object instanceof $root.onnx.TypeProto.SparseTensor)
                     return object;
-                let message = new $root.onnx.TypeProto.SparseTensor();
+                var message = new $root.onnx.TypeProto.SparseTensor();
                 if (object.elemType != null)
                     message.elemType = object.elemType | 0;
                 if (object.shape != null) {
@@ -6838,7 +6840,7 @@ export const onnx = $root.onnx = (() => {
             SparseTensor.toObject = function toObject(message, options) {
                 if (!options)
                     options = {};
-                let object = {};
+                var object = {};
                 if (options.defaults) {
                     object.elemType = 0;
                     object.shape = null;
@@ -6902,7 +6904,7 @@ export const onnx = $root.onnx = (() => {
          */
         function OperatorSetIdProto(properties) {
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -6981,9 +6983,9 @@ export const onnx = $root.onnx = (() => {
         OperatorSetIdProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.OperatorSetIdProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.OperatorSetIdProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.domain = reader.string();
@@ -7048,7 +7050,7 @@ export const onnx = $root.onnx = (() => {
         OperatorSetIdProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.OperatorSetIdProto)
                 return object;
-            let message = new $root.onnx.OperatorSetIdProto();
+            var message = new $root.onnx.OperatorSetIdProto();
             if (object.domain != null)
                 message.domain = String(object.domain);
             if (object.version != null)
@@ -7075,11 +7077,11 @@ export const onnx = $root.onnx = (() => {
         OperatorSetIdProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.defaults) {
                 object.domain = "";
                 if ($util.Long) {
-                    let long = new $util.Long(0, 0, false);
+                    var long = new $util.Long(0, 0, false);
                     object.version = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
                 } else
                     object.version = options.longs === String ? "0" : 0;
@@ -7131,7 +7133,7 @@ export const onnx = $root.onnx = (() => {
      * @property {number} STABLE=1 STABLE value
      */
     onnx.OperatorStatus = (function() {
-        const valuesById = {}, values = Object.create(valuesById);
+        var valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "EXPERIMENTAL"] = 0;
         values[valuesById[1] = "STABLE"] = 1;
         return values;
@@ -7170,7 +7172,7 @@ export const onnx = $root.onnx = (() => {
             this.node = [];
             this.opsetImport = [];
             if (properties)
-                for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
                         this[keys[i]] = properties[keys[i]];
         }
@@ -7274,26 +7276,26 @@ export const onnx = $root.onnx = (() => {
             if (message.name != null && Object.hasOwnProperty.call(message, "name"))
                 writer.uint32(/* id 1, wireType 2 =*/10).string(message.name);
             if (message.input != null && message.input.length)
-                for (let i = 0; i < message.input.length; ++i)
+                for (var i = 0; i < message.input.length; ++i)
                     writer.uint32(/* id 4, wireType 2 =*/34).string(message.input[i]);
             if (message.output != null && message.output.length)
-                for (let i = 0; i < message.output.length; ++i)
+                for (var i = 0; i < message.output.length; ++i)
                     writer.uint32(/* id 5, wireType 2 =*/42).string(message.output[i]);
             if (message.attribute != null && message.attribute.length)
-                for (let i = 0; i < message.attribute.length; ++i)
+                for (var i = 0; i < message.attribute.length; ++i)
                     writer.uint32(/* id 6, wireType 2 =*/50).string(message.attribute[i]);
             if (message.node != null && message.node.length)
-                for (let i = 0; i < message.node.length; ++i)
+                for (var i = 0; i < message.node.length; ++i)
                     $root.onnx.NodeProto.encode(message.node[i], writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
             if (message.docString != null && Object.hasOwnProperty.call(message, "docString"))
                 writer.uint32(/* id 8, wireType 2 =*/66).string(message.docString);
             if (message.opsetImport != null && message.opsetImport.length)
-                for (let i = 0; i < message.opsetImport.length; ++i)
+                for (var i = 0; i < message.opsetImport.length; ++i)
                     $root.onnx.OperatorSetIdProto.encode(message.opsetImport[i], writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
             if (message.domain != null && Object.hasOwnProperty.call(message, "domain"))
                 writer.uint32(/* id 10, wireType 2 =*/82).string(message.domain);
             if (message.attributeProto != null && message.attributeProto.length)
-                for (let i = 0; i < message.attributeProto.length; ++i)
+                for (var i = 0; i < message.attributeProto.length; ++i)
                     $root.onnx.AttributeProto.encode(message.attributeProto[i], writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
             return writer;
         };
@@ -7325,9 +7327,9 @@ export const onnx = $root.onnx = (() => {
         FunctionProto.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            let end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.FunctionProto();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.onnx.FunctionProto();
             while (reader.pos < end) {
-                let tag = reader.uint32();
+                var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
                         message.name = reader.string();
@@ -7418,29 +7420,29 @@ export const onnx = $root.onnx = (() => {
             if (message.input != null && message.hasOwnProperty("input")) {
                 if (!Array.isArray(message.input))
                     return "input: array expected";
-                for (let i = 0; i < message.input.length; ++i)
+                for (var i = 0; i < message.input.length; ++i)
                     if (!$util.isString(message.input[i]))
                         return "input: string[] expected";
             }
             if (message.output != null && message.hasOwnProperty("output")) {
                 if (!Array.isArray(message.output))
                     return "output: array expected";
-                for (let i = 0; i < message.output.length; ++i)
+                for (var i = 0; i < message.output.length; ++i)
                     if (!$util.isString(message.output[i]))
                         return "output: string[] expected";
             }
             if (message.attribute != null && message.hasOwnProperty("attribute")) {
                 if (!Array.isArray(message.attribute))
                     return "attribute: array expected";
-                for (let i = 0; i < message.attribute.length; ++i)
+                for (var i = 0; i < message.attribute.length; ++i)
                     if (!$util.isString(message.attribute[i]))
                         return "attribute: string[] expected";
             }
             if (message.attributeProto != null && message.hasOwnProperty("attributeProto")) {
                 if (!Array.isArray(message.attributeProto))
                     return "attributeProto: array expected";
-                for (let i = 0; i < message.attributeProto.length; ++i) {
-                    let error = $root.onnx.AttributeProto.verify(message.attributeProto[i]);
+                for (var i = 0; i < message.attributeProto.length; ++i) {
+                    var error = $root.onnx.AttributeProto.verify(message.attributeProto[i]);
                     if (error)
                         return "attributeProto." + error;
                 }
@@ -7448,8 +7450,8 @@ export const onnx = $root.onnx = (() => {
             if (message.node != null && message.hasOwnProperty("node")) {
                 if (!Array.isArray(message.node))
                     return "node: array expected";
-                for (let i = 0; i < message.node.length; ++i) {
-                    let error = $root.onnx.NodeProto.verify(message.node[i]);
+                for (var i = 0; i < message.node.length; ++i) {
+                    var error = $root.onnx.NodeProto.verify(message.node[i]);
                     if (error)
                         return "node." + error;
                 }
@@ -7460,8 +7462,8 @@ export const onnx = $root.onnx = (() => {
             if (message.opsetImport != null && message.hasOwnProperty("opsetImport")) {
                 if (!Array.isArray(message.opsetImport))
                     return "opsetImport: array expected";
-                for (let i = 0; i < message.opsetImport.length; ++i) {
-                    let error = $root.onnx.OperatorSetIdProto.verify(message.opsetImport[i]);
+                for (var i = 0; i < message.opsetImport.length; ++i) {
+                    var error = $root.onnx.OperatorSetIdProto.verify(message.opsetImport[i]);
                     if (error)
                         return "opsetImport." + error;
                 }
@@ -7483,35 +7485,35 @@ export const onnx = $root.onnx = (() => {
         FunctionProto.fromObject = function fromObject(object) {
             if (object instanceof $root.onnx.FunctionProto)
                 return object;
-            let message = new $root.onnx.FunctionProto();
+            var message = new $root.onnx.FunctionProto();
             if (object.name != null)
                 message.name = String(object.name);
             if (object.input) {
                 if (!Array.isArray(object.input))
                     throw TypeError(".onnx.FunctionProto.input: array expected");
                 message.input = [];
-                for (let i = 0; i < object.input.length; ++i)
+                for (var i = 0; i < object.input.length; ++i)
                     message.input[i] = String(object.input[i]);
             }
             if (object.output) {
                 if (!Array.isArray(object.output))
                     throw TypeError(".onnx.FunctionProto.output: array expected");
                 message.output = [];
-                for (let i = 0; i < object.output.length; ++i)
+                for (var i = 0; i < object.output.length; ++i)
                     message.output[i] = String(object.output[i]);
             }
             if (object.attribute) {
                 if (!Array.isArray(object.attribute))
                     throw TypeError(".onnx.FunctionProto.attribute: array expected");
                 message.attribute = [];
-                for (let i = 0; i < object.attribute.length; ++i)
+                for (var i = 0; i < object.attribute.length; ++i)
                     message.attribute[i] = String(object.attribute[i]);
             }
             if (object.attributeProto) {
                 if (!Array.isArray(object.attributeProto))
                     throw TypeError(".onnx.FunctionProto.attributeProto: array expected");
                 message.attributeProto = [];
-                for (let i = 0; i < object.attributeProto.length; ++i) {
+                for (var i = 0; i < object.attributeProto.length; ++i) {
                     if (typeof object.attributeProto[i] !== "object")
                         throw TypeError(".onnx.FunctionProto.attributeProto: object expected");
                     message.attributeProto[i] = $root.onnx.AttributeProto.fromObject(object.attributeProto[i]);
@@ -7521,7 +7523,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.node))
                     throw TypeError(".onnx.FunctionProto.node: array expected");
                 message.node = [];
-                for (let i = 0; i < object.node.length; ++i) {
+                for (var i = 0; i < object.node.length; ++i) {
                     if (typeof object.node[i] !== "object")
                         throw TypeError(".onnx.FunctionProto.node: object expected");
                     message.node[i] = $root.onnx.NodeProto.fromObject(object.node[i]);
@@ -7533,7 +7535,7 @@ export const onnx = $root.onnx = (() => {
                 if (!Array.isArray(object.opsetImport))
                     throw TypeError(".onnx.FunctionProto.opsetImport: array expected");
                 message.opsetImport = [];
-                for (let i = 0; i < object.opsetImport.length; ++i) {
+                for (var i = 0; i < object.opsetImport.length; ++i) {
                     if (typeof object.opsetImport[i] !== "object")
                         throw TypeError(".onnx.FunctionProto.opsetImport: object expected");
                     message.opsetImport[i] = $root.onnx.OperatorSetIdProto.fromObject(object.opsetImport[i]);
@@ -7556,7 +7558,7 @@ export const onnx = $root.onnx = (() => {
         FunctionProto.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
-            let object = {};
+            var object = {};
             if (options.arrays || options.defaults) {
                 object.input = [];
                 object.output = [];
@@ -7574,36 +7576,36 @@ export const onnx = $root.onnx = (() => {
                 object.name = message.name;
             if (message.input && message.input.length) {
                 object.input = [];
-                for (let j = 0; j < message.input.length; ++j)
+                for (var j = 0; j < message.input.length; ++j)
                     object.input[j] = message.input[j];
             }
             if (message.output && message.output.length) {
                 object.output = [];
-                for (let j = 0; j < message.output.length; ++j)
+                for (var j = 0; j < message.output.length; ++j)
                     object.output[j] = message.output[j];
             }
             if (message.attribute && message.attribute.length) {
                 object.attribute = [];
-                for (let j = 0; j < message.attribute.length; ++j)
+                for (var j = 0; j < message.attribute.length; ++j)
                     object.attribute[j] = message.attribute[j];
             }
             if (message.node && message.node.length) {
                 object.node = [];
-                for (let j = 0; j < message.node.length; ++j)
+                for (var j = 0; j < message.node.length; ++j)
                     object.node[j] = $root.onnx.NodeProto.toObject(message.node[j], options);
             }
             if (message.docString != null && message.hasOwnProperty("docString"))
                 object.docString = message.docString;
             if (message.opsetImport && message.opsetImport.length) {
                 object.opsetImport = [];
-                for (let j = 0; j < message.opsetImport.length; ++j)
+                for (var j = 0; j < message.opsetImport.length; ++j)
                     object.opsetImport[j] = $root.onnx.OperatorSetIdProto.toObject(message.opsetImport[j], options);
             }
             if (message.domain != null && message.hasOwnProperty("domain"))
                 object.domain = message.domain;
             if (message.attributeProto && message.attributeProto.length) {
                 object.attributeProto = [];
-                for (let j = 0; j < message.attributeProto.length; ++j)
+                for (var j = 0; j < message.attributeProto.length; ++j)
                     object.attributeProto[j] = $root.onnx.AttributeProto.toObject(message.attributeProto[j], options);
             }
             return object;
@@ -7641,4 +7643,4 @@ export const onnx = $root.onnx = (() => {
     return onnx;
 })();
 
-export { $root as default };
+module.exports = $root;

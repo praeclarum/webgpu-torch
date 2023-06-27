@@ -8,7 +8,7 @@
     "test": "jest",
     "start": "webpack-dev-server --open",
     "build-tests": "ts-node ./scripts/testgen.ts && webpack --config webpack.config.tests.js",
-    "build-onnx": "pbjs -t static-module -w es6 -o src/onnx.js external/onnx.proto && pbts -o src/onnx.d.ts src/onnx.js"
+    "build-onnx": "pbjs -t static-module -w commonjs -o src/onnx.js external/onnx.proto && pbts -o src/onnx.d.ts src/onnx.js"
   },
   "repository": {
     "type": "git",
@@ -49,6 +49,7 @@
     "webpack-dev-server": "^4.13.3"
   },
   "dependencies": {
-    "@webgpu/types": "^0.1.31"
+    "@webgpu/types": "^0.1.31",
+    "cross-fetch": "^3.1.6"
   }
 }
