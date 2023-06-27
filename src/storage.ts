@@ -334,19 +334,7 @@ export class BufferHeap<T> {
                 `Requested heap size ${heapSize} is not a power of two`
             );
         }
-
-        // if (this._heapSize > gpuDevice.limits.maxBufferSize) {
-        //     throw new Error(
-        //         `Requested heap size ${heapSize} is larger than maximum buffer size ${gpuDevice.limits.maxBufferSize}`
-        //     );
-        // }
-        // this._heapBuffer = gpuDevice.createBuffer({
-        //     mappedAtCreation: false,
-        //     size: this._heapSize,
-        //     usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-        // });
         this._heapBuffer = heapBuffer;
-        // this._minOrder = Math.ceil(Math.log2(gpuDevice.limits.minStorageBufferOffsetAlignment));
         this._minOrder = minOrder;
         this.orderFreeLists = [];
         const maxOrder = Math.log2(this._heapSize);

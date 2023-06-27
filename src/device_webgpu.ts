@@ -45,29 +45,6 @@ export class DeviceWebGPU extends Device {
                 }
             }
         );
-        for (let size of []) {
-            let bufferPool: { usage: number; buffer: GPUBuffer }[] =
-                this._bufferPools[size];
-            if (bufferPool === undefined) {
-                bufferPool = [];
-                this._bufferPools[size] = bufferPool;
-            }
-            for (let usage of [
-                GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-            ]) {
-                const count = Math.min(256, (8 * 1024 * 1042) / size);
-                for (let i = 0; i < count; i++) {
-                    bufferPool.push({
-                        usage: usage,
-                        buffer: this._device.createBuffer({
-                            mappedAtCreation: false,
-                            size: size,
-                            usage: usage,
-                        }),
-                    });
-                }
-            }
-        }
     }
     initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): UntypedStorage {
         const elementByteSize = dtypeByteSize(dtype);
@@ -105,35 +82,6 @@ export class DeviceWebGPU extends Device {
     }
     createHeapStorage(buffer: HeapBuffer<GPUBuffer>): UntypedStorage {
         return new GPUBufferStorage(buffer, this);
-    }
-    getPooledBuffer(descriptor: GPUBufferDescriptor): GPUBuffer {
-        const sizeRaw = descriptor.size;
-        // function nextPowerOfTwo(x: number) {
-        //     return Math.pow(2, Math.ceil(Math.log2(x)));
-        // }
-        // const size = nextPowerOfTwo(sizeRaw);
-        const size = sizeRaw;
-        let bufferPool: { usage: number; buffer: GPUBuffer }[] =
-            this._bufferPools[size];
-        if (bufferPool === undefined) {
-            bufferPool = [];
-            this._bufferPools[size] = bufferPool;
-        }
-        const npool = bufferPool.length;
-        if (npool > 0) {
-            // console.log(`Reusing buffer of size ${size} bytes (pool length: ${this._bufferPool.length})`);
-            const buffer = bufferPool[npool - 1].buffer;
-            bufferPool.splice(npool - 1, 1);
-            return buffer;
-        } else {
-            // console.log(`Creating new buffer of size ${size} bytes (pool length: ${this._bufferPool.length})`);
-            // Otherwise, create a new buffer
-            return this._device.createBuffer({
-                mappedAtCreation: false,
-                size: descriptor.size,
-                usage: descriptor.usage,
-            });
-        }
     }
     createKernel(spec: KernelSpec, config: KernelConfig): Kernel {
         return new KernelWebGPU(spec, config, this);
