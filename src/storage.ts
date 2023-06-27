@@ -2,7 +2,7 @@ import { Device } from "./device";
 import { DeviceWebGPU } from "./device_webgpu";
 import { cpuDevice } from "./devices";
 import { ATypedArray, Dtype, dtypedBufferToTypedArray } from "./dtype";
-import { Shape, defaultStrides, shapeSize } from "./shape";
+import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 
 export type TensorArrayData = Array<number | TensorArrayData>;
 
@@ -216,11 +216,34 @@ export function newTypedArrayForDtype(length: number, dtype: Dtype) {
     }
 }
 
-export function newTypedArrayFromArray(
-    data: TensorArrayData | null,
+export function newStorageFromATypedArray(
+    data: ATypedArray,
+    shape: Shape,
     dtype: Dtype,
     device: Device
-): { storage: UntypedStorage; shape: number[]; strides: number[] } {
+): { storage: UntypedStorage; shape: Shape; strides: Strides } {
+    const strides = defaultStrides(shape);
+    const storage = device.initStorage(shape, dtype, (flatData) => {
+        const elementSize = flatData.BYTES_PER_ELEMENT;
+        if (elementSize > 1 && data instanceof Uint8Array) {
+            new Uint8Array(flatData.buffer).set(data);
+        }
+        else {
+            flatData.set(data);
+        }
+    });
+    return {
+        storage,
+        shape,
+        strides,
+    }
+}
+
+export function newTypedArrayFromArray(
+    data: TensorArrayData,
+    dtype: Dtype,
+    device: Device
+): { storage: UntypedStorage; shape: Shape; strides: Strides } {
     const shape: number[] = [];
     function getShape(data: TensorArrayData | number) {
         if (typeof data === "number") {
@@ -233,7 +256,6 @@ export function newTypedArrayFromArray(
         getShape(data);
     }
     const strides = defaultStrides(shape);
-    const size = shapeSize(shape);
     const storage = device.initStorage(shape, dtype, (flatData) => {
         // const flatData = storage.getTypedArray(dtype);
         let flatIndex = 0;

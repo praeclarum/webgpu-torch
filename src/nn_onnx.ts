@@ -46,7 +46,7 @@ export class ONNXModule extends Module {
             }
             const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
             this.tensorSpecNameToBufferName[name] = bufferName;
-            this.registerBuffer(name, initToTensor(init));
+            this.registerBuffer(bufferName, initToTensor(init));
         }
     }
     forward(inputs: Tensor[]): Tensor[] {

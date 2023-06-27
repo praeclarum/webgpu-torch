@@ -289,3 +289,8 @@ test("add scalar inplace with alpha", async () => {
     x.add_(5, 7);
     expect(await x.toArrayAsync()).toEqual([36, 37, 38]);
 });
+
+test("create with Uint8Array", async () => {
+    const x = tensor({data:new Uint8Array([1, 2, 3, 4]), shape: [2, 2], dtype: "uint8"});
+    expect(await x.toArrayAsync()).toEqual([[1, 2], [3, 4]]);
+});

@@ -6,6 +6,7 @@ import { ATypedArray, Dtype, getDtype } from "./dtype";
 import {
     TensorArrayData,
     UntypedStorage,
+    newStorageFromATypedArray,
     newTypedArrayFromArray,
 } from "./storage";
 import { type GradientFunction, type GradientContext, isGradEnabled } from "./autograd";
@@ -121,6 +122,13 @@ export class Tensor extends TensorBase {
             this._shape = array.shape;
             this._strides = array.strides;
             this._node = (new SourceNode(array.storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
+        } else if (arrayOrSpec instanceof Uint8Array) {
+            const shape = [arrayOrSpec.length];
+            const array = newStorageFromATypedArray(arrayOrSpec, shape, dt, d);
+            this._dtype = dt;
+            this._shape = array.shape;
+            this._strides = array.strides;
+            this._node = (new SourceNode(array.storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else if (arrayOrSpec.hasOwnProperty("node") && (arrayOrSpec as any).node instanceof GraphNode) {
             const noder = arrayOrSpec as GraphNodeOutputRef;
             const spec = noder.node.outputs[noder.outputIndex];
@@ -136,6 +144,13 @@ export class Tensor extends TensorBase {
             let storage: UntypedStorage;
             if (jdata.data instanceof Array) {
                 const array = newTypedArrayFromArray(jdata.data, dt, d);
+                storage = array.storage;
+                this._dtype = dt;
+                this._shape = array.shape;
+                this._strides = array.strides;
+            } else if (jdata.data instanceof Uint8Array) {
+                const shape = jdata.shape || [jdata.data.length];
+                const array = newStorageFromATypedArray(jdata.data, shape, dt, d);
                 storage = array.storage;
                 this._dtype = dt;
                 this._shape = array.shape;
