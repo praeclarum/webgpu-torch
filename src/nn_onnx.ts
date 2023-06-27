@@ -12,7 +12,8 @@ export class ONNXModule extends Module {
     readonly outputs: onnx.IValueInfoProto[];
     readonly nodes: onnx.INodeProto[];
     readonly nodeFromOutput: { [outputName: string]: onnx.INodeProto } = {};
-    readonly tensorSpecNameToBufferName: { [tensorSpecName: string]: string } = {};
+    readonly tensorSpecNameToBufferName: { [tensorSpecName: string]: string } =
+        {};
     constructor(model: onnx.IModelProto) {
         super();
         const graph = model.graph;
@@ -85,13 +86,17 @@ export class ONNXModule extends Module {
                 return [c];
             }
             default:
-                throw new Error(`Cannot evaluate ONNX node type '${node.opType}'`);
+                throw new Error(
+                    `Cannot evaluate ONNX node type '${node.opType}'`
+                );
         }
     }
     static async loadUrlAsync(url: string): Promise<ONNXModule> {
         const response = await fetch(url);
         if (!response.ok) {
-            throw new Error(`HTTP request for model failed. Status: ${response.status}`);
+            throw new Error(
+                `HTTP request for model failed. Status: ${response.status}`
+            );
         }
         const buffer = await response.arrayBuffer();
         const model = onnx.ModelProto.decode(new Uint8Array(buffer));
@@ -99,7 +104,7 @@ export class ONNXModule extends Module {
     }
 }
 
-function longDimsToShape(dims: (Long|number)[]): Shape {
+function longDimsToShape(dims: (Long | number)[]): Shape {
     const shape: number[] = [];
     for (const rawdim of dims) {
         if (rawdim instanceof Long) {
@@ -121,34 +126,79 @@ function longDimsToShape(dims: (Long|number)[]): Shape {
 
 function onnxDataTypeToDType(onnxDataType: onnx.TensorProto.DataType): Dtype {
     switch (onnxDataType) {
+        case onnx.TensorProto.DataType.INT8:
+            return "int8";
         case onnx.TensorProto.DataType.FLOAT:
             return "float32";
+        case onnx.TensorProto.DataType.INT64:
+            return "int64";
         default:
             throw new Error(`ONNX data type ${onnxDataType} not supported`);
     }
 }
 
 function initToTensor(init: onnx.ITensorProto): Tensor {
-    const shape = longDimsToShape(init.dims || []);
-    const indata64 = init.int64Data || init.uint64Data;
-    let data64: number[] | undefined;
-    if (indata64 && indata64.length > 0) {
-        data64 = indata64.map((x) => (x instanceof Long) ? x.toNumber() : x as number);
-    }
-    let dataString: Uint8Array | undefined;
-    if (init.stringData && init.stringData.length > 0) {
-        dataString = init.stringData[0];
-        throw new Error("String data not supported");
-    }
-    const data = init.rawData || init.floatData || init.int32Data || data64 || dataString;
-    if (!data) {
-        throw new Error("Initializer does not contain data");
+    const shape: Shape = longDimsToShape(init.dims || []);
+    const strides = defaultStrides(shape);
+    let dtype = onnxDataTypeToDType(init.dataType || 1);
+    let data: number[];
+    if (dtype === "int64") {
+        const oldDtype = dtype;
+        if (init.rawData && init.rawData.length > 0) {
+            let bytes = init.rawData;
+            let byteOffset = bytes.byteOffset;
+            const length = init.rawData.byteLength / 8;
+            if (byteOffset % 8 !== 0) {
+                const newBuffer = new ArrayBuffer(bytes.byteLength);
+                const newBytes = new Uint8Array(newBuffer);
+                newBytes.set(bytes);
+                bytes = newBytes;
+                byteOffset = bytes.byteOffset;
+            }
+            const in64 = new BigInt64Array(bytes.buffer, byteOffset, length);
+            const minInt32 = -2147483648n;
+            const maxInt32 = 2147483647n;
+            data = Array.from(in64).map((x) => {
+                if (x < minInt32) {
+                    console.warn(`Clipping int64 value ${x} to -2147483648`);
+                    return -2147483648;
+                }
+                if (x > maxInt32) {
+                    console.warn(`Clipping int64 value ${x} to 2147483647`);
+                    return 2147483647;
+                }
+                return Number(x);
+            });
+            dtype = "int32";
+        } else if (init.int64Data && init.int64Data.length > 0) {
+            data = init.int64Data.map((x) =>
+                x instanceof Long ? x.toNumber() : (x as number)
+            );
+            dtype = "int32";
+        } else if (init.uint64Data && init.uint64Data.length > 0) {
+            data = init.uint64Data.map((x) =>
+                x instanceof Long ? x.toNumber() : (x as number)
+            );
+            dtype = "uint32";
+        } else {
+            throw new Error("Initializer for int64 data cannot be found");
+        }
+    } else {
+        if (init.rawData && init.rawData.length > 0) {
+            data = Array.from(init.rawData);
+        } else if (init.floatData && init.floatData.length > 0) {
+            data = init.floatData;
+        } else if (init.int32Data && init.int32Data.length > 0) {
+            data = init.int32Data;
+        } else {
+            throw new Error("Initializer does not contain data");
+        }
     }
     const spec: TensorSpec = {
         data,
         shape,
-        strides: defaultStrides(shape),
-        dtype: onnxDataTypeToDType(init.dataType || 1),
+        strides,
+        dtype,
     };
     return new Tensor(spec);
 }

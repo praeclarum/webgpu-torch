@@ -72,9 +72,10 @@ export class DeviceWebGPU extends Device {
     initStorage(shape: Shape, dtype: Dtype, init: (array: ATypedArray) => void): UntypedStorage {
         const elementByteSize = dtypeByteSize(dtype);
         const byteSize = shapeSize(shape) * elementByteSize;
+        const alignedByteSize = Math.floor((byteSize + 3) / 4) * 4;
         const buffer = this._device.createBuffer({
             mappedAtCreation: true,
-            size: byteSize,
+            size: alignedByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
         const arrayBuffer = buffer.getMappedRange();
@@ -84,9 +85,10 @@ export class DeviceWebGPU extends Device {
         return new GPUBufferStorage(buffer, this);
     }
     alloc(byteSize: number): UntypedStorage {
+        const alignedByteSize = Math.floor((byteSize + 3) / 4) * 4;
         const buffer = this._device.createBuffer({
             mappedAtCreation: false,
-            size: byteSize,
+            size: alignedByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
         return new GPUBufferStorage(buffer, this);

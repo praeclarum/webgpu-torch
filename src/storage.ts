@@ -129,9 +129,10 @@ export class GPUBufferStorage extends UntypedStorage {
             usage !== undefined &&
             device !== undefined
         ) {
+            const alignedByteSize = Math.floor((input + 3) / 4) * 4;
             this._buffer = this._gpuDevice.createBuffer({
                 mappedAtCreation: true,
-                size: input,
+                size: alignedByteSize,
                 usage: usage,
             });
             this._byteSize = this._buffer.size;
@@ -226,7 +227,14 @@ export function newStorageFromATypedArray(
     const storage = device.initStorage(shape, dtype, (flatData) => {
         const elementSize = flatData.BYTES_PER_ELEMENT;
         if (elementSize > 1 && data instanceof Uint8Array) {
-            new Uint8Array(flatData.buffer).set(data);
+            const bflatData = new Uint8Array(flatData.buffer);
+            if (bflatData.length !== data.length) {
+                throw new Error(`TypedArray from Uint8Array length mismatch: ${bflatData.length} !== ${data.length}`);
+            }
+            bflatData.set(data);
+        }
+        else if (flatData.length !== data.length) {
+            throw new Error(`TypedArray length mismatch: ${flatData.length} !== ${data.length}`);
         }
         else {
             flatData.set(data);

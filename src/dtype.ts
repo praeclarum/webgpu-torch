@@ -1,8 +1,9 @@
-export type Dtype = "float32" | "int32" | "uint32" | "uint8";
+export type Dtype = "int8" | "uint8" | "int32" | "uint32" | "float32" | "int64";
 
-export type ATypedArray = Uint8Array | Int32Array | Uint32Array | Float32Array;
+export type ATypedArray = Int8Array | Uint8Array | Int32Array | Uint32Array | Float32Array;
 
 const dtypeArrayCtors = {
+    "int8": Int8Array,
     "uint8": Uint8Array,
     "int32": Int32Array,
     "uint32": Uint32Array,
@@ -10,6 +11,9 @@ const dtypeArrayCtors = {
 };
 
 export function dtypedBufferToTypedArray(dtype: Dtype, buffer: ArrayBuffer, byteOffset?: number, byteLength?: number): ATypedArray {
+    if (dtype === "int64") {
+        throw new Error("int64 not supported");
+    }
     const ctor = dtypeArrayCtors[dtype];
     if (ctor === undefined) {
         throw new Error(`Invalid dtype \"${dtype}\"`);
@@ -26,6 +30,8 @@ export function dtypedBufferToTypedArray(dtype: Dtype, buffer: ArrayBuffer, byte
 
 export function dtypeByteSize(dtype: Dtype): number {
     switch (dtype) {
+        case "int8":
+            return 1;
         case "uint8":
             return 1;
         case "int32":
@@ -34,6 +40,8 @@ export function dtypeByteSize(dtype: Dtype): number {
             return 4;
         case "float32":
             return 4;
+        case "int64":
+            return 8;
         default:
             throw new Error(`Invalid dtype ${dtype}`);
     }
@@ -42,6 +50,8 @@ export function dtypeByteSize(dtype: Dtype): number {
 export function getDtype(dtype?: Dtype | ATypedArray | null, defaultType?: Dtype): Dtype {
     if (dtype === null || dtype === undefined) {
         return defaultType || "float32";
+    } else if (dtype === "int8") {
+        return "int8";
     } else if (dtype === "uint8") {
         return "uint8";
     } else if (dtype === "int32") {
@@ -50,6 +60,8 @@ export function getDtype(dtype?: Dtype | ATypedArray | null, defaultType?: Dtype
         return "uint32";
     } else if (dtype === "float32") {
         return "float32";
+    } else if (dtype instanceof Int8Array) {
+        return "int8";
     } else if (dtype instanceof Uint8Array) {
         return "uint8";
     } else if (dtype instanceof Int32Array) {
