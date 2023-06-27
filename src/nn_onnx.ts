@@ -11,7 +11,7 @@ export class ONNXModule extends Module {
     readonly inputs: onnx.IValueInfoProto[];
     readonly outputs: onnx.IValueInfoProto[];
     readonly nodes: onnx.INodeProto[];
-    readonly nodeFromOutput: { [outputName: string]: onnx.INodeProto } = {};
+    readonly nodeFromOutput: { [outputName: string]: { node:onnx.INodeProto, outputIndex:number } } = {};
     readonly tensorSpecNameToBufferName: { [tensorSpecName: string]: string } =
         {};
     constructor(model: onnx.IModelProto) {
@@ -36,8 +36,8 @@ export class ONNXModule extends Module {
         this.outputs = outputs;
         this.nodes = nodes;
         for (const node of nodes) {
-            for (const output of node.output || []) {
-                this.nodeFromOutput[output] = node;
+            for (const [outputIndex, output] of (node.output || []).entries()) {
+                this.nodeFromOutput[output] = {node, outputIndex};
             }
         }
         for (const init of graph.initializer || []) {
@@ -64,32 +64,55 @@ export class ONNXModule extends Module {
             const outputName = output.name || "";
             if (outputName.length === 0) {
                 throw new Error(`Output ${i} does not have a name`);
-            }
-            const node = this.nodeFromOutput[outputName];
-            if (!node) {
-                throw new Error(`Output ${i} does not have a node`);
-            }
-            this.evaluateNode(node, inputs, env);
-            outputs.push(env[outputName]);
+            }            
+            const outputT = this.evaluateTensor(outputName, env);
+            outputs.push(outputT);
         }
         return outputs;
     }
-    private evaluateNode(
-        node: onnx.INodeProto,
-        inputs: Tensor[],
+    private evaluateTensor(
+        tensorSpecName: string,
         env: { [name: string]: Tensor }
-    ): Tensor[] {
-        switch (node.opType) {
-            case "MatMul": {
-                const c = matmul(inputs[0], inputs[1]);
-                env[node.output![0]] = c;
-                return [c];
-            }
-            default:
-                throw new Error(
-                    `Cannot evaluate ONNX node type '${node.opType}'`
-                );
+    ): Tensor {
+        // Has it already been evaluated?
+        if (tensorSpecName in env) {
+            return env[tensorSpecName];
         }
+        // Has it been initialized?
+        if (tensorSpecName in this.tensorSpecNameToBufferName) {
+            const bufferName = this.tensorSpecNameToBufferName[tensorSpecName];
+            const buffer = this.getBuffer(bufferName);
+            if (!buffer) {
+                throw new Error(`Buffer ${bufferName} not found`);
+            }
+            env[tensorSpecName] = buffer;
+            return buffer;
+        }
+        // Is it a node?
+        const node = this.nodeFromOutput[tensorSpecName];
+        if (!node) {
+            throw new Error(`Tensor ${tensorSpecName} does not have a node`);
+        }
+        // Evaluate inputs
+        const inputs: Tensor[] = [];
+        for (const tensorSpecName of node.node.input || []) {
+            inputs.push(this.evaluateTensor(tensorSpecName, env));
+        }
+        // Evaluate node
+        const nodeOutputNames = node.node.output || [];
+        const outputs = evalNode(node.node, inputs);
+        if (outputs.length !== nodeOutputNames.length) {
+            throw new Error(
+                `Node ${node.node.name} has ${nodeOutputNames.length} outputs but evaluated to ${outputs.length} outputs`
+            );
+        }
+        for (const [i, output] of outputs.entries()) {
+            const outputName = nodeOutputNames[i];
+            env[outputName] = output;
+        }
+        const output = outputs[node.outputIndex];
+        env[tensorSpecName] = output;
+        return output;
     }
     static async loadUrlAsync(url: string): Promise<ONNXModule> {
         const response = await fetch(url);
@@ -201,4 +224,19 @@ function initToTensor(init: onnx.ITensorProto): Tensor {
         dtype,
     };
     return new Tensor(spec);
+}
+
+function evalNode(node: onnx.INodeProto, inputs: Tensor[]): Tensor[] {
+    switch (node.opType) {
+        case "MatMul": {
+            return [matmul(inputs[0], inputs[1])];
+        }
+        case "Mul": {
+            return [inputs[0].mul(inputs[1])];
+        }
+        default:
+            throw new Error(
+                `Cannot evaluate ONNX node type '${node.opType}'`
+            );
+    }
 }

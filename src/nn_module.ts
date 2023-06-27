@@ -254,6 +254,10 @@ export class Module {
             yield buffer;
         }
     }
+    getBuffer(name: string): Tensor | null {
+        const buffer = this._buffers.find(([n, _]) => n === name);
+        return buffer ? buffer[1] : null;
+    }
 
     /**
      * Sets the module in training mode.
