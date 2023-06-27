@@ -1,4 +1,3 @@
-import { FunctionInput } from "./autograd";
 import { Tensor } from "./tensor";
 
 export type StateDict = { [key: string]: Tensor };
