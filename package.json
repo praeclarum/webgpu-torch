@@ -50,6 +50,7 @@
   },
   "dependencies": {
     "@webgpu/types": "^0.1.31",
+    "@xtuc/long": "^4.2.2",
     "cross-fetch": "^3.1.6"
   }
 }

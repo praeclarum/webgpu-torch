@@ -149,7 +149,7 @@ export class Tensor extends TensorBase {
                 this._shape = jdata.shape || [];
                 this._strides = jdata.strides || defaultStrides(this._shape);
             } else {
-                throw new Error("Cannot create tensor from json data " + jdata);
+                throw new Error("Cannot create tensor from data with type " + jdata.data.constructor.name);
             }
             this._node = (new SourceNode(storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else {
