@@ -2,9 +2,9 @@ import { Module } from "./nn_module";
 import { onnx } from "./onnx";
 import { fetch } from "cross-fetch";
 import { Tensor, TensorSpec } from "./tensor";
-import { matmul, tensor } from "./ops_artisanal";
+import { gather, matmul, tensor } from "./ops_artisanal";
 import { Shape, defaultStrides } from "./shape";
-import Long from "@xtuc/long";
+import Long from "long";
 import { Dtype } from "./dtype";
 
 export class ONNXModule extends Module {
@@ -248,15 +248,38 @@ function initToTensor(init: onnx.ITensorProto): Tensor {
     return new Tensor(spec);
 }
 
+function attrNumber(node: onnx.INodeProto, name: string): number {
+    const attr = node.attribute?.find((x) => x.name === name);
+    if (!attr) {
+        throw new Error(`Attribute ${name} of node ${node.name} (${node.opType}) not found`);
+    }
+    const atype = attr.type;
+    switch (atype) {
+        case onnx.AttributeProto.AttributeType.INT: {
+            const v = attr.i!;
+            if (typeof v == "number") {
+                return v;
+            }
+            else {
+                return v.toNumber();
+            }
+        }
+        case onnx.AttributeProto.AttributeType.FLOAT: {
+            return attr.f!;
+        }
+        default:
+            throw new Error(`Attribute ${name} of node ${node.name} (${node.opType}) is not a number`);
+    }
+}
+
 function evalNode(node: onnx.INodeProto, inputs: Tensor[]): Tensor[] {
     switch (node.opType) {
         case "Constant": {
             throw new Error("Constant nodes should be removed");
         }
         case "Gather": {
-            const axis = node.attribute?.find((x) => x.name === "axis")?.i || 0;
-            throw new Error("Gather not implemented");
-            // return [gather(inputs[0], inputs[1], axis)];
+            const axis = attrNumber(node, "axis");
+            return [gather(inputs[0], axis, inputs[1])];
         }
         case "MatMul": {
             return [matmul(inputs[0], inputs[1])];

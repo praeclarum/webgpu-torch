@@ -5,7 +5,7 @@ import type { Dtype } from "./dtype";
 import { broadcastBatchedMatmul, contiguousStridedShape, reshapeBatchedMatmul, type Shape, type StridedShape, type Strides } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
-import { LinearFunction } from "./functions_artisanal";
+import { GatherFunction, LinearFunction } from "./functions_artisanal";
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
@@ -92,6 +92,13 @@ export function conv2d(
             weight
         )[0];
     }
+}
+
+export function gather(input: Tensor, dim: number, index: Tensor): Tensor {
+    if (shouldCreateGradient(input, index)) {
+        return GatherFunction.apply(input, dim, index);
+    }
+    return GatherFunction.forward([input, dim, index]);
 }
 
 export function linear(input: Tensor, weight: Tensor, bias?: Tensor): Tensor {

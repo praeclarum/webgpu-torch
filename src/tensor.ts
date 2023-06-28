@@ -444,6 +444,9 @@ export class Tensor extends TensorBase {
         // console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
         return this.withShape(newShape, newStrides);
     }
+    gather(dim: number, index: Tensor): Tensor {
+        return aops.gather(this, dim, index);
+    }
     mm(other: Tensor): Tensor {
         return aops.mm(this, other);
     }

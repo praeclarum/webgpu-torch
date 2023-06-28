@@ -8,6 +8,32 @@ import { matmul } from "./ops_artisanal";
 import { Shape } from "./shape";
 import type { Tensor } from "./tensor";
 
+export class GatherFunction extends AutoFunction {
+    static forward(inputs: FunctionInput[]): Tensor {
+        const [input, dim, index] = inputs as [Tensor, number, Tensor];
+        const outputShape = input.shape.slice();
+        outputShape[dim] = index.shape[0];
+        return input.runKernel("gather", {dtype: input.dtype}, {dim}, [outputShape], index)[0];
+    }
+    static setupContext(
+        ctx: GradientContext,
+        inputs: FunctionInput[],
+        output: Tensor
+    ) {
+        const [input, dim, index] = inputs as [Tensor, number, Tensor];
+        ctx.saveForBackward(input, index);
+        ctx.dim = dim;
+    }
+    static backward(
+        ctx: GradientContext,
+        gradOutput: Tensor
+    ): GradientFunctionOutput[] {
+        const [input, index] = ctx.savedTensors;
+        const dim: number = ctx.dim;
+        throw new Error("Gather backward not implemented");
+    }
+}
+
 function _grad_sum_to_size(grad: Tensor, targetShape: Shape): Tensor {
     const gradShape = grad.shape;
     let sumDims: number[] = [];

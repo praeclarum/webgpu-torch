@@ -79,3 +79,9 @@ test("add 2d to 2d inplace broadcasts", async () => {
     x.add_(tensor([[4]]));
     expect(await x.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
 });
+
+test("gather 1d", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.gather(1, tensor([2, 1, 0]));
+    expect(await y.toArrayAsync()).toEqual([3, 2, 1]);
+});
