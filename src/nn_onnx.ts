@@ -2,7 +2,7 @@ import { Module } from "./nn_module";
 import { onnx } from "./onnx";
 import { fetch } from "cross-fetch";
 import { Tensor, TensorSpec } from "./tensor";
-import { matmul } from "./ops_artisanal";
+import { matmul, tensor } from "./ops_artisanal";
 import { Shape, defaultStrides } from "./shape";
 import Long from "@xtuc/long";
 import { Dtype } from "./dtype";
@@ -40,6 +40,7 @@ export class ONNXModule extends Module {
                 this.nodeFromOutput[output] = {node, outputIndex};
             }
         }
+        // Create buffers for initialized data
         for (const init of graph.initializer || []) {
             const name = init.name || "";
             if (name.length === 0) {
@@ -48,6 +49,27 @@ export class ONNXModule extends Module {
             const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
             this.tensorSpecNameToBufferName[name] = bufferName;
             this.registerBuffer(bufferName, initToTensor(init));
+        }
+        // Create buffers for constants
+        for (const node of nodes) {
+            if (node.opType === "Constant") {
+                const attr = (node.attribute || []).find(a => a.name === "value");
+                if (!attr) {
+                    throw new Error("Constant does not have a value");
+                }
+                if (attr.t) {
+                    const name = (node.output || [])[0] || "";
+                    if (name.length === 0) {
+                        throw new Error("Constant does not have a name");
+                    }
+                    const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
+                    this.tensorSpecNameToBufferName[name] = bufferName;
+                    this.registerBuffer(bufferName, initToTensor(attr.t));
+                }
+                else {
+                    console.warn(`Constant ${node.name} has no tensor value`);
+                }
+            }
         }
     }
     forward(inputs: Tensor[]): Tensor[] {
@@ -228,11 +250,23 @@ function initToTensor(init: onnx.ITensorProto): Tensor {
 
 function evalNode(node: onnx.INodeProto, inputs: Tensor[]): Tensor[] {
     switch (node.opType) {
+        case "Constant": {
+            throw new Error("Constant nodes should be removed");
+        }
+        case "Gather": {
+            const axis = node.attribute?.find((x) => x.name === "axis")?.i || 0;
+            throw new Error("Gather not implemented");
+            // return [gather(inputs[0], inputs[1], axis)];
+        }
         case "MatMul": {
             return [matmul(inputs[0], inputs[1])];
         }
         case "Mul": {
             return [inputs[0].mul(inputs[1])];
+        }
+        case "Shape": {
+            const device = inputs[0].device;
+            return [tensor({data:inputs[0].shape, dtype:"int32", device})];
         }
         default:
             throw new Error(
