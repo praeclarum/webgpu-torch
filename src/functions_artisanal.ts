@@ -10,9 +10,15 @@ import type { Tensor } from "./tensor";
 
 export class GatherFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, index] = inputs as [Tensor, number, Tensor];
-        const outputShape = input.shape.slice();
-        outputShape[dim] = index.shape[0];
+        let [input, dim, index] = inputs as [Tensor, number, Tensor];
+        if (dim < 0) {
+            dim += input.shape.length;
+        }
+        const rank = input.shape.length;
+        if (index.shape.length !== rank) {
+            throw new Error(`Index shape ${index.shape} does not match input shape ${input.shape}`);
+        }
+        const outputShape = index.shape.slice();
         return input.runKernel("gather", {dtype: input.dtype}, {dim}, [outputShape], index)[0];
     }
     static setupContext(

@@ -27,7 +27,7 @@ export async function discoverWebGPUDevicesAsync(): Promise<boolean> {
     return true;
 }
 
-export function getDevice(device: Deviceish | null | undefined): Device {
+export function getDevice(device?: Deviceish | null): Device {
     if (device === null || device === undefined) {
         return webgpuDevice || cpuDevice;
     } else if (typeof device === "string") {

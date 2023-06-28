@@ -13,7 +13,7 @@ export abstract class UntypedStorage {
     abstract destroy(): void;
     abstract clone(): UntypedStorage;
     abstract toTypedArrayAsync(dtype: Dtype): Promise<ATypedArray>;
-    async toArrayAsync(dtype: Dtype): Promise<TensorArrayData> {
+    async toArrayAsync(dtype: Dtype): Promise<number[]> {
         const typedArray = await this.toTypedArrayAsync(dtype);
         return Array.from(typedArray);
     }
@@ -291,6 +291,48 @@ export function newTypedArrayFromArray(
         }
     });
     return { storage, shape, strides };
+}
+
+export function flatDataToArray(data: ATypedArray, shape: Shape, strides: Strides): TensorArrayData | number {
+    if (shape.length == 0) {
+        return data[0];
+    }
+    if (shape.length == 1 && shape[0] == 1) {
+        return [data[0]];
+    }
+
+    const index: number[] = [];
+    return readArray(index);
+
+    function readArray(index: number[]): TensorArrayData {
+        const dim = index.length;
+
+        if (dim == shape.length - 1) {
+            const offset = calculateOffset(index);
+            const length = shape[dim];
+            const subarray = data.subarray(offset, offset + length);
+            if (subarray.length !== length) {
+                throw new Error(`Failed to get sub array for index [${index}] (tensor shape [${shape}] and strides [${strides}]) at offset ${offset} with length ${length} from buffer of length ${data.length}`);
+            }
+            return Array.from(subarray);
+        } else {
+            const result: TensorArrayData = [];
+            for (let i = 0; i < shape[dim]; i++) {
+                index.push(i);
+                result.push(readArray(index));
+                index.pop();
+            }
+            return result;
+        }
+    }
+
+    function calculateOffset(index: number[]): number {
+        let offset = 0;
+        for (let i = 0; i < index.length; i++) {
+            offset += index[i] * strides[i];
+        }
+        return offset;
+    }
 }
 
 function getNearestPowerOfTwo(size: GPUSize64): GPUSize64 {

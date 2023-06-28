@@ -94,6 +94,7 @@ export function conv2d(
     }
 }
 
+/** Gathers values along an axis specified by dim. */
 export function gather(input: Tensor, dim: number, index: Tensor): Tensor {
     if (shouldCreateGradient(input, index)) {
         return GatherFunction.apply(input, dim, index);

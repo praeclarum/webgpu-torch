@@ -3,15 +3,20 @@ import { onnx } from "./onnx";
 import { fetch } from "cross-fetch";
 import { Tensor, TensorSpec } from "./tensor";
 import { gather, matmul, tensor } from "./ops_artisanal";
-import { Shape, defaultStrides } from "./shape";
+import { Shape, Strides, defaultStrides } from "./shape";
+import { cpuDevice, getDevice } from "./devices";
 import Long from "long";
-import { Dtype } from "./dtype";
+import type { Dtype } from "./dtype";
+import { flatDataToArray, ArrayBufferStorage, TensorArrayData } from "./storage";
+import type { Device } from "./device";
 
 export class ONNXModule extends Module {
     readonly inputs: onnx.IValueInfoProto[];
     readonly outputs: onnx.IValueInfoProto[];
     readonly nodes: onnx.INodeProto[];
-    readonly nodeFromOutput: { [outputName: string]: { node:onnx.INodeProto, outputIndex:number } } = {};
+    readonly nodeFromOutput: {
+        [outputName: string]: { node: onnx.INodeProto; outputIndex: number };
+    } = {};
     readonly tensorSpecNameToBufferName: { [tensorSpecName: string]: string } =
         {};
     constructor(model: onnx.IModelProto) {
@@ -37,10 +42,11 @@ export class ONNXModule extends Module {
         this.nodes = nodes;
         for (const node of nodes) {
             for (const [outputIndex, output] of (node.output || []).entries()) {
-                this.nodeFromOutput[output] = {node, outputIndex};
+                this.nodeFromOutput[output] = { node, outputIndex };
             }
         }
         // Create buffers for initialized data
+        const device = getDevice();
         for (const init of graph.initializer || []) {
             const name = init.name || "";
             if (name.length === 0) {
@@ -48,12 +54,14 @@ export class ONNXModule extends Module {
             }
             const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
             this.tensorSpecNameToBufferName[name] = bufferName;
-            this.registerBuffer(bufferName, initToTensor(init));
+            this.registerBuffer(bufferName, initToTensor(init, device));
         }
-        // Create buffers for constants
+        // Create constant
         for (const node of nodes) {
             if (node.opType === "Constant") {
-                const attr = (node.attribute || []).find(a => a.name === "value");
+                const attr = (node.attribute || []).find(
+                    (a) => a.name === "value"
+                );
                 if (!attr) {
                     throw new Error("Constant does not have a value");
                 }
@@ -64,9 +72,10 @@ export class ONNXModule extends Module {
                     }
                     const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
                     this.tensorSpecNameToBufferName[name] = bufferName;
-                    this.registerBuffer(bufferName, initToTensor(attr.t));
-                }
-                else {
+                    const ctensor = initToTensor(attr.t, cpuDevice);
+                    const carray = valueToArray(ctensor);
+                    this.registerBuffer(bufferName, ctensor);
+                } else {
                     console.warn(`Constant ${node.name} has no tensor value`);
                 }
             }
@@ -74,7 +83,7 @@ export class ONNXModule extends Module {
     }
     forward(inputs: Tensor[]): Tensor[] {
         const outputs: Tensor[] = [];
-        const env: { [name: string]: Tensor } = {};
+        const env: { [name: string]: ONNXValue } = {};
         for (const [i, input] of inputs.entries()) {
             const inputName = this.inputs[i].name || "";
             if (inputName.length === 0) {
@@ -86,16 +95,19 @@ export class ONNXModule extends Module {
             const outputName = output.name || "";
             if (outputName.length === 0) {
                 throw new Error(`Output ${i} does not have a name`);
-            }            
+            }
             const outputT = this.evaluateTensor(outputName, env);
+            if (!(outputT instanceof Tensor)) {
+                throw new Error(`Output ${i} is not a tensor`);
+            }
             outputs.push(outputT);
         }
         return outputs;
     }
     private evaluateTensor(
         tensorSpecName: string,
-        env: { [name: string]: Tensor }
-    ): Tensor {
+        env: { [name: string]: ONNXValue }
+    ): ONNXValue {
         // Has it already been evaluated?
         if (tensorSpecName in env) {
             return env[tensorSpecName];
@@ -116,7 +128,7 @@ export class ONNXModule extends Module {
             throw new Error(`Tensor ${tensorSpecName} does not have a node`);
         }
         // Evaluate inputs
-        const inputs: Tensor[] = [];
+        const inputs: ONNXValue[] = [];
         for (const tensorSpecName of node.node.input || []) {
             inputs.push(this.evaluateTensor(tensorSpecName, env));
         }
@@ -182,7 +194,7 @@ function onnxDataTypeToDType(onnxDataType: onnx.TensorProto.DataType): Dtype {
     }
 }
 
-function initToTensor(init: onnx.ITensorProto): Tensor {
+function initToTensor(init: onnx.ITensorProto, device: Device): Tensor {
     const shape: Shape = longDimsToShape(init.dims || []);
     const strides = defaultStrides(shape);
     let dtype = onnxDataTypeToDType(init.dataType || 1);
@@ -244,6 +256,7 @@ function initToTensor(init: onnx.ITensorProto): Tensor {
         shape,
         strides,
         dtype,
+        device,
     };
     return new Tensor(spec);
 }
@@ -251,7 +264,9 @@ function initToTensor(init: onnx.ITensorProto): Tensor {
 function attrNumber(node: onnx.INodeProto, name: string): number {
     const attr = node.attribute?.find((x) => x.name === name);
     if (!attr) {
-        throw new Error(`Attribute ${name} of node ${node.name} (${node.opType}) not found`);
+        throw new Error(
+            `Attribute ${name} of node ${node.name} (${node.opType}) not found`
+        );
     }
     const atype = attr.type;
     switch (atype) {
@@ -259,8 +274,7 @@ function attrNumber(node: onnx.INodeProto, name: string): number {
             const v = attr.i!;
             if (typeof v == "number") {
                 return v;
-            }
-            else {
+            } else {
                 return v.toNumber();
             }
         }
@@ -268,32 +282,78 @@ function attrNumber(node: onnx.INodeProto, name: string): number {
             return attr.f!;
         }
         default:
-            throw new Error(`Attribute ${name} of node ${node.name} (${node.opType}) is not a number`);
+            throw new Error(
+                `Attribute ${name} of node ${node.name} (${node.opType}) is not a number`
+            );
     }
 }
 
-function evalNode(node: onnx.INodeProto, inputs: Tensor[]): Tensor[] {
+type StructuredArray = { data: TensorArrayData|number; dtype: Dtype; shape: Shape };
+
+type ONNXValue = Tensor | StructuredArray;
+
+function valueToTensor(value: ONNXValue): Tensor {
+    if (value instanceof Tensor) {
+        return value;
+    } else {
+        return tensor(value);
+    }
+}
+
+function valueToArray(value: ONNXValue): StructuredArray {
+    if (value instanceof Tensor) {
+        const storage = value.storage;
+        if (storage.device.type !== "cpu") {
+            throw new Error("GPU tensor cannot be converted to array");
+        }
+        const data = (storage as ArrayBufferStorage).getTypedArray(value.dtype);
+        return {
+            data: flatDataToArray(data, value.shape, value.strides),
+            dtype: value.dtype,
+            shape: value.shape,
+        };
+    } else {
+        return value;
+    }
+}
+
+function agather(
+    input: StructuredArray,
+    dim: number,
+    index: StructuredArray
+): StructuredArray {
+    throw new Error("agather not implemented.");
+}
+
+function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
     switch (node.opType) {
         case "Constant": {
             throw new Error("Constant nodes should be removed");
         }
         case "Gather": {
-            const axis = attrNumber(node, "axis");
-            return [gather(inputs[0], axis, inputs[1])];
+            const dim = attrNumber(node, "axis");
+            if (inputs[0] instanceof Tensor) {
+                return [gather(inputs[0], dim, valueToTensor(inputs[1]))];
+            } else {
+                return [agather(inputs[0], dim, valueToArray(inputs[1]))];
+            }
         }
         case "MatMul": {
-            return [matmul(inputs[0], inputs[1])];
+            return [matmul(valueToTensor(inputs[0]), valueToTensor(inputs[1]))];
         }
         case "Mul": {
-            return [inputs[0].mul(inputs[1])];
+            return [valueToTensor(inputs[0]).mul(valueToTensor(inputs[1]))];
         }
         case "Shape": {
-            const device = inputs[0].device;
-            return [tensor({data:inputs[0].shape, dtype:"int32", device})];
+            return [
+                {
+                    data: inputs[0].shape,
+                    dtype: "int32",
+                    shape: [inputs[0].shape.length],
+                },
+            ];
         }
         default:
-            throw new Error(
-                `Cannot evaluate ONNX node type '${node.opType}'`
-            );
+            throw new Error(`Cannot evaluate ONNX node type '${node.opType}'`);
     }
 }
