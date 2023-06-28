@@ -160,8 +160,8 @@ export class Tensor extends TensorBase {
                 const array = newTypedArrayFromArray(jdata.data, dt, d);
                 storage = array.storage;
                 this._dtype = dt;
-                this._shape = array.shape;
-                this._strides = array.strides;
+                this._shape = jdata.shape || array.shape;
+                this._strides = jdata.strides || array.strides;
             } else if (jdata.data instanceof Uint8Array) {
                 const shape = jdata.shape || [jdata.data.length];
                 const array = newStorageFromATypedArray(jdata.data, shape, dt, d);

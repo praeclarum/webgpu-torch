@@ -3,11 +3,15 @@ import { onnx } from "./onnx";
 import { fetch } from "cross-fetch";
 import { Tensor, TensorSpec } from "./tensor";
 import { gather, matmul, tensor } from "./ops_artisanal";
-import { Shape, Strides, defaultStrides } from "./shape";
+import { Shape, Strides, defaultStrides, shapeSize } from "./shape";
 import { cpuDevice, getDevice } from "./devices";
 import Long from "long";
 import { Dtype, newTypedArrayForDtype } from "./dtype";
-import { flatDataToArray, ArrayBufferStorage, TensorArrayData } from "./storage";
+import {
+    flatDataToArray,
+    ArrayBufferStorage,
+    TensorArrayData,
+} from "./storage";
 import type { Device } from "./device";
 
 export class ONNXModule extends Module {
@@ -59,7 +63,7 @@ export class ONNXModule extends Module {
         // Create constant
         for (const node of nodes) {
             if (node.opType === "Constant") {
-                const attr = (node.attribute || []).find(
+                const attr = node.attribute?.find(
                     (a) => a.name === "value"
                 );
                 if (!attr) {
@@ -260,7 +264,7 @@ function initToTensor(init: onnx.ITensorProto, device: Device): Tensor {
     return new Tensor(spec);
 }
 
-function attrNumber(node: onnx.INodeProto, name: string): number {
+function attrNumbers(node: onnx.INodeProto, name: string): number[] {
     const attr = node.attribute?.find((x) => x.name === name);
     if (!attr) {
         throw new Error(
@@ -272,13 +276,17 @@ function attrNumber(node: onnx.INodeProto, name: string): number {
         case onnx.AttributeProto.AttributeType.INT: {
             const v = attr.i!;
             if (typeof v == "number") {
-                return v;
+                return [v];
             } else {
-                return v.toNumber();
+                return [v.toNumber()];
             }
         }
+        case onnx.AttributeProto.AttributeType.INTS: {
+            const v = attr.ints!;
+            return v.map((x) => (typeof x == "number" ? x : x.toNumber()));
+        }
         case onnx.AttributeProto.AttributeType.FLOAT: {
-            return attr.f!;
+            return [attr.f!];
         }
         default:
             throw new Error(
@@ -287,7 +295,11 @@ function attrNumber(node: onnx.INodeProto, name: string): number {
     }
 }
 
-type StructuredArray = { data: TensorArrayData|number; dtype: Dtype; shape: Shape };
+type StructuredArray = {
+    data: TensorArrayData | number;
+    dtype: Dtype;
+    shape: Shape;
+};
 
 type ONNXValue = Tensor | StructuredArray;
 
@@ -339,8 +351,16 @@ function onnxGather(
         }
     }
     const outputSize = outputShape.reduce((a, b) => a * b, 1);
-    let outputData: TensorArrayData|number;
-    if (r == 1 && outputRank === 1) {
+    let outputData: TensorArrayData | number;
+    if (r == 1 && outputRank === 0) {
+        const inputData = data.data as number[];
+        const indicesData = indices.data as number;
+        let output: number = 0;
+        const k = indicesData;
+        const inputIndex0 = k;
+        output = inputData[inputIndex0];
+        outputData = output;
+    } else if (r == 1 && outputRank === 1) {
         const inputData = data.data as number[];
         const indicesData = indices.data as number[];
         let flatDataIndex = 0;
@@ -363,13 +383,90 @@ function onnxGather(
     };
 }
 
+function onnxConcat(inputs: StructuredArray[], axis: number): StructuredArray {
+    const r = inputs[0].shape.length;
+    axis = axis < 0 ? r + axis : axis;
+    const outputShape = inputs[0].shape.slice();
+    outputShape[axis] = inputs.reduce((a, x) => a + x.shape[axis], 0);
+    const outputSize = shapeSize(outputShape);
+    let outputData: TensorArrayData;
+    if (outputShape.length === 1) {
+        const output = new Array<number>(outputSize);
+        let flatDataIndex = 0;
+        for (const input of inputs) {
+            const inputData = input.data as number[];
+            for (let i0 = 0; i0 < input.shape[0]; i0++) {
+                output[flatDataIndex] = inputData[i0];
+                flatDataIndex++;
+            }
+        }
+        outputData = output;
+    }
+    else {
+        throw new Error(`concat rank ${outputShape.length} not supported`);
+    }
+    return {
+        data: outputData,
+        dtype: inputs[0].dtype,
+        shape: outputShape,
+    };
+}
+
+function onnxUnsqueeze(data: StructuredArray, axes: number[]): StructuredArray {
+    const r = data.shape.length;
+    const outputShape = new Array(r + axes.length);
+    let i = 0;
+    let j = 0;
+    for (let k = 0; k < outputShape.length; k++) {
+        if (axes[j] === k) {
+            outputShape[k] = 1;
+            j++;
+        } else {
+            outputShape[k] = data.shape[i];
+            i++;
+        }
+    }
+    let outputData: TensorArrayData;
+    if (r === 0 && outputShape.length === 1) {
+        const inputData = data.data as number;
+        const output = new Array<number>(1);
+        output[0] = inputData;
+        outputData = output;
+    } else if (r === 1 && outputShape.length === 2) {
+        const inputData = data.data as number[];
+        const n0 = outputShape[0];
+        const output = new Array<number[]>(n0);
+        for (let i0 = 0; i0 < n0; i0++) {
+            const n1 = outputShape[1];
+            output[i0] = new Array<number>(n1);
+            for (let i1 = 0; i1 < n1; i1++) {
+                const inputIndex = axes[0] === 0 ? i1 : i0;
+                output[i0][i1] = inputData[inputIndex];
+            }
+        }
+        outputData = output;
+    }
+    else {
+        throw new Error(`ONNX Unsqueeze rank ${outputShape.length} not supported`);
+    }
+    return {
+        data: outputData,
+        dtype: data.dtype,
+        shape: outputShape,
+    };
+}
+
 function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
     switch (node.opType) {
+        case "Concat": {
+            const axis = attrNumbers(node, "axis")[0];
+            return [onnxConcat(inputs.map(valueToArray), axis)];
+        }
         case "Constant": {
             throw new Error("Constant nodes should be removed");
         }
         case "Gather": {
-            const dim = attrNumber(node, "axis");
+            const dim = attrNumbers(node, "axis")[0];
             if (inputs[0] instanceof Tensor) {
                 return [gather(inputs[0], dim, valueToTensor(inputs[1]))];
             } else {
@@ -390,6 +487,10 @@ function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
                     shape: [inputs[0].shape.length],
                 },
             ];
+        }
+        case "Unsqueeze": {
+            const axes = attrNumbers(node, "axes");
+            return [onnxUnsqueeze(valueToArray(inputs[0]), axes)];
         }
         default:
             throw new Error(`Cannot evaluate ONNX node type '${node.opType}'`);
