@@ -6,6 +6,7 @@ import { ATypedArray, Dtype, getDtype } from "./dtype";
 import {
     TensorArrayData,
     UntypedStorage,
+    flatDataToArray,
     newStorageFromATypedArray,
     newTypedArrayFromArray,
 } from "./storage";
@@ -18,7 +19,7 @@ import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutpu
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
-export type TensorData = TensorArrayData | ATypedArray | UntypedStorage;
+export type TensorData = TensorArrayData | ATypedArray | UntypedStorage | number;
 
 export type TensorSpec = {
     data: TensorData;
@@ -115,6 +116,13 @@ export class Tensor extends TensorBase {
         let dt = getDtype(dtype);
         if (arrayOrSpec === null) {
             throw new Error("Cannot create tensor from null");
+        } else if (typeof arrayOrSpec === "number") {
+            const array = newTypedArrayFromArray([arrayOrSpec], dt, d);
+            // this._storage = array.storage;
+            this._dtype = dt;
+            this._shape = [];
+            this._strides = [];
+            this._node = (new SourceNode(array.storage, this._dtype, this._shape, this._strides)).getOutputRef(0);
         } else if (arrayOrSpec instanceof Array) {
             const array = newTypedArrayFromArray(arrayOrSpec, dt, d);
             // this._storage = array.storage;
@@ -142,7 +150,13 @@ export class Tensor extends TensorBase {
             dt = jdata.dtype ? getDtype(jdata.dtype) : dt;
             requiresGrad = requiresGrad || jdata.requiresGrad;
             let storage: UntypedStorage;
-            if (jdata.data instanceof Array) {
+            if (typeof jdata.data === "number") {
+                const array = newTypedArrayFromArray([jdata.data], dt, d);
+                storage = array.storage;
+                this._dtype = dt;
+                this._shape = jdata.shape || [];
+                this._strides = defaultStrides(this._shape);
+            } else if (jdata.data instanceof Array) {
                 const array = newTypedArrayFromArray(jdata.data, dt, d);
                 storage = array.storage;
                 this._dtype = dt;
@@ -205,50 +219,8 @@ export class Tensor extends TensorBase {
         return `tensor([${this.shape}], ${this.dtype}${rg})`;
     }
     async toArrayAsync(): Promise<TensorArrayData | number> {
-        const storage = this.storage;
-        const data = await storage.toTypedArrayAsync(this.dtype);
-        const shape = this.shape;
-        const strides = this.strides;
-    
-        if (shape.length == 0) {
-            return data[0];
-        }
-        if (shape.length == 1 && shape[0] == 1) {
-            return [data[0]];
-        }
-    
-        const index: number[] = [];
-        return readArray(index);
-    
-        function readArray(index: number[]): TensorArrayData {
-            const dim = index.length;
-    
-            if (dim == shape.length - 1) {
-                const offset = calculateOffset(index);
-                const length = shape[dim];
-                const subarray = data.subarray(offset, offset + length);
-                if (subarray.length !== length) {
-                    throw new Error(`Failed to get sub array for index [${index}] (tensor shape [${shape}] and strides [${strides}]) at offset ${offset} with length ${length} from buffer of length ${data.length} (storage has ${storage.byteSize} bytes)`);
-                }
-                return Array.from(subarray);
-            } else {
-                const result: TensorArrayData = [];
-                for (let i = 0; i < shape[dim]; i++) {
-                    index.push(i);
-                    result.push(readArray(index));
-                    index.pop();
-                }
-                return result;
-            }
-        }
-    
-        function calculateOffset(index: number[]): number {
-            let offset = 0;
-            for (let i = 0; i < index.length; i++) {
-                offset += index[i] * strides[i];
-            }
-            return offset;
-        }
+        const data = await this.storage.toTypedArrayAsync(this.dtype);
+        return flatDataToArray(data, this.shape, this.strides);
     }
 
     /** Eagerly compute this tensor if it is lazy.
@@ -444,6 +416,7 @@ export class Tensor extends TensorBase {
         // console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
         return this.withShape(newShape, newStrides);
     }
+    /** Gathers values along an axis specified by dim. */
     gather(dim: number, index: Tensor): Tensor {
         return aops.gather(this, dim, index);
     }

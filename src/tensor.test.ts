@@ -294,3 +294,18 @@ test("create with Uint8Array", async () => {
     const x = tensor({data:new Uint8Array([1, 2, 3, 4]), shape: [2, 2], dtype: "uint8"});
     expect(await x.toArrayAsync()).toEqual([[1, 2], [3, 4]]);
 });
+
+test("create with scalar", async () => {
+    const x = tensor(42);
+    expect(await x.toArrayAsync()).toEqual(42);
+});
+
+test("create with scalar and shape []", async () => {
+    const x = tensor({data:42, shape: [], dtype: "int32"});
+    expect(await x.toArrayAsync()).toEqual(42);
+});
+
+test("create with scalar and shape [1]", async () => {
+    const x = tensor({data:42, shape: [1], dtype: "int32"});
+    expect(await x.toArrayAsync()).toEqual([42]);
+});
