@@ -479,6 +479,11 @@ function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
         case "Mul": {
             return [valueToTensor(inputs[0]).mul(valueToTensor(inputs[1]))];
         }
+        case "Reshape": {
+            const input = valueToTensor(inputs[0]);
+            const shape = valueToArray(inputs[1]).data as number[];
+            return [input.reshape(shape)];
+        }
         case "Shape": {
             return [
                 {

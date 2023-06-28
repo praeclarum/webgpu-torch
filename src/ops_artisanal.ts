@@ -278,6 +278,10 @@ export function mm(input: Tensor, other: Tensor): Tensor {
     }
 }
 
+export function reshape(input: Tensor, shape: number[]): Tensor {
+    throw new Error("reshape not supported yet");
+}
+
 export function t(input: Tensor): Tensor {
     if (input.shape.length !== 2) {
         throw new Error(`Expected 2D tensor, got ${input.shape}`);
