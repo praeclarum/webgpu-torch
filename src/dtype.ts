@@ -10,6 +10,23 @@ const dtypeArrayCtors = {
     "float32": Float32Array,
 };
 
+export function newTypedArrayForDtype(length: number, dtype: Dtype) {
+    switch (dtype) {
+        case "int8":
+            return new Int8Array(length);
+        case "uint8":
+            return new Uint8Array(length);
+        case "int32":
+            return new Int32Array(length);
+        case "uint32":
+            return new Uint32Array(length);
+        case "float32":
+            return new Float32Array(length);
+        default:
+            throw new Error(`Unsupported dtype: ${dtype}`);
+    }
+}
+
 export function dtypedBufferToTypedArray(dtype: Dtype, buffer: ArrayBuffer, byteOffset?: number, byteLength?: number): ATypedArray {
     if (dtype === "int64") {
         throw new Error("int64 not supported");

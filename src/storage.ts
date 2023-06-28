@@ -204,19 +204,6 @@ export class GPUBufferStorage extends UntypedStorage {
     }
 }
 
-export function newTypedArrayForDtype(length: number, dtype: Dtype) {
-    switch (dtype) {
-        case "uint8":
-            return new Uint8Array(length);
-        case "int32":
-            return new Int32Array(length);
-        case "float32":
-            return new Float32Array(length);
-        default:
-            throw new Error(`Unsupported dtype: ${dtype}`);
-    }
-}
-
 export function newStorageFromATypedArray(
     data: ATypedArray,
     shape: Shape,
@@ -294,11 +281,15 @@ export function newTypedArrayFromArray(
 }
 
 export function flatDataToArray(data: ATypedArray, shape: Shape, strides: Strides): TensorArrayData | number {
-    if (shape.length == 0) {
+    const rank = shape.length;
+    if (rank == 0) {
         return data[0];
     }
-    if (shape.length == 1 && shape[0] == 1) {
+    if (rank == 1 && shape[0] == 1) {
         return [data[0]];
+    }
+    if (rank == 1 && strides[0] == 1) {
+        return Array.from(data);
     }
 
     const index: number[] = [];

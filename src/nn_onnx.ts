@@ -6,7 +6,7 @@ import { gather, matmul, tensor } from "./ops_artisanal";
 import { Shape, Strides, defaultStrides } from "./shape";
 import { cpuDevice, getDevice } from "./devices";
 import Long from "long";
-import type { Dtype } from "./dtype";
+import { Dtype, newTypedArrayForDtype } from "./dtype";
 import { flatDataToArray, ArrayBufferStorage, TensorArrayData } from "./storage";
 import type { Device } from "./device";
 
@@ -73,7 +73,6 @@ export class ONNXModule extends Module {
                     const bufferName = name.replace(/[^a-zA-Z0-9_]/g, "_");
                     this.tensorSpecNameToBufferName[name] = bufferName;
                     const ctensor = initToTensor(attr.t, cpuDevice);
-                    const carray = valueToArray(ctensor);
                     this.registerBuffer(bufferName, ctensor);
                 } else {
                     console.warn(`Constant ${node.name} has no tensor value`);
@@ -317,12 +316,51 @@ function valueToArray(value: ONNXValue): StructuredArray {
     }
 }
 
-function agather(
-    input: StructuredArray,
-    dim: number,
-    index: StructuredArray
+function onnxGather(
+    data: StructuredArray,
+    axis: number,
+    indices: StructuredArray
 ): StructuredArray {
-    throw new Error("agather not implemented.");
+    const r = data.shape.length;
+    const q = indices.shape.length;
+    const outputRank = q + (r - 1);
+    axis = axis < 0 ? r + axis : axis;
+    const outputShape = new Array(outputRank);
+    const outputStrides = new Array(outputRank);
+    let j = 0;
+    for (let i = 0; i < outputRank; i++) {
+        if (i < axis) {
+            outputShape[i] = data.shape[i];
+        } else if (i < axis + q) {
+            outputShape[i] = indices.shape[j];
+            j++;
+        } else {
+            outputShape[i] = data.shape[i - q + 1];
+        }
+    }
+    const outputSize = outputShape.reduce((a, b) => a * b, 1);
+    let outputData: TensorArrayData|number;
+    if (r == 1 && outputRank === 1) {
+        const inputData = data.data as number[];
+        const indicesData = indices.data as number[];
+        let flatDataIndex = 0;
+        const flatData: number[] = new Array(outputSize);
+        for (let o0 = 0; o0 < outputShape[0]; o0++) {
+            // output[i_{0}, ..., i_{q-1}, j_{0}, ..., j_{r-2}] = input[k, j_{0}, ..., j_{r-2}]
+            const k = indicesData[o0];
+            const inputIndex0 = k;
+            flatData[flatDataIndex] = inputData[inputIndex0];
+            flatDataIndex++;
+        }
+        outputData = flatData;
+    } else {
+        throw new Error(`agather rank ${outputRank} not supported`);
+    }
+    return {
+        data: outputData,
+        dtype: data.dtype,
+        shape: outputShape,
+    };
 }
 
 function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
@@ -335,7 +373,7 @@ function evalNode(node: onnx.INodeProto, inputs: ONNXValue[]): ONNXValue[] {
             if (inputs[0] instanceof Tensor) {
                 return [gather(inputs[0], dim, valueToTensor(inputs[1]))];
             } else {
-                return [agather(inputs[0], dim, valueToArray(inputs[1]))];
+                return [onnxGather(inputs[0], dim, valueToArray(inputs[1]))];
             }
         }
         case "MatMul": {
