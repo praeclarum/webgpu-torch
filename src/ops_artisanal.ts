@@ -320,25 +320,17 @@ value and is ambiguous`,
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
     const shape = inferSize(shapeInput, a.numel());
 
+    // Special-cases reshaping zero dim tensors
+    if (a.shape.length === 0) {
+        throw new Error(`shape '[${shape}]' is invalid for input of size 0`);
+    }
+
     // Short-circuits if shape is the same
     if (shapesAreEqual(a.shape, shape)) {
         return a.withShape(a.shape, a.strides);
     }
 
-    /*
-
-    // Special-cases reshaping zero dim tensors
-    if (a.ndim === 0) {
-        let _a = a;
-        for (let length of shape) {
-            if (length !== 1) {
-                throw new Error("Expected length to be 1.");
-            }
-            _a = unsqueeze(_a, -1);
-        }
-        return _a;
-    }
-
+/*
     // Special-cases reshaping to zero dim tensors
     if (shape.length === 0) {
         let _a = a;

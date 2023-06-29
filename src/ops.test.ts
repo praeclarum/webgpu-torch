@@ -91,33 +91,64 @@ test("numel", async () => {
     expect(x.numel()).toEqual(6);
 });
 
-test("view of same shape", async () => {
-    const x = tensor([1, 2, 3]);
-    const y = x.view([3]);
-    expect(await y.toArrayAsync()).toEqual([1, 2, 3]);
+test("view [] to []", async () => {
+    const a = ones([]);
+    expect(() => a.view([])).toThrow("shape '[]' is invalid for input of size 0");
 });
-
-test("view of same shape implicit 0/2", async () => {
-    const x = tensor([[1, 2, 3], [4, 5, 6]]);
-    const y = x.view([-1, 3]);
-    expect(y.shape).toEqual([2, 3]);
-    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+test("view [] to [1]", async () => {
+    const a = ones([]);
+    expect(() => a.view([1])).toThrow("shape '[1]' is invalid for input of size 0");
 });
-
-test("view of same shape implicit 1/2", async () => {
-    const x = tensor([[1, 2, 3], [4, 5, 6]]);
-    const y = x.view([2, -1]);
-    expect(y.shape).toEqual([2, 3]);
-    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+// test("view [1] to []", async () => {
+//     const a = tensor([34.0]);
+//     expect(a.shape).toEqual([1]);
+//     const c = a.view([]);
+//     expect(c.shape).toEqual([]);
+//     expect(await c.toArrayAsync()).toEqual(34.0);
+// });
+// test("view [2] to []", async () => {
+//     const a = ones([2]);
+//     expect(() => a.view([])).toThrow("shape '[]' is invalid for input of size 2");
+// });
+test("view [1] to [1]", async () => {
+    const a = tensor([-116.0]);
+    expect(a.shape).toEqual([1]);
+    const c = a.view([1]);
+    expect(c.shape).toEqual([1]);
+    expect(await c.toArrayAsync()).toEqual([-116.0]);
 });
-
-test("two implicits fails", async () => {
-    const x = tensor([[1, 2, 3], [4, 5, 6]]);
-    expect(() => x.view([-1, -1])).toThrow();
+test("view [2] to [-1]", async () => {
+    const a = tensor([-50.0, 82.0]);
+    expect(a.shape).toEqual([2]);
+    const c = a.view([-1]);
+    expect(c.shape).toEqual([2]);
+    expect(await c.toArrayAsync()).toEqual([-50.0, 82.0]);
 });
-
-// test("view of different shape", async () => {
-//     const x = tensor([1, 2, 3]);
-//     const y = x.view([1, 3]);
-//     expect(await y.toArrayAsync()).toEqual([[1, 2, 3]]);
+// test("view [1, 1] to []", async () => {
+//     const a = tensor([[120.0]]);
+//     expect(a.shape).toEqual([1, 1]);
+//     const c = a.view([]);
+//     expect(c.shape).toEqual([]);
+//     expect(await c.toArrayAsync()).toEqual(120.0);
+// });
+test("view [2, 3] to [2, -1]", async () => {
+    const a = tensor([[112.0, -103.0, -218.0], [-80.0, -32.0, 237.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    const c = a.view([2, -1]);
+    expect(c.shape).toEqual([2, 3]);
+    expect(await c.toArrayAsync()).toEqual([[112.0, -103.0, -218.0], [-80.0, -32.0, 237.0]]);
+});
+test("view [2, 3] to [-1, 3]", async () => {
+    const a = tensor([[-138.0, 103.0, 58.0], [-182.0, 64.0, 8.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    const c = a.view([-1, 3]);
+    expect(c.shape).toEqual([2, 3]);
+    expect(await c.toArrayAsync()).toEqual([[-138.0, 103.0, 58.0], [-182.0, 64.0, 8.0]]);
+});
+// test("view [2, 3] to [3, 2]", async () => {
+//     const a = tensor([[-122.0, -74.0, -13.0], [59.0, 70.0, -52.0]]);
+//     expect(a.shape).toEqual([2, 3]);
+//     const c = a.view([3, 2]);
+//     expect(c.shape).toEqual([3, 2]);
+//     expect(await c.toArrayAsync()).toEqual([[-122.0, -74.0], [-13.0, 59.0], [70.0, -52.0]]);
 // });
