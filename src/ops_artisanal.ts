@@ -330,7 +330,6 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         return a.withShape(a.shape, a.strides);
     }
 
-/*
     // Special-cases reshaping to zero dim tensors
     if (shape.length === 0) {
         let _a = a;
@@ -342,7 +341,8 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         }
         return _a;
     }
-
+    
+    /*
     // Handles general case: a 1+D tensor reshaped into a distinct 1+D shape
     let idx = 0;
     let a_ = a;
@@ -402,6 +402,10 @@ export function reshape(input: Tensor, shape: number[]): Tensor {
 
 export function reshapeAs(input: Tensor, other: Tensor): Tensor {
     return input.reshape(other.shape);
+}
+
+export function squeeze(input: Tensor, dim?: number|number[]): Tensor {
+    throw new Error("squeeze not supported yet");
 }
 
 export function t(input: Tensor): Tensor {

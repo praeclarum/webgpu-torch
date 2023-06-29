@@ -439,6 +439,9 @@ export class Tensor extends TensorBase {
     reshape(shape: Shape): Tensor {
         return aops.reshape(this, shape);
     }
+    squeeze(dim?: number|number[]): Tensor {
+        return aops.squeeze(this, dim);
+    }
     t(): Tensor {
         return aops.t(this);
     }
