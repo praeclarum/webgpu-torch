@@ -240,8 +240,8 @@ export function newTypedArrayFromArray(
     device: Device
 ): { storage: UntypedStorage; shape: Shape; strides: Strides } {
     const shape: number[] = [];
-    function getShape(data: TensorArrayData | number) {
-        if (typeof data === "number") {
+    function getShape(data?: TensorArrayData | number) {
+        if (data === undefined || typeof data === "number") {
             return;
         }
         shape.push(data.length);
