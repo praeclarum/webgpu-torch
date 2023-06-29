@@ -2,10 +2,16 @@ import { shouldCreateGradient } from "./autograd";
 import { Tensor } from "./tensor";
 import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
-import { broadcastBatchedMatmul, contiguousStridedShape, defaultStrides, reshapeBatchedMatmul, type Shape, type StridedShape, type Strides } from "./shape";
+import { broadcastBatchedMatmul, contiguousStridedShape, defaultStrides, reshapeBatchedMatmul, shapesAreEqual, type Shape, type StridedShape, type Strides, shapeSize } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
 import { GatherFunction, LinearFunction } from "./functions_artisanal";
+
+function check(cond: boolean, msgGenerator: () => string) {
+    if (!cond) {
+        throw new Error(msgGenerator());
+    }
+}
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
@@ -278,10 +284,8 @@ export function mm(input: Tensor, other: Tensor): Tensor {
     }
 }
 
-function check(cond: boolean, msgGenerator: () => string) {
-    if (!cond) {
-        throw new Error(msgGenerator());
-    }
+export function numel(input: Tensor): number {
+    return shapeSize(input.shape);
 }
 
 function inferSize(shape: Shape, numel: number): Shape {
@@ -314,14 +318,13 @@ value and is ambiguous`,
 }
 
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
-    /*
     const shape = inferSize(shapeInput, a.numel());
 
+    /*
     // Short-circuits if shape is the same
     if (shapesAreEqual(a.shape, shape)) {
         return prims.viewOf(a);
     }
-
     // Special-cases tensors with no elements
     if (a.numel() === 0) {
         return prims.asStrided(a, shape, defaultStrides(shape));

@@ -423,6 +423,9 @@ export class Tensor extends TensorBase {
     mm(other: Tensor): Tensor {
         return aops.mm(this, other);
     }
+    numel(): number {
+        return aops.numel(this);
+    }
     reshape(shape: Shape): Tensor {
         return aops.reshape(this, shape);
     }

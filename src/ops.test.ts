@@ -85,3 +85,14 @@ test("add 2d to 2d inplace broadcasts", async () => {
 //     const y = x.gather(1, tensor([2, 1, 0]));
 //     expect(await y.toArrayAsync()).toEqual([3, 2, 1]);
 // });
+
+test("numel", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    expect(x.numel()).toEqual(6);
+});
+
+// test("view of same shape", async () => {
+//     const x = tensor([1, 2, 3]);
+//     const y = x.view([3]);
+//     expect(await y.toArrayAsync()).toEqual([1, 2, 3]);
+// });

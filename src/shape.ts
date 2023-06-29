@@ -25,6 +25,18 @@ export function shapeSize(shape: Shape): number {
     }
 }
 
+export function shapesAreEqual(a: Shape, b: Shape): boolean {
+    if (a.length !== b.length) {
+        return false;
+    }
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export function defaultStrides(shape: Shape): Strides {
     const strides = [];
     let stride = 1;
@@ -233,4 +245,3 @@ export function broadcastBatchedMatmul(
         b: { shape: otherShape, strides: otherStrides },
     };
 }
-
