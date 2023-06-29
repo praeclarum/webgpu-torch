@@ -405,7 +405,48 @@ export function reshapeAs(input: Tensor, other: Tensor): Tensor {
 }
 
 export function squeeze(input: Tensor, dim?: number|number[]): Tensor {
-    throw new Error("squeeze not supported yet");
+    let dims: number[];
+    if (dim === undefined) {
+        dims = [];
+        for (let i = 0; i < input.shape.length; i++) {
+            if (input.shape[i] === 1) {
+                dims.push(i);
+            }
+        }
+    } else if (typeof dim === "number") {
+        dims = [dim];
+    } else {
+        dims = dim;
+    }
+    const inputRank = input.shape.length;
+    const minDim = inputRank > 0 ? -inputRank : -1;
+    const maxDim = inputRank > 0 ? inputRank - 1 : 0;
+    for (let i in dims) {
+        let d = dims[i];
+        if (d < minDim || d > maxDim) {
+            throw new Error(`Dimension out of range (expected to be in range of [${minDim}, ${maxDim}], but got ${d})`);
+        }
+        if (d < 0) {
+            dims[i] = input.shape.length + d;
+        }
+    }
+    dims.sort();
+    const outputShape: Shape = [];
+    const outputStrides: number[] = [];
+    let j = 0;
+    for (let i = 0; i < inputRank; i++) {
+        if (j < dims.length && i === dims[j]) {
+            if (input.shape[i] !== 1) {
+                outputShape.push(input.shape[i]);
+                outputStrides.push(input.strides[i]);
+            }
+            j++;
+        } else {
+            outputShape.push(input.shape[i]);
+            outputStrides.push(input.strides[i]);
+        }
+    }
+    return input.withShape(outputShape, outputStrides);
 }
 
 export function t(input: Tensor): Tensor {
