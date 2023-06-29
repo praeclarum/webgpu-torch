@@ -15,7 +15,7 @@ import { shaderTypeToDtype, type KernelConfigInput, type KernelParamsInput } fro
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
-import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec } from "./graph";
+import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec, KernelNode } from "./graph";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -250,7 +250,7 @@ export class Tensor extends TensorBase {
                 dtype: this.dtype,
                 strides: this.strides,
             }];
-            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            const node = new KernelNode(kernel, inputRefs, params, outputSpecs);
             this._node = node.getOutputRef(0);
         }
         else {
@@ -294,7 +294,7 @@ export class Tensor extends TensorBase {
                     });
                 }
             }
-            const node = new ComputedNode(kernel, inputRefs, params, outputSpecs);
+            const node = new KernelNode(kernel, inputRefs, params, outputSpecs);
             return outputs.map((output, i) => new Tensor(node.getOutputRef(i)));
         }
         else {

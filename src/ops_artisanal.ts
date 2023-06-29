@@ -320,11 +320,11 @@ value and is ambiguous`,
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
     const shape = inferSize(shapeInput, a.numel());
 
-    /*
     // Short-circuits if shape is the same
     if (shapesAreEqual(a.shape, shape)) {
-        return prims.viewOf(a);
+        return a.withShape(a.shape, a.strides);
     }
+    /*
     // Special-cases tensors with no elements
     if (a.numel() === 0) {
         return prims.asStrided(a, shape, defaultStrides(shape));

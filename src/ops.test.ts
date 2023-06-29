@@ -91,8 +91,27 @@ test("numel", async () => {
     expect(x.numel()).toEqual(6);
 });
 
-// test("view of same shape", async () => {
-//     const x = tensor([1, 2, 3]);
-//     const y = x.view([3]);
-//     expect(await y.toArrayAsync()).toEqual([1, 2, 3]);
-// });
+test("view of same shape", async () => {
+    const x = tensor([1, 2, 3]);
+    const y = x.view([3]);
+    expect(await y.toArrayAsync()).toEqual([1, 2, 3]);
+});
+
+test("view of same shape implicit 0/2", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    const y = x.view([-1, 3]);
+    expect(y.shape).toEqual([2, 3]);
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+});
+
+test("view of same shape implicit 1/2", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    const y = x.view([2, -1]);
+    expect(y.shape).toEqual([2, 3]);
+    expect(await y.toArrayAsync()).toEqual([[1, 2, 3], [4, 5, 6]]);
+});
+
+test("two implicits fails", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    expect(() => x.view([-1, -1])).toThrow();
+});

@@ -19,6 +19,9 @@ export type GraphNodeOutputSpec = {
 export class GraphNodeOutputRef {
     readonly node: GraphNode;
     readonly outputIndex: number;
+    get dtype(): Dtype {
+        return this.node.outputs[this.outputIndex].dtype;
+    }
     constructor(node: GraphNode, outputIndex: number) {
         this.node = node;
         this.outputIndex = outputIndex;
@@ -100,15 +103,48 @@ export class SourceNode extends GraphNode {
     }
 }
 
-export class ComputedNode extends GraphNode {
-    readonly kernel: Kernel;
-    readonly params: KernelParamsInput;
-    readonly inputs: GraphNodeOutputRef[];
+export abstract class ComputedNode extends GraphNode {
     private readonly _outputs: GraphNodeOutputSpec[];
-    private _storages: UntypedStorage[] | null = null;
+    get outputs(): GraphNodeOutputSpec[] {
+        return this._outputs;
+    }
     get isSource(): boolean {
         return false;
     }
+    constructor(outputs: GraphNodeOutputSpec[]) {
+        super();
+        this._outputs = outputs;
+    }
+}
+
+export class ViewNode extends ComputedNode {
+    readonly _input: GraphNodeOutputRef;
+    get device(): Device {
+        return this._input.node.device;
+    }
+    get inputs(): GraphNodeOutputRef[] {
+        return [this._input];
+    }
+    get storageAvailable(): boolean {
+        return this._input.node.storageAvailable;
+    }
+    get storages(): UntypedStorage[] {
+        return [this._input.node.storages[this._input.outputIndex]];
+    }
+    eager(): void {
+        this._input.node.eager();
+    }
+    constructor(input: GraphNodeOutputRef, shape: Shape, strides: Strides) {
+        super([{shape,strides,dtype:input.dtype}]);
+        this._input = input;
+    }
+}
+
+export class KernelNode extends ComputedNode {
+    readonly kernel: Kernel;
+    readonly params: KernelParamsInput;
+    readonly inputs: GraphNodeOutputRef[];
+    private _storages: UntypedStorage[] | null = null;
     get device(): Device {
         return this.kernel.device;
     }
@@ -117,12 +153,9 @@ export class ComputedNode extends GraphNode {
     }
     get storages(): UntypedStorage[] {
         if (this._storages === null) {
-            ComputedNode.run([this]);
+            KernelNode.run([this]);
         }
         return this._storages!;
-    }
-    get outputs(): GraphNodeOutputSpec[] {
-        return this._outputs;
     }
     constructor(
         kernel: Kernel,
@@ -130,7 +163,7 @@ export class ComputedNode extends GraphNode {
         params: KernelParamsInput,
         outputs: GraphNodeOutputSpec[]
     ) {
-        super();
+        super(outputs);
         if (inputs.length !== kernel.spec.inputs.length) {
             throw new Error(
                 `Kernel \"${kernel.spec.name}\" expects ${kernel.spec.inputs.length} inputs, but ${inputs.length} were provided`
@@ -139,11 +172,10 @@ export class ComputedNode extends GraphNode {
         this.kernel = kernel;
         this.params = params;
         this.inputs = inputs;
-        this._outputs = outputs;
     }
     eager(): void {
         if (this._storages === null) {
-            ComputedNode.run([this]);
+            KernelNode.run([this]);
         }
     }
     private static run(outputNodes: GraphNode[]): void {
@@ -188,29 +220,35 @@ export class ComputedNode extends GraphNode {
                     `Node ${nodeId} is not a ComputedNode, but it is not in nodesWithStorage`
                 );
             }
-            node as ComputedNode;
-            const inputs = node.inputs.map((input, j) => {
-                const inputS =
-                    computedStorages[input.node.id][input.outputIndex];
-                if (inputS === undefined) {
-                    throw new Error(
-                        `Input #${j} of node ${node.id} with kernel \"${node.kernel.spec.name}\" not computed yet`
-                    );
-                }
-                return inputS;
-            });
-            const [nodeRunEnv, paramValues] = node.kernel.getRunEnv(
-                node.params
-            );
-            const outputs = node.outputs.map((output, i) => {
-                const outputNumElements =
-                    node.kernel.spec.outputs[i].size(nodeRunEnv);
-                const outputByteSize =
-                    outputNumElements * dtypeByteSize(output.dtype);
-                return alloc(outputByteSize);
-            });
-            node.kernel.run(inputs, node.params, outputs);
-            computedStorages[nodeId] = outputs;
+            if (node instanceof KernelNode) {
+                node as ComputedNode;
+                const inputs = node.inputs.map((input, j) => {
+                    const inputS =
+                        computedStorages[input.node.id][input.outputIndex];
+                    if (inputS === undefined) {
+                        throw new Error(
+                            `Input #${j} of node ${node.id} with kernel \"${node.kernel.spec.name}\" not computed yet`
+                        );
+                    }
+                    return inputS;
+                });
+                const [nodeRunEnv, paramValues] = node.kernel.getRunEnv(
+                    node.params
+                );
+                const outputs = node.outputs.map((output, i) => {
+                    const outputNumElements =
+                        node.kernel.spec.outputs[i].size(nodeRunEnv);
+                    const outputByteSize =
+                        outputNumElements * dtypeByteSize(output.dtype);
+                    return alloc(outputByteSize);
+                });
+                node.kernel.run(inputs, node.params, outputs);
+                computedStorages[nodeId] = outputs;
+            } else if (node instanceof ViewNode) {
+                throw new Error("ViewNodes are not supported yet");
+            } else {
+                throw new Error(`Unknown node type ${node.constructor.name}`);
+            }
             // Free any nodes that are not live anymore
             for (let inLiveId of liveness.ins[i]) {
                 if (liveness.outs[i].has(inLiveId)) {
@@ -227,7 +265,7 @@ export class ComputedNode extends GraphNode {
         }
         // Set the storages of the retained nodes
         for (let node of retainNodes) {
-            if (node instanceof ComputedNode) {
+            if (node instanceof KernelNode) {
                 const nodeId = node.id;
                 const storages = computedStorages[nodeId];
                 if (storages === undefined) {
@@ -271,7 +309,7 @@ export class ComputedNode extends GraphNode {
         for (let outputNode of outputNodes) {
             topoSort(outputNode);
         }
-        const liveness = ComputedNode.getLiveness(depthFirstNodes, retainNodes);
+        const liveness = KernelNode.getLiveness(depthFirstNodes, retainNodes);
         // console.log(`Liveness for node#${this.id}`, liveness);
         return [depthFirstNodes, nodesWithStorage, liveness, retainNodes];
     }
