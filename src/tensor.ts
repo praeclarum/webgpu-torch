@@ -429,6 +429,9 @@ export class Tensor extends TensorBase {
     t(): Tensor {
         return aops.t(this);
     }
+    view(shape: Shape): Tensor {
+        return aops.view(this, shape);
+    }
     zero_(): Tensor {
         throw new Error("Tensor zero_ is not implemented");
     }
