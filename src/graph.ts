@@ -155,7 +155,7 @@ export class ViewNode extends ComputedNode {
         inputs: UntypedStorage[],
         alloc: (byteSize: number) => UntypedStorage
     ): UntypedStorage[] {
-        throw new Error("ViewNode run is not supported yet");
+        return inputs;
     }
 }
 
@@ -202,25 +202,42 @@ function run(outputNodes: GraphNode[]): void {
     const [depthFirstNodes, nodesWithStorage, liveness, retainNodes] =
         createExecutionPlan(outputNodes);
     const temporaryStoragePool: { [byteSize: number]: UntypedStorage[] } = {};
+    const refCounts: Map<UntypedStorage, number> = new Map();
+    const addRef = (storage: UntypedStorage) => {
+        const refCount = refCounts.get(storage);
+        if (refCount === undefined) {
+            refCounts.set(storage, 1);
+        } else {
+            refCounts.set(storage, refCount + 1);
+        }
+    };
     const alloc = (byteSize: number) => {
         if (!(byteSize in temporaryStoragePool)) {
             temporaryStoragePool[byteSize] = [];
         }
-        const storage = temporaryStoragePool[byteSize].pop();
-        if (storage !== undefined) {
-            // console.log("reuse temp", byteSize);
-            return storage;
+        let storage = temporaryStoragePool[byteSize].pop();
+        if (storage === undefined) {
+            storage = device.alloc(byteSize);
         }
-        // console.log("alloc temp", byteSize);
-        return device.alloc(byteSize);
+        return storage;
     };
-    const free = (storage: UntypedStorage) => {
-        const byteSize = storage.byteSize;
-        // console.log("free temp", byteSize);
-        if (!(byteSize in temporaryStoragePool)) {
-            temporaryStoragePool[byteSize] = [storage];
+    const remRef = (storage: UntypedStorage) => {
+        // Decrement ref count
+        const refCount = refCounts.get(storage);
+        if (refCount === undefined) {
+            throw new Error("Storage is not ref counted");
+        }
+        if (refCount === 1) {
+            // This is the last ref, free the storage by putting it back in the pool
+            refCounts.delete(storage);
+            const byteSize = storage.byteSize;
+            if (!(byteSize in temporaryStoragePool)) {
+                temporaryStoragePool[byteSize] = [storage];
+            } else {
+                temporaryStoragePool[byteSize].push(storage);
+            }
         } else {
-            temporaryStoragePool[byteSize].push(storage);
+            refCounts.set(storage, refCount - 1);
         }
     };
     const computedStorages: { [nodeId: number]: UntypedStorage[] } = {};
@@ -233,6 +250,7 @@ function run(outputNodes: GraphNode[]): void {
             computedStorages[nodeId] = nodesWithStorage[nodeId].storages;
             continue;
         }
+        // Guess we have to compute it
         if (!(node instanceof ComputedNode)) {
             throw new Error(
                 `Node ${nodeId} is not a ComputedNode, but it is not in nodesWithStorage`
@@ -247,8 +265,10 @@ function run(outputNodes: GraphNode[]): void {
             }
             return inputS;
         });
-        computedStorages[nodeId] = node.runNode(inputs, alloc);
-        // Free any nodes that are not live anymore
+        const outputs = node.runNode(inputs, alloc);
+        outputs.forEach(addRef);
+        computedStorages[nodeId] = outputs;
+        // Free any nodes' storages that are not live anymore
         for (let inLiveId of liveness.ins[i]) {
             if (liveness.outs[i].has(inLiveId)) {
                 continue;
@@ -257,7 +277,7 @@ function run(outputNodes: GraphNode[]): void {
             delete computedStorages[inLiveId];
             if (!(inLiveId in nodesWithStorage)) {
                 for (let storage of storagesToFree) {
-                    free(storage);
+                    remRef(storage);
                 }
             }
         }
