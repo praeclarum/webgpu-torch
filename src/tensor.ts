@@ -15,7 +15,7 @@ import { shaderTypeToDtype, type KernelConfigInput, type KernelParamsInput } fro
 import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
-import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec, KernelNode } from "./graph";
+import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec, KernelNode, ViewNode } from "./graph";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -192,20 +192,30 @@ export class Tensor extends TensorBase {
         this._gradCtx = null;
         this.grad = null;
     }
+
     withShape(shape: Shape, strides: Strides): Tensor {
         if (shapeSize(shape) != shapeSize(this.shape)) {
             throw new Error(
                 `Cannot reshape tensor of size ${this.shape} to ${shape}`
             );
         }
-        return new Tensor({
-            data: this.storage,
-            dtype: this.dtype,
-            device: this.device,
-            requiresGrad: this.requiresGrad,
-            shape,
-            strides,
-        });
+        const lazy = true;
+        if (lazy) {
+            const node = new ViewNode(this.node, shape, strides);
+            const output = new Tensor(node.getOutputRef(0));
+            output.requiresGrad = this.requiresGrad;
+            return output;
+        }
+        else {
+            return new Tensor({
+                data: this.storage,
+                dtype: this.dtype,
+                device: this.device,
+                requiresGrad: this.requiresGrad,
+                shape,
+                strides,
+            });
+        }
     }
 
     get [Symbol.toStringTag]() {

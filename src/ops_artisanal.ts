@@ -324,11 +324,8 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
     if (shapesAreEqual(a.shape, shape)) {
         return a.withShape(a.shape, a.strides);
     }
+
     /*
-    // Special-cases tensors with no elements
-    if (a.numel() === 0) {
-        return prims.asStrided(a, shape, defaultStrides(shape));
-    }
 
     // Special-cases reshaping zero dim tensors
     if (a.ndim === 0) {

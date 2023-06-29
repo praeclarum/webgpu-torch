@@ -115,3 +115,9 @@ test("two implicits fails", async () => {
     const x = tensor([[1, 2, 3], [4, 5, 6]]);
     expect(() => x.view([-1, -1])).toThrow();
 });
+
+// test("view of different shape", async () => {
+//     const x = tensor([1, 2, 3]);
+//     const y = x.view([1, 3]);
+//     expect(await y.toArrayAsync()).toEqual([[1, 2, 3]]);
+// });
