@@ -304,7 +304,7 @@ function inferSize(shape: Shape, numel: number): Shape {
     }
     check(
         numel == newsize || (dim !== null && newsize > 0 && numel % newsize == 0),
-        () => `shape '${shape}' is invalid for input of size ${numel}`,
+        () => `shape '[${shape}]' is invalid for input of size ${numel}`,
     );
     if (dim !== null) {
         check(
