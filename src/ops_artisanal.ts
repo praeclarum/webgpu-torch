@@ -335,6 +335,52 @@ function splitDim(a: Tensor, dim: number, outerLength: number): Tensor {
     }
     return a.withShape(newShape, newStrides);
 }
+function validateCollapseArgs(a: Tensor, start: number, end: number): void {
+    const ndim = Math.max(1, a.ndim);
+    validateIdx(ndim, start);
+    validateIdx(ndim, end);
+    check(end >= start, () => `Attempting to collapse but end, ${end}, is less than start, ${start}`);
+}
+function collapseViewHelper(a: Tensor, start: number, end: number): StridedShape | null {
+    validateCollapseArgs(a, start, end);
+    let shape: Shape;
+    let strides: Strides;
+    if (a.ndim === 0) {
+        shape = [1];
+        strides = [1];
+    }
+    else {
+        shape = a.shape;
+        strides = a.strides;
+    }
+
+    if (a.ndim === 0 || start === end) {
+        return { shape, strides };
+    }
+    let length = shape[end];
+    let stride = strides[end];
+    for (let idx = end - 1; idx >= start; idx--) {
+        if (shape[idx] === 0 || shape[idx+1] === 0) {
+            length = 0;
+            stride = 0;
+            break;
+        }
+        if (shape[idx] === 1) {
+            continue;
+        }
+        length *= shape[idx];
+        stride = Math.min(stride, strides[idx]);
+        if ((a.numel() > 0) && (shape[idx+1]!=1) && !(strides[idx]===strides[idx+1]*shape[idx+1])) {
+            return null;
+        }
+    }
+    const newShape = shape.slice(0, start).concat([length]).concat(shape.slice(end + 1));
+    let newStrides = strides.slice(0, start).concat([stride]).concat(strides.slice(end + 1));
+    if (a.numel() === 0) {
+        newStrides = defaultStrides(newShape);
+    }
+    return { shape: newShape, strides: newStrides };
+}
 
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
     const shape = inferSize(shapeInput, a.numel());
@@ -388,12 +434,14 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
             continue;
         }
         
-        /*
         // Skips dimensions that are already the correct length
         if (length === a_.shape[idx]) {
             idx++;
             continue;
         }
+        // Gathers enough original dimensions such that this new dimension can be created
+        // Note that this accumulation will terminate because we've verified a and the shape
+        // specify the same number of elements above
         let accum = a_.shape[idx];
         let end = idx;
         while (accum % length !== 0) {
@@ -401,7 +449,8 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
             accum *= a_.shape[end];
         }
         if (end !== idx) {
-            let newShapeStrides = prims.collapseViewHelper(a_, idx, end);
+            let newShapeStrides = collapseViewHelper(a_, idx, end);
+            /*
             if (newShapeStrides === null) {
                 if (allowCopy) {
                     return prims.reshape(a, shape);
@@ -410,11 +459,12 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
                 throw new Error(msg);
             }
             a_ = flatten(a_, idx, end);
+            */
+            throw new Error("Reshape flatten not implemented");
         }
         if (accum !== length) {
-            a_ = prims.splitDim(a_, idx, length);
+            a_ = splitDim(a_, idx, length);
         }
-        */
         idx++;
     }
     while (idx < a_.ndim) {
