@@ -8,7 +8,10 @@ class Expect {
     toBe(expected) { if (this.truth(!Object.is(this.value, expected))) { throw new Error(`Expected «${this.value}» to be «${expected}»`); } }
     toBeCloseTo(expected, precision) { const expDiff = Math.pow(10, -precision)/2; if (this.truth(Math.abs(this.value - expected) >= expDiff)) { throw new Error(`Expected «${this.value}» to be close to «${expected}» (diff: < ${expDiff.toFixed(precision+1)})`); } }
     toBeGreaterThan(expected) { if (this.truth(!(this.value > expected))) { throw new Error(`Expected «${this.value}» to be greater than «${expected}»`); } }
+    toBeGreaterThanOrEqual(expected) { if (this.truth(!(this.value >= expected))) { throw new Error(`Expected «${this.value}» to be greater than or equal to «${expected}»`); } }
     toBeInstanceOf(expected) { if (this.truth(!(this.value instanceof expected))) { throw new Error(`Expected «${this.value}» to be instance of «${expected}»`); } }
+    toBeLessThan(expected) { if (this.truth(!(this.value < expected))) { throw new Error(`Expected «${this.value}» to be less than «${expected}»`); } }
+    toBeLessThanOrEqual(expected) { if (this.truth(!(this.value <= expected))) { throw new Error(`Expected «${this.value}» to be less than or equal to «${expected}»`); } }
     toBeNaN() { if (this.truth(!Number.isNaN(this.value))) { throw new Error(`Expected «${this.value}» to be NaN`); } }
     toBeNull() { if (this.truth(this.value !== null)) { throw new Error(`Expected «${this.value}» to be null`); } }
     toEqual(expected) { if (this.truth(!eq(this.value, expected))) { throw new Error(`Expected «${JSON.stringify(this.value)}» to equal «${JSON.stringify(expected)}»`); } }
