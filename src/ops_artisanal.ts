@@ -488,13 +488,37 @@ export function unsqueeze(input: Tensor, dim?: number): Tensor {
     const inputRank = input.shape.length;
     const minDim = inputRank > 0 ? -inputRank - 1 : -2;
     const maxDim = inputRank > 0 ? inputRank + 1 : 2;
+    let unsqueezeOutputDim: number;
     if (dim === undefined) {
-        dim = 0;
+        unsqueezeOutputDim = 0;
     }
     else if (dim < minDim || dim >= maxDim) {
         throw new Error(`Dimension out of range (expected to be in range of [${minDim}, ${maxDim-1}], but got ${dim})`);
     }
-    throw new Error("unsqueeze not supported yet");
+    else if (dim < 0) {
+        unsqueezeOutputDim = dim + inputRank + 1;
+    }
+    else {
+        unsqueezeOutputDim = dim;
+    }
+    const outputShape: Shape = [];
+    const outputStrides: number[] = [];
+    let inputDim = 0;
+    for (let outputDim = 0; outputDim < inputRank + 1; outputDim++) {
+        if (outputDim === unsqueezeOutputDim) {
+            outputShape.push(1);
+            if (outputDim === 0) {
+                outputStrides.push(input.strides[0]*input.shape[0]);
+            } else {
+                outputStrides.push(outputStrides[outputDim - 1]);
+            }
+        } else {
+            outputShape.push(input.shape[inputDim]);
+            outputStrides.push(input.strides[inputDim]);
+            inputDim++;
+        }
+    }
+    return input.withShape(outputShape, outputStrides);
 }
 
 export function view(input: Tensor, shape: number[]): Tensor {

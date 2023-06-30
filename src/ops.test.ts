@@ -252,6 +252,175 @@ test("squeeze [2, 1, 2, 1, 2] dim (1, 2, 3)", async () => {
     expect(await c.toArrayAsync()).toEqual([[[57.0, 33.0], [64.0, 69.0]], [[113.0, 122.0], [83.0, -97.0]]]);
 });
 
+test("unsqueeze [] dim 0", async () => {
+    const a = tensor([]);
+    expect(a.shape).toEqual([0]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 0]);
+    expect(c.strides).toEqual([0, 1]);
+    expect(await c.toArrayAsync()).toEqual([[]]);
+});
+test("unsqueeze [] dim 1", async () => {
+    const a = tensor([]);
+    expect(a.shape).toEqual([0]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([0, 1]);
+    expect(c.strides).toEqual([1, 1]);
+    expect(await c.toArrayAsync()).toEqual([]);
+});
+test("unsqueeze [] dim -2", async () => {
+    const a = tensor([]);
+    expect(a.shape).toEqual([0]);
+    const c = a.unsqueeze(-2);
+    expect(c.shape).toEqual([1, 0]);
+    expect(c.strides).toEqual([0, 1]);
+    expect(await c.toArrayAsync()).toEqual([[]]);
+});
+test("unsqueeze [] dim -3", async () => {
+    const a = ones([]);
+    expect(() => a.unsqueeze(-3)).toThrow('Dimension out of range (expected to be in range of [-2, 1], but got -3)');
+});
+test("unsqueeze [1] dim 0", async () => {
+    const a = tensor([-38.0]);
+    expect(a.shape).toEqual([1]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 1]);
+    expect(c.strides).toEqual([1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[-38.0]]);
+});
+test("unsqueeze [1] dim 1", async () => {
+    const a = tensor([-28.0]);
+    expect(a.shape).toEqual([1]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([1, 1]);
+    expect(c.strides).toEqual([1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[-28.0]]);
+});
+test("unsqueeze [2] dim 0", async () => {
+    const a = tensor([23.0, -53.0]);
+    expect(a.shape).toEqual([2]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 2]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[23.0, -53.0]]);
+});
+test("unsqueeze [2] dim 1", async () => {
+    const a = tensor([-11.0, -33.0]);
+    expect(a.shape).toEqual([2]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([2, 1]);
+    expect(c.strides).toEqual([1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[-11.0], [-33.0]]);
+});
+test("unsqueeze [2] dim -2", async () => {
+    const a = tensor([113.0, 99.0]);
+    expect(a.shape).toEqual([2]);
+    const c = a.unsqueeze(-2);
+    expect(c.shape).toEqual([1, 2]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[113.0, 99.0]]);
+});
+test("unsqueeze [2] dim -3", async () => {
+    const a = ones([2]);
+    expect(() => a.unsqueeze(-3)).toThrow('Dimension out of range (expected to be in range of [-2, 1], but got -3)');
+});
+test("unsqueeze [1, 1] dim 0", async () => {
+    const a = tensor([[-2.0]]);
+    expect(a.shape).toEqual([1, 1]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 1, 1]);
+    expect(c.strides).toEqual([1, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-2.0]]]);
+});
+test("unsqueeze [1, 1] dim 1", async () => {
+    const a = tensor([[-133.0]]);
+    expect(a.shape).toEqual([1, 1]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([1, 1, 1]);
+    expect(c.strides).toEqual([1, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-133.0]]]);
+});
+test("unsqueeze [2, 1] dim 0", async () => {
+    const a = tensor([[-116.0], [-163.0]]);
+    expect(a.shape).toEqual([2, 1]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 2, 1]);
+    expect(c.strides).toEqual([2, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-116.0], [-163.0]]]);
+});
+test("unsqueeze [2, 1] dim 1", async () => {
+    const a = tensor([[-117.0], [-104.0]]);
+    expect(a.shape).toEqual([2, 1]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([2, 1, 1]);
+    expect(c.strides).toEqual([1, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-117.0]], [[-104.0]]]);
+});
+test("unsqueeze [1, 2] dim 0", async () => {
+    const a = tensor([[-36.0, 169.0]]);
+    expect(a.shape).toEqual([1, 2]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 1, 2]);
+    expect(c.strides).toEqual([2, 2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-36.0, 169.0]]]);
+});
+test("unsqueeze [1, 2] dim 1", async () => {
+    const a = tensor([[116.0, -113.0]]);
+    expect(a.shape).toEqual([1, 2]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([1, 1, 2]);
+    expect(c.strides).toEqual([2, 2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[116.0, -113.0]]]);
+});
+test("unsqueeze [1, 2] dim -4", async () => {
+    const a = ones([1, 2]);
+    expect(() => a.unsqueeze(-4)).toThrow('Dimension out of range (expected to be in range of [-3, 2], but got -4)');
+});
+test("unsqueeze [2, 3, 5] dim 0", async () => {
+    const a = tensor([[[130.0, -25.0, -68.0, -70.0, -72.0], [-22.0, -167.0, 14.0, 9.0, -148.0], [12.0, -54.0, -48.0, -70.0, -85.0]], [[-88.0, 9.0, 151.0, -38.0, 24.0], [-93.0, 52.0, -226.0, 82.0, -4.0], [39.0, -97.0, -51.0, 84.0, -10.0]]]);
+    expect(a.shape).toEqual([2, 3, 5]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 2, 3, 5]);
+    expect(c.strides).toEqual([30, 15, 5, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[130.0, -25.0, -68.0, -70.0, -72.0], [-22.0, -167.0, 14.0, 9.0, -148.0], [12.0, -54.0, -48.0, -70.0, -85.0]], [[-88.0, 9.0, 151.0, -38.0, 24.0], [-93.0, 52.0, -226.0, 82.0, -4.0], [39.0, -97.0, -51.0, 84.0, -10.0]]]]);
+});
+test("unsqueeze [2, 3, 5] dim 3", async () => {
+    const a = tensor([[[-92.0, 48.0, -18.0, -133.0, -36.0], [-36.0, -30.0, -85.0, 112.0, 76.0], [27.0, 2.0, -12.0, 67.0, -187.0]], [[-23.0, 64.0, 254.0, 88.0, 73.0], [-198.0, -90.0, 144.0, 66.0, 131.0], [-155.0, 103.0, 22.0, 41.0, -1.0]]]);
+    expect(a.shape).toEqual([2, 3, 5]);
+    const c = a.unsqueeze(3);
+    expect(c.shape).toEqual([2, 3, 5, 1]);
+    expect(c.strides).toEqual([15, 5, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[-92.0], [48.0], [-18.0], [-133.0], [-36.0]], [[-36.0], [-30.0], [-85.0], [112.0], [76.0]], [[27.0], [2.0], [-12.0], [67.0], [-187.0]]], [[[-23.0], [64.0], [254.0], [88.0], [73.0]], [[-198.0], [-90.0], [144.0], [66.0], [131.0]], [[-155.0], [103.0], [22.0], [41.0], [-1.0]]]]);
+});
+test("unsqueeze [2, 3, 5] dim -2", async () => {
+    const a = tensor([[[-40.0, 4.0, -87.0, -51.0, -27.0], [136.0, 169.0, -33.0, 107.0, -56.0], [255.0, -123.0, -58.0, 47.0, 116.0]], [[-12.0, 207.0, -30.0, -138.0, -110.0], [-132.0, -48.0, -157.0, -164.0, -41.0], [-4.0, 31.0, 177.0, 23.0, 1.0]]]);
+    expect(a.shape).toEqual([2, 3, 5]);
+    const c = a.unsqueeze(-2);
+    expect(c.shape).toEqual([2, 3, 1, 5]);
+    expect(c.strides).toEqual([15, 5, 5, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[-40.0, 4.0, -87.0, -51.0, -27.0]], [[136.0, 169.0, -33.0, 107.0, -56.0]], [[255.0, -123.0, -58.0, 47.0, 116.0]]], [[[-12.0, 207.0, -30.0, -138.0, -110.0]], [[-132.0, -48.0, -157.0, -164.0, -41.0]], [[-4.0, 31.0, 177.0, 23.0, 1.0]]]]);
+});
+test("unsqueeze [2, 3, 5] dim -5", async () => {
+    const a = ones([2, 3, 5]);
+    expect(() => a.unsqueeze(-5)).toThrow('Dimension out of range (expected to be in range of [-4, 3], but got -5)');
+});
+test("unsqueeze [2, 1, 2, 1, 2] dim 0", async () => {
+    const a = tensor([[[[[-33.0, -202.0]], [[-18.0, 143.0]]]], [[[[-92.0, 0.0]], [[-25.0, 40.0]]]]]);
+    expect(a.shape).toEqual([2, 1, 2, 1, 2]);
+    const c = a.unsqueeze(0);
+    expect(c.shape).toEqual([1, 2, 1, 2, 1, 2]);
+    expect(c.strides).toEqual([8, 4, 4, 2, 2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[[[-33.0, -202.0]], [[-18.0, 143.0]]]], [[[[-92.0, 0.0]], [[-25.0, 40.0]]]]]]);
+});
+test("unsqueeze [2, 1, 2, 1, 2] dim 1", async () => {
+    const a = tensor([[[[[59.0, 89.0]], [[-48.0, -94.0]]]], [[[[-12.0, 132.0]], [[127.0, 3.0]]]]]);
+    expect(a.shape).toEqual([2, 1, 2, 1, 2]);
+    const c = a.unsqueeze(1);
+    expect(c.shape).toEqual([2, 1, 1, 2, 1, 2]);
+    expect(c.strides).toEqual([4, 4, 4, 2, 2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[[[59.0, 89.0]], [[-48.0, -94.0]]]]], [[[[[-12.0, 132.0]], [[127.0, 3.0]]]]]]);
+});
+
 test("view [] to []", async () => {
     const a = ones([]);
     expect(() => a.view([])).toThrow("shape '[]' is invalid for input of size 0");
