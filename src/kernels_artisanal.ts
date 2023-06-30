@@ -456,4 +456,45 @@ export const kernels: { [name: string]: KernelSpec } = {
         }
     `
     },
+    uniform_: {
+        name: "uniform_",
+        config: [
+            {
+                name: "dtype",
+            },
+        ],
+        parameters: [
+            {
+                name: "size",
+                shaderType: "u32",
+            },
+            {
+                name: "lowerBound",
+                shaderType: "f32",
+            },
+            {
+                name: "upperBound",
+                shaderType: "f32",
+            },
+        ],
+        inputs: [],
+        outputs: [
+            {
+                name: "output",
+                shaderType: "array<f32>",
+                size: "size",
+            }
+        ],
+        workgroupSize: [256, 1, 1],
+        workgroupCount: ["size/256", 1, 1],
+        shader: `
+        let range = parameters.upperBound - parameters.lowerBound;
+        let outputIndex = global_id.x;
+        if (outputIndex >= parameters.size) {
+            return;
+        }
+        // output[outputIndex] = parameters.lowerBound + range * random<f32>(vec2<f32>(f32(outputIndex), 0.0));
+        output[outputIndex] = 42;
+    `
+    }
 };

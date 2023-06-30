@@ -36,9 +36,9 @@ export abstract class GraphNode {
     private static nextId = 0;
     readonly id: NodeId;
     private readonly _outputRefs: GraphNodeOutputRef[] = [];
-    private _referenceCount = 0;
-    get referenceCount(): number {
-        return this._referenceCount;
+    private _refCount = 0;
+    get refCount(): number {
+        return this._refCount;
     }
     abstract get device(): Device;
     abstract get inputs(): GraphNodeOutputRef[];
@@ -63,7 +63,7 @@ export abstract class GraphNode {
         return this._outputRefs[outputIndex];
     }
     addRef(): void {
-        this._referenceCount++;
+        this._refCount++;
     }
 }
 
@@ -318,7 +318,7 @@ function createExecutionPlan(
             for (let input of node.inputs) {
                 topoSort(input.node);
             }
-            if (node.referenceCount > 1) {
+            if (node.refCount > 1) {
                 retainNodes.push(node);
             }
         }

@@ -196,6 +196,29 @@ export class Tensor extends TensorBase {
         this.grad = null;
     }
 
+    get [Symbol.toStringTag]() {
+        return "Tensor";
+    }
+    toString(): string {
+        let rg = this.requiresGrad ? ", requiresGrad=true" : "";
+        if (this._gradFunc) {
+            rg = ", gradFunc";
+        }
+        return `tensor([${this.shape}], ${this.dtype}${rg})`;
+    }
+    async toArrayAsync(): Promise<TensorArrayData | number> {
+        const data = await this.storage.toTypedArrayAsync(this.dtype);
+        return flatDataToArray(data, this.shape, this.strides);
+    }
+
+    /** Eagerly compute this tensor if it is lazy.
+     * @returns This tensor.
+     */
+    eager(): Tensor {
+        this.node.node.eager();
+        return this;
+    }
+
     withShape(shape: Shape, strides: Strides): Tensor {
         if (shapeSize(shape) != shapeSize(this.shape)) {
             throw new Error(
@@ -221,29 +244,6 @@ export class Tensor extends TensorBase {
         }
     }
 
-    get [Symbol.toStringTag]() {
-        return "Tensor";
-    }
-    toString(): string {
-        let rg = this.requiresGrad ? ", requiresGrad=true" : "";
-        if (this._gradFunc) {
-            rg = ", gradFunc";
-        }
-        return `tensor([${this.shape}], ${this.dtype}${rg})`;
-    }
-    async toArrayAsync(): Promise<TensorArrayData | number> {
-        const data = await this.storage.toTypedArrayAsync(this.dtype);
-        return flatDataToArray(data, this.shape, this.strides);
-    }
-
-    /** Eagerly compute this tensor if it is lazy.
-     * @returns This tensor.
-     */
-    eager(): Tensor {
-        this.node.node.eager();
-        return this;
-    }
-
     runKernelInplace(
         name: string,
         config: KernelConfigInput,
@@ -253,7 +253,8 @@ export class Tensor extends TensorBase {
         if (this.requiresGrad && isGradEnabled()) {
             throw new Error(`A tensor that requires a gradient cannot be used in an in-place operation`);
         }
-        const lazy = true;
+        const nodeRefCount = this._node.node.refCount;
+        const lazy = nodeRefCount > 0;
         if (lazy) {
             const nameWithoutTrailing_ = name.endsWith("_") ? name.slice(0, -1) : name;
             const kernel = this.device.getKernel(nameWithoutTrailing_, config);
@@ -455,7 +456,12 @@ export class Tensor extends TensorBase {
         return aops.t(this);
     }
     uniform_(lowerBound: number, upperBound: number): Tensor {
-        throw new Error("Tensor uniform_ is not implemented");
+        const params = {
+            size: shapeSize(this.shape),
+            lowerBound,
+            upperBound,
+        };
+        return this.runKernelInplace("uniform_", { dtype: this.dtype }, params);
     }
     unsqueeze(dim?: number): Tensor {
         return aops.unsqueeze(this, dim);

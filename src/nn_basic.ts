@@ -26,11 +26,11 @@ export class Linear extends Module {
         this.resetParameters();
     }
     private resetParameters(): void {
-        // kaimingUniform_(this.weight);
+        kaimingUniform_(this.weight, Math.sqrt(5));
         if (this.bias) {
             const [fanIn, fanOut] = calculateFanInAndFanOut(this.weight);
             const bound = fanIn > 0 ? 1.0 / Math.sqrt(fanIn) : 0.0;
-            // uniform_(this.bias, -bound, bound);
+            uniform_(this.bias, -bound, bound);
         }
     }
     forward(input: Tensor): Tensor {

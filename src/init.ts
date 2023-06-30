@@ -116,5 +116,8 @@ export function uniform_(
     lowerBound: number,
     upperBound: number
 ): Tensor {
-    return tensor.uniform_(lowerBound, upperBound);
+    noGrad(() => {
+        tensor.uniform_(lowerBound, upperBound);
+    });
+    return tensor;
 }
