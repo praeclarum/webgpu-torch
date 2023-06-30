@@ -320,14 +320,26 @@ value and is ambiguous`,
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
     const shape = inferSize(shapeInput, a.numel());
 
-    // Special-cases reshaping zero dim tensors
-    if (a.shape.length === 0) {
-        throw new Error(`shape '[${shape}]' is invalid for input of size 0`);
-    }
-
     // Short-circuits if shape is the same
     if (shapesAreEqual(a.shape, shape)) {
         return a.withShape(a.shape, a.strides);
+    }
+
+    // Special-cases tensors with no elements
+    if (a.numel() === 0) {
+        return a.withShape(shape, defaultStrides(shape));
+    }
+
+    // Special-cases reshaping zero dim tensors
+    if (a.ndim === 0) {
+        let _a = a;
+        for (let length of shape) {
+            if (length !== 1) {
+                throw new Error("Expected length to be 1.");
+            }
+            _a = squeeze(_a, -1);
+        }
+        return _a;
     }
 
     // Special-cases reshaping to zero dim tensors
@@ -342,11 +354,11 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         return _a;
     }
     
-    /*
     // Handles general case: a 1+D tensor reshaped into a distinct 1+D shape
     let idx = 0;
     let a_ = a;
     for (let length of shape) {
+        /*
         // Handles tail unsqueezes
         if (idx >= a_.ndim) {
             if (length !== 1) {
@@ -383,6 +395,7 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         if (accum !== length) {
             a_ = prims.splitDim(a_, idx, length);
         }
+        */
         idx++;
     }
     while (idx < a_.ndim) {
@@ -392,8 +405,6 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         a_ = squeeze(a_, idx);
     }
     return a_;
-    */
-   throw new Error("reshape/view not supported yet");
 }
 
 export function reshape(input: Tensor, shape: number[]): Tensor {
