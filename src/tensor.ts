@@ -61,6 +61,9 @@ export class Tensor extends TensorBase {
     get strides(): Strides {
         return this._strides;
     }
+    get ndim(): number {
+        return this._shape.length;
+    }
     get device(): Device {
         return this._device;
     }
