@@ -484,6 +484,19 @@ export function tensor(
     return new Tensor(arrayOrSpec as TensorData, dtype, device, requiresGrad);
 }
 
+export function unsqueeze(input: Tensor, dim?: number): Tensor {
+    const inputRank = input.shape.length;
+    const minDim = inputRank > 0 ? -inputRank - 1 : -2;
+    const maxDim = inputRank > 0 ? inputRank + 1 : 2;
+    if (dim === undefined) {
+        dim = 0;
+    }
+    else if (dim < minDim || dim >= maxDim) {
+        throw new Error(`Dimension out of range (expected to be in range of [${minDim}, ${maxDim-1}], but got ${dim})`);
+    }
+    throw new Error("unsqueeze not supported yet");
+}
+
 export function view(input: Tensor, shape: number[]): Tensor {
     return _reshapeViewHelper(input, shape, false);
 }

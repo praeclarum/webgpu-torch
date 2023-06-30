@@ -445,6 +445,9 @@ export class Tensor extends TensorBase {
     t(): Tensor {
         return aops.t(this);
     }
+    unsqueeze(dim?: number): Tensor {
+        return aops.unsqueeze(this, dim);
+    }
     view(shape: Shape): Tensor {
         return aops.view(this, shape);
     }
