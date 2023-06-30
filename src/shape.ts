@@ -2,6 +2,12 @@ export type Shape = number[];
 export type Shapeish = Shape | number;
 export type Strides = number[];
 
+export function check(cond: boolean, msgGenerator: () => string) {
+    if (!cond) {
+        throw new Error(msgGenerator());
+    }
+}
+
 export interface StridedShape {
     shape: Shape;
     strides: Strides;
@@ -244,4 +250,14 @@ export function broadcastBatchedMatmul(
         a: { shape: inputShape, strides: inputStrides },
         b: { shape: otherShape, strides: otherStrides },
     };
+}
+
+export function validateIdx(rank: number, idx: number): void {
+    check(
+        (idx >= 0 && idx < rank) || (idx === 0),
+        () => `index ${idx} is out of bounds for dimension ${rank}`,
+    );
+}
+export function validateDimLength(length: number): void {
+    check(length >= 0, () => `dimension length ${length} must be non-negative`);
 }

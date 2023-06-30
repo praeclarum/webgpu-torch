@@ -2,16 +2,10 @@ import { shouldCreateGradient } from "./autograd";
 import { Tensor } from "./tensor";
 import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
-import { broadcastBatchedMatmul, contiguousStridedShape, defaultStrides, reshapeBatchedMatmul, shapesAreEqual, type Shape, type StridedShape, type Strides, shapeSize } from "./shape";
+import { broadcastBatchedMatmul, contiguousStridedShape, defaultStrides, reshapeBatchedMatmul, shapesAreEqual, type Shape, type StridedShape, type Strides, shapeSize, check, validateIdx, validateDimLength } from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
 import { GatherFunction, LinearFunction } from "./functions_artisanal";
-
-function check(cond: boolean, msgGenerator: () => string) {
-    if (!cond) {
-        throw new Error(msgGenerator());
-    }
-}
 
 export function cat(inputs: Tensor[], dim: number): Tensor {
     throw new Error("cat not implemented yet");
@@ -317,6 +311,31 @@ value and is ambiguous`,
     return shape;
 }
 
+function splitDim(a: Tensor, dim: number, outerLength: number): Tensor {
+    validateIdx(a.ndim, dim);
+    validateDimLength(outerLength);
+    const innerLength = Math.floor(a.shape[dim] / outerLength);
+    if (a.shape[dim] % outerLength !== 0) {
+        throw new Error(
+            `Attempting to split dimension of length ${a.shape[dim]}, but out length of ${outerLength} divides it with a remainder!`
+        );
+    }
+    const newShape: Shape = [];
+    const newStrides: Strides = [];
+    for (let idx = 0; idx < a.ndim; idx++) {
+        if (idx === dim) {
+            newShape.push(outerLength);
+            newShape.push(innerLength);
+            newStrides.push(a.strides[idx] * innerLength);
+            newStrides.push(a.strides[idx]);
+        } else {
+            newShape.push(a.shape[idx]);
+            newStrides.push(a.strides[idx]);
+        }
+    }
+    return a.withShape(newShape, newStrides);
+}
+
 function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
     const shape = inferSize(shapeInput, a.numel());
 
@@ -358,18 +377,18 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
     let idx = 0;
     let a_ = a;
     for (let length of shape) {
-        /*
         // Handles tail unsqueezes
         if (idx >= a_.ndim) {
             if (length !== 1) {
                 throw new Error("Expected length to be 1.");
             }
             let lastDim = a_.ndim - 1;
-            a_ = prims.splitDim(a_, lastDim, a_.shape[lastDim]);
+            a_ = splitDim(a_, lastDim, a_.shape[lastDim]);
             idx++;
             continue;
         }
-
+        
+        /*
         // Skips dimensions that are already the correct length
         if (length === a_.shape[idx]) {
             idx++;
