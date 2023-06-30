@@ -19,16 +19,15 @@ test("linear backwards", async () => {
     const bias = new Tensor({data:[13, 14], requiresGrad:  true});
     const output = linear(input, weight, bias);
     expect(await output.toArrayAsync()).toEqual([[ 63.,  82.], [135., 181.]]);
-    // const loss = output.sum();
-    // expect(loss.gradFunc).not.toBeNull();
-    // expect(loss.requiresGrad).toBe(true);
-    // loss.backward();
-    // expect(await loss.toArrayAsync()).toEqual(11063);
-    // expect(weight.grad).not.toBeNull();
-    // expect(weight.grad!.shape).toEqual([2, 3]);
-    // expect(bias.grad).not.toBeNull();
-    // expect(bias.grad!.shape).toEqual([2]);
-    // expect(await weight.grad?.toArrayAsync()).toEqual([[5., 7., 9.],
-    //     [5., 7., 9.]]);
-    // expect(await bias.grad?.toArrayAsync()).toEqual([2., 2.]);
+    const loss = output.sum();
+    expect(loss.gradFunc).not.toBeNull();
+    expect(loss.requiresGrad).toBe(true);
+    loss.backward();
+    expect(await loss.toArrayAsync()).toEqual(461);
+    expect(weight.grad).not.toBeNull();
+    expect(weight.grad!.shape).toEqual([2, 3]);
+    expect(bias.grad).not.toBeNull();
+    expect(bias.grad!.shape).toEqual([2]);
+    expect(await weight.grad?.toArrayAsync()).toEqual([[5., 7., 9.], [5., 7., 9.]]);
+    expect(await bias.grad?.toArrayAsync()).toEqual([2., 2.]);
 });

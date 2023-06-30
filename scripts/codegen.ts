@@ -32,7 +32,7 @@ function writeOpHeader(opSpec: OpSpec, name: string, isAlias: boolean, suffix: s
     const isReduction = opSpec.type === "reduction";
     writeOpDocs(opSpec, "this", isAlias, w);
     if (isReduction) {
-        w.writeLine(`${name}(dim?: number, keepdim?: boolean): Tensor${suffix}`);
+        w.writeLine(`${name}(dim?: number | number[], keepdim?: boolean): Tensor${suffix}`);
     }
     else if (isBinary) {
         if (hasAlpha) {
@@ -273,7 +273,7 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
         const configS = JSON.stringify(config);
         const writeUnpackInputs = (inputsName: string, includeAlpha: boolean) => {
             if (isReduction) {
-                w.writeLine(`const [input, dim, keepdim] = ${inputsName} as [Tensor, number | number[] | undefined, boolean | undefined];`);
+                w.writeLine(`let [input, dim, keepdim] = ${inputsName} as [Tensor, number | number[] | undefined, boolean | undefined];`);
             }
             else if (isBinary) {
                 if (hasAlpha && includeAlpha) {
@@ -322,6 +322,7 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
         if (isReduction) {
             w.writeLine(`if (dim !== undefined) {`);
             w.indent();
+            w.writeLine(`dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;`);
             w.writeLine(`if (typeof dim === "number") {`);
             w.indent();
             w.writeLine(`const inputShape = input.shape;`);

@@ -1626,8 +1626,9 @@ export class XlogyFunction extends AutoFunction {
 }
 export class AllFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -1665,7 +1666,7 @@ export class AllFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -1693,8 +1694,9 @@ export class AllFunction extends AutoFunction {
 }
 export class AnyFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -1732,7 +1734,7 @@ export class AnyFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -1760,8 +1762,9 @@ export class AnyFunction extends AutoFunction {
 }
 export class MeanFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -1799,7 +1802,7 @@ export class MeanFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -1827,8 +1830,9 @@ export class MeanFunction extends AutoFunction {
 }
 export class NormFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -1866,7 +1870,7 @@ export class NormFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -1894,8 +1898,9 @@ export class NormFunction extends AutoFunction {
 }
 export class ProdFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -1933,7 +1938,7 @@ export class ProdFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -1961,8 +1966,9 @@ export class ProdFunction extends AutoFunction {
 }
 export class SumFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -2000,7 +2006,7 @@ export class SumFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);
@@ -2028,8 +2034,9 @@ export class SumFunction extends AutoFunction {
 }
 export class CountNonzeroFunction extends AutoFunction {
     static forward(inputs: FunctionInput[]): Tensor {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         if (dim !== undefined) {
+            dim = Array.isArray(dim) && dim.length === 1 ? dim[0] : dim;
             if (typeof dim === "number") {
                 const inputShape = input.shape;
                 let outputShape = input.shape.slice();
@@ -2067,7 +2074,7 @@ export class CountNonzeroFunction extends AutoFunction {
         inputs: FunctionInput[],
         output: Tensor
     ): void {
-        const [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
+        let [input, dim, keepdim] = inputs as [Tensor, number | number[] | undefined, boolean | undefined];
         ctx.dim = dim;
         ctx.keepdim = keepdim;
         ctx.saveForBackward(input, output);

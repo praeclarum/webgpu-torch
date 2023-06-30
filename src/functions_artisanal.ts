@@ -5,6 +5,7 @@ import {
     GradientFunctionOutput,
 } from "./autograd";
 import { matmul } from "./ops_artisanal";
+import { sum } from "./ops_opgen";
 import { Shape } from "./shape";
 import type { Tensor } from "./tensor";
 
@@ -40,23 +41,22 @@ export class GatherFunction extends AutoFunction {
     }
 }
 
-function _grad_sum_to_size(grad: Tensor, targetShape: Shape): Tensor {
-    const gradShape = grad.shape;
-    let sumDims: number[] = [];
-    let viewShape: Shape = [];
-
-    for (let i = 0; i < gradShape.length; i++) {
-        if (gradShape[i] === targetShape[i]) {
-            viewShape.push(1);
-        } else {
-            viewShape.push(gradShape[i]);
-            sumDims.push(i);
+function sumTo(tensor: Tensor, shape: Shape): Tensor {
+    const sizes = tensor.shape;
+    const reduceDims: number[] = [];
+    const leadingDims = sizes.length - shape.length;
+    for (let i = 0; i < leadingDims; i++) {
+        reduceDims.push(i);
+    }
+    for (let i = leadingDims; i < sizes.length; i++) {
+        if (shape[i - leadingDims] === 1 && sizes[i] !== 1) {
+            reduceDims.push(i);
         }
     }
-    return grad.sum(sumDims[0], true);
-    // let reshapedGrad = grad.view(viewShape);
-    // reshapedGrad = reshapedGrad.sum(sumDims, true);
-    // return reshapedGrad.view(targetShape);
+    if (reduceDims.length > 0) {
+        tensor = tensor.sum(reduceDims, true);
+    }
+    return leadingDims > 0 ? tensor.view(shape) : tensor;
 }
 
 export class LinearFunction extends AutoFunction {
@@ -91,7 +91,7 @@ export class LinearFunction extends AutoFunction {
             weightGrad = matmul(gradOutput.t(), input);
         }
         if (ctx.needsInputGradient[2]) {
-            biasGrad = _grad_sum_to_size(gradOutput, bias.shape);
+            biasGrad = sumTo(gradOutput, bias.shape);
         }
         return [inputGrad, weightGrad, biasGrad];
     }

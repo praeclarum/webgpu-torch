@@ -3013,7 +3013,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    all(dim?: number, keepdim?: boolean): Tensor {
+    all(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.all(this, dim, keepdim);
     }
     /**
@@ -3031,7 +3031,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    any(dim?: number, keepdim?: boolean): Tensor {
+    any(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.any(this, dim, keepdim);
     }
     /**
@@ -3049,7 +3049,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    mean(dim?: number, keepdim?: boolean): Tensor {
+    mean(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.mean(this, dim, keepdim);
     }
     /**
@@ -3067,7 +3067,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    norm(dim?: number, keepdim?: boolean): Tensor {
+    norm(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.norm(this, dim, keepdim);
     }
     /**
@@ -3085,7 +3085,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    prod(dim?: number, keepdim?: boolean): Tensor {
+    prod(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.prod(this, dim, keepdim);
     }
     /**
@@ -3103,7 +3103,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    sum(dim?: number, keepdim?: boolean): Tensor {
+    sum(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.sum(this, dim, keepdim);
     }
     /**
@@ -3116,7 +3116,7 @@ export class Tensor extends TensorBase {
     *
     * @returns the output tensor
     */
-    countNonzero(dim?: number, keepdim?: boolean): Tensor {
+    countNonzero(dim?: number | number[], keepdim?: boolean): Tensor {
         return ops.countNonzero(this, dim, keepdim);
     }
     // End codegen marker
