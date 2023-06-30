@@ -33,7 +33,7 @@ export function zeros(
     const s = getShape(shape);
     const dt = getDtype(dtype);
     const storage = d.initStorage(s, dt, (array) => {
-        array.fill(1);
+        array.fill(0);
     });
     return new Tensor({
         data: storage,
