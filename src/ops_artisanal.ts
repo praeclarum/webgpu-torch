@@ -2,7 +2,21 @@ import { shouldCreateGradient } from "./autograd";
 import { Tensor } from "./tensor";
 import type { Deviceish } from "./device";
 import type { Dtype } from "./dtype";
-import { broadcastBatchedMatmul, contiguousStridedShape, defaultStrides, reshapeBatchedMatmul, shapesAreEqual, type Shape, type StridedShape, type Strides, shapeSize, check, validateIdx, validateDimLength } from "./shape";
+import {
+    broadcastBatchedMatmul,
+    contiguousStridedShape,
+    defaultStrides,
+    reshapeBatchedMatmul,
+    shapesAreEqual,
+    type Shape,
+    type StridedShape,
+    type Strides,
+    shapeSize,
+    check,
+    validateIdx,
+    validateDimLength,
+    canonicalizeDim,
+} from "./shape";
 import type { TensorData, TensorSpec, MemoryFormat } from "./tensor";
 import { KernelParamsInput } from "./kernel";
 import { GatherFunction, LinearFunction } from "./functions_artisanal";
@@ -92,6 +106,16 @@ export function conv2d(
             weight
         )[0];
     }
+}
+
+export function flatten(
+    a: Tensor,
+    startDim: number = 0,
+    endDim: number = -1
+): Tensor {
+    startDim = canonicalizeDim(a.ndim, startDim);
+    endDim = canonicalizeDim(a.ndim, endDim);
+    throw new Error("flatten not implemented yet");
 }
 
 /** Gathers values along an axis specified by dim. */
@@ -297,14 +321,15 @@ function inferSize(shape: Shape, numel: number): Shape {
         }
     }
     check(
-        numel == newsize || (dim !== null && newsize > 0 && numel % newsize == 0),
-        () => `shape '[${shape}]' is invalid for input of size ${numel}`,
+        numel == newsize ||
+            (dim !== null && newsize > 0 && numel % newsize == 0),
+        () => `shape '[${shape}]' is invalid for input of size ${numel}`
     );
     if (dim !== null) {
         check(
             newsize != 0,
             () => `cannot reshape tensor of 0 elements into shape ${shape} because the unspecified dimension size -1 can be any 
-value and is ambiguous`,
+value and is ambiguous`
         );
         shape[dim] = Math.floor(numel / newsize);
     }
@@ -339,17 +364,24 @@ function validateCollapseArgs(a: Tensor, start: number, end: number): void {
     const ndim = Math.max(1, a.ndim);
     validateIdx(ndim, start);
     validateIdx(ndim, end);
-    check(end >= start, () => `Attempting to collapse but end, ${end}, is less than start, ${start}`);
+    check(
+        end >= start,
+        () =>
+            `Attempting to collapse but end, ${end}, is less than start, ${start}`
+    );
 }
-function collapseViewHelper(a: Tensor, start: number, end: number): StridedShape | null {
+function collapseViewHelper(
+    a: Tensor,
+    start: number,
+    end: number
+): StridedShape | null {
     validateCollapseArgs(a, start, end);
     let shape: Shape;
     let strides: Strides;
     if (a.ndim === 0) {
         shape = [1];
         strides = [1];
-    }
-    else {
+    } else {
         shape = a.shape;
         strides = a.strides;
     }
@@ -360,7 +392,7 @@ function collapseViewHelper(a: Tensor, start: number, end: number): StridedShape
     let length = shape[end];
     let stride = strides[end];
     for (let idx = end - 1; idx >= start; idx--) {
-        if (shape[idx] === 0 || shape[idx+1] === 0) {
+        if (shape[idx] === 0 || shape[idx + 1] === 0) {
             length = 0;
             stride = 0;
             break;
@@ -370,19 +402,37 @@ function collapseViewHelper(a: Tensor, start: number, end: number): StridedShape
         }
         length *= shape[idx];
         stride = Math.min(stride, strides[idx]);
-        if ((a.numel() > 0) && (shape[idx+1]!=1) && !(strides[idx]===strides[idx+1]*shape[idx+1])) {
+        if (
+            a.numel() > 0 &&
+            shape[idx + 1] != 1 &&
+            !(strides[idx] === strides[idx + 1] * shape[idx + 1])
+        ) {
             return null;
         }
     }
-    const newShape = shape.slice(0, start).concat([length]).concat(shape.slice(end + 1));
-    let newStrides = strides.slice(0, start).concat([stride]).concat(strides.slice(end + 1));
+    const newShape = shape
+        .slice(0, start)
+        .concat([length])
+        .concat(shape.slice(end + 1));
+    let newStrides = strides
+        .slice(0, start)
+        .concat([stride])
+        .concat(strides.slice(end + 1));
     if (a.numel() === 0) {
         newStrides = defaultStrides(newShape);
     }
     return { shape: newShape, strides: newStrides };
 }
 
-function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = false): Tensor {
+function primitiveReshape(a: Tensor, shape: Shape): Tensor {
+    throw new Error("Copying reshape not implemented");
+}
+
+function reshapeViewHelper(
+    a: Tensor,
+    shapeInput: Shape,
+    allowCopy: boolean = false
+): Tensor {
     const shape = inferSize(shapeInput, a.numel());
 
     // Short-circuits if shape is the same
@@ -418,7 +468,7 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         }
         return _a;
     }
-    
+
     // Handles general case: a 1+D tensor reshaped into a distinct 1+D shape
     let idx = 0;
     let a_ = a;
@@ -433,7 +483,7 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
             idx++;
             continue;
         }
-        
+
         // Skips dimensions that are already the correct length
         if (length === a_.shape[idx]) {
             idx++;
@@ -450,16 +500,15 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
         }
         if (end !== idx) {
             let newShapeStrides = collapseViewHelper(a_, idx, end);
-            /*
             if (newShapeStrides === null) {
                 if (allowCopy) {
-                    return prims.reshape(a, shape);
+                    return primitiveReshape(a, shape);
                 }
-                let msg = `Cannot view a tensor with shape ${a.shape} and strides ${a.stride()} as a tensor with shape ${shape}!`;
-                throw new Error(msg);
+                throw new Error(
+                    `Cannot view a tensor with shape ${a.shape} and strides ${a.strides} as a tensor with shape ${shape}!`
+                );
             }
             a_ = flatten(a_, idx, end);
-            */
             throw new Error("Reshape flatten not implemented");
         }
         if (accum !== length) {
@@ -477,14 +526,14 @@ function _reshapeViewHelper(a: Tensor, shapeInput: Shape, allowCopy: boolean = f
 }
 
 export function reshape(input: Tensor, shape: number[]): Tensor {
-    return _reshapeViewHelper(input, shape, true);
+    return reshapeViewHelper(input, shape, true);
 }
 
 export function reshapeAs(input: Tensor, other: Tensor): Tensor {
     return input.reshape(other.shape);
 }
 
-export function squeeze(input: Tensor, dim?: number|number[]): Tensor {
+export function squeeze(input: Tensor, dim?: number | number[]): Tensor {
     let dims: number[];
     if (dim === undefined) {
         dims = [];
@@ -504,7 +553,9 @@ export function squeeze(input: Tensor, dim?: number|number[]): Tensor {
     for (let i in dims) {
         let d = dims[i];
         if (d < minDim || d > maxDim) {
-            throw new Error(`Dimension out of range (expected to be in range of [${minDim}, ${maxDim}], but got ${d})`);
+            throw new Error(
+                `Dimension out of range (expected to be in range of [${minDim}, ${maxDim}], but got ${d})`
+            );
         }
         if (d < 0) {
             dims[i] = input.shape.length + d;
@@ -571,14 +622,15 @@ export function unsqueeze(input: Tensor, dim?: number): Tensor {
     let unsqueezeOutputDim: number;
     if (dim === undefined) {
         unsqueezeOutputDim = 0;
-    }
-    else if (dim < minDim || dim >= maxDim) {
-        throw new Error(`Dimension out of range (expected to be in range of [${minDim}, ${maxDim-1}], but got ${dim})`);
-    }
-    else if (dim < 0) {
+    } else if (dim < minDim || dim >= maxDim) {
+        throw new Error(
+            `Dimension out of range (expected to be in range of [${minDim}, ${
+                maxDim - 1
+            }], but got ${dim})`
+        );
+    } else if (dim < 0) {
         unsqueezeOutputDim = dim + inputRank + 1;
-    }
-    else {
+    } else {
         unsqueezeOutputDim = dim;
     }
     const outputShape: Shape = [];
@@ -588,7 +640,7 @@ export function unsqueeze(input: Tensor, dim?: number): Tensor {
         if (outputDim === unsqueezeOutputDim) {
             outputShape.push(1);
             if (outputDim === 0) {
-                outputStrides.push(input.strides[0]*input.shape[0]);
+                outputStrides.push(input.strides[0] * input.shape[0]);
             } else {
                 outputStrides.push(outputStrides[outputDim - 1]);
             }
@@ -602,7 +654,7 @@ export function unsqueeze(input: Tensor, dim?: number): Tensor {
 }
 
 export function view(input: Tensor, shape: number[]): Tensor {
-    return _reshapeViewHelper(input, shape, false);
+    return reshapeViewHelper(input, shape, false);
 }
 
 export function viewAs(input: Tensor, other: Tensor): Tensor {

@@ -261,3 +261,29 @@ export function validateIdx(rank: number, idx: number): void {
 export function validateDimLength(length: number): void {
     check(length >= 0, () => `dimension length ${length} must be non-negative`);
 }
+
+export function canonicalizeDim(rank: number, idx: number, wrapScalar: boolean = true): number {
+    if (rank < 0) {
+        throw new Error(`Rank must be non-negative, got ${rank}`);
+    }
+    if (rank === 0) {
+        if (!wrapScalar) {
+            throw new Error(`Dimension specified as ${idx} but tensor has no dimensions`);
+        }
+        rank = 1;
+    }
+    if (idx >0 && idx < rank) {
+        return idx;
+    }
+    let _idx: number;
+    if (idx < 0) {
+        _idx = idx + rank;
+    }
+    else {
+        _idx = idx;
+    }
+    if (_idx < 0 || _idx >= rank) {
+        throw new Error(`Dimension out of range (expected to be in range of [${-rank}, ${rank}), but got ${idx})`);
+    }
+    return _idx;
+}

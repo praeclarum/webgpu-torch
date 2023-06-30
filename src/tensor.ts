@@ -429,6 +429,9 @@ export class Tensor extends TensorBase {
         // console.log("EXPAND", this.shape, this.strides, shape, newShape, newStrides);
         return this.withShape(newShape, newStrides);
     }
+    flatten(startDim: number = 0, endDim: number = -1): Tensor {
+        return aops.flatten(this, startDim, endDim);
+    }
     /** Gathers values along an axis specified by dim. */
     gather(dim: number, index: Tensor): Tensor {
         return aops.gather(this, dim, index);
