@@ -42,7 +42,7 @@ export function defaultStrides(shape: Shape): Strides {
     let stride = 1;
     for (let i = shape.length - 1; i >= 0; i--) {
         strides[i] = stride;
-        stride *= shape[i];
+        stride *= Math.max(1, shape[i]);
     }
     return strides;
 }
