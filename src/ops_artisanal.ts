@@ -108,6 +108,24 @@ export function conv2d(
     }
 }
 
+function collapseView(a: Tensor, start: number, end: number): Tensor {
+    const newShape = collapseViewHelper(a, start, end);
+    if (newShape === null) {
+        throw new Error("Attempting to view a collapsed tensor, but no such view exists!");
+    }
+    return a.withShape(newShape.shape, newShape.strides);
+}
+
+function collapse(a: Tensor, start: number, end: number): Tensor {
+    // const newShape = collapsedShape(a, start, end);
+    throw new Error("collapse not implemented yet");
+}
+
+/** Flattens a contiguous range of dims into a 1D tensor.
+ *  
+ * `flatten`, unlike other shape operators, returns the input tensor on a no-op
+ * (unless a 0D tensor is flattened, in which case it's returned in 1D).
+ * */
 export function flatten(
     a: Tensor,
     startDim: number = 0,
@@ -115,7 +133,16 @@ export function flatten(
 ): Tensor {
     startDim = canonicalizeDim(a.ndim, startDim);
     endDim = canonicalizeDim(a.ndim, endDim);
-    throw new Error("flatten not implemented yet");
+    // Short-circuits on no-op
+    if (startDim == endDim && a.ndim != 0) {
+        return a;
+    }
+    // Tries to take a view
+    const newShape = collapseViewHelper(a, startDim, endDim);
+    if (newShape !== null) {
+        return collapseView(a, startDim, endDim);
+    }
+    return collapse(a, startDim, endDim);
 }
 
 /** Gathers values along an axis specified by dim. */
@@ -509,7 +536,6 @@ function reshapeViewHelper(
                 );
             }
             a_ = flatten(a_, idx, end);
-            throw new Error("Reshape flatten not implemented");
         }
         if (accum !== length) {
             a_ = splitDim(a_, idx, length);

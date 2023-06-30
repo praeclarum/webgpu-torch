@@ -80,6 +80,13 @@ test("add 2d to 2d inplace broadcasts", async () => {
     expect(await x.toArrayAsync()).toEqual([[ 5,  6,  7], [ 8,  9, 10]]);
 });
 
+test("flatten 2d", async () => {
+    const x = tensor([[1, 2, 3], [4, 5, 6]]);
+    const y = x.flatten();
+    expect(y.shape).toEqual([6]);
+    expect(await y.toArrayAsync()).toEqual([1, 2, 3, 4, 5, 6]);
+});
+
 // test("gather 1d", async () => {
 //     const x = tensor([1, 2, 3]);
 //     const y = x.gather(1, tensor([2, 1, 0]));
@@ -490,7 +497,7 @@ test("view [2, 3] to [-1, 3]", async () => {
 test("view [2, 3] to [3, 2]", async () => {
     const a = tensor([[-122.0, -74.0, -13.0], [59.0, 70.0, -52.0]]);
     expect(a.shape).toEqual([2, 3]);
-    // const c = a.view([3, 2]);
-    // expect(c.shape).toEqual([3, 2]);
-    // expect(await c.toArrayAsync()).toEqual([[-122.0, -74.0], [-13.0, 59.0], [70.0, -52.0]]);
+    const c = a.view([3, 2]);
+    expect(c.shape).toEqual([3, 2]);
+    expect(await c.toArrayAsync()).toEqual([[-122.0, -74.0], [-13.0, 59.0], [70.0, -52.0]]);
 });
