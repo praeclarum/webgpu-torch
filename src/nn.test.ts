@@ -205,7 +205,7 @@ test("iterate over ModuleList", () => {
 test("Sequential adds modules from array", () => {
     const a = new A();
     const b = new B();
-    const seq = new nn.Sequential([a, b]);
+    const seq = new nn.Sequential(a, b);
     expect(seq.length).toBe(2);
     expect(seq[0]).toBe(a);
     expect(seq[1]).toBe(b);
@@ -214,7 +214,7 @@ test("Sequential adds modules from array", () => {
 test("iterate over sequential", () => {
     const a = new A();
     const b = new B();
-    const seq = new nn.Sequential([a, b]);
+    const seq = new nn.Sequential(a, b);
     let i = 0;
     for (const m of seq) {
         expect(m).toBe(seq[i]);
@@ -225,7 +225,7 @@ test("iterate over sequential", () => {
 test("Sequential forward works", async () => {
     const abs = new Abs();
     const x = new X();
-    const seq = new nn.Sequential([x, abs]);
+    const seq = new nn.Sequential(x, abs);
     const output = seq.forward(new Tensor([-1, 2, -3]));
     expect(await output.toArrayAsync()).toEqual([1, 2, 3]);
 });
@@ -233,7 +233,7 @@ test("Sequential forward works", async () => {
 test("Sequential forward fails with missing child forward", async () => {
     const abs = new Abs();
     const no = new NoForward();
-    const seq = new nn.Sequential([no, abs]);
+    const seq = new nn.Sequential(no, abs);
     expect(() => seq.forward(new Tensor([-1, 2, -3]))).toThrow();
 });
 

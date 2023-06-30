@@ -36,12 +36,25 @@ test("linear backwards", async () => {
 });
 
 test("mlp backwards", async () => {
-    const model = new Sequential([
-        new Linear(2, 3),
+    const linear1 = new Linear(2, 3);
+    const linear2 = new Linear(3, 5);
+    const model = new Sequential(
+        linear1,
         new ReLU(),
-        new Linear(3, 5),
+        linear2,
         new Sigmoid()
-    ]);
-    const input = new Tensor({data:[[1, 2], [3, 4]], requiresGrad: false});
-    // const output = model.forward(input);
+    );
+    const input = new Tensor({data:[[-0.1, 0.2], [0.3, -0.4]], requiresGrad: false});
+    const output = model.forward(input);
+    expect((await output.toArrayAsync() as number[][])[0][0]).toBeCloseTo(0.5744);
+    const loss = output.sum();
+    expect(loss.gradFunc).not.toBeNull();
+    expect(loss.requiresGrad).toBe(true);
+    expect(await loss.toArrayAsync()).toBeCloseTo(5.3722);
+    loss.backward();
+    expect(await loss.toArrayAsync()).toBeCloseTo(5.3722);
+    const l1wgrad = await linear1.weight.grad?.toArrayAsync() as number[][];
+    expect(l1wgrad).not.toBeNull();
+    expect(l1wgrad[0][0]).toBeCloseTo(-0.1222);
+    expect(l1wgrad[0][1]).toBeCloseTo(0.2445);
 });

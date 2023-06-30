@@ -120,11 +120,11 @@ export class UNetModel extends Module {
         const useNewAttentionOrder = config.useNewAttentionOrder || false;
 
         const timeEmbedDim = config.modelChannels * 4;
-        this.timeEmbed = new Sequential([
+        this.timeEmbed = new Sequential(
             linear(this.modelChannels, timeEmbedDim),
             new SiLU(),
             linear(timeEmbedDim, timeEmbedDim),
-        ]);
+        );
 
         this.inputBlocks = new ModuleList([
             new TimestepEmbedSequential(
@@ -345,7 +345,7 @@ export class UNetModel extends Module {
             }
         }
 
-        this.out = new Sequential([
+        this.out = new Sequential(
             normalization(ch),
             new SiLU(),
             zeroModule(
@@ -359,7 +359,7 @@ export class UNetModel extends Module {
                     this.dtype
                 )
             ),
-        ]);
+        );
     }
 
     /**

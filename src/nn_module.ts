@@ -449,7 +449,7 @@ export class Sequential extends Container {
     [Symbol.iterator]() {
         return this.children[Symbol.iterator]();
     }
-    constructor(modules: Module[]) {
+    constructor(...modules: Module[]) {
         super();
         for (const module of modules) {
             this.push(module);

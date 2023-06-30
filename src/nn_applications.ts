@@ -10,12 +10,12 @@ export class DeepSDF extends Module {
         const depth = config?.depth ?? 8;
         const width = config?.width ?? 128;
         this.pointEncoder = new Linear(3, width);
-        this.block1 = new Sequential([]);
+        this.block1 = new Sequential();
         for (let i = 0; i < depth; i++) {
-            this.block1.push(new Sequential([
+            this.block1.push(new Sequential(
                 new Linear(width, width),
                 new ReLU(),
-            ]));
+            ));
         }
         this.distanceHead = new Linear(width, 1);
     }
