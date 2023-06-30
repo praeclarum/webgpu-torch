@@ -454,6 +454,9 @@ export class Tensor extends TensorBase {
     t(): Tensor {
         return aops.t(this);
     }
+    uniform_(lowerBound: number, upperBound: number): Tensor {
+        throw new Error("Tensor uniform_ is not implemented");
+    }
     unsqueeze(dim?: number): Tensor {
         return aops.unsqueeze(this, dim);
     }

@@ -8,7 +8,7 @@ export { ATypedArray, Dtype } from "./dtype";
 export { Device, Deviceish, DeviceId, DeviceType } from "./device";
 export { CompiledExpr, EvalEnv, ExprCode } from "./expr";
 export * from "./factories";
-// export * as functions from "./functions";
+export * as init from "./init";
 export {
     Kernel,
     KernelConfig,
