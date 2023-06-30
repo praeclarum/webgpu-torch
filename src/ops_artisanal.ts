@@ -153,6 +153,13 @@ export function gather(input: Tensor, dim: number, index: Tensor): Tensor {
     return GatherFunction.forward([input, dim, index]);
 }
 
+/**
+ * Applies a linear transformation to the incoming data: `y = xA^T + b`.
+ * @param input `(*, inFeatures)` where `*` means any number of additional dimensions, including none
+ * @param weight `(outFeatures, inFeatures)` or `(inFeatures)`
+ * @param bias `(outFeatures)` or `()`
+ * @returns `(*, outFeatures)` or `(*)`, based on the shape of the weight
+ */
 export function linear(input: Tensor, weight: Tensor, bias?: Tensor): Tensor {
     if (shouldCreateGradient(input, weight, bias)) {
         return LinearFunction.apply(input, weight, bias);
