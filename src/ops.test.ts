@@ -98,6 +98,26 @@ test("numel", async () => {
     expect(x.numel()).toEqual(6);
 });
 
+test("reshape [2, 3] to [3, 2]", async () => {
+    const a = tensor([[25.0, -102.0, -1.0], [7.0, -95.0, -38.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    expect(a.strides).toEqual([3, 1]);
+    const c = a.reshape([3, 2]);
+    expect(c.shape).toEqual([3, 2]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[25.0, -102.0], [-1.0, 7.0], [-95.0, -38.0]]);
+});
+
+test("reshape [2, 3] as [3, 2]", async () => {
+    const a = tensor([[25.0, -102.0, -1.0], [7.0, -95.0, -38.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    expect(a.strides).toEqual([3, 1]);
+    const c = a.reshapeAs(ones([3, 2]));
+    expect(c.shape).toEqual([3, 2]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[25.0, -102.0], [-1.0, 7.0], [-95.0, -38.0]]);
+});
+
 test("squeeze [] dim ", async () => {
     const a = tensor([]);
     expect(a.shape).toEqual([0]);
@@ -347,6 +367,14 @@ test("unsqueeze [1, 1] dim 1", async () => {
     expect(c.strides).toEqual([1, 1, 1]);
     expect(await c.toArrayAsync()).toEqual([[[-133.0]]]);
 });
+test("unsqueeze [2, 1]", async () => {
+    const a = tensor([[-116.0], [-163.0]]);
+    expect(a.shape).toEqual([2, 1]);
+    const c = a.unsqueeze();
+    expect(c.shape).toEqual([1, 2, 1]);
+    expect(c.strides).toEqual([2, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-116.0], [-163.0]]]);
+});
 test("unsqueeze [2, 1] dim 0", async () => {
     const a = tensor([[-116.0], [-163.0]]);
     expect(a.shape).toEqual([2, 1]);
@@ -495,9 +523,51 @@ test("view [2, 3] to [-1, 3]", async () => {
     expect(await c.toArrayAsync()).toEqual([[-138.0, 103.0, 58.0], [-182.0, 64.0, 8.0]]);
 });
 test("view [2, 3] to [3, 2]", async () => {
-    const a = tensor([[-122.0, -74.0, -13.0], [59.0, 70.0, -52.0]]);
+    const a = tensor([[25.0, -102.0, -1.0], [7.0, -95.0, -38.0]]);
     expect(a.shape).toEqual([2, 3]);
+    expect(a.strides).toEqual([3, 1]);
     const c = a.view([3, 2]);
     expect(c.shape).toEqual([3, 2]);
-    expect(await c.toArrayAsync()).toEqual([[-122.0, -74.0], [-13.0, 59.0], [70.0, -52.0]]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[25.0, -102.0], [-1.0, 7.0], [-95.0, -38.0]]);
+});
+test("view [2, 15] to [3, -1]", async () => {
+    const a = tensor([[120.0, -202.0, 12.0, -39.0, 81.0, 92.0, 247.0, -497.0, -37.0, -130.0, 126.0, -178.0, 20.0, 32.0, 118.0], [4.0, -92.0, -18.0, 115.0, 33.0, 94.0, -136.0, -5.0, 18.0, 96.0, 29.0, 146.0, -42.0, 20.0, 109.0]]);
+    expect(a.shape).toEqual([2, 15]);
+    expect(a.strides).toEqual([15, 1]);
+    const c = a.view([3, -1]);
+    expect(c.shape).toEqual([3, 10]);
+    expect(c.strides).toEqual([10, 1]);
+    expect(await c.toArrayAsync()).toEqual([[120.0, -202.0, 12.0, -39.0, 81.0, 92.0, 247.0, -497.0, -37.0, -130.0], [126.0, -178.0, 20.0, 32.0, 118.0, 4.0, -92.0, -18.0, 115.0, 33.0], [94.0, -136.0, -5.0, 18.0, 96.0, 29.0, 146.0, -42.0, 20.0, 109.0]]);
+});
+test("view [2, 15] to [4, -1]", async () => {
+    const a = ones([2, 15]);
+    expect(() => a.view([4, -1])).toThrow("shape '[4,-1]' is invalid for input of size 30");
+});
+test("view [2, 15] to [1, 15, 2]", async () => {
+    const a = tensor([[-77.0, 14.0, 17.0, 84.0, -21.0, 54.0, -97.0, 126.0, -63.0, 129.0, 17.0, 46.0, 16.0, 215.0, -83.0], [144.0, -88.0, 114.0, 130.0, 34.0, -32.0, 92.0, -1.0, -60.0, -59.0, 10.0, 170.0, -137.0, 4.0, -138.0]]);
+    expect(a.shape).toEqual([2, 15]);
+    expect(a.strides).toEqual([15, 1]);
+    const c = a.view([1, 15, 2]);
+    expect(c.shape).toEqual([1, 15, 2]);
+    expect(c.strides).toEqual([30, 2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[-77.0, 14.0], [17.0, 84.0], [-21.0, 54.0], [-97.0, 126.0], [-63.0, 129.0], [17.0, 46.0], [16.0, 215.0], [-83.0, 144.0], [-88.0, 114.0], [130.0, 34.0], [-32.0, 92.0], [-1.0, -60.0], [-59.0, 10.0], [170.0, -137.0], [4.0, -138.0]]]);
+});
+test("view [2, 3] to [1, 1, 3, 1, 2, 1, 1]", async () => {
+    const a = tensor([[135.0, -38.0, 56.0], [28.0, 17.0, 96.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    expect(a.strides).toEqual([3, 1]);
+    const c = a.view([1, 1, 3, 1, 2, 1, 1]);
+    expect(c.shape).toEqual([1, 1, 3, 1, 2, 1, 1]);
+    expect(c.strides).toEqual([6, 6, 2, 2, 1, 1, 1]);
+    expect(await c.toArrayAsync()).toEqual([[[[[[[135.0]], [[-38.0]]]], [[[[56.0]], [[28.0]]]], [[[[17.0]], [[96.0]]]]]]]);
+});
+test("view [2, 3] as [3, 2]", async () => {
+    const a = tensor([[25.0, -102.0, -1.0], [7.0, -95.0, -38.0]]);
+    expect(a.shape).toEqual([2, 3]);
+    expect(a.strides).toEqual([3, 1]);
+    const c = a.viewAs(ones([3, 2]));
+    expect(c.shape).toEqual([3, 2]);
+    expect(c.strides).toEqual([2, 1]);
+    expect(await c.toArrayAsync()).toEqual([[25.0, -102.0], [-1.0, 7.0], [-95.0, -38.0]]);
 });

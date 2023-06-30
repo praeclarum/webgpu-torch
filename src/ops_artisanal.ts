@@ -555,10 +555,6 @@ export function reshape(input: Tensor, shape: number[]): Tensor {
     return reshapeViewHelper(input, shape, true);
 }
 
-export function reshapeAs(input: Tensor, other: Tensor): Tensor {
-    return input.reshape(other.shape);
-}
-
 export function squeeze(input: Tensor, dim?: number | number[]): Tensor {
     let dims: number[];
     if (dim === undefined) {
@@ -681,8 +677,4 @@ export function unsqueeze(input: Tensor, dim?: number): Tensor {
 
 export function view(input: Tensor, shape: number[]): Tensor {
     return reshapeViewHelper(input, shape, false);
-}
-
-export function viewAs(input: Tensor, other: Tensor): Tensor {
-    return input.view(other.shape);
 }

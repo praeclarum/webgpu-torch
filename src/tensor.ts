@@ -445,6 +445,9 @@ export class Tensor extends TensorBase {
     reshape(shape: Shape): Tensor {
         return aops.reshape(this, shape);
     }
+    reshapeAs(other: Tensor): Tensor {
+        return aops.reshape(this, other.shape);
+    }
     squeeze(dim?: number|number[]): Tensor {
         return aops.squeeze(this, dim);
     }
@@ -456,6 +459,9 @@ export class Tensor extends TensorBase {
     }
     view(shape: Shape): Tensor {
         return aops.view(this, shape);
+    }
+    viewAs(other: Tensor): Tensor {
+        return aops.view(this, other.shape);
     }
     zero_(): Tensor {
         throw new Error("Tensor zero_ is not implemented");
