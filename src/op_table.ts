@@ -278,6 +278,7 @@ export const registry: AnOpSpec[] = [
     // sgn: complex
     {
         name: "sigmoid",
+        nnOp: true,
         type: "unary",
         forward: "output = 1.0 / (1.0 + exp(-input))",
         backward: "var out = 1.0 / (1.0 + exp(-input)); inputGrad = outputGrad * out * (1.0 - out)",
@@ -346,6 +347,7 @@ export const registry: AnOpSpec[] = [
     },
     {
         name: "tanh",
+        nnOp: true,
         type: "unary",
         forward: "output = tanh(input)",
         backward: "inputGrad = outputGrad * (1.0 - tanh(input) * tanh(input))",

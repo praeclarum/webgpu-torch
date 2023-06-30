@@ -2,6 +2,9 @@ import { Tensor } from "./tensor";
 import { AutoFunction, GradientContext } from "./autograd";
 import { zeros } from "./factories";
 import { linear } from "./ops_artisanal";
+import { Sequential } from "./nn_module";
+import { Linear } from "./nn_basic";
+import { ReLU, Sigmoid } from "./nn_opgen";
 
 test("auto function forward fails", () => {
     expect(() => AutoFunction.forward([])).toThrow();
@@ -30,4 +33,15 @@ test("linear backwards", async () => {
     expect(bias.grad!.shape).toEqual([2]);
     expect(await weight.grad?.toArrayAsync()).toEqual([[5., 7., 9.], [5., 7., 9.]]);
     expect(await bias.grad?.toArrayAsync()).toEqual([2., 2.]);
+});
+
+test("mlp backwards", async () => {
+    const model = new Sequential([
+        new Linear(2, 3),
+        new ReLU(),
+        new Linear(3, 5),
+        new Sigmoid()
+    ]);
+    const input = new Tensor({data:[[1, 2], [3, 4]], requiresGrad: false});
+    // const output = model.forward(input);
 });

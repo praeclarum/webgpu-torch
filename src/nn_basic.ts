@@ -12,6 +12,6 @@ export class Linear extends Module {
     }
     forward(input: Tensor): Tensor {
         // linear(input, this.weight, this.bias);
-        throw new Error("Method not implemented.");
+        throw new Error("Linear forward not implemented.");
     }
 }
