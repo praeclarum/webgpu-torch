@@ -46,6 +46,7 @@ test("mlp backwards", async () => {
     );
     const input = new Tensor({data:[[-0.1, 0.2], [0.3, -0.4]], requiresGrad: false});
     const output = model.forward(input);
+    const outputArray = await output.toArrayAsync();
     const loss = output.sum();
     expect(loss.gradFunc).not.toBeNull();
     expect(loss.requiresGrad).toBe(true);

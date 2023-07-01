@@ -16,6 +16,7 @@ import * as ops from "./ops_opgen";
 import * as aops from "./ops_artisanal";
 import { TensorBase } from "./tensor_base";
 import { GraphNode, SourceNode, ComputedNode, GraphNodeOutputRef, GraphNodeOutputSpec, KernelNode, ViewNode } from "./graph";
+import { getSeed } from "./random";
 
 export type MemoryFormat = "contiguousFormat" | "preserveFormat";
 
@@ -458,7 +459,7 @@ export class Tensor extends TensorBase {
     uniform_(lowerBound: number, upperBound: number): Tensor {
         const params = {
             size: shapeSize(this.shape),
-            seed: 42,
+            seed: getSeed(),
             lowerBound,
             upperBound,
         };
