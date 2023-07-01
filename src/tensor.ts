@@ -458,6 +458,7 @@ export class Tensor extends TensorBase {
     uniform_(lowerBound: number, upperBound: number): Tensor {
         const params = {
             size: shapeSize(this.shape),
+            seed: 42,
             lowerBound,
             upperBound,
         };

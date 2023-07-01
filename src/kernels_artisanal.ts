@@ -469,6 +469,10 @@ export const kernels: { [name: string]: KernelSpec } = {
                 shaderType: "u32",
             },
             {
+                name: "seed",
+                shaderType: "u32",
+            },
+            {
                 name: "lowerBound",
                 shaderType: "f32",
             },
@@ -488,13 +492,24 @@ export const kernels: { [name: string]: KernelSpec } = {
         workgroupSize: [256, 1, 1],
         workgroupCount: ["size/256", 1, 1],
         shader: `
-        let range = parameters.upperBound - parameters.lowerBound;
         let outputIndex = global_id.x;
         if (outputIndex >= parameters.size) {
             return;
         }
-        // output[outputIndex] = parameters.lowerBound + range * random<f32>(vec2<f32>(f32(outputIndex), 0.0));
-        output[outputIndex] = 42;
+
+        var b = 0u;
+        let seed = u32(u32(parameters.seed + outputIndex) * 1099087573u);
+        b = ((seed << 13) ^ seed) >> 19;
+        let z1 = ((seed & 429496729u) << 12) ^ b;
+        b = ((seed << 2) ^ seed) >> 25;
+        let z2 = ((seed & 4294967288u) << 4) ^ b;
+        b = ((seed << 3) ^ seed) >> 11;
+        let z3 = ((seed & 429496280u) << 17) ^ b;
+        let z4 = u32(u32(1664525u * seed) + 1013904223u);
+        let r = z1 ^ z2 ^ z3 ^ z4;
+        let u = f32(u32(r)) * 2.3283064365387e-10;
+
+        output[outputIndex] = parameters.lowerBound + u * (parameters.upperBound - parameters.lowerBound);
     `
     }
 };

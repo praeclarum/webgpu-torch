@@ -378,6 +378,7 @@ const javaScriptSubstitutions: [RegExp, string][] = [
     ["(\\d+)u", "$1"],
     ["(\\d+)f", "$1"],
     ["(\\d+\\.\\d+)f", "$1"],
+    [">>", ">>>"],
     ["global_id\\.x", "global_id_x"],
     ["global_id\\.y", "global_id_y"],
     ["global_id\\.z", "global_id_z"],
