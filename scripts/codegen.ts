@@ -253,8 +253,8 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
         if (isGrad) continue;
         const isStrided = kernelSpec.name.includes("_strided");
         if (isStrided) continue;
-        const isOtherScalar = kernelSpec.name.includes("_scalar");
-        if (isOtherScalar) continue;
+        const isScalarKernel = kernelSpec.name.includes("_scalar");
+        if (isScalarKernel) continue;
         const isBinary = opSpec.type === "binary";
         const isReduction = opSpec.type === "reduction";
         const hasAlpha = opSpec.alpha ?? false;
@@ -456,8 +456,17 @@ import { shapeSize, defaultStrides, broadcastShapes, stridedShapeIsContiguous } 
             w.writeLine(`}`);
         }
         else if (isBinary) {
-            writeParams("input", isOtherScalar, hasAlpha, "ctx.alpha", w);
+            w.writeLine(`if (typeof other === "number") {`);
+            w.indent();
+            writeParams("input", true, hasAlpha, "ctx.alpha", w);
+            w.writeLine(`return input.runKernel("${kernelSpec.name}_scalar_grad", ${configS}, params, [input.shape], outputGrad);`);
+            w.dedent();
+            w.writeLine(`} else {`);
+            w.indent();
+            writeParams("input", false, hasAlpha, "ctx.alpha", w);
             w.writeLine(`return input.runKernel("${kernelSpec.name}_grad", ${configS}, params, [input.shape, other.shape], other, outputGrad);`);
+            w.dedent();
+            w.writeLine(`}`);
         }
         else {
             writeParams("input", false, hasAlpha, "ctx.alpha", w);

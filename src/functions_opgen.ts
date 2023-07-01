@@ -136,11 +136,20 @@ export class AddFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-            alpha: ctx.alpha || 1.0,
-        };
-        return input.runKernel("add_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+                alpha: ctx.alpha || 1.0,
+            };
+            return input.runKernel("add_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+                alpha: ctx.alpha || 1.0,
+            };
+            return input.runKernel("add_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class AsinFunction extends AutoFunction {
@@ -269,10 +278,18 @@ export class Atan2Function extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("atan2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("atan2_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("atan2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class CeilFunction extends AutoFunction {
@@ -353,10 +370,18 @@ export class CopysignFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("copysign_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("copysign_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("copysign_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class CosFunction extends AutoFunction {
@@ -485,10 +510,18 @@ export class DivFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("div_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("div_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("div_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class ExpFunction extends AutoFunction {
@@ -665,10 +698,18 @@ export class HypotFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("hypot_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("hypot_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("hypot_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class LdexpFunction extends AutoFunction {
@@ -725,10 +766,18 @@ export class LdexpFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("ldexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("ldexp_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("ldexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class LogFunction extends AutoFunction {
@@ -881,10 +930,18 @@ export class LogaddexpFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("logaddexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("logaddexp_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("logaddexp_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class Logaddexp2Function extends AutoFunction {
@@ -941,10 +998,18 @@ export class Logaddexp2Function extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("logaddexp2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("logaddexp2_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("logaddexp2_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class MulFunction extends AutoFunction {
@@ -1001,10 +1066,18 @@ export class MulFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("mul_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("mul_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("mul_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class NegFunction extends AutoFunction {
@@ -1109,10 +1182,18 @@ export class PowFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("pow_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("pow_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("pow_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class Rad2degFunction extends AutoFunction {
@@ -1485,11 +1566,20 @@ export class SubFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-            alpha: ctx.alpha || 1.0,
-        };
-        return input.runKernel("sub_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+                alpha: ctx.alpha || 1.0,
+            };
+            return input.runKernel("sub_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+                alpha: ctx.alpha || 1.0,
+            };
+            return input.runKernel("sub_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class TanFunction extends AutoFunction {
@@ -1618,10 +1708,18 @@ export class XlogyFunction extends AutoFunction {
     }
     static backward(ctx: GradientContext, outputGrad: Tensor): GradientFunctionOutput[] {
         const [input, other] = ctx.savedTensors as [Tensor, Tensor];
-        const params = {
-            size: shapeSize(input.shape),
-        };
-        return input.runKernel("xlogy_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        if (typeof other === "number") {
+            const params = {
+                size: shapeSize(input.shape),
+                other: other,
+            };
+            return input.runKernel("xlogy_scalar_grad", {"dtype":"float32"}, params, [input.shape], outputGrad);
+        } else {
+            const params = {
+                size: shapeSize(input.shape),
+            };
+            return input.runKernel("xlogy_grad", {"dtype":"float32"}, params, [input.shape, other.shape], other, outputGrad);
+        }
     }
 }
 export class AllFunction extends AutoFunction {
