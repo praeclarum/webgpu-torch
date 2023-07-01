@@ -510,7 +510,7 @@ function getBinaryGradKernelSpec(
         if (global_id.x >= parameters.size) {
             return;
         }
-        ${isOtherScalar? "let otherGrad = 0.0;" : ""}
+        ${isOtherScalar? "var otherGrad = 0.0;" : ""}
         ${shaderSnippet};`;
     const inputs: KernelInputSpec[] = [
         {
