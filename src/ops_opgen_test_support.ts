@@ -86,7 +86,7 @@ function compareArrays(x: TensorArrayData|number, expected: TestArrayData, preci
     }
 }
 
-async function runOpgenTest(kernelName: string, inputs: (TensorArrayData|number)[], expectedOutputs: TestArrayData[], expectedGrads: TestArrayData[], gradError: boolean, runBackward: boolean): Promise<void> {
+async function runOpgenTest(kernelName: string, inputs: (TensorArrayData|number)[], expectedOutputs: TestArrayData[], expectedGrads: (TestArrayData|number)[], gradError: boolean, runBackward: boolean): Promise<void> {
     let outputTensor: Tensor;
     let inputGrads: (Tensor|null)[];
     if (kernelName.endsWith("_")) {
@@ -136,7 +136,9 @@ async function runOpgenTest(kernelName: string, inputs: (TensorArrayData|number)
                 continue;
             }
             const expectedGrad = expectedGrads[i];
-            compareArrays(await inputGrad.toArrayAsync(), expectedGrad, precision, inputGrad.device.type);
+            if (typeof expectedGrad !== "number") {
+                compareArrays(await inputGrad.toArrayAsync(), expectedGrad, precision, inputGrad.device.type);
+            }
         }
     }
     else {
@@ -152,6 +154,6 @@ export async function runOpgenTestForward(kernelName: string, inputs: (TensorArr
     await runOpgenTest(kernelName, inputs, expectedOutputs, [], false, false);
 }
 
-export async function runOpgenTestBackward(kernelName: string, inputs: (TensorArrayData|number)[], expectedGrads: TestArrayData[], gradError: boolean): Promise<void> {
+export async function runOpgenTestBackward(kernelName: string, inputs: (TensorArrayData|number)[], expectedGrads: (TestArrayData|number)[], gradError: boolean): Promise<void> {
     await runOpgenTest(kernelName, inputs, [], expectedGrads, gradError, true);
 }

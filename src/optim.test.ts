@@ -101,7 +101,7 @@ test("sgd mlp train loop", async () => {
         // console.log("expectedDistancesA", expectedDistancesA);
         const predictedDistances = model.forward(points);
         // console.log("predictedDistances", await predictedDistances.toArrayAsync());
-        const loss = predictedDistances.sub(expectedDistances).pow(two).mean();
+        const loss = predictedDistances.sub(expectedDistances).pow(2).mean();
         console.log("loss", await loss.toArrayAsync());
         loss.backward();
         optimizer.step();

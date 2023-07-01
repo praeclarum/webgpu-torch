@@ -137,7 +137,7 @@ function writePythonTests() {
                 w.writeLine(`output.backward()`);
                 w.writeLine(`assert input.grad is not None`);
                 if (isBinary) {
-                    w.writeLine(`grads = [input.grad, other.grad]`);
+                    w.writeLine(`grads = [input.grad, 0.0 if scalar else other.grad]`);
                 }
                 else {
                     w.writeLine(`grads = [input.grad]`);

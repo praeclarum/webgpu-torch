@@ -1,5 +1,5 @@
 // Generate code from op_spec.ts and op_table.ts
-import { KernelInputSpec, KernelParamSpec, KernelSpec } from "./kernel";
+import { KernelInputSpec, KernelOutputSpec, KernelParamSpec, KernelSpec } from "./kernel";
 import {
     ExprCode,
     exprCodeToWebGLShader,
@@ -54,7 +54,8 @@ function getBinaryKernelSpecs(op: BinaryOpSpec): KernelSpec[] {
         getBinaryKernelSpec(op, true, false, true),
     ];
     if (op.backward) {
-        specs.push(getBinaryGradKernelSpec(op, op.backward));
+        specs.push(getBinaryGradKernelSpec(op, op.backward, false));
+        specs.push(getBinaryGradKernelSpec(op, op.backward, true));
     }
     return specs;
 }
@@ -470,7 +471,8 @@ function getBinaryKernelSpec(
 
 function getBinaryGradKernelSpec(
     op: BinaryOpSpec,
-    backward: ExprCode
+    backward: ExprCode,
+    isOtherScalar: boolean
 ): KernelSpec {
     const parameters: KernelParamSpec[] = [
         {
@@ -486,6 +488,14 @@ function getBinaryGradKernelSpec(
         other: "other[global_id.x]",
         otherGrad: "otherGrad[global_id.x]",
     };
+    if (isOtherScalar) {
+        subs.other = "parameters.other";
+        subs.otherGrad = "otherGrad";
+        parameters.push({
+            name: "other",
+            shaderType: "f32",
+        });
+    }
     if (op.alpha !== undefined && op.alpha) {
         parameters.push({
             name: "alpha",
@@ -500,44 +510,49 @@ function getBinaryGradKernelSpec(
         if (global_id.x >= parameters.size) {
             return;
         }
+        ${isOtherScalar? "let otherGrad = 0.0;" : ""}
         ${shaderSnippet};`;
+    const inputs: KernelInputSpec[] = [
+        {
+            name: "input",
+            shaderType: "array<f32>",
+        }];
+    if (!isOtherScalar) {
+        inputs.push({
+            name: "other",
+            shaderType: "array<f32>",
+        });
+    }
+    inputs.push({
+            name: "outputGrad",
+            shaderType: "array<f32>",
+        });
+    const outputs: KernelOutputSpec[] = [
+        {
+            name: "inputGrad",
+            shaderType: "array<f32>",
+            size: "size",
+        }];
+    if (!isOtherScalar) {
+        outputs.push({
+            name: "otherGrad",
+            shaderType: "array<f32>",
+            size: "size",
+        });
+    }
     return {
-        name: op.name + "_grad",
+        name: op.name + (isOtherScalar ? "_scalar" : "") + "_grad",
         config: [
             {
                 name: "dtype",
             },
         ],
-        parameters: parameters,
-        inputs: [
-            {
-                name: "input",
-                shaderType: "array<f32>",
-            },
-            {
-                name: "other",
-                shaderType: "array<f32>",
-            },
-            {
-                name: "outputGrad",
-                shaderType: "array<f32>",
-            },
-        ],
-        outputs: [
-            {
-                name: "inputGrad",
-                shaderType: "array<f32>",
-                size: "size",
-            },
-            {
-                name: "otherGrad",
-                shaderType: "array<f32>",
-                size: "size",
-            },
-        ],
+        parameters,
+        inputs,
+        outputs,
         workgroupSize: [256, 1, 1],
         workgroupCount: ["size/256", 1, 1],
-        shader: shader,
+        shader,
     };
 }
 
