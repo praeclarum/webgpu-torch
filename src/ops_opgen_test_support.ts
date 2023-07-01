@@ -86,9 +86,9 @@ function compareArrays(x: TensorArrayData|number, expected: TestArrayData, preci
     }
 }
 
-async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expectedOutputs: TestArrayData[], expectedGrads: TestArrayData[], gradError: boolean, runBackward: boolean): Promise<void> {
+async function runOpgenTest(kernelName: string, inputs: (TensorArrayData|number)[], expectedOutputs: TestArrayData[], expectedGrads: TestArrayData[], gradError: boolean, runBackward: boolean): Promise<void> {
     let outputTensor: Tensor;
-    let inputGrads: Tensor[];
+    let inputGrads: (Tensor|null)[];
     if (kernelName.endsWith("_")) {
         const inputTensors = inputs.map(input => tensor(input));
         const input = inputTensors[0];
@@ -98,12 +98,16 @@ async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expec
         inputGrads = [];
     }
     else {
-        const inputTensors = inputs.map(input => tensor({data: input, requiresGrad: true}));
+        const inputTensors = inputs.map(input => {
+            if (typeof input == "number")
+                return input;
+            return tensor({data: input, requiresGrad: true});
+        });
         const op: Function = (torch as any)[kernelName];
         outputTensor = op.apply(null, inputTensors);
         if (runBackward) {
             outputTensor.backward();
-            inputGrads = inputTensors.map(input => input.grad!);
+            inputGrads = inputTensors.map(input => typeof input === "number" ? null : input.grad!);
         }
         else {
             inputGrads = [];
@@ -128,12 +132,15 @@ async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expec
         expect(inputGrads).toHaveLength(expectedGrads.length);
         for (let i = 0; i < inputGrads.length; i++) {
             const inputGrad = inputGrads[i];
+            if (inputGrad === null) {
+                continue;
+            }
             const expectedGrad = expectedGrads[i];
             compareArrays(await inputGrad.toArrayAsync(), expectedGrad, precision, inputGrad.device.type);
         }
     }
     else {
-        if (opName === "round" && outputTensor.device.type === "cpu" && inputs[0][0] === 0.5) {
+        if (opName === "round" && outputTensor.device.type === "cpu" && (inputs as number[][])[0][0] === 0.5) {
             // HACK: Pass, because round(0.5) is 0 on CPU and 1 on GPU
             return;
         }
@@ -141,10 +148,10 @@ async function runOpgenTest(kernelName: string, inputs: TensorArrayData[], expec
     }
 }
 
-export async function runOpgenTestForward(kernelName: string, inputs: TensorArrayData[], expectedOutputs: TestArrayData[]): Promise<void> {
+export async function runOpgenTestForward(kernelName: string, inputs: (TensorArrayData|number)[], expectedOutputs: TestArrayData[]): Promise<void> {
     await runOpgenTest(kernelName, inputs, expectedOutputs, [], false, false);
 }
 
-export async function runOpgenTestBackward(kernelName: string, inputs: TensorArrayData[], expectedGrads: TestArrayData[], gradError: boolean): Promise<void> {
+export async function runOpgenTestBackward(kernelName: string, inputs: (TensorArrayData|number)[], expectedGrads: TestArrayData[], gradError: boolean): Promise<void> {
     await runOpgenTest(kernelName, inputs, [], expectedGrads, gradError, true);
 }

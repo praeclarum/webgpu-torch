@@ -51,6 +51,11 @@ function writePythonTests() {
     w.dedent();
     w.writeLine(`def tensor_to_list(tensor):`);
     w.indent();
+    // Check if the tensor is actually just a float first
+    w.writeLine(`if isinstance(tensor, float):`);
+    w.indent();
+    w.writeLine(`return nan_to_str(tensor)`);
+    w.dedent();
     w.writeLine(`return nan_to_str(tensor.detach().numpy().tolist())`);
     w.dedent();
     w.writeLine(`def add_results(op_name, kernel_name, inputs, outputs, grads, gradError):`);
@@ -82,13 +87,17 @@ function writePythonTests() {
         const isInplace = kernelName.endsWith("_");
         const hasAlpha = opSpec.alpha ?? false;
         const params = ["input"];
+        const args = ["input"];
         if (isBinary) {
             params.push("other");
+            args.push("other");
+            params.push("scalar");
         }
         // if (hasAlpha) {
         //     params.push("alpha");
         // }
         const paramsS = params.join(", ");
+        const argsS = args.join(", ");
         w.writeLine(`def test_${kernelName}_value(${paramsS}):`);
         w.indent();
         w.writeLine(`grads = []`);
@@ -118,10 +127,10 @@ function writePythonTests() {
         else {
             w.writeLine(`input = torch.tensor(input, dtype=torch.float32, requires_grad=True)`);
             if (isBinary) {
-                w.writeLine(`other = torch.tensor(other, dtype=torch.float32, requires_grad=True)`);
+                w.writeLine(`other = other[0] if scalar else torch.tensor(other, dtype=torch.float32, requires_grad=True)`);
             }
             const functionName = opSpec.torchName ?? `torch.${kernelName}`;
-            w.writeLine(`output = ${functionName}(${paramsS})`);
+            w.writeLine(`output = ${functionName}(${argsS})`);
             if (opSpec.backward) {
                 w.writeLine(`try:`);
                 w.indent();
@@ -140,7 +149,7 @@ function writePythonTests() {
                 w.dedent();
             }
         }
-        w.writeLine(`add_results("${opName}", "${kernelName}", [${params}], [output], grads, gradError)`);
+        w.writeLine(`add_results("${opName}", "${kernelName}", [${args}], [output], grads, gradError)`);
         w.dedent();
         w.writeLine(`def test_${kernelName}():`);
         w.indent();
@@ -150,9 +159,12 @@ function writePythonTests() {
             }
         }
         else if (isBinary) {
+            let i = 0;
             for (const v1 of binaryTestValues) {
                 for (const v2 of binaryTestValues) {
-                    w.writeLine(`test_${kernelName}_value([${v1}], [${v2}])`);
+                    let scalar = (i === 0) && (kernelName !== "atan2" && kernelName !== "hypot" && kernelName !== "ldexp" && kernelName !== "logaddexp" && kernelName !== "logaddexp2");
+                    w.writeLine(`test_${kernelName}_value([${v1}], [${v2}], ${scalar?'True':'False'})`);
+                    i++;
                 }
             }
         }

@@ -188,11 +188,11 @@ test("acosh_([1])", async () => {
 test("acosh_([2])", async () => {
     await f("acosh_", [[2]], [[1.316957950592041]]);
 });
-test("add([-0.5], [-0.5])", async () => {
-    await f("add", [[-0.5],[-0.5]], [[-1]]);
+test("add([-0.5], -0.5)", async () => {
+    await f("add", [[-0.5],-0.5], [[-1]]);
 });
-test("add([-0.5], [-0.5]) gradient", async () => {
-    await b("add", [[-0.5],[-0.5]], [[1],[1]], false);
+test("add([-0.5], -0.5) gradient", async () => {
+    await b("add", [[-0.5],-0.5], [], true);
 });
 test("add([-0.5], [0])", async () => {
     await f("add", [[-0.5],[0]], [[-0.5]]);
@@ -602,11 +602,11 @@ test("ceil_([1])", async () => {
 test("ceil_([2])", async () => {
     await f("ceil_", [[2]], [[2]]);
 });
-test("copysign([-0.5], [-0.5])", async () => {
-    await f("copysign", [[-0.5],[-0.5]], [[-0.5]]);
+test("copysign([-0.5], -0.5)", async () => {
+    await f("copysign", [[-0.5],-0.5], [[-0.5]]);
 });
-test("copysign([-0.5], [-0.5]) gradient", async () => {
-    await b("copysign", [[-0.5],[-0.5]], [[1],[0]], false);
+test("copysign([-0.5], -0.5) gradient", async () => {
+    await b("copysign", [[-0.5],-0.5], [], true);
 });
 test("copysign([-0.5], [0])", async () => {
     await f("copysign", [[-0.5],[0]], [[0.5]]);
@@ -872,11 +872,11 @@ test("deg2rad_([1])", async () => {
 test("deg2rad_([2])", async () => {
     await f("deg2rad_", [[2]], [[0.03490658476948738]]);
 });
-test("div([-0.5], [-0.5])", async () => {
-    await f("div", [[-0.5],[-0.5]], [[1]]);
+test("div([-0.5], -0.5)", async () => {
+    await f("div", [[-0.5],-0.5], [[1]]);
 });
-test("div([-0.5], [-0.5]) gradient", async () => {
-    await b("div", [[-0.5],[-0.5]], [[-2],[2]], false);
+test("div([-0.5], -0.5) gradient", async () => {
+    await b("div", [[-0.5],-0.5], [], true);
 });
 test("div([-0.5], [0])", async () => {
     await f("div", [[-0.5],[0]], [["-Inf"]]);
@@ -1790,11 +1790,11 @@ test("logaddexp2([0.30000001192092896], [0.30000001192092896])", async () => {
 test("logaddexp2([0.30000001192092896], [0.30000001192092896]) gradient", async () => {
     await b("logaddexp2", [[0.30000001192092896],[0.30000001192092896]], [[0.5],[0.5]], false);
 });
-test("mul([-0.5], [-0.5])", async () => {
-    await f("mul", [[-0.5],[-0.5]], [[0.25]]);
+test("mul([-0.5], -0.5)", async () => {
+    await f("mul", [[-0.5],-0.5], [[0.25]]);
 });
-test("mul([-0.5], [-0.5]) gradient", async () => {
-    await b("mul", [[-0.5],[-0.5]], [[-0.5],[-0.5]], false);
+test("mul([-0.5], -0.5) gradient", async () => {
+    await b("mul", [[-0.5],-0.5], [], true);
 });
 test("mul([-0.5], [0])", async () => {
     await f("mul", [[-0.5],[0]], [[0]]);
@@ -1976,11 +1976,11 @@ test("positive([2])", async () => {
 test("positive([2]) gradient", async () => {
     await b("positive", [[2]], [[1]], false);
 });
-test("pow([-0.5], [-0.5])", async () => {
-    await f("pow", [[-0.5],[-0.5]], [["NaN"]]);
+test("pow([-0.5], -0.5)", async () => {
+    await f("pow", [[-0.5],-0.5], [["NaN"]]);
 });
-test("pow([-0.5], [-0.5]) gradient", async () => {
-    await b("pow", [[-0.5],[-0.5]], [["NaN"],["NaN"]], false);
+test("pow([-0.5], -0.5) gradient", async () => {
+    await b("pow", [[-0.5],-0.5], [], true);
 });
 test("pow([-0.5], [0])", async () => {
     await f("pow", [[-0.5],[0]], [[1]]);
@@ -2876,11 +2876,11 @@ test("square_([1])", async () => {
 test("square_([2])", async () => {
     await f("square_", [[2]], [[4]]);
 });
-test("sub([-0.5], [-0.5])", async () => {
-    await f("sub", [[-0.5],[-0.5]], [[0]]);
+test("sub([-0.5], -0.5)", async () => {
+    await f("sub", [[-0.5],-0.5], [[0]]);
 });
-test("sub([-0.5], [-0.5]) gradient", async () => {
-    await b("sub", [[-0.5],[-0.5]], [[1],[-1]], false);
+test("sub([-0.5], -0.5) gradient", async () => {
+    await b("sub", [[-0.5],-0.5], [], true);
 });
 test("sub([-0.5], [0])", async () => {
     await f("sub", [[-0.5],[0]], [[-0.5]]);
@@ -3146,11 +3146,11 @@ test("trunc_([1])", async () => {
 test("trunc_([2])", async () => {
     await f("trunc_", [[2]], [[2]]);
 });
-test("xlogy([-0.5], [-0.5])", async () => {
-    await f("xlogy", [[-0.5],[-0.5]], [["NaN"]]);
+test("xlogy([-0.5], -0.5)", async () => {
+    await f("xlogy", [[-0.5],-0.5], [["NaN"]]);
 });
-test("xlogy([-0.5], [-0.5]) gradient", async () => {
-    await b("xlogy", [[-0.5],[-0.5]], [["NaN"],[1]], false);
+test("xlogy([-0.5], -0.5) gradient", async () => {
+    await b("xlogy", [[-0.5],-0.5], [], true);
 });
 test("xlogy([-0.5], [0])", async () => {
     await f("xlogy", [[-0.5],[0]], [["+Inf"]]);
