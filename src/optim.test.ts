@@ -75,6 +75,7 @@ test("sgd mlp train loop", async () => {
     );
     const batchSize = 2;
     const radius = ones([batchSize, 1]);
+    const two = ones([batchSize, 1]).mul(2);
     const sphere = (batchedPoints: Tensor) => 
         batchedPoints.pow(2).sum(1, true).sqrt().sub(radius);
     const sphereA = (batchedPoints: number[][]) => {
@@ -86,7 +87,7 @@ test("sgd mlp train loop", async () => {
         }
         return result;
     }
-    const maxSteps = 1;
+    const maxSteps = 2;
     const optimizer = new SGD(Array.from(model.parameters()), 0.1);
     for (let stepIndex = 0; stepIndex < maxSteps; stepIndex++) {
         const pointsArray: number[][] = [];
@@ -100,10 +101,11 @@ test("sgd mlp train loop", async () => {
         // console.log("expectedDistancesA", expectedDistancesA);
         const predictedDistances = model.forward(points);
         // console.log("predictedDistances", await predictedDistances.toArrayAsync());
-        const loss = predictedDistances.sub(expectedDistances).pow(2).mean();
-        // console.log("loss", await loss.toArrayAsync());
-        // loss.backward();
-        // optimizer.step();
+        const loss = predictedDistances.sub(expectedDistances).pow(two).mean();
+        console.log("loss", await loss.toArrayAsync());
+        loss.backward();
+        optimizer.step();
+        // optimizer.zeroGrad();
     }
 });
 
