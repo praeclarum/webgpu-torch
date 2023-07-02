@@ -122,12 +122,12 @@ test("sgd mlp train loop", async () => {
         const error = predictedDistances.sub(expectedDistances);
         const loss = error.pow(2).mean();
         if (stepIndex > 0 && stepIndex % printInterval === 0) {
-            console.log("loss", await loss.toArrayAsync());
-            // sample();
+            console.log("step", `${stepIndex}/${maxSteps}`, "loss", await loss.toArrayAsync());
         }
         loss.backward();
         optimizer.step();
         optimizer.zeroGrad();
     }
+    // sample();
 });
 
