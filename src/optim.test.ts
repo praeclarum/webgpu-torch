@@ -6,6 +6,7 @@ import { Sequential } from "./nn_module";
 import { Linear } from "./nn_basic";
 import { ReLU } from "./nn_opgen";
 import { ones } from "./factories";
+import { noGrad } from "./autograd";
 
 test("optimizer ctor with empty param list", () => {
     expect(() => new SGD([], 0.1)).toThrow();
@@ -65,7 +66,10 @@ test("sgd step with params with grads", async () => {
 });
 
 test("sgd mlp train loop", async () => {
+    const batchSize = 31;
     const hiddenSize = 31;
+    const maxSteps = 50;
+    const printInterval = 1000;
     const model = new Sequential(
         new Linear(3, hiddenSize),
         new ReLU(),
@@ -73,17 +77,12 @@ test("sgd mlp train loop", async () => {
         new ReLU(),
         new Linear(hiddenSize, 1),
     );
-    const batchSize = 31;
     const radius = ones([batchSize, 1]);
-    const sphereSDF = async (batchedPoints: Tensor) => {
+    const sphereSDF = (batchedPoints: Tensor) => {
         // sqrt(x^2 + y^2 + z^2) - radius
-        // const squaredPoint = batchedPoints.pow(2);
-        const squaredPoint = batchedPoints.mul(batchedPoints);
-        console.log("squaredPoint", await squaredPoint.toArrayAsync());
-        const discriminator = squaredPoint.sum(1, true);
-        console.log("discriminator", await discriminator.toArrayAsync());
         // const distanceToCenterSq = batchedPoints.pow(2).sum(1, true);
-        const distanceToCenterSq = batchedPoints.mul(batchedPoints).sum(1, true);
+        const squaredPoint = batchedPoints.mul(batchedPoints);
+        const distanceToCenterSq = squaredPoint.sum(1, true);
         const distanceToCenter = distanceToCenterSq.sqrt();
         const distanceToSurface = distanceToCenter.sub(radius);
         return distanceToSurface;
@@ -97,25 +96,38 @@ test("sgd mlp train loop", async () => {
         }
         return result;
     }
-    const maxSteps = 2;
-    const optimizer = new SGD(Array.from(model.parameters()), 0.1);
-    for (let stepIndex = 0; stepIndex < maxSteps; stepIndex++) {
+    const getBatch = () => {
         const pointsArray: number[][] = [];
         for (let batchIndex = 0; batchIndex < batchSize; batchIndex++) {
-            pointsArray.push([(Math.random()-0.5)*4, (Math.random()-0.5)*4, (Math.random()-0.5)*4]);
+            pointsArray.push([(Math.random()-0.5)*2.1, (Math.random()-0.5)*2.1, (Math.random()-0.5)*2.1]);
         }
         const points = new Tensor(pointsArray);
-        // console.log("points", await points.toArrayAsync());
-        const expectedDistances = await sphereSDF(points);
-        const expectedDistancesA = sphereA(pointsArray);
+        return points;
+    };
+    const sample = async () => {
+        const [e, p] = noGrad(() => {
+            const points = getBatch();
+            const expectedDistances = sphereSDF(points);
+            const predictedDistances = model.forward(points);
+            return [expectedDistances, predictedDistances];
+        });
+        console.log("expectedDistances", await e.toArrayAsync());
+        console.log("predictedDistances", await p.toArrayAsync());
+    };
+    const optimizer = new SGD(Array.from(model.parameters()), 0.01);
+    for (let stepIndex = 0; stepIndex < maxSteps; stepIndex++) {
+        const points = getBatch();
+        const expectedDistances = sphereSDF(points);
         const predictedDistances = model.forward(points);
-        // const loss = predictedDistances.sub(expectedDistances).pow(2).mean();
         const error = predictedDistances.sub(expectedDistances);
         const loss = error.mul(error).mean();
-        console.log("loss", await loss.toArrayAsync());
+        if (stepIndex > 0 && stepIndex % printInterval === 0) {
+            console.log("loss", await loss.toArrayAsync());
+            sample();
+        }
         loss.backward();
         optimizer.step();
-        // optimizer.zeroGrad();
+        optimizer.zeroGrad();
     }
 });
 

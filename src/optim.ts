@@ -48,6 +48,19 @@ export abstract class Optimizer {
         this.paramGroups.push(paramGroup);
     }
     abstract step(closure?: () => Tensor): Tensor | null;
+    zeroGrad(setToNull: boolean = true) {
+        for (const group of this.paramGroups) {
+            for (const param of group.params as Tensor[]) {
+                if (param.grad !== null) {
+                    if (setToNull) {
+                        param.grad = null;
+                    } else {
+                        param.grad.zero_();
+                    }
+                }
+            }
+        }
+    }
 }
 
 export class SGD extends Optimizer {
