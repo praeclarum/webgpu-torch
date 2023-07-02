@@ -26,6 +26,7 @@ export { OpSpec, OpType } from "./op_spec";
 export * from "./ops_opgen";
 export * from "./ops_artisanal";
 export * as nn from "./nn";
+export * from "./serialization";
 export * from "./shape";
 export { TensorArrayData, UntypedStorage } from "./storage";
 export * from "./tensor";

@@ -1,6 +1,15 @@
+import { dtypeByteSize } from './dtype';
 import { zeros } from './factories';
 import * as nn from './nn';
+import { saveSafetensorsAsync } from './serialization';
 import { Tensor } from './tensor';
+
+// if (typeof globalThis.TextEncoder === "undefined" || typeof globalThis.TextDecoder === "undefined") {
+//     const utils = require("util");
+//     globalThis.TextEncoder = utils.TextEncoder;
+//     globalThis.TextDecoder = utils.TextDecoder;
+//     globalThis.Uint8Array = Uint8Array;
+// }
 
 class A extends nn.Module {
     b: B;
@@ -12,7 +21,7 @@ class A extends nn.Module {
         this.b = new B();
         this.d = new D();
         this.p1 = new nn.Parameter(zeros([1, 2, 3]));
-        this.registerBuffer("buf1", zeros([100, 200, 300]));
+        this.registerBuffer("buf1", zeros([10, 20, 30]));
     }
     forward(input: Tensor): Tensor {
         this.forwardCount++;
@@ -174,6 +183,23 @@ test("save dict has buffers and parameters", () => {
     expect(stateDict["p1"]).toBe(m.p1);
     expect(stateDict["b.p2"]).toBe(m.b.p2);
     expect(stateDict["d.p2"]).toBe(m.d.p2);
+});
+
+test("save safetensors", async () => {
+    const hasEncoder = typeof globalThis.TextEncoder !== "undefined";
+    if (hasEncoder) {
+        const m = new A();
+        const stateDict = m.stateDict();
+        const buffer = await saveSafetensorsAsync(stateDict);
+        let expectedMinSize = 0;
+        for (const key in stateDict) {
+            const tensor = stateDict[key];
+            expectedMinSize += dtypeByteSize(tensor.dtype) * tensor.numel();
+        }
+        console.log(buffer);
+        expect(buffer.byteLength).toBeGreaterThan(expectedMinSize);
+        expect(buffer.byteLength).toBeLessThan(expectedMinSize + 512);
+    }
 });
 
 test("AddModule duplicate names not allowed", () => {
