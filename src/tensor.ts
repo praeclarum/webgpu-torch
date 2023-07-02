@@ -2133,7 +2133,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = pow(input, other)
+    * output = input
     * ```
     *
     * Gradient:
@@ -2150,7 +2150,7 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = pow(input, other)
+    * output = input
     * ```
     *
     * Gradient:

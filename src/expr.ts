@@ -4,7 +4,7 @@
 
 export type ExprCode = number | string;
 
-export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "var" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "!" | "~" | "^" | "%" | "?";
+export type ExprNodeType = "apply" | "block" | "assign" | "if" | "negate" | "return" | "statements" | "var" | "+" | "-" | "*" | "/" | "==" | "!=" | "<" | "<=" | ">" | ">=" | "&&" | "||" | "&" | "|" | "^" | "!" | "~" | "^" | "%" | "?";
 
 export type ExprAtom = string | ManifestNumber;
 export type ExprCell = [ExprNodeType, ExprNode[]];
@@ -82,7 +82,11 @@ function lexn(code: string): (string | ManifestNumber)[] {
                 s += code[i];
                 i++;
             }
-            const numType = hasDecimal ? "floatAbstract" : "intAbstract";
+            let numType: ManifestNumberType = hasDecimal ? "floatAbstract" : "intAbstract";
+            if (i < n && code[i] === "f") {
+                i++;
+                numType = "floatAbstract";
+            }
             tokens.push(new ManifestNumber(numType, parseFloat(s)));
             continue;
         }
@@ -229,7 +233,7 @@ export function parseCode(code: ExprCode): ExprNode {
         }
         const t2 = tokens[i];
         if (typeof t2 !== "string" || t2 !== ":") {
-            throw new Error("Expected :");
+            throw new Error(`Expected ':', got ${t2}`);
         }
         const expr3 = parseConditional(i + 1);
         if (expr3 === null) {
@@ -271,7 +275,10 @@ export function parseCode(code: ExprCode): ExprNode {
     const parseAddOrSubtract =genericParseSeparatedList(parseMultiplyOrDivide, ["+", "-"]);
     const parseRelational = genericParseSeparatedList(parseAddOrSubtract, ["<", ">", "<=", ">="]);
     const parseEquality = genericParseSeparatedList(parseRelational, ["==", "!="]);
-    const parseLogicalAnd = genericParseSeparatedList(parseEquality, ["&&"]);
+    const parseAnd = genericParseSeparatedList(parseEquality, ["&"]);
+    const parseExclusiveOr = genericParseSeparatedList(parseAnd, ["|"]);
+    const parseInclusiveOr = genericParseSeparatedList(parseExclusiveOr, ["|"]);
+    const parseLogicalAnd = genericParseSeparatedList(parseInclusiveOr, ["&&"]);
     const parseLogicalOr = genericParseSeparatedList(parseLogicalAnd, ["||"]);
     function parseUnary(i: number): ParseState|null {
         if (i >= tokens.length) {
@@ -535,6 +542,16 @@ export function exprNodeToString(ast: ExprNode): string {
         return `(${exprNodeToString(ast[1][0])} <= ${exprNodeToString(ast[1][1])})`;
     case ">=":
         return `(${exprNodeToString(ast[1][0])} >= ${exprNodeToString(ast[1][1])})`;
+    case "&&":
+        return `(${exprNodeToString(ast[1][0])} && ${exprNodeToString(ast[1][1])})`;
+    case "||":
+        return `(${exprNodeToString(ast[1][0])} || ${exprNodeToString(ast[1][1])})`;
+    case "&":
+        return `(${exprNodeToString(ast[1][0])} & ${exprNodeToString(ast[1][1])})`;
+    case "|":
+        return `(${exprNodeToString(ast[1][0])} | ${exprNodeToString(ast[1][1])})`;
+    case "^":
+        return `(${exprNodeToString(ast[1][0])} ^ ${exprNodeToString(ast[1][1])})`;
     case "&&":
         return `(${exprNodeToString(ast[1][0])} && ${exprNodeToString(ast[1][1])})`;
     case "||":

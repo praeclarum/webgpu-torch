@@ -235,7 +235,9 @@ export const registry: AnOpSpec[] = [
     {
         name: "pow",
         type: "binary",
-        forward: "output = pow(input, other)",
+        // forward: "output = pow(input, other)",
+        forward: `output = input >= 0 ? pow(input, other) :
+            (fract(other) == 0 ? (pow(-input, other) * ((i32(other) & 1) != 0 ? -1f : 1f)) : pow(input, other))`,
         backward: "inputGrad = outputGrad * other * pow(input, other - 1.0); otherGrad = outputGrad * pow(input, other) * log(input)",
     },
     // quantized_batch_norm: quantization

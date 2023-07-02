@@ -81,7 +81,7 @@ test("sgd mlp train loop", async () => {
     const sphereSDF = (batchedPoints: Tensor) => {
         // sqrt(x^2 + y^2 + z^2) - radius
         // const distanceToCenterSq = batchedPoints.pow(2).sum(1, true);
-        const squaredPoint = batchedPoints.mul(batchedPoints);
+        const squaredPoint = batchedPoints.pow(2);
         const distanceToCenterSq = squaredPoint.sum(1, true);
         const distanceToCenter = distanceToCenterSq.sqrt();
         const distanceToSurface = distanceToCenter.sub(radius);

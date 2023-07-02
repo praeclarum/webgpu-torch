@@ -773,7 +773,7 @@ export function positive(input: Tensor): Tensor {
 /**
 * Calculates:
 * ```js
-* output = pow(input, other)
+* output = input
 * ```
 *
 * Gradient:
