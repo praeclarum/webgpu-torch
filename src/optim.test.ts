@@ -73,11 +73,21 @@ test("sgd mlp train loop", async () => {
         new ReLU(),
         new Linear(hiddenSize, 1),
     );
-    const batchSize = 2;
+    const batchSize = 31;
     const radius = ones([batchSize, 1]);
-    const two = ones([batchSize, 1]).mul(2);
-    const sphere = (batchedPoints: Tensor) => 
-        batchedPoints.pow(2).sum(1, true).sqrt().sub(radius);
+    const sphereSDF = async (batchedPoints: Tensor) => {
+        // sqrt(x^2 + y^2 + z^2) - radius
+        // const squaredPoint = batchedPoints.pow(2);
+        const squaredPoint = batchedPoints.mul(batchedPoints);
+        console.log("squaredPoint", await squaredPoint.toArrayAsync());
+        const discriminator = squaredPoint.sum(1, true);
+        console.log("discriminator", await discriminator.toArrayAsync());
+        // const distanceToCenterSq = batchedPoints.pow(2).sum(1, true);
+        const distanceToCenterSq = batchedPoints.mul(batchedPoints).sum(1, true);
+        const distanceToCenter = distanceToCenterSq.sqrt();
+        const distanceToSurface = distanceToCenter.sub(radius);
+        return distanceToSurface;
+    }
     const sphereA = (batchedPoints: number[][]) => {
         const result: number[] = [];
         for (let i = 0; i < batchedPoints.length; i++) {
@@ -95,13 +105,13 @@ test("sgd mlp train loop", async () => {
             pointsArray.push([(Math.random()-0.5)*4, (Math.random()-0.5)*4, (Math.random()-0.5)*4]);
         }
         const points = new Tensor(pointsArray);
-        const expectedDistances = sphere(points);
-        // console.log("expectedDistances", await expectedDistances.toArrayAsync());
-        // const expectedDistancesA = sphereA(pointsArray);
-        // console.log("expectedDistancesA", expectedDistancesA);
+        // console.log("points", await points.toArrayAsync());
+        const expectedDistances = await sphereSDF(points);
+        const expectedDistancesA = sphereA(pointsArray);
         const predictedDistances = model.forward(points);
-        // console.log("predictedDistances", await predictedDistances.toArrayAsync());
-        const loss = predictedDistances.sub(expectedDistances).pow(2).mean();
+        // const loss = predictedDistances.sub(expectedDistances).pow(2).mean();
+        const error = predictedDistances.sub(expectedDistances);
+        const loss = error.mul(error).mean();
         console.log("loss", await loss.toArrayAsync());
         loss.backward();
         optimizer.step();
