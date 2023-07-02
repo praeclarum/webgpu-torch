@@ -236,9 +236,11 @@ export const registry: AnOpSpec[] = [
         name: "pow",
         type: "binary",
         // forward: "output = pow(input, other)",
-        forward: `output = input >= 0 ? pow(input, other) :
-            (fract(other) == 0 ? (pow(-input, other) * ((i32(other) & 1) != 0 ? -1f : 1f)) : pow(input, other))`,
-        backward: "inputGrad = outputGrad * other * pow(input, other - 1.0); otherGrad = outputGrad * pow(input, other) * log(input)",
+        forward: `output = input >= 0 || fract(other) != 0 ? pow(input, other) :
+            pow(-input, other) * ((i32(other) & 1) != 0 ? -1f : 1f)`,
+        backward: `inputGrad = input >= 0 || fract(other) != 0 ? outputGrad * other * pow(input, other - 1.0) :
+            outputGrad * other * pow(-input, other - 1) * ((i32(other - 1) & 1) != 0 ? -1f : 1f);
+        otherGrad = outputGrad * pow(input, other) * log(input)`,
     },
     // quantized_batch_norm: quantization
     // quantized_max_pool1d: quantization

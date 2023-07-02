@@ -196,7 +196,6 @@ test("save safetensors", async () => {
             const tensor = stateDict[key];
             expectedMinSize += dtypeByteSize(tensor.dtype) * tensor.numel();
         }
-        console.log(buffer);
         expect(buffer.byteLength).toBeGreaterThan(expectedMinSize);
         expect(buffer.byteLength).toBeLessThan(expectedMinSize + 512);
     }

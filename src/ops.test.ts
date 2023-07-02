@@ -105,8 +105,6 @@ test("pow(3) of 31x3 random numbers", async () => {
         pointsArray.push([(Math.random()-0.5)*2.1, (Math.random()-0.5)*2.1, (Math.random()-0.5)*2.1]);
     }
     const points = tensor({data:pointsArray, requiresGrad: true});
-    const pointsAr = await points.toArrayAsync() as number[][];
-    console.log(pointsAr);
     const y = points.pow(3);
     expect(y.shape).toEqual([batchSize, 3]);
     const yArray = await y.toArrayAsync() as number[][];
@@ -122,13 +120,30 @@ test("pow(3) of 31x3 random numbers", async () => {
     loss.backward();
     expect(points.grad).not.toBeNull();
     const gradArray = await points.grad!.toArrayAsync() as number[][];
-    console.log(gradArray);
     for (let b = 0; b < batchSize; b++) {
         for (let i = 0; i < 3; i++) {
             expect(gradArray[b][i]).not.toBeNaN();
             expect(gradArray[b][i]).toBeCloseTo(3 * pointsArray[b][i] * pointsArray[b][i]);
         }
     }
+});
+
+test("pow(2) grad of 1 negative number", async () => {
+    const pointsArray: number[] = [-3.14];
+    const points = tensor({data:pointsArray, requiresGrad: true});
+    const y = points.pow(2);
+    const yArray = await y.toArrayAsync() as number[][];
+    expect(yArray[0]).not.toBeNaN();
+    expect(yArray[0]).toBeCloseTo(pointsArray[0] * pointsArray[0]);
+    const loss = y.abs();
+    const lossValue = await loss.toArrayAsync() as number;
+    expect(lossValue).not.toBeNaN();
+    loss.backward();
+    expect(points.grad).not.toBeNull();
+    expect(y.grad).not.toBeNull();
+    const gradArray = await points.grad!.toArrayAsync() as number[][];
+    expect(gradArray[0]).not.toBeNaN();
+    expect(gradArray[0]).toBeCloseTo(-6.2800);
 });
 
 test("pow(3) grad of 1 negative number", async () => {
@@ -145,9 +160,26 @@ test("pow(3) grad of 1 negative number", async () => {
     expect(points.grad).not.toBeNull();
     expect(y.grad).not.toBeNull();
     const gradArray = await points.grad!.toArrayAsync() as number[][];
-    console.log(gradArray);
     expect(gradArray[0]).not.toBeNaN();
-    expect(gradArray[0]).toBeCloseTo(-3 * pointsArray[0] * pointsArray[0]);
+    expect(gradArray[0]).toBeCloseTo(-29.5788);
+});
+
+test("pow(2.5) grad of 1 positive number", async () => {
+    const pointsArray: number[] = [3.14];
+    const points = tensor({data:pointsArray, requiresGrad: true});
+    const y = points.pow(2.5);
+    const yArray = await y.toArrayAsync() as number[][];
+    expect(yArray[0]).not.toBeNaN();
+    expect(yArray[0]).toBeCloseTo(Math.pow(pointsArray[0], 2.5));
+    const loss = y.abs();
+    const lossValue = await loss.toArrayAsync() as number;
+    expect(lossValue).not.toBeNaN();
+    loss.backward();
+    expect(points.grad).not.toBeNull();
+    expect(y.grad).not.toBeNull();
+    const gradArray = await points.grad!.toArrayAsync() as number[][];
+    expect(gradArray[0]).not.toBeNaN();
+    expect(gradArray[0]).toBeCloseTo(13.9102);
 });
 
 test("reshape [2, 3] to [3, 2]", async () => {

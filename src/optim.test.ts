@@ -66,7 +66,7 @@ test("sgd step with params with grads", async () => {
 });
 
 test("sgd mlp train loop", async () => {
-    const batchSize = 31;
+    const batchSize = 17;
     const hiddenSize = 31;
     const maxSteps = 50;
     const printInterval = 1000;
@@ -120,10 +120,10 @@ test("sgd mlp train loop", async () => {
         const expectedDistances = sphereSDF(points);
         const predictedDistances = model.forward(points);
         const error = predictedDistances.sub(expectedDistances);
-        const loss = error.mul(error).mean();
+        const loss = error.pow(2).mean();
         if (stepIndex > 0 && stepIndex % printInterval === 0) {
             console.log("loss", await loss.toArrayAsync());
-            sample();
+            // sample();
         }
         loss.backward();
         optimizer.step();
