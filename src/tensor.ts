@@ -2133,12 +2133,15 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input
+    * output = input >= 0 || fract(other) != 0 ? pow(input, other) :
+            pow(-input, other) * ((i32(other) & 1) != 0 ? -1f : 1f)
     * ```
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * other * pow(input, other - 1.0); otherGrad = outputGrad * pow(input, other) * log(input)
+    * inputGrad = input >= 0 || fract(other) != 0 ? outputGrad * other * pow(input, other - 1.0) :
+            outputGrad * other * pow(-input, other - 1) * ((i32(other - 1) & 1) != 0 ? -1f : 1f);
+        otherGrad = outputGrad * pow(input, other) * log(input)
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor
@@ -2150,12 +2153,15 @@ export class Tensor extends TensorBase {
     /**
     * Calculates:
     * ```js
-    * output = input
+    * output = input >= 0 || fract(other) != 0 ? pow(input, other) :
+            pow(-input, other) * ((i32(other) & 1) != 0 ? -1f : 1f)
     * ```
     *
     * Gradient:
     * ```js
-    * inputGrad = outputGrad * other * pow(input, other - 1.0); otherGrad = outputGrad * pow(input, other) * log(input)
+    * inputGrad = input >= 0 || fract(other) != 0 ? outputGrad * other * pow(input, other - 1.0) :
+            outputGrad * other * pow(-input, other - 1) * ((i32(other - 1) & 1) != 0 ? -1f : 1f);
+        otherGrad = outputGrad * pow(input, other) * log(input)
     * ```
     *
     * @param other the other tensor whose shape is broadcastable with the input tensor

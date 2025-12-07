@@ -6,6 +6,7 @@ import type { UntypedStorage } from "./storage";
 
 export type ShaderDynamicArrayType =
     | "array<u8>"
+    | "array<f16>"
     | "array<i32>"
     | "array<u32>"
     | "array<f32>";
@@ -16,6 +17,7 @@ export type ShaderArrayType =
 
 export type ShaderType =
     | "u8"
+    | "f16"
     | "i32"
     | "u32"
     | "f32"
@@ -229,6 +231,9 @@ export function getShaderTypeElementByteSize(shaderType: ShaderType): number {
         case "array<i32>":
         case "array<u32>":
             return 4;
+        case "f16":
+        case "array<f16>":
+            return 2;
         case "u8":
         case "array<u8>":
             return 1;
@@ -239,6 +244,9 @@ export function getShaderTypeElementByteSize(shaderType: ShaderType): number {
 
 export function shaderTypeToDtype(shaderType: ShaderType): Dtype {
     switch (shaderType) {
+        case "f16":
+        case "array<f16>":
+            return "float16";
         case "f32":
         case "array<f32>":
             return "float32";

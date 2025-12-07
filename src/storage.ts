@@ -50,13 +50,16 @@ export class ArrayBufferStorage extends UntypedStorage {
             this._buffer = byteSize;
             this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Uint8Array) {
-            this._buffer = byteSize.buffer;
+            this._buffer = byteSize.buffer as ArrayBuffer;
+            this._byteSize = byteSize.byteLength;
+        } else if (byteSize instanceof Float16Array) {
+            this._buffer = byteSize.buffer as ArrayBuffer;
             this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Int32Array) {
-            this._buffer = byteSize.buffer;
+            this._buffer = byteSize.buffer as ArrayBuffer;
             this._byteSize = byteSize.byteLength;
         } else if (byteSize instanceof Float32Array) {
-            this._buffer = byteSize.buffer;
+            this._buffer = byteSize.buffer as ArrayBuffer;
             this._byteSize = byteSize.byteLength;
         } else {
             throw new Error(
