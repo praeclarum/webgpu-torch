@@ -18,8 +18,34 @@ export async function discoverWebGPUDevicesAsync(): Promise<boolean> {
     if (id in devices) {
         return true;
     }
-    const adapter = await (navigator as any).gpu.requestAdapter();
-    const device = await adapter.requestDevice();
+    const adapter = (await navigator.gpu.requestAdapter())!;
+    const f16_supported = adapter.features.has("shader-f16");
+    const timestamp_supported = adapter.features.has("timestamp-query");
+
+    const { limits } = adapter;
+    const requiredLimits: Record<string, number> = {};
+    for (const prop of [
+        "maxBufferSize",
+        "maxComputeInvocationsPerWorkgroup",
+        "maxComputeWorkgroupSizeX",
+        "maxComputeWorkgroupSizeY",
+        "maxComputeWorkgroupSizeZ",
+        "maxComputeWorkgroupStorageSize",
+        "maxComputeWorkgroupsPerDimension",
+        "maxUniformBufferBindingSize",
+        "maxUniformBuffersPerShaderStage",
+        "maxStorageBufferBindingSize",
+        "maxStorageBuffersPerShaderStage",
+    ] as const) {
+        requiredLimits[prop] = limits[prop];
+    }
+    const device = await adapter.requestDevice({
+        requiredFeatures: [
+            ...(f16_supported ? ["shader-f16" as const] : []),
+            ...(timestamp_supported ? ["timestamp-query" as const] : []),
+        ],
+        requiredLimits,
+    });
     const dev = new DeviceWebGPU(id, adapter, device);
     devices[id] = dev;
     webgpuDevice = dev;
